@@ -24,10 +24,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(JUCE)
 
 add_library(iupac_synth_domain STATIC
+    src/domain/Patch.cpp
     src/domain/ProductInfo.cpp
 )
 target_include_directories(iupac_synth_domain PUBLIC include)
 target_compile_features(iupac_synth_domain PUBLIC cxx_std_20)
+target_compile_definitions(iupac_synth_domain PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
+target_link_libraries(iupac_synth_domain PUBLIC juce::juce_core)
 
 add_library(iupac_synth_engine STATIC
     src/engine/Engine.cpp
@@ -95,7 +98,7 @@ target_link_libraries(IupacSynth2
 )
 
 if(BUILD_TESTING)
-    add_executable(iupac-tests tests/ProductPathTests.cpp)
+    add_executable(iupac-tests tests/ProductPathTests.cpp tests/PatchTests.cpp)
     target_compile_features(iupac-tests PRIVATE cxx_std_20)
     target_link_libraries(iupac-tests PRIVATE iupac_synth_engine)
     add_test(NAME product-path-smoke COMMAND iupac-tests)
