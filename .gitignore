@@ -16,3 +16,4 @@ out/
 *.wav
 *.aiff
 *.flac
+build/

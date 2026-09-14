@@ -1,0 +1,6 @@
+# Immutable source inputs used by the chemistry-independent build and validator smoke.
+JUCE_REPOSITORY=https://github.com/juce-framework/JUCE.git
+JUCE_COMMIT=91ad83ae34a81e0833b1a2b0866f54846370ae53
+PLUGINVAL_REPOSITORY=https://github.com/Tracktion/pluginval.git
+PLUGINVAL_COMMIT=ed19c2c16b57a6d94db391bea3ef4a80b769d5bf
+PLUGINVAL_SUBMODULE_modules/juce=5179f4e720d8406ebd1b5401c86aea8da6cc83c9

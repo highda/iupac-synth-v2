@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 49b85ab..328d8e3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -61,7 +61,6 @@ endif()
+ target_compile_definitions(pluginval PRIVATE
+     JUCE_PLUGINHOST_AU=1
+-    JUCE_PLUGINHOST_LADSPA=1
+     JUCE_PLUGINHOST_VST3=1
+     JUCE_PLUGINHOST_LV2=1
+     JUCE_USE_CURL=0
+     JUCE_WEB_BROWSER=0

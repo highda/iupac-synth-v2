@@ -1,0 +1,50 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "linux-synth",
+      "displayName": "Linux synth-only build",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-synth",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "IUPAC_ENABLE_CHEMISTRY": "OFF",
+        "JUCE_BUILD_EXAMPLES": "OFF",
+        "JUCE_BUILD_EXTRAS": "OFF"
+      }
+    },
+    {
+      "name": "linux-sanitize",
+      "displayName": "Linux ASan and UBSan build",
+      "inherits": "linux-synth",
+      "binaryDir": "${sourceDir}/build/linux-sanitize",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "linux-synth", "configurePreset": "linux-synth" },
+    { "name": "linux-sanitize", "configurePreset": "linux-sanitize" }
+  ],
+  "testPresets": [
+    {
+      "name": "linux-synth",
+      "configurePreset": "linux-synth",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-sanitize",
+      "configurePreset": "linux-sanitize",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}
