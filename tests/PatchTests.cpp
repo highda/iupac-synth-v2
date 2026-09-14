@@ -59,6 +59,9 @@ bool runPatchTests()
     ok &= expect(static_cast<bool>(silentDecoded), "silent patch codec round trip");
 
     auto patch = authoredPatch();
+    ok &= expect(applyHarmonicSpectrum(patch.nodes[0], -1.0, 0.02), "harmonic convenience edit succeeds");
+    ok &= expect(patch.nodes[0].parameters[0].values[1] < patch.nodes[0].parameters[0].values[0]
+        && patch.nodes[0].parameters[1].values[1] > 2.0, "convenience edit stores explicit arrays");
     ok &= expect(validate(patch).empty(), "authored serial/parallel graph valid");
     const auto encoded = encodePatchJson(patch, true);
     auto decoded = decodePatchJson(encoded);

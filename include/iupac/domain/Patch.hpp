@@ -73,6 +73,8 @@ struct Patch
     std::array<Macro, 4> macros{};
 };
 
+[[nodiscard]] bool applyHarmonicSpectrum(Node&, double tilt, double inharmonicity) noexcept;
+
 struct HostControls { std::array<double, 4> macros{}; double outputGain{-6.0}; double width{0.5}; double masterTune{}; bool bypass{}; };
 struct State { Patch basePatch; Patch editedPatch; HostControls controls; std::optional<juce::var> provenance; };
 

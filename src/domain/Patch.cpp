@@ -100,6 +100,17 @@ const std::array<ModuleDescriptor, 7>& moduleCatalog() { return catalog; }
 const ModuleDescriptor* findModule(std::string_view id) noexcept { auto i = std::ranges::find(catalog, id, &ModuleDescriptor::id); return i == catalog.end() ? nullptr : &*i; }
 const ParameterDescriptor* findParameter(const ModuleDescriptor& m, std::string_view id) noexcept { auto i = std::ranges::find(m.parameters, id, &ParameterDescriptor::id); return i == m.parameters.end() ? nullptr : &*i; }
 
+bool applyHarmonicSpectrum(Node& node, double tilt, double inharmonicity) noexcept
+{
+    if (node.type != ModuleType::harmonic || !std::isfinite(tilt) || !std::isfinite(inharmonicity)) return false;
+    tilt=std::clamp(tilt,-2.0,2.0);inharmonicity=std::clamp(inharmonicity,0.0,0.02);
+    auto find=[&](std::string_view id)->ParameterValue*{for(auto& value:node.parameters)if(value.id==id)return &value;return nullptr;};
+    auto* amplitudes=find("partialAmplitudes");auto* ratios=find("partialRatios");auto* tiltValue=find("tilt");auto* inharmonicityValue=find("inharmonicity");
+    if(!amplitudes||!ratios||!tiltValue||!inharmonicityValue||amplitudes->values.size()!=16||ratios->values.size()!=16)return false;
+    for(std::size_t i=0;i<16;++i){const auto harmonic=static_cast<double>(i+1);amplitudes->values[i]=std::clamp(std::pow(harmonic,tilt-1.0),0.0,1.0);ratios->values[i]=std::clamp(harmonic*std::sqrt(1.0+inharmonicity*harmonic*harmonic),0.5,32.0);}
+    tiltValue->values={tilt};inharmonicityValue->values={inharmonicity};return true;
+}
+
 std::string validate(const Patch& p)
 {
     if (p.nodes.size() > maximumNodes || p.edges.size() > maximumEdges || p.matrix.size() > maximumMatrixRows) return "patch exceeds structural cap";
