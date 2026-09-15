@@ -1,0 +1,846 @@
+{
+  "panelVersion": 1,
+  "analysisVersion": 1,
+  "backend": {
+    "rdkitVersion": "2022.09.3",
+    "opsinVersion": "2.8.0",
+    "opsinSha256": "d25bc08f41b8f6fcd6f35e18ab83f3b8d9218cdb003d55c5f74aaefe2e0c68ab"
+  },
+  "annotationLicense": "CC0-1.0",
+  "records": [
+    {
+      "id": "identity-ethanol-a",
+      "mode": "smiles",
+      "text": "CCO",
+      "identityGroup": "ethanol",
+      "assertions": {
+        "heavyAtoms": 3,
+        "elementCounts": {
+          "C": 2,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-ethanol-b",
+      "mode": "smiles",
+      "text": "OCC",
+      "identityGroup": "ethanol",
+      "assertions": {
+        "heavyAtoms": 3,
+        "elementCounts": {
+          "C": 2,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-propane-a",
+      "mode": "smiles",
+      "text": "CCC",
+      "identityGroup": "propane",
+      "assertions": {
+        "heavyAtoms": 3,
+        "elementCounts": {
+          "C": 3
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-propane-b",
+      "mode": "smiles",
+      "text": "C(C)C",
+      "identityGroup": "propane",
+      "assertions": {
+        "heavyAtoms": 3,
+        "elementCounts": {
+          "C": 3
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-acetone-a",
+      "mode": "smiles",
+      "text": "CC(=O)C",
+      "identityGroup": "acetone",
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 3,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-acetone-b",
+      "mode": "smiles",
+      "text": "O=C(C)C",
+      "identityGroup": "acetone",
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 3,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-acetic-acid-a",
+      "mode": "smiles",
+      "text": "CC(=O)O",
+      "identityGroup": "acetic-acid",
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 2,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-acetic-acid-b",
+      "mode": "smiles",
+      "text": "OC(C)=O",
+      "identityGroup": "acetic-acid",
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 2,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-benzene-aromatic-a",
+      "mode": "smiles",
+      "text": "c1ccccc1",
+      "identityGroup": "benzene-aromatic",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 6
+        },
+        "formalCharge": 0,
+        "rings": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-benzene-aromatic-b",
+      "mode": "smiles",
+      "text": "C1=CC=CC=C1",
+      "identityGroup": "benzene-aromatic",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 6
+        },
+        "formalCharge": 0,
+        "rings": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-pyridine-aromatic-a",
+      "mode": "smiles",
+      "text": "n1ccccc1",
+      "identityGroup": "pyridine-aromatic",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 5,
+          "N": 1
+        },
+        "formalCharge": 0,
+        "rings": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-pyridine-aromatic-b",
+      "mode": "smiles",
+      "text": "C1=CC=NC=C1",
+      "identityGroup": "pyridine-aromatic",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 5,
+          "N": 1
+        },
+        "formalCharge": 0,
+        "rings": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-phenol-traversal-a",
+      "mode": "smiles",
+      "text": "Oc1ccccc1",
+      "identityGroup": "phenol-traversal",
+      "assertions": {
+        "heavyAtoms": 7,
+        "elementCounts": {
+          "C": 6,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "phenol": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-phenol-traversal-b",
+      "mode": "smiles",
+      "text": "c1ccc(cc1)O",
+      "identityGroup": "phenol-traversal",
+      "assertions": {
+        "heavyAtoms": 7,
+        "elementCounts": {
+          "C": 6,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "phenol": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-ethyl-acetate-a",
+      "mode": "smiles",
+      "text": "CCOC(C)=O",
+      "identityGroup": "ethyl-acetate",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 4,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-ethyl-acetate-b",
+      "mode": "smiles",
+      "text": "CC(=O)OCC",
+      "identityGroup": "ethyl-acetate",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 4,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-glycine-a",
+      "mode": "smiles",
+      "text": "NCC(=O)O",
+      "identityGroup": "glycine",
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 2,
+          "N": 1,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-glycine-b",
+      "mode": "smiles",
+      "text": "O=C(O)CN",
+      "identityGroup": "glycine",
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 2,
+          "N": 1,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-chlorobenzene-a",
+      "mode": "smiles",
+      "text": "Clc1ccccc1",
+      "identityGroup": "chlorobenzene",
+      "assertions": {
+        "heavyAtoms": 7,
+        "elementCounts": {
+          "C": 6,
+          "Cl": 1
+        },
+        "formalCharge": 0,
+        "arylHalide": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-chlorobenzene-b",
+      "mode": "smiles",
+      "text": "c1ccc(cc1)Cl",
+      "identityGroup": "chlorobenzene",
+      "assertions": {
+        "heavyAtoms": 7,
+        "elementCounts": {
+          "C": 6,
+          "Cl": 1
+        },
+        "formalCharge": 0,
+        "arylHalide": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-fragment-order-a",
+      "mode": "smiles",
+      "text": "[Na+].CC(=O)[O-]",
+      "identityGroup": "fragment-order",
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 2,
+          "O": 2,
+          "other": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-fragment-order-b",
+      "mode": "smiles",
+      "text": "CC(=O)[O-].[Na+]",
+      "identityGroup": "fragment-order",
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 2,
+          "O": 2,
+          "other": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-salt-three-fragments-a",
+      "mode": "smiles",
+      "text": "[Cl-].[K+].CCO",
+      "identityGroup": "salt-three-fragments",
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 2,
+          "O": 1,
+          "Cl": 1,
+          "other": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-salt-three-fragments-b",
+      "mode": "smiles",
+      "text": "CCO.[K+].[Cl-]",
+      "identityGroup": "salt-three-fragments",
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 2,
+          "O": 1,
+          "Cl": 1,
+          "other": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-explicit-h-ethanol-a",
+      "mode": "smiles",
+      "text": "[H]OC([H])([H])C([H])([H])[H]",
+      "identityGroup": "explicit-h-ethanol",
+      "assertions": {
+        "heavyAtoms": 3,
+        "elementCounts": {
+          "C": 2,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-explicit-h-ethanol-b",
+      "mode": "smiles",
+      "text": "CCO",
+      "identityGroup": "explicit-h-ethanol",
+      "assertions": {
+        "heavyAtoms": 3,
+        "elementCounts": {
+          "C": 2,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-explicit-h-ammonia-a",
+      "mode": "smiles",
+      "text": "[H]N([H])[H]",
+      "identityGroup": "explicit-h-ammonia",
+      "assertions": {
+        "heavyAtoms": 1,
+        "elementCounts": {
+          "N": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-explicit-h-ammonia-b",
+      "mode": "smiles",
+      "text": "N",
+      "identityGroup": "explicit-h-ammonia",
+      "assertions": {
+        "heavyAtoms": 1,
+        "elementCounts": {
+          "N": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-isotope-carbon-a",
+      "mode": "smiles",
+      "text": "[13CH3]CO",
+      "identityGroup": "isotope-carbon",
+      "assertions": {
+        "heavyAtoms": 3,
+        "elementCounts": {
+          "C": 2,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "isotope": true
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-isotope-carbon-b",
+      "mode": "smiles",
+      "text": "OC[13CH3]",
+      "identityGroup": "isotope-carbon",
+      "assertions": {
+        "heavyAtoms": 3,
+        "elementCounts": {
+          "C": 2,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "isotope": true
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-isotope-deuterium-a",
+      "mode": "smiles",
+      "text": "[2H]OC",
+      "identityGroup": "isotope-deuterium",
+      "assertions": {
+        "heavyAtoms": 2,
+        "elementCounts": {
+          "C": 1,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "isotope": true
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-isotope-deuterium-b",
+      "mode": "smiles",
+      "text": "CO[2H]",
+      "identityGroup": "isotope-deuterium",
+      "assertions": {
+        "heavyAtoms": 2,
+        "elementCounts": {
+          "C": 1,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "isotope": true
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-stereo-lactic-r-a",
+      "mode": "smiles",
+      "text": "C[C@H](O)C(=O)O",
+      "identityGroup": "stereo-lactic-r",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 3,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-stereo-lactic-r-b",
+      "mode": "smiles",
+      "text": "O=C(O)[C@@H](O)C",
+      "identityGroup": "stereo-lactic-r",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 3,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-stereo-lactic-s-a",
+      "mode": "smiles",
+      "text": "C[C@@H](O)C(=O)O",
+      "identityGroup": "stereo-lactic-s",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 3,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-stereo-lactic-s-b",
+      "mode": "smiles",
+      "text": "O=C(O)[C@H](O)C",
+      "identityGroup": "stereo-lactic-s",
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 3,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-alkene-e-a",
+      "mode": "smiles",
+      "text": "C/C=C/C",
+      "identityGroup": "alkene-e",
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 4
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-alkene-e-b",
+      "mode": "smiles",
+      "text": "C(=C/C)\\C",
+      "identityGroup": "alkene-e",
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 4
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-alkene-z-a",
+      "mode": "smiles",
+      "text": "C/C=C\\C",
+      "identityGroup": "alkene-z",
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 4
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-alkene-z-b",
+      "mode": "smiles",
+      "text": "C(=C\\C)\\C",
+      "identityGroup": "alkene-z",
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 4
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": ""
+    },
+    {
+      "id": "identity-charge-neutral-amine",
+      "mode": "smiles",
+      "text": "CN",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 2,
+        "elementCounts": {
+          "C": 1,
+          "N": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "deliberately non-equivalent"
+    },
+    {
+      "id": "identity-charge-protonated-amine",
+      "mode": "smiles",
+      "text": "C[NH3+]",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 2,
+        "elementCounts": {
+          "C": 1,
+          "N": 1
+        },
+        "formalCharge": 1
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "deliberately non-equivalent"
+    },
+    {
+      "id": "identity-tautomer-keto",
+      "mode": "smiles",
+      "text": "CC(=O)C",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 3,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "deliberately non-equivalent"
+    },
+    {
+      "id": "identity-tautomer-enol",
+      "mode": "smiles",
+      "text": "CC(O)=C",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 3,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "deliberately non-equivalent"
+    },
+    {
+      "id": "identity-enantiomer-r",
+      "mode": "smiles",
+      "text": "F[C@H](Cl)Br",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 1,
+          "F": 1,
+          "Cl": 1,
+          "Br": 1
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "deliberately non-equivalent"
+    },
+    {
+      "id": "identity-enantiomer-s",
+      "mode": "smiles",
+      "text": "F[C@@H](Cl)Br",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 1,
+          "F": 1,
+          "Cl": 1,
+          "Br": 1
+        },
+        "formalCharge": 0,
+        "stereo": "specified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "deliberately non-equivalent"
+    },
+    {
+      "id": "identity-stereo-unspecified",
+      "mode": "smiles",
+      "text": "FC(Cl)Br",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 1,
+          "F": 1,
+          "Cl": 1,
+          "Br": 1
+        },
+        "formalCharge": 0,
+        "stereo": "unspecified"
+      },
+      "source": "repository-authored minimal structure",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "deliberately non-equivalent"
+    }
+  ]
+}

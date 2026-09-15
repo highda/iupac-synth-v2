@@ -1,0 +1,20 @@
+{
+  "manifestVersion": 1,
+  "frozenBeforeCalibration": true,
+  "generator": "scripts/generate-chemistry-panels.py",
+  "generatorVersion": 1,
+  "backend": {
+    "rdkitVersion": "2022.09.3",
+    "opsinVersion": "2.8.0",
+    "opsinSha256": "d25bc08f41b8f6fcd6f35e18ab83f3b8d9218cdb003d55c5f74aaefe2e0c68ab"
+  },
+  "files": {
+    "data/panels/identity.json": "14ea9e1c789e314e4742efca3be8ea04f8efd8e8acdf92a13645c7ac7eeb6fe4",
+    "data/panels/broad-development.json": "d8add058e30467945f6d262f2d910dedb820c75e5ef3e985b9c367073cb70b98",
+    "data/panels/legacy-hard.json": "5528f7ed10c8e5c93f81fca6d04d6608886bbb98f14aa229b0e63a87c8f30b45",
+    "data/panels/holdout.json": "a823a3ba5424d04215fceb5c3fe775cb2410a462d5ce8f182dfbc168fe44b66a",
+    "data/panels/adversarial-analysis.json": "1ae89084861af25e60ab6efe74c0393de74c0277ed64651200c41cc63f0fc057",
+    "data/panels/legacy-hard-pairs.json": "4e66a2cb3ba59b1b1d364f3ab6d5618500efc69e9860fdda2db6818f1791443f",
+    "tests/fixtures/chemistry-analysis-v1.json": "e8da45b06fc515df93ba770239c681550a27e25902db2a49ef1c36f60dc964b5"
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "panelVersion": 1,
+  "annotationLicense": "CC0-1.0",
+  "records": [
+    {
+      "id": "invalid-empty",
+      "mode": "smiles",
+      "text": "",
+      "expectedDiagnostic": "non-empty"
+    },
+    {
+      "id": "invalid-whitespace",
+      "mode": "smiles",
+      "text": "   ",
+      "expectedDiagnostic": "non-whitespace"
+    },
+    {
+      "id": "invalid-smiles",
+      "mode": "smiles",
+      "text": "C1(",
+      "expectedDiagnostic": "invalid"
+    },
+    {
+      "id": "invalid-wildcard",
+      "mode": "smiles",
+      "text": "C*",
+      "expectedDiagnostic": "wildcards"
+    },
+    {
+      "id": "invalid-query",
+      "mode": "smiles",
+      "text": "[C;H3]",
+      "expectedDiagnostic": "invalid"
+    },
+    {
+      "id": "invalid-reaction",
+      "mode": "smiles",
+      "text": "CCO>>CC=O",
+      "expectedDiagnostic": "reactions"
+    },
+    {
+      "id": "invalid-newline",
+      "mode": "smiles",
+      "text": "CCO\nC",
+      "expectedDiagnostic": "newlines"
+    },
+    {
+      "id": "invalid-over-limit",
+      "mode": "smiles",
+      "text": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+      "expectedDiagnostic": "4096"
+    },
+    {
+      "id": "invalid-over-graph",
+      "mode": "smiles",
+      "text": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+      "expectedDiagnostic": "256 heavy atoms"
+    },
+    {
+      "id": "invalid-components",
+      "mode": "smiles",
+      "text": "C.C.C.C.C.C.C.C.C",
+      "expectedDiagnostic": "8 disconnected"
+    },
+    {
+      "id": "invalid-long-name",
+      "mode": "name",
+      "text": "methanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethanemethane",
+      "expectedDiagnostic": "4096"
+    },
+    {
+      "id": "invalid-malformed-utf8",
+      "surface": "protocol-bytes",
+      "injection": "ff-fe",
+      "expected": "bounded UTF-8 error; last valid state preserved"
+    },
+    {
+      "id": "invalid-malformed-helper-json",
+      "surface": "protocol-json",
+      "injection": "{",
+      "expected": "bounded JSON error; last valid state preserved"
+    },
+    {
+      "id": "invalid-timeout",
+      "surface": "process",
+      "injection": "synthetic child exceeds deadline",
+      "expected": "process tree cancelled; last valid state preserved"
+    },
+    {
+      "id": "invalid-missing-helper",
+      "surface": "process",
+      "injection": "helper executable absent",
+      "expected": "bounded unavailable status; saved sound remains playable"
+    },
+    {
+      "id": "invalid-missing-jre",
+      "surface": "process",
+      "injection": "private Java executable absent",
+      "expected": "bounded unavailable status; last valid state preserved"
+    },
+    {
+      "id": "invalid-cancelled-job",
+      "surface": "coordinator",
+      "injection": "newer document generation",
+      "expected": "stale result cannot publish"
+    },
+    {
+      "id": "invalid-analysis-version",
+      "surface": "analysis-decoder",
+      "injection": {
+        "analysisVersion": 2
+      },
+      "expected": "strict rejection; last valid state preserved"
+    },
+    {
+      "id": "invalid-nonfinite-patch",
+      "surface": "patch-decoder",
+      "injection": "NaN parameter",
+      "expected": "strict rejection; last valid state preserved"
+    },
+    {
+      "id": "invalid-oversized-patch",
+      "surface": "patch-decoder",
+      "injection": "more than bounded nodes/bytes",
+      "expected": "strict rejection; last valid state preserved"
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "panelVersion": 1,
+  "analysisVersion": 1,
+  "backend": {
+    "rdkitVersion": "2022.09.3",
+    "opsinVersion": "2.8.0",
+    "opsinSha256": "d25bc08f41b8f6fcd6f35e18ab83f3b8d9218cdb003d55c5f74aaefe2e0c68ab"
+  },
+  "annotationLicense": "CC0-1.0",
+  "records": [
+    {
+      "id": "propan-1-ol",
+      "mode": "smiles",
+      "text": "CCCO",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 3,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/1031",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "propan-1-ol. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "propan-2-ol",
+      "mode": "smiles",
+      "text": "CC(O)C",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 3,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/3776",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "propan-2-ol. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "ethylene-glycol",
+      "mode": "smiles",
+      "text": "OCCO",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 2,
+          "O": 2
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/174",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "ethylene glycol. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "succinic-acid",
+      "mode": "smiles",
+      "text": "OC(=O)CCC(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 8,
+        "elementCounts": {
+          "C": 4,
+          "O": 4
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/1110",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "succinic acid. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "furan",
+      "mode": "smiles",
+      "text": "c1ccoc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 4,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/8029",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "furan. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "thiazole",
+      "mode": "smiles",
+      "text": "c1cscn1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 3,
+          "N": 1,
+          "S": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/9257",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "thiazole. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "anisole",
+      "mode": "smiles",
+      "text": "COc1ccccc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 8,
+        "elementCounts": {
+          "C": 7,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/7519",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "anisole. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "benzoic-acid",
+      "mode": "smiles",
+      "text": "O=C(O)c1ccccc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 9,
+        "elementCounts": {
+          "C": 7,
+          "O": 2
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/243",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "benzoic acid. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "methyl-acetylsalicylate",
+      "mode": "smiles",
+      "text": "CC(=O)Oc1ccccc1C(=O)OC",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 14,
+        "elementCounts": {
+          "C": 10,
+          "O": 4
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/234036",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "acetylsalicylic-acid methyl ester. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "valine",
+      "mode": "smiles",
+      "text": "N[C@@H](C(C)C)C(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 8,
+        "elementCounts": {
+          "C": 5,
+          "N": 1,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "stereo": "L"
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/6287",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "L-valine. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "holdout-leu-gly",
+      "mode": "smiles",
+      "text": "CC(C)C[C@H](N)C(=O)NCC(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 13,
+        "elementCounts": {
+          "C": 8,
+          "N": 2,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence LG; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "holdout-gly-leu",
+      "mode": "smiles",
+      "text": "CC(C)C[C@H](NC(=O)CN)C(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 13,
+        "elementCounts": {
+          "C": 8,
+          "N": 2,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence GL; generated with RDKit 2022.09.3."
+    }
+  ]
+}

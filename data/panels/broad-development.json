@@ -1,0 +1,435 @@
+{
+  "panelVersion": 1,
+  "analysisVersion": 1,
+  "backend": {
+    "rdkitVersion": "2022.09.3",
+    "opsinVersion": "2.8.0",
+    "opsinSha256": "d25bc08f41b8f6fcd6f35e18ab83f3b8d9218cdb003d55c5f74aaefe2e0c68ab"
+  },
+  "annotationLicense": "CC0-1.0",
+  "records": [
+    {
+      "id": "methane",
+      "mode": "smiles",
+      "text": "C",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 1,
+        "elementCounts": {
+          "C": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/297",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "methane. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "ethanol",
+      "mode": "smiles",
+      "text": "CCO",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 3,
+        "elementCounts": {
+          "C": 2,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/702",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "ethanol. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "acetone",
+      "mode": "smiles",
+      "text": "CC(=O)C",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 3,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/180",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "acetone. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "acetic-acid",
+      "mode": "smiles",
+      "text": "CC(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 2,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "carbonyl": 1
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/176",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "acetic acid. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "glycine",
+      "mode": "smiles",
+      "text": "NCC(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 2,
+          "N": 1,
+          "O": 2
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/750",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "glycine. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "l-alanine",
+      "mode": "smiles",
+      "text": "N[C@@H](C)C(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 3,
+          "N": 1,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "stereo": "L"
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/5950",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "L-alanine. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "urea",
+      "mode": "smiles",
+      "text": "NC(=O)N",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 1,
+          "N": 2,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/1176",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "urea. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "ethyl-acetate",
+      "mode": "smiles",
+      "text": "CCOC(=O)C",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 4,
+          "O": 2
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/8857",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "ethyl acetate. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "benzene",
+      "mode": "smiles",
+      "text": "c1ccccc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 6
+        },
+        "formalCharge": 0,
+        "rings": 1
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/241",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "benzene. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "phenol",
+      "mode": "smiles",
+      "text": "Oc1ccccc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 7,
+        "elementCounts": {
+          "C": 6,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "phenol": 1
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/996",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "phenol. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "aniline",
+      "mode": "smiles",
+      "text": "Nc1ccccc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 7,
+        "elementCounts": {
+          "C": 6,
+          "N": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/6115",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "aniline. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "pyridine",
+      "mode": "smiles",
+      "text": "n1ccccc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 5,
+          "N": 1
+        },
+        "formalCharge": 0,
+        "rings": 1
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/1049",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "pyridine. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "naphthalene",
+      "mode": "smiles",
+      "text": "c1ccc2ccccc2c1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 10,
+        "elementCounts": {
+          "C": 10
+        },
+        "formalCharge": 0,
+        "rings": 2
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/931",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "naphthalene. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "cyclohexane",
+      "mode": "smiles",
+      "text": "C1CCCCC1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 6,
+        "elementCounts": {
+          "C": 6
+        },
+        "formalCharge": 0,
+        "rings": 1
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/8078",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "cyclohexane. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "caffeine",
+      "mode": "smiles",
+      "text": "Cn1c(=O)c2c(ncn2C)n(C)c1=O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 14,
+        "elementCounts": {
+          "C": 8,
+          "N": 4,
+          "O": 2
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/2519",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "caffeine. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "aspirin",
+      "mode": "smiles",
+      "text": "CC(=O)Oc1ccccc1C(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 13,
+        "elementCounts": {
+          "C": 9,
+          "O": 4
+        },
+        "formalCharge": 0,
+        "carbonyl": 2
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/2244",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "aspirin. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "d-glucose",
+      "mode": "smiles",
+      "text": "OC[C@H]1O[C@@H](O)[C@H](O)[C@@H](O)[C@@H]1O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 12,
+        "elementCounts": {
+          "C": 6,
+          "O": 6
+        },
+        "formalCharge": 0,
+        "stereo": "D"
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/5793",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "D-glucose. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "dimethyl-sulfoxide",
+      "mode": "smiles",
+      "text": "CS(C)=O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 4,
+        "elementCounts": {
+          "C": 2,
+          "O": 1,
+          "S": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/679",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "dimethyl sulfoxide. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "thiophene",
+      "mode": "smiles",
+      "text": "c1ccsc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 4,
+          "S": 1
+        },
+        "formalCharge": 0,
+        "rings": 1
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/8028",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "thiophene. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "phosphoric-acid",
+      "mode": "smiles",
+      "text": "OP(=O)(O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "O": 4,
+          "P": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/1004",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "phosphoric acid. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "sodium-acetate",
+      "mode": "smiles",
+      "text": "[Na+].CC(=O)[O-]",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 5,
+        "elementCounts": {
+          "C": 2,
+          "O": 2,
+          "other": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/517045",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "sodium acetate. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "chlorobenzene",
+      "mode": "smiles",
+      "text": "Clc1ccccc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 7,
+        "elementCounts": {
+          "C": 6,
+          "Cl": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/7967",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "chlorobenzene. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "serotonin",
+      "mode": "smiles",
+      "text": "NCCc1c[nH]c2ccc(O)cc12",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 13,
+        "elementCounts": {
+          "C": 10,
+          "N": 2,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/5202",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "serotonin. Structure choice follows the cited PubChem compound record."
+    },
+    {
+      "id": "cholesterol",
+      "mode": "smiles",
+      "text": "C[C@H](CCCC(C)C)[C@H]1CC[C@@H]2[C@@]1(CC[C@H]3[C@H]2CC=C4[C@@]3(CC[C@@H](C4)O)C)C",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 28,
+        "elementCounts": {
+          "C": 27,
+          "O": 1
+        },
+        "formalCharge": 0,
+        "stereo": "PubChem CID 5997 isomeric record"
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/5997",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "cholesterol. Structure choice follows the cited PubChem compound record."
+    }
+  ]
+}

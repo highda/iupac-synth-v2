@@ -80,7 +80,8 @@ def _molecule(smiles):
     if "*" in smiles or ">" in smiles or "|" in smiles:
         raise InputError("queries, wildcards, reactions, and extended stereochemistry are unsupported")
     try:
-        molecule = Chem.MolFromSmiles(smiles, sanitize=True)
+        with rdBase.BlockLogs():
+            molecule = Chem.MolFromSmiles(smiles, sanitize=True)
     except Exception as exc:
         raise InputError("structure failed RDKit sanitization") from exc
     if molecule is None or any(atom.HasQuery() for atom in molecule.GetAtoms()) or any(bond.HasQuery() for bond in molecule.GetBonds()):

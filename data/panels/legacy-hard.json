@@ -1,0 +1,439 @@
+{
+  "panelVersion": 1,
+  "analysisVersion": 1,
+  "backend": {
+    "rdkitVersion": "2022.09.3",
+    "opsinVersion": "2.8.0",
+    "opsinSha256": "d25bc08f41b8f6fcd6f35e18ab83f3b8d9218cdb003d55c5f74aaefe2e0c68ab"
+  },
+  "annotationLicense": "CC0-1.0",
+  "records": [
+    {
+      "id": "legacy-amphetamine",
+      "mode": "smiles",
+      "text": "CC(N)Cc1ccccc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 10,
+        "elementCounts": {
+          "C": 9,
+          "N": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/3007",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "amphetamine. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-dopamine",
+      "mode": "smiles",
+      "text": "NCCc1ccc(O)c(O)c1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 11,
+        "elementCounts": {
+          "C": 8,
+          "N": 1,
+          "O": 2
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/681",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "dopamine. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-cathinone",
+      "mode": "smiles",
+      "text": "NC(C(=O)c1ccccc1)C",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 11,
+        "elementCounts": {
+          "C": 9,
+          "N": 1,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/62258",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "cathinone. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-methcathinone",
+      "mode": "smiles",
+      "text": "CNC(C)C(=O)c1ccccc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 12,
+        "elementCounts": {
+          "C": 10,
+          "N": 1,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/1576",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "methcathinone. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-4-methylmethcathinone",
+      "mode": "smiles",
+      "text": "CNC(C)C(=O)c1ccc(C)cc1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 13,
+        "elementCounts": {
+          "C": 11,
+          "N": 1,
+          "O": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/45266826",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "4-methylmethcathinone. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-mdpv-family",
+      "mode": "smiles",
+      "text": "CNC(C)C(=O)c1ccc2OCOc2c1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 15,
+        "elementCounts": {
+          "C": 11,
+          "N": 1,
+          "O": 3
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/161464",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "3,4-methylenedioxymethcathinone. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-mda",
+      "mode": "smiles",
+      "text": "CC(N)Cc1ccc2OCOc2c1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 13,
+        "elementCounts": {
+          "C": 10,
+          "N": 1,
+          "O": 2
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/1615",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "MDA. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-mdma",
+      "mode": "smiles",
+      "text": "CNC(C)Cc1ccc2OCOc2c1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 14,
+        "elementCounts": {
+          "C": 11,
+          "N": 1,
+          "O": 2
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/16193",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "MDMA. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-mdea",
+      "mode": "smiles",
+      "text": "CCNC(C)Cc1ccc2OCOc2c1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 15,
+        "elementCounts": {
+          "C": 12,
+          "N": 1,
+          "O": 2
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/105039",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "MDEA. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-ketamine",
+      "mode": "smiles",
+      "text": "CNC1(CCCCC1=O)c1ccccc1Cl",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 16,
+        "elementCounts": {
+          "C": 13,
+          "N": 1,
+          "O": 1,
+          "Cl": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/3821",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "ketamine. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-norketamine",
+      "mode": "smiles",
+      "text": "NC1(CCCCC1=O)c1ccccc1Cl",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 15,
+        "elementCounts": {
+          "C": 12,
+          "N": 1,
+          "O": 1,
+          "Cl": 1
+        },
+        "formalCharge": 0
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/123767",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "norketamine. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-testosterone",
+      "mode": "smiles",
+      "text": "CC12CCC3C(C1CCC2O)CCC1=CC(=O)CCC31C",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 21,
+        "elementCounts": {
+          "C": 19,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "stereo": "record choice"
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/6013",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "testosterone. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-estradiol",
+      "mode": "smiles",
+      "text": "CC12CCC3C(C1CCC2O)CCC1=C3C=CC(O)=C1",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 20,
+        "elementCounts": {
+          "C": 18,
+          "O": 2
+        },
+        "formalCharge": 0,
+        "stereo": "record choice"
+      },
+      "source": "https://pubchem.ncbi.nlm.nih.gov/compound/5757",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "estradiol. Unspecified/racemic where the SMILES has no stereo marks; cited record fixes constitution."
+    },
+    {
+      "id": "legacy-ala-ala",
+      "mode": "smiles",
+      "text": "C[C@H](N)C(=O)N[C@@H](C)C(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 11,
+        "elementCounts": {
+          "C": 6,
+          "N": 2,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence AA; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "legacy-gly-gly",
+      "mode": "smiles",
+      "text": "NCC(=O)NCC(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 9,
+        "elementCounts": {
+          "N": 2,
+          "C": 4,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence GG; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "legacy-phe-gly",
+      "mode": "smiles",
+      "text": "N[C@@H](Cc1ccccc1)C(=O)NCC(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 16,
+        "elementCounts": {
+          "N": 2,
+          "C": 11,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence FG; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "legacy-gly-phe",
+      "mode": "smiles",
+      "text": "NCC(=O)N[C@@H](Cc1ccccc1)C(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 16,
+        "elementCounts": {
+          "N": 2,
+          "C": 11,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence GF; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "legacy-ala-gly",
+      "mode": "smiles",
+      "text": "C[C@H](N)C(=O)NCC(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 10,
+        "elementCounts": {
+          "C": 5,
+          "N": 2,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence AG; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "legacy-gly-ala",
+      "mode": "smiles",
+      "text": "C[C@H](NC(=O)CN)C(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 10,
+        "elementCounts": {
+          "C": 5,
+          "N": 2,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence GA; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "legacy-cys-gly",
+      "mode": "smiles",
+      "text": "N[C@@H](CS)C(=O)NCC(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 11,
+        "elementCounts": {
+          "N": 2,
+          "C": 5,
+          "S": 1,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence CG; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "legacy-met-gly",
+      "mode": "smiles",
+      "text": "CSCC[C@H](N)C(=O)NCC(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 13,
+        "elementCounts": {
+          "C": 7,
+          "S": 1,
+          "N": 2,
+          "O": 3
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence MG; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "legacy-gly-ala-4",
+      "mode": "smiles",
+      "text": "C[C@H](NC(=O)CNC(=O)[C@H](C)NC(=O)CN)C(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 19,
+        "elementCounts": {
+          "C": 10,
+          "N": 4,
+          "O": 5
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence GAGA; generated with RDKit 2022.09.3."
+    },
+    {
+      "id": "legacy-gly-ala-8",
+      "mode": "smiles",
+      "text": "C[C@H](NC(=O)CNC(=O)[C@H](C)NC(=O)CNC(=O)[C@H](C)NC(=O)CNC(=O)[C@H](C)NC(=O)CN)C(=O)O",
+      "identityGroup": null,
+      "assertions": {
+        "heavyAtoms": 37,
+        "elementCounts": {
+          "C": 20,
+          "N": 8,
+          "O": 9
+        },
+        "formalCharge": 0,
+        "stereo": "RDKit L-amino-acid convention"
+      },
+      "source": "RDKit MolFromSequence",
+      "license": "Repository-authored fixture facts and annotations, CC0-1.0",
+      "annotation": "Sequence GAGAGAGA; generated with RDKit 2022.09.3."
+    }
+  ]
+}
