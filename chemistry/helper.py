@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 from rdkit import Chem, rdBase
 from rdkit.Chem import Crippen, Descriptors, Lipinski, rdMolDescriptors
@@ -47,24 +48,67 @@ def _validate_text(text):
     return text
 
 
-def _opsin(name, jar_path):
+def _bundle_root():
+    """Return the immutable payload root for a frozen helper."""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent.parent
+    return Path(__file__).resolve().parent.parent
+
+
+def _payload_paths():
+    root = _bundle_root()
+    if getattr(sys, "frozen", False):
+        return root / "resources" / "opsin-cli-2.8.0.jar", root / "java" / "bin" / "java"
+    jar = Path(os.environ.get("IUPAC_OPSIN_JAR", root / "third_party" / "opsin" / "opsin-cli-2.8.0.jar"))
+    return jar, Path(os.environ.get("IUPAC_JAVA_EXECUTABLE", "java"))
+
+
+def _child_environment(java_path):
+    # Never let a host/DAW Python, Java or freezer loader setting redirect the
+    # private runtime. The frozen executable has already loaded its own native
+    # closure before this child environment is created.
+    blocked = {
+        "CLASSPATH", "JAVA_HOME", "JDK_JAVA_OPTIONS", "JAVA_TOOL_OPTIONS", "_JAVA_OPTIONS",
+        "PYTHONHOME", "PYTHONPATH", "VIRTUAL_ENV", "CONDA_PREFIX", "LD_LIBRARY_PATH",
+        "DYLD_LIBRARY_PATH", "DYLD_FALLBACK_LIBRARY_PATH", "DYLD_INSERT_LIBRARIES",
+    }
+    env = {key: value for key, value in os.environ.items() if key not in blocked}
+    if java_path.is_absolute():
+        env["JAVA_HOME"] = str(java_path.parent.parent)
+    return env
+
+
+def _opsin(name, jar_path, java_path=None):
     if not jar_path or not os.path.isfile(jar_path):
         raise InputError("OPSIN 2.8.0 artifact is missing")
+    java_path = Path(java_path or _payload_paths()[1])
+    if java_path.is_absolute() and not java_path.is_file():
+        raise InputError("private Java 17 runtime is missing")
     with tempfile.TemporaryDirectory(prefix="iupac-opsin-") as directory:
         source = os.path.join(directory, "name.txt")
         target = os.path.join(directory, "structure.smi")
         with open(source, "x", encoding="utf-8") as stream:
             stream.write(name + "\n")
+        process = subprocess.Popen(
+            [str(java_path), "-Xmx256m", "-jar", str(jar_path), "-o", "smi", source, target],
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            env=_child_environment(java_path), start_new_session=True,
+        )
         try:
-            result = subprocess.run(
-                ["java", "-Xmx256m", "-jar", jar_path, "-o", "smi", source, target],
-                stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                timeout=OPSIN_TIMEOUT_SECONDS, check=False,
-            )
+            stdout, stderr = process.communicate(timeout=OPSIN_TIMEOUT_SECONDS)
         except subprocess.TimeoutExpired as exc:
+            try:
+                os.killpg(process.pid, 15)
+                process.communicate(timeout=1)
+            except (ProcessLookupError, subprocess.TimeoutExpired):
+                try:
+                    os.killpg(process.pid, 9)
+                except ProcessLookupError:
+                    pass
+                process.communicate()
             raise InputError("OPSIN name resolution exceeded its deadline") from exc
-        diagnostic = result.stderr[:65536].decode("utf-8", "replace").strip()
-        if result.returncode != 0:
+        diagnostic = stderr[:65536].decode("utf-8", "replace").strip()
+        if process.returncode != 0:
             raise InputError("OPSIN could not resolve the name" + (": " + diagnostic if diagnostic else ""))
         try:
             with open(target, encoding="utf-8") as stream:
@@ -186,7 +230,8 @@ def main():
         request = json.loads(raw.decode("utf-8"))
         if isinstance(request, dict):
             request_id = request.get("requestId")
-        response = process(request, os.environ.get("IUPAC_OPSIN_JAR", ""))
+        jar_path, _ = _payload_paths()
+        response = process(request, str(jar_path))
     except (InputError, UnicodeError, json.JSONDecodeError) as exc:
         response = {"protocolVersion": PROTOCOL_VERSION, "requestId": request_id, "status": "error",
                     "diagnostic": str(exc)[:4096]}

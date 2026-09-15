@@ -1,0 +1,29 @@
+name: Linux arm64 private runtime package
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ["chemistry/**", "data/discovery/**", "packaging/**", ".github/workflows/package-arm64.yml"]
+jobs:
+  package:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - name: Build pinned Debian payload and runtime image
+        run: docker build --platform linux/arm64 --target runtime -t iupac-runtime:test -f packaging/Dockerfile .
+      - name: Run isolated clean-runtime proof
+        run: |
+          mkdir -p out
+          chmod 0777 out
+          docker run --rm --network none --read-only --tmpfs /tmp:rw,noexec,nosuid,size=16m \
+            --user 65534:65534 -v "$PWD/out:/reports" iupac-runtime:test \
+            /opt/iupac-chemistry /reports/clean-runtime-report.json
+      - name: Export retained package and reports
+        run: docker build --platform linux/arm64 --target export --output type=local,dest=out -f packaging/Dockerfile .
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: iupac-chemistry-linux-arm64-${{ github.sha }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 30

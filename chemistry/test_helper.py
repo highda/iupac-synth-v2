@@ -68,6 +68,23 @@ class HelperTests(unittest.TestCase):
         self.assertEqual(json.loads(bad.stdout)["status"], "error")
         self.assertEqual(bad.stderr, "")
 
+    def test_private_child_environment_is_sanitized(self):
+        poisoned = ("PYTHONHOME", "PYTHONPATH", "JAVA_HOME", "CLASSPATH", "LD_LIBRARY_PATH", "JAVA_TOOL_OPTIONS")
+        old = {name: os.environ.get(name) for name in poisoned}
+        try:
+            os.environ.update({name: "/host-value" for name in poisoned})
+            env = helper._child_environment(helper.Path("/private/java/bin/java"))
+            self.assertEqual(env["JAVA_HOME"], "/private/java")
+            for name in poisoned:
+                if name != "JAVA_HOME":
+                    self.assertNotIn(name, env)
+        finally:
+            for name, value in old.items():
+                if value is None:
+                    os.environ.pop(name, None)
+                else:
+                    os.environ[name] = value
+
 
 if __name__ == "__main__":
     unittest.main()

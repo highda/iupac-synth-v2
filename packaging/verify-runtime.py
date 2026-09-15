@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Verify a staged onedir helper through source and frozen production protocols."""
+import argparse, hashlib, json, os, shutil, stat, subprocess, tempfile, time
+from pathlib import Path
+
+REQUESTS = [
+    {"protocolVersion": 1, "requestId": "smiles", "mode": "smiles", "text": "CCN(CC)C(=O)c1ccc(Cl)cc1"},
+    {"protocolVersion": 1, "requestId": "name", "mode": "name", "text": "2,2,2-trifluoroethan-1-ol"},
+]
+BLOCKED_ENV = {"PYTHONHOME":"/no/python", "PYTHONPATH":"/no/modules", "JAVA_HOME":"/no/java", "CLASSPATH":"/no/jar", "LD_LIBRARY_PATH":"/no/libs", "JAVA_TOOL_OPTIONS":"-Duser.language=xx"}
+
+def invoke(command, request, env, timeout=15):
+    started=time.monotonic()
+    run=subprocess.run(command,input=json.dumps(request),text=True,capture_output=True,env=env,timeout=timeout)
+    elapsed=time.monotonic()-started
+    if run.returncode != 0: raise RuntimeError(f"helper failed {run.returncode}: {run.stdout} {run.stderr}")
+    return json.loads(run.stdout), elapsed
+
+def sha(path):
+    h=hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda:stream.read(1024*1024),b""): h.update(block)
+    return h.hexdigest()
+
+def native_dependencies(path):
+    run=subprocess.run(["ldd",str(path)],text=True,capture_output=True,check=True)
+    return sorted(line.strip() for line in run.stdout.splitlines() if line.strip())
+
+def main():
+    p=argparse.ArgumentParser(); p.add_argument("--source",type=Path,required=True); p.add_argument("--payload",type=Path,required=True); p.add_argument("--report",type=Path,required=True); a=p.parse_args()
+    payload=a.payload.resolve(); exe=payload/"helper/iupac-analysis-helper"
+    required=[exe,payload/"java/bin/java",payload/"resources/opsin-cli-2.8.0.jar",payload/"resources/discovery/discovery-v1.sqlite3"]
+    if any(not x.is_file() for x in required): raise RuntimeError("payload is incomplete")
+    for path in payload.rglob("*"):
+        if path.is_symlink() and payload not in path.resolve().parents: raise RuntimeError(f"escaping symlink: {path}")
+    source_env=dict(os.environ,IUPAC_OPSIN_JAR=str(a.source/"third_party/opsin/opsin-cli-2.8.0.jar"))
+    frozen_env=dict(os.environ); frozen_env.update(BLOCKED_ENV); frozen_env["PATH"]="/no/system/runtime"
+    timings=[]
+    for request in REQUESTS:
+        expected,_=invoke([os.sys.executable,str(a.source/"chemistry/helper.py")],request,source_env)
+        actual,elapsed=invoke([str(exe)],request,frozen_env)
+        if actual != expected: raise RuntimeError(f"source/frozen mismatch for {request['requestId']}")
+        timings.append({"requestId":request["requestId"],"seconds":elapsed})
+    bad=subprocess.run([str(exe)],input="{}",text=True,capture_output=True,env=frozen_env,timeout=15)
+    if bad.returncode != 2 or json.loads(bad.stdout).get("status") != "error": raise RuntimeError("damaged request handling failed")
+    with tempfile.TemporaryDirectory(prefix="iupac payload with spaces ") as temp:
+        moved=Path(temp)/"read only payload"; shutil.copytree(payload,moved,symlinks=True)
+        for path in moved.rglob("*"):
+            path.chmod(0o555 if path.is_dir() or os.access(path,os.X_OK) else 0o444)
+        actual,_=invoke([str(moved/"helper/iupac-analysis-helper")],REQUESTS[0],frozen_env)
+        if actual["status"] != "ok": raise RuntimeError("read-only relocation failed")
+    with tempfile.TemporaryDirectory(prefix="iupac damaged payload ") as temp:
+        damaged=Path(temp)/"payload"; shutil.copytree(payload,damaged,symlinks=True)
+        (damaged/"resources/opsin-cli-2.8.0.jar").rename(damaged/"resources/opsin.damaged")
+        run=subprocess.run([str(damaged/"helper/iupac-analysis-helper")],input=json.dumps(REQUESTS[1]),text=True,capture_output=True,env=frozen_env,timeout=15)
+        if run.returncode != 2 or "artifact is missing" not in json.loads(run.stdout).get("diagnostic",""): raise RuntimeError("damaged payload was not diagnosed")
+    with tempfile.TemporaryDirectory(prefix="iupac deadline payload ") as temp:
+        deadline=Path(temp)/"payload"; shutil.copytree(payload,deadline,symlinks=True)
+        java=deadline/"java/bin/java"; real_java=java.with_name("java.real"); java.rename(real_java)
+        java.write_text("#!/bin/sh\n/bin/sleep 60 &\necho $! > \"$IUPAC_TEST_CHILD_PID\"\nwait\n"); java.chmod(0o755)
+        pidfile=Path(temp)/"child.pid"; timeout_env=dict(frozen_env,IUPAC_TEST_CHILD_PID=str(pidfile))
+        run=subprocess.run([str(deadline/"helper/iupac-analysis-helper")],input=json.dumps(REQUESTS[1]),text=True,capture_output=True,env=timeout_env,timeout=15)
+        if run.returncode != 2 or "deadline" not in json.loads(run.stdout).get("diagnostic",""): raise RuntimeError("deadline was not diagnosed")
+        child=int(pidfile.read_text()); time.sleep(.1)
+        try: os.kill(child,0)
+        except ProcessLookupError: pass
+        else: raise RuntimeError("deadline left an OPSIN descendant running")
+    modules=subprocess.check_output([str(payload/"java/bin/java"),"--list-modules"],text=True).splitlines()
+    files=[x for x in payload.rglob("*") if x.is_file()]
+    report={"schemaVersion":1,"architecture":os.uname().machine,"files":len(files),"unpackedBytes":sum(x.stat().st_size for x in files),"startup":timings,"javaModules":modules,"nativeDependencies":{"helper":native_dependencies(exe),"java":native_dependencies(payload/"java/bin/java")},"artifacts":{str(x.relative_to(payload)):sha(x) for x in required[1:]},"negativeIsolation":{"path":frozen_env["PATH"],"poisonedEnvironment":sorted(BLOCKED_ENV),"sourceTreeRequired":False,"damagedPayload":"diagnosed","deadlineTreeCleanup":"passed"},"sqliteVersion":subprocess.check_output([os.sys.executable,"-c","import sqlite3;print(sqlite3.sqlite_version)"],text=True).strip()}
+    a.report.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+if __name__=="__main__": main()
