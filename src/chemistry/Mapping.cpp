@@ -27,6 +27,10 @@ void set(domain::Node& n, std::string_view id, double value)
 {
     for (auto& p : n.parameters) if (p.id == id) { p.values[0] = value; return; }
 }
+void setArray(domain::Node& n, std::string_view id, std::initializer_list<double> values)
+{
+    for (auto& p : n.parameters) if (p.id == id) { p.values.assign(values); return; }
+}
 int motif(const Analysis& a, const char* name)
 {
     const auto* d = a.descriptors.getDynamicObject();
@@ -77,9 +81,9 @@ GenerationResult generate(const Analysis& a)
     if(secondary){auto n=node("secondary",harmonic?domain::ModuleType::fm:domain::ModuleType::harmonic);if(n.type==domain::ModuleType::harmonic){if(!domain::applyHarmonicSpectrum(n,-1.2+s.brightness,0.012*s.detail.heteroPlacement))return {s,{},{},"secondary spectrum composition failed"};}else{set(n,"modulatorRatio",1+3*s.detail.heteroPlacement);set(n,"index",1+3*s.motion);}set(n,"outputLevel",0.22+0.16*s.motion);p.nodes.push_back(n);traceItem(items,"node","secondary","M2-complement",s.motion,1);}
     if(noise){auto n=node("noise",domain::ModuleType::noise);set(n,"color",s.brightness<.5?1:0);set(n,"mode",s.decay<.45?1:0);set(n,"burstMs",30+300*s.decay);set(n,"outputLevel",.05+.18*s.roughness);p.nodes.push_back(n);traceItem(items,"node","noise","M2-noise",s.roughness,1);}
     const bool resonator=motif(a,"amide")||num(a.descriptors.getDynamicObject(),"ringCount")>0;
-    if(resonator){auto n=node("resonator",domain::ModuleType::resonator);set(n,"mode",s.rigidity<.5?0:1);set(n,"tuneRatio",.75+2*s.density);set(n,"combFeedback",.2+.65*s.decay);set(n,"modalQ",2+8*s.rigidity);set(n,"outputLevel",.55);p.nodes.push_back(n);traceItem(items,"node","resonator","M3-resonator",s.rigidity,1);}
+    if(resonator){auto n=node("resonator",domain::ModuleType::resonator);set(n,"mode",s.rigidity<.5?0:1);set(n,"tuneRatio",.65+1.4*s.density+1.5*s.detail.motifPlacement);set(n,"combFeedback",.2+.65*s.decay);set(n,"modalQ",2+8*s.rigidity);setArray(n,"modeRatios",{1.0,1.48+.24*s.detail.bondOrderMean,2.05+.35*s.detail.heteroPlacement,2.9+.5*s.detail.motifPlacement});setArray(n,"modeLevels",{1.0,.55+.2*s.brightness,.32+.18*s.detail.bondOrderSpread,.16+.16*s.motion});set(n,"outputLevel",.7);p.nodes.push_back(n);traceItem(items,"node","resonator","M3-resonator",s.rigidity,1);}
     const bool shaper=s.roughness>=.2||motif(a,"carbonyl"); if(shaper){auto n=node("shaper",domain::ModuleType::shaper);set(n,"drive",1+8*s.roughness+2*s.detail.bondOrderSpread);set(n,"wet",.2+.45*s.roughness);p.nodes.push_back(n);traceItem(items,"node","shaper","M4-shaper",s.roughness,1);}
-    const bool filter=s.brightness>=.1||resonator; if(filter){auto n=node("filter",domain::ModuleType::filter);set(n,"mode",s.brightness<.3?0:s.brightness<.65?1:2);set(n,"cutoff",120+15000*s.brightness*s.brightness);set(n,"q",.7+4*s.harmonicity);p.nodes.push_back(n);traceItem(items,"node","filter","M4-filter",s.brightness,1);}
+    const bool filter=s.brightness>=.1||resonator; if(filter){auto n=node("filter",domain::ModuleType::filter);const int mode=s.brightness<.3?0:s.brightness<.65?1:2;set(n,"mode",mode);set(n,"cutoff",mode==0?300+8000*s.brightness*s.brightness:mode==1?400+5000*s.brightness:500+2500*s.brightness);set(n,"q",.7+4*s.harmonicity);p.nodes.push_back(n);traceItem(items,"node","filter","M4-filter",s.brightness,1);}
     std::vector<std::string> sources{"primary"};if(secondary)sources.push_back("secondary");if(noise)sources.push_back("noise");
     std::vector<std::string> processors;if(shaper&&filter){if(s.rigidity<.5)processors={"shaper","filter"};else processors={"filter","shaper"};}else if(shaper)processors={"shaper"};else if(filter)processors={"filter"};
     const std::string post=processors.empty()?"output":processors.front();

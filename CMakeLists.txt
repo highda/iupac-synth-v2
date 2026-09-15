@@ -130,7 +130,13 @@ if(BUILD_TESTING)
         add_test(NAME analysis-schema COMMAND iupac-analysis-tests ${CMAKE_SOURCE_DIR}/tests/fixtures/chemistry-analysis-v1.json)
         add_test(NAME chemistry-source-helper COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/chemistry/test_helper.py)
         add_test(NAME chemistry-panels COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/chemistry/test_panels.py)
+        add_test(NAME mapping-calibration COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/verify_mapping_calibration.py
+            --cli $<TARGET_FILE:iupac-cli>
+            --fixture ${CMAKE_SOURCE_DIR}/tests/fixtures/chemistry-analysis-v1.json
+            --pairs ${CMAKE_SOURCE_DIR}/data/panels/legacy-hard-pairs.json
+            --output-dir ${CMAKE_BINARY_DIR}/mapping-calibration)
         set_tests_properties(chemistry-source-helper chemistry-panels PROPERTIES ENVIRONMENT "IUPAC_OPSIN_JAR=${CMAKE_SOURCE_DIR}/third_party/opsin/opsin-cli-2.8.0.jar" TIMEOUT 120)
+        set_tests_properties(mapping-calibration PROPERTIES TIMEOUT 600)
     endif()
     add_executable(iupac-plugin-tests tests/PluginAdapterTests.cpp)
     target_include_directories(iupac-plugin-tests PRIVATE src/plugin include)
