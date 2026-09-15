@@ -1,0 +1,2939 @@
+{
+  "categories": [
+    "amino-acids-short-peptides",
+    "aromatic-heterocyclic",
+    "carbohydrates",
+    "common-natural-products",
+    "lipids-steroids",
+    "salts-inorganic",
+    "simple-organics",
+    "solvents-material-ingredients"
+  ],
+  "files": {
+    "discovery-v1.sqlite3": "2db0b7c5b4dfd6797ca0312f98cab9d1397424082730a273618f541dea3a3b61",
+    "records-v1.jsonl": "a1ec746aa550864cef76593e6fa1d976e8bf7ee32e12053d5234f6fab1c07f44",
+    "wikidata-archive-v1.json": "111feaaf4a61bc01adc07e04b8e431053133f6f576df6359ae551ffaba6abfb7"
+  },
+  "outsideMappingPanels": 256,
+  "recordCount": 256,
+  "rejected": [
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106040917"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27098001"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q135987767"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q39903556"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q72483265"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q155890"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q424236"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27115709"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27263630"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q16879083"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q18883176"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q1101193"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104203049"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110077804"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105245040"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100145915"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100145478"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100146265"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105265234"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105170989"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105170990"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100146262"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105303631"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105303633"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104199195"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105263206"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104400839"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105175947"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105175950"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105175951"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105175952"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105155383"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105155384"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104193788"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110176201"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104200112"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105302276"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105302278"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105302279"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100145911"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104195273"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105213583"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105213585"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105213586"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105348272"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105348273"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105348274"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105253202"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105253203"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100146240"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104922016"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100145900"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104193635"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105197097"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105197104"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105197105"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104171603"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105379441"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105379442"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105379443"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100145891"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104665494"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104667755"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104992866"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104992907"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104992911"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104992921"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104992922"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104992923"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105240016"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104953128"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104953129"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105386334"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105386335"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105386336"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100146247"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104985397"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105278677"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105278678"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103787941"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104169999"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104376005"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105137028"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105137030"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105137031"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105137032"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105137047"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105137048"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105137049"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104251531"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104389511"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104392138"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160600"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160603"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160604"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160605"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160606"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160607"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160608"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160609"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160610"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160611"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160612"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160613"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105160614"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110184807"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110185066"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110185102"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q125699836"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105197576"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105287433"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105287434"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105287437"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105287438"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105235328"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104389641"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936667"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936669"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936671"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936672"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936673"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936675"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936676"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936677"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936681"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110078257"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104197274"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104197275"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104253180"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104396681"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105252414"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105252415"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105252417"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105252419"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105252420"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105252421"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105252448"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105252452"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105252454"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q115948659"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105212272"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105212273"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105035325"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106042212"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27136481"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100152464"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987209"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100154012"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105015047"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105015048"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q126610796"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100268598"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q11751625"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27104273"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27104604"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27109364"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27109369"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27159909"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q83053169"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100276118"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100306102"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105151228"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100325978"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q126615215"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q82579327"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q82853435"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100324205"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103796100"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104391038"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104984601"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104984606"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104984623"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104984625"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054377"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054439"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054444"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054445"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054563"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054565"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054576"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054577"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054579"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054594"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054601"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106054623"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q113301298"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100347804"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100345932"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100349509"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100348872"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27104759"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27122003"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27122004"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27122005"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27122006"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27122007"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27126749"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27457119"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100415940"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100416453"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100416621"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100416772"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100416864"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100417171"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100417906"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100603063"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100603288"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100603733"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100604186"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100604471"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q101096001"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q101096024"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q101096034"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q101096039"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q101096042"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q101096046"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055825"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055826"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055828"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055831"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055832"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055833"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055834"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055835"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055845"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055860"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055865"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055870"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055875"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055880"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055885"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055894"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055898"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055900"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055910"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055912"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055921"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055944"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055947"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q335208"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q424248"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q23905960"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q23905964"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q23905965"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q23905968"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q23905983"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27103248"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27103775"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27103868"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27104464"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27104500"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27104503"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27106301"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27106307"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27106313"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117210"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117211"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117212"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117224"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117225"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117226"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117228"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117229"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117230"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117232"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117233"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117246"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117247"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117248"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27126774"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27132623"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27136956"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27139932"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27156581"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27158869"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27465362"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100416045"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100416326"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100417297"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100417551"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055824"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055840"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055850"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055855"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055904"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055926"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106055935"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27280143"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100423358"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100429273"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100429558"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100430420"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100606475"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27271891"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100716337"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q126609831"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100722527"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100718032"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100724244"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q114831069"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100783323"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100783427"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27458219"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100785603"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27163600"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100786783"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100870930"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100899778"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103815930"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104249303"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104249650"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104253371"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104253372"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104396917"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104402142"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987764"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987770"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987772"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987773"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987776"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987777"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987781"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987782"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987783"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27160820"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100935883"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100980887"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q72511571"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100979758"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q100997268"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27104391"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q101096468"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q840660"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q866179"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q1014081"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q1770822"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q3658304"
+    },
+    {
+      "reason": "structure is invalid or contains query atoms",
+      "sourceId": "Q1014287"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q76414716"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q101428108"
+    },
+    {
+      "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+      "sourceId": "Q101497"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27117865"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q126677980"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102015395"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q1100804"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27098334"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102049439"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102049251"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102115727"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104253326"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105174911"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105174921"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105174924"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105174927"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q82115641"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102165835"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105214059"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105214061"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27095051"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102164158"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105114246"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105163011"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110202117"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105278902"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105278903"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105156206"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105156207"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105156208"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104946198"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104946201"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104917691"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102165936"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104910133"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104977117"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q115951067"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q48837901"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q63398856"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102165924"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104389753"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104393042"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104667403"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105217269"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105217270"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105217271"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105217272"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105217273"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105217274"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105217276"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105217277"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110184320"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104179873"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105183093"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q125617325"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102165722"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105243838"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102165751"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104200531"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105248137"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104167807"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104917603"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105198518"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105198520"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q77373912"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q77422217"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102165795"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104168951"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105116309"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973462"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973465"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973466"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973468"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973470"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973471"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973473"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973481"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973486"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973487"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973490"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973491"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104973492"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105103483"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105103484"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104970200"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104970201"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104917476"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104917478"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104917479"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105350532"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105182714"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105182715"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105385317"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104991596"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104991605"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104991606"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q115947671"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104252988"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104981117"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104981118"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104981122"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104981124"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102182434"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q77250128"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102302396"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27887888"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q72465044"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102338526"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27288006"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27288534"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27289199"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102338681"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27288468"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27290706"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27293255"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102349190"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27259497"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27292319"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102349339"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27265371"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102349611"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106634608"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q102338428"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27458874"
+    },
+    {
+      "reason": "structure exceeds 8 disconnected components",
+      "sourceId": "Q1026348"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106631512"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q107199364"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q106618566"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q126678077"
+    },
+    {
+      "reason": "structure exceeds 8 disconnected components",
+      "sourceId": "Q1026338"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q126603930"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q1032539"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q1032873"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q76422893"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27109313"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q82996337"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q27110821"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q126615635"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105187219"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105187221"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q67879598"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q67879608"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q76416625"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q81981669"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q81981670"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103795149"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104249395"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120396"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120400"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120402"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120408"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120409"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120410"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120412"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120419"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120420"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120422"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105120423"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103785950"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104375610"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105277028"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105277030"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110080107"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103796473"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105382028"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105382029"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105382031"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104168569"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104201175"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104887538"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103786771"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105142148"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105142149"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105142150"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105142152"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105142153"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105204174"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103786460"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104917742"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104991503"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104996605"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103788512"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104195846"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105221340"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104253478"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104399300"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105121920"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105121922"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105184511"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105184514"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105184517"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104396579"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105284524"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105196452"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105196453"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105196454"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105196455"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104977572"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104977574"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103787031"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105376049"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105376050"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105376055"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105151346"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105285557"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105215426"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104397138"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105036110"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110200397"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105226455"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987223"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987224"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104987225"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q82852042"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103787669"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104252977"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104394051"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105312726"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105312731"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105312733"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105312734"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104909839"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104936244"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104193739"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105268522"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104200542"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105349914"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105349915"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105349917"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105349918"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105146644"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105146645"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105146646"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105146647"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105146648"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104398887"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105277235"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110201539"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105237447"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105251816"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105382619"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105382621"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105382622"
+    },
+    {
+      "reason": "name is missing or oversized",
+      "sourceId": "Q103794458"
+    },
+    {
+      "reason": "name is missing or oversized",
+      "sourceId": "Q105224891"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q125613081"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105278427"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105143564"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105143565"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103788637"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103816132"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104912511"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104912515"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104912518"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105379708"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104946314"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105233046"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105233048"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105203507"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104946825"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104972865"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104972867"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105177567"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105177568"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105177569"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105177570"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105326427"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105326428"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105326429"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105326430"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105326432"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104951704"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104990805"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104990806"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104990807"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104990809"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104990810"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105104583"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110199373"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105180418"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105345493"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105142658"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103786411"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104964572"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104964584"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104947387"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104394107"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105253814"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105253816"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105146565"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105146566"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105146567"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103794681"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105182289"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105182290"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104252052"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105163706"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q117835430"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104400955"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105196702"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105196703"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105143786"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105006345"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105006347"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105006348"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105006349"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105326451"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105326464"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110185032"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103795504"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104968316"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104968319"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104968320"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104968321"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103795352"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103818622"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104375598"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104376006"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104386336"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104402383"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104986657"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104986658"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104986659"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104986660"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104986661"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104986663"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104986666"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104667295"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105033280"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105033281"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105033282"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105033283"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110183726"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q115948670"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105253606"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105025576"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105025577"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105145447"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105145449"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105145450"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105003863"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105003864"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105003866"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105003868"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105003869"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105003870"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105376308"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105376309"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104403737"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103786546"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104253179"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104415282"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104415346"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148264"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148265"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148266"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148268"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148272"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148276"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148277"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148278"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148279"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148292"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148293"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148294"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148295"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q110188595"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104944513"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103786087"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104167399"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105015588"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105015590"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105015591"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105165246"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104252986"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104951328"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104951330"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104951332"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104951334"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104951337"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104951339"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104951342"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105193110"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148079"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q105148080"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104939212"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104939214"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103817920"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104967491"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q103817950"
+    },
+    {
+      "reason": "duplicate canonical structure",
+      "sourceId": "Q104246384"
+    }
+  ],
+  "schemaVersion": 1,
+  "twoNameCount": 139
+}
