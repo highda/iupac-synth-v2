@@ -7,10 +7,6 @@ include(FetchContent)
 
 option(IUPAC_ENABLE_CHEMISTRY "Build the chemistry extension" OFF)
 
-if(IUPAC_ENABLE_CHEMISTRY)
-    message(FATAL_ERROR "The chemistry extension is introduced by a later implementation leaf")
-endif()
-
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -31,6 +27,14 @@ target_include_directories(iupac_synth_domain PUBLIC include)
 target_compile_features(iupac_synth_domain PUBLIC cxx_std_20)
 target_compile_definitions(iupac_synth_domain PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
 target_link_libraries(iupac_synth_domain PUBLIC juce::juce_core)
+
+if(IUPAC_ENABLE_CHEMISTRY)
+    add_library(iupac_chemistry_analysis STATIC src/chemistry/Analysis.cpp)
+    target_include_directories(iupac_chemistry_analysis PUBLIC include)
+    target_compile_features(iupac_chemistry_analysis PUBLIC cxx_std_20)
+    target_compile_definitions(iupac_chemistry_analysis PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
+    target_link_libraries(iupac_chemistry_analysis PUBLIC juce::juce_core)
+endif()
 
 add_library(iupac_synth_engine STATIC
     src/engine/Engine.cpp
@@ -115,6 +119,14 @@ if(BUILD_TESTING)
     add_test(NAME product-path-smoke COMMAND iupac-tests)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     add_test(NAME render-distance-metric COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_render_distance.py)
+    if(IUPAC_ENABLE_CHEMISTRY)
+        add_executable(iupac-analysis-tests tests/AnalysisTests.cpp)
+        target_compile_features(iupac-analysis-tests PRIVATE cxx_std_20)
+        target_link_libraries(iupac-analysis-tests PRIVATE iupac_chemistry_analysis)
+        add_test(NAME analysis-schema COMMAND iupac-analysis-tests)
+        add_test(NAME chemistry-source-helper COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/chemistry/test_helper.py)
+        set_tests_properties(chemistry-source-helper PROPERTIES ENVIRONMENT "IUPAC_OPSIN_JAR=${CMAKE_SOURCE_DIR}/third_party/opsin/opsin-cli-2.8.0.jar" TIMEOUT 60)
+    endif()
     add_executable(iupac-plugin-tests tests/PluginAdapterTests.cpp)
     target_include_directories(iupac-plugin-tests PRIVATE src/plugin include)
     target_compile_features(iupac-plugin-tests PRIVATE cxx_std_20)

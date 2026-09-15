@@ -31,6 +31,15 @@
       }
     },
     {
+      "name": "linux-chemistry",
+      "displayName": "Linux chemistry analysis build",
+      "inherits": "linux-synth",
+      "binaryDir": "${sourceDir}/build/linux-chemistry",
+      "cacheVariables": {
+        "IUPAC_ENABLE_CHEMISTRY": "ON"
+      }
+    },
+    {
       "name": "linux-tsan",
       "displayName": "Linux ThreadSanitizer coordinator build",
       "inherits": "linux-synth",
@@ -44,6 +53,7 @@
   ],
   "buildPresets": [
     { "name": "linux-synth", "configurePreset": "linux-synth" },
+    { "name": "linux-chemistry", "configurePreset": "linux-chemistry" },
     { "name": "linux-sanitize", "configurePreset": "linux-sanitize" },
     { "name": "linux-tsan", "configurePreset": "linux-tsan" }
   ],
@@ -51,6 +61,11 @@
     {
       "name": "linux-synth",
       "configurePreset": "linux-synth",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-chemistry",
+      "configurePreset": "linux-chemistry",
       "output": { "outputOnFailure": true }
     },
     {
