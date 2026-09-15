@@ -1,0 +1,49 @@
+name: TSan arm64
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tsan-arm64-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coordinator:
+    name: Coordinator mailbox and state concurrency
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            libasound2-dev \
+            libfreetype6-dev \
+            libfontconfig1-dev \
+            libgl1-mesa-dev \
+            libjack-jackd2-dev \
+            libx11-dev \
+            libxcomposite-dev \
+            libxcursor-dev \
+            libxext-dev \
+            libxinerama-dev \
+            libxrandr-dev \
+            libxrender-dev \
+            ninja-build \
+            pkg-config
+
+      - name: Configure TSan
+        run: cmake --preset linux-tsan
+
+      - name: Build instrumented production tests
+        run: cmake --build --preset linux-tsan --target iupac-tests --parallel 4

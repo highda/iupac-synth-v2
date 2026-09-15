@@ -35,6 +35,7 @@ target_link_libraries(iupac_synth_domain PUBLIC juce::juce_core)
 add_library(iupac_synth_engine STATIC
     src/engine/Engine.cpp
     src/engine/Modules.cpp
+    src/engine/PatchCoordinator.cpp
 )
 target_include_directories(iupac_synth_engine PUBLIC include)
 target_compile_features(iupac_synth_engine PUBLIC cxx_std_20)
@@ -108,7 +109,7 @@ target_link_libraries(IupacSynth2
 )
 
 if(BUILD_TESTING)
-    add_executable(iupac-tests tests/ProductPathTests.cpp tests/PatchTests.cpp tests/ModuleTests.cpp tests/EngineTests.cpp tests/HeadlessTests.cpp)
+    add_executable(iupac-tests tests/ProductPathTests.cpp tests/PatchTests.cpp tests/ModuleTests.cpp tests/EngineTests.cpp tests/HeadlessTests.cpp tests/RealtimeAllocationTests.cpp)
     target_compile_features(iupac-tests PRIVATE cxx_std_20)
     target_link_libraries(iupac-tests PRIVATE iupac_synth_tools)
     add_test(NAME product-path-smoke COMMAND iupac-tests)

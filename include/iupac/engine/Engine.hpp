@@ -38,7 +38,10 @@ struct ModuleValues
 class ModuleProcessor final
 {
 public:
+    using CombDelay = juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>;
     explicit ModuleProcessor(domain::ModuleType type = domain::ModuleType::mixer) noexcept : type_(type) {}
+    void setType(domain::ModuleType type) noexcept { type_ = type; reset(); }
+    void setCombDelay(CombDelay* delay) noexcept { comb_ = delay; }
     void prepare(double internalSampleRate, std::size_t maximumBlockSize);
     void reset() noexcept;
     void noteOn(int midiNote, int midiChannel, std::uint32_t patchSeed, std::uint32_t nodeHash) noexcept;
@@ -58,7 +61,8 @@ private:
     std::array<float, 2> pink_{};
     std::size_t burstSamplesRemaining_{};
     bool gate_{};
-    std::unique_ptr<juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>> comb_;
+    CombDelay* comb_{};
+    std::unique_ptr<CombDelay> ownedComb_;
     juce::dsp::StateVariableTPTFilter<float> filter_;
     std::array<juce::dsp::StateVariableTPTFilter<float>, 4> modes_;
 };
@@ -75,9 +79,10 @@ public:
     [[nodiscard]] bool finalEnvelopeActive() const noexcept { return envelopes_[0].isActive(); }
 private:
     std::array<juce::ADSR, 3> envelopes_;
-    std::array<domain::Lfo, 2> lfoSettings_{};
+    std::array<domain::Lfo, 2> lfoSettings_{}, previousLfoSettings_{};
     std::array<double, 2> lfoPhases_{};
     double sampleRate_{48000.0};
+    std::uint64_t smoothingSample_{}, smoothingLength_{1};
 };
 
 enum class ParameterTarget : std::uint8_t { carrierRatio, modulatorRatio, index, burstMilliseconds, tuneRatio, combFeedback, modalQ, cutoff, q, drive, wet, level, pan, outputLevel };
@@ -110,6 +115,7 @@ public:
     Engine(const Engine&) = delete; Engine& operator=(const Engine&) = delete;
     void prepare(double sampleRate, std::size_t maximumBlockSize) noexcept;
     void reset() noexcept; void setPatch(const CompiledPatch&); void setControls(const domain::HostControls&) noexcept;
+    void updatePatchPreservingVoices(const CompiledPatch&) noexcept;
     void render(std::span<float> left, std::span<float> right, std::span<const MidiEvent> events = {}) noexcept;
     void renderSilence(std::span<float> left, std::span<float> right) noexcept;
     [[nodiscard]] double sampleRate() const noexcept { return sampleRate_; }

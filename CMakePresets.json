@@ -29,11 +29,23 @@
         "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
       }
+    },
+    {
+      "name": "linux-tsan",
+      "displayName": "Linux ThreadSanitizer coordinator build",
+      "inherits": "linux-synth",
+      "binaryDir": "${sourceDir}/build/linux-tsan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS": "-fsanitize=thread -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=thread"
+      }
     }
   ],
   "buildPresets": [
     { "name": "linux-synth", "configurePreset": "linux-synth" },
-    { "name": "linux-sanitize", "configurePreset": "linux-sanitize" }
+    { "name": "linux-sanitize", "configurePreset": "linux-sanitize" },
+    { "name": "linux-tsan", "configurePreset": "linux-tsan" }
   ],
   "testPresets": [
     {
@@ -44,6 +56,11 @@
     {
       "name": "linux-sanitize",
       "configurePreset": "linux-sanitize",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-tsan",
+      "configurePreset": "linux-tsan",
       "output": { "outputOnFailure": true }
     }
   ]
