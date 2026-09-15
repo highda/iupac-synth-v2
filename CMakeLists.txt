@@ -103,7 +103,7 @@ target_link_libraries(IupacSynth2
 )
 
 if(BUILD_TESTING)
-    add_executable(iupac-tests tests/ProductPathTests.cpp tests/PatchTests.cpp tests/ModuleTests.cpp)
+    add_executable(iupac-tests tests/ProductPathTests.cpp tests/PatchTests.cpp tests/ModuleTests.cpp tests/EngineTests.cpp)
     target_compile_features(iupac-tests PRIVATE cxx_std_20)
     target_link_libraries(iupac-tests PRIVATE iupac_synth_engine)
     add_test(NAME product-path-smoke COMMAND iupac-tests)

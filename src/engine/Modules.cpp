@@ -39,6 +39,7 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
 }
 void ModulatorBank::prepare(double rate) noexcept {sampleRate_=std::max(1.0,rate);for(auto& e:envelopes_)e.setSampleRate(sampleRate_);}
 void ModulatorBank::configure(const std::array<domain::Envelope,3>& es,const std::array<domain::Lfo,2>& ls) noexcept {lfoSettings_=ls;for(std::size_t i=0;i<3;++i){juce::ADSR::Parameters p;p.attack=static_cast<float>(std::clamp(es[i].attack,.001,2.0));p.decay=static_cast<float>(std::clamp(es[i].decay,.01,4.0));p.sustain=static_cast<float>(std::clamp(es[i].sustain,0.0,1.0));p.release=static_cast<float>(std::clamp(es[i].release,.02,6.0));envelopes_[i].setParameters(p);}}
+void ModulatorBank::reset() noexcept {lfoPhases_.fill(0);for(auto&e:envelopes_)e.reset();}
 void ModulatorBank::noteOn() noexcept {lfoPhases_.fill(0);for(auto& e:envelopes_)e.noteOn();}void ModulatorBank::noteOff() noexcept {for(auto& e:envelopes_)e.noteOff();}
 std::array<float,5> ModulatorBank::next() noexcept {std::array<float,5> r{};for(std::size_t i=0;i<3;++i)r[i]=envelopes_[i].getNextSample();for(std::size_t i=0;i<2;++i){const auto ph=lfoPhases_[i];r[3+i]=lfoSettings_[i].waveform==domain::LfoWaveform::sine?static_cast<float>(std::sin(ph)):static_cast<float>(2/std::numbers::pi*std::asin(std::sin(ph)));lfoPhases_[i]=std::fmod(ph+twoPi*std::clamp(lfoSettings_[i].rate,.05,12.0)/sampleRate_,twoPi);}return r;}
 }

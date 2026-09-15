@@ -10,12 +10,16 @@
 #include <cstddef>
 #include <memory>
 #include <span>
+#include <string>
 
 namespace iupac::engine
 {
 inline constexpr std::size_t maximumModuleBlockSize = 4096;
 inline constexpr unsigned internalOversamplingFactor = 2;
+inline constexpr std::size_t maximumVoices = 16;
+inline constexpr std::size_t maximumMidiEventsPerBlock = 4096;
 [[nodiscard]] constexpr double internalSampleRate(double outputSampleRate) noexcept { return outputSampleRate * internalOversamplingFactor; }
+[[nodiscard]] constexpr float filterCutoffCeiling(double outputSampleRate) noexcept { return static_cast<float>(outputSampleRate * 0.4); }
 
 struct ModuleValues
 {
@@ -38,7 +42,7 @@ public:
     void prepare(double internalSampleRate, std::size_t maximumBlockSize);
     void reset() noexcept;
     void noteOn(int midiNote, int midiChannel, std::uint32_t patchSeed, std::uint32_t nodeHash) noexcept;
-    void noteOff() noexcept {} // E1 owns the release; source state continues until voice retirement/reset.
+    void noteOff() noexcept {}
     void process(const ModuleValues&, float fundamentalHz, std::span<const float> inputLeft,
                  std::span<const float> inputRight, std::span<float> outputLeft,
                  std::span<float> outputRight) noexcept;
@@ -64,6 +68,7 @@ class ModulatorBank final
 public:
     void prepare(double sampleRate) noexcept;
     void configure(const std::array<domain::Envelope, 3>&, const std::array<domain::Lfo, 2>&) noexcept;
+    void reset() noexcept;
     void noteOn() noexcept;
     void noteOff() noexcept;
     [[nodiscard]] std::array<float, 5> next() noexcept;
@@ -75,17 +80,43 @@ private:
     double sampleRate_{48000.0};
 };
 
+enum class ParameterTarget : std::uint8_t { carrierRatio, modulatorRatio, index, burstMilliseconds, tuneRatio, combFeedback, modalQ, cutoff, q, drive, wet, level, pan, outputLevel };
+struct CompiledNode { domain::ModuleType type{}; ModuleValues values{}; std::uint32_t idHash{}; };
+struct CompiledEdge { std::uint8_t source{}, destination{}; float gain{}; bool toOutput{}; };
+struct CompiledRow { domain::ModulationSource source{}; std::uint8_t node{}; ParameterTarget target{}; float depth{}, minimum{}, maximum{}; domain::ParameterScale scale{}; };
+struct CompiledPatch
+{
+    std::array<CompiledNode, domain::maximumNodes> nodes{};
+    std::array<CompiledEdge, domain::maximumEdges> edges{};
+    std::array<CompiledRow, domain::maximumMatrixRows> rows{};
+    std::array<domain::Envelope, 3> envelopes{};
+    std::array<domain::Lfo, 2> lfos{};
+    std::uint32_t noiseSeed{};
+    std::uint8_t nodeCount{}, edgeCount{}, rowCount{};
+};
+struct CompileResult { CompiledPatch patch{}; std::string error; explicit operator bool() const noexcept { return error.empty(); } };
+[[nodiscard]] CompileResult compilePatch(const domain::Patch&);
+using ModulationInputs = std::array<float, static_cast<std::size_t>(domain::ModulationSource::macro4) + 1>;
+[[nodiscard]] ModuleValues applyModulation(const CompiledPatch&, std::size_t node,
+                                            const ModuleValues&, const ModulationInputs&) noexcept;
+
+enum class MidiEventType : std::uint8_t { noteOn, noteOff, pitchBend, controlChange };
+struct MidiEvent { std::uint32_t sampleOffset{}; MidiEventType type{}; std::uint8_t channel{1}, data1{}, data2{}; std::uint16_t bend{8192}; };
+
 class Engine final
 {
 public:
+    Engine(); ~Engine(); Engine(Engine&&) noexcept; Engine& operator=(Engine&&) noexcept;
+    Engine(const Engine&) = delete; Engine& operator=(const Engine&) = delete;
     void prepare(double sampleRate, std::size_t maximumBlockSize) noexcept;
+    void reset() noexcept; void setPatch(const CompiledPatch&); void setControls(const domain::HostControls&) noexcept;
+    void render(std::span<float> left, std::span<float> right, std::span<const MidiEvent> events = {}) noexcept;
     void renderSilence(std::span<float> left, std::span<float> right) noexcept;
-
     [[nodiscard]] double sampleRate() const noexcept { return sampleRate_; }
     [[nodiscard]] std::size_t maximumBlockSize() const noexcept { return maximumBlockSize_; }
-
+    [[nodiscard]] int latencySamples() const noexcept; [[nodiscard]] std::uint64_t guardHits() const noexcept;
+    [[nodiscard]] std::uint64_t midiOverflowCount() const noexcept; [[nodiscard]] std::size_t activeVoiceCount() const noexcept;
 private:
-    double sampleRate_ = 0.0;
-    std::size_t maximumBlockSize_ = 0;
+    class Impl; std::unique_ptr<Impl> impl_; double sampleRate_{}; std::size_t maximumBlockSize_{};
 };
 }
