@@ -138,6 +138,7 @@ void PatchCoordinator::render(std::span<float> left, std::span<float> right, std
         offset += count;
         events = {};
     }
+    activeVoices_.store(banks_[active_].activeVoiceCount() + (fading_ ? banks_[incoming_].activeVoiceCount() : 0u), std::memory_order_relaxed);
 }
 
 void PatchCoordinator::setAudioControls(const domain::HostControls& controls) noexcept
