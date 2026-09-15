@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <memory>
+#include <limits>
 #include <span>
 #include <string>
 
@@ -56,9 +57,20 @@ private:
     domain::ModuleType type_;
     double sampleRate_{96000.0};
     std::array<double, 16> phases_{};
+    std::array<float, 16> harmonicSin_{}, harmonicCos_{{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}}, harmonicDeltaSin_{}, harmonicDeltaCos_{};
+    std::array<float, 16> cachedRatios_{{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}};
+    float cachedHarmonicFundamental_{-1.0f};
     double modPhase_{};
     std::uint32_t randomState_{1};
     std::array<float, 2> pink_{};
+    std::array<float, 16> panLeft_{}, panRight_{}, cachedPans_{};
+    float cachedPan_{std::numeric_limits<float>::quiet_NaN()}, cachedPanLeft_{}, cachedPanRight_{};
+    float cachedFundamental_{std::numeric_limits<float>::quiet_NaN()}, cachedFmRolloff_{1.0f};
+    float cachedFilterCutoff_{std::numeric_limits<float>::quiet_NaN()}, cachedFilterQ_{std::numeric_limits<float>::quiet_NaN()};
+    std::array<float, 4> cachedModeCutoffs_{{-1,-1,-1,-1}};
+    float cachedModalQ_{std::numeric_limits<float>::quiet_NaN()};
+    std::uint8_t filterControlCountdown_{};
+    std::uint16_t harmonicRenormalizeCountdown_{4096};
     std::size_t burstSamplesRemaining_{};
     bool gate_{};
     CombDelay* comb_{};
@@ -89,15 +101,20 @@ enum class ParameterTarget : std::uint8_t { carrierRatio, modulatorRatio, index,
 struct CompiledNode { domain::ModuleType type{}; ModuleValues values{}; std::uint32_t idHash{}; };
 struct CompiledEdge { std::uint8_t source{}, destination{}; float gain{}; bool toOutput{}; };
 struct CompiledRow { domain::ModulationSource source{}; std::uint8_t node{}; ParameterTarget target{}; float depth{}, minimum{}, maximum{}; domain::ParameterScale scale{}; };
+struct CompiledTarget { std::uint8_t node{}; ParameterTarget target{}; float minimum{}, maximum{}; domain::ParameterScale scale{}; std::array<std::uint8_t, domain::maximumMatrixRows> rows{}; std::uint8_t rowCount{}; };
+struct CompiledEdgeList { std::array<std::uint8_t, domain::maximumEdges> edges{}; std::uint8_t count{}; };
 struct CompiledPatch
 {
     std::array<CompiledNode, domain::maximumNodes> nodes{};
     std::array<CompiledEdge, domain::maximumEdges> edges{};
     std::array<CompiledRow, domain::maximumMatrixRows> rows{};
+    std::array<CompiledTarget, domain::maximumMatrixRows> targets{};
+    std::array<CompiledEdgeList, domain::maximumNodes> incomingEdges{};
+    CompiledEdgeList outputEdges{};
     std::array<domain::Envelope, 3> envelopes{};
     std::array<domain::Lfo, 2> lfos{};
     std::uint32_t noiseSeed{};
-    std::uint8_t nodeCount{}, edgeCount{}, rowCount{};
+    std::uint8_t nodeCount{}, edgeCount{}, rowCount{}, targetCount{};
 };
 struct CompileResult { CompiledPatch patch{}; std::string error; explicit operator bool() const noexcept { return error.empty(); } };
 [[nodiscard]] CompileResult compilePatch(const domain::Patch&);

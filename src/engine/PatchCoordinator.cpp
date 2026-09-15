@@ -89,7 +89,7 @@ void PatchCoordinator::accept(const Command& command) noexcept
     }
     if (fading_) { audioDeferred_ = command; return; }
     incoming_ = 1 - active_;
-    banks_[incoming_].reset(); banks_[incoming_].setPatch(command.patch); banks_[incoming_].setControls(command.controls);
+    banks_[incoming_].reset(); banks_[incoming_].setControls(command.controls); banks_[incoming_].setPatch(command.patch);
     seedIncoming();
     activePatch_ = command.patch; activeControls_ = command.controls;
     fadeSample_ = 0; transitionGeneration_ = command.generation; fading_ = true; transitioning_.store(true, std::memory_order_release);

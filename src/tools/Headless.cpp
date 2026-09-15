@@ -1,4 +1,5 @@
 #include "iupac/tools/Headless.hpp"
+#include "iupac/engine/PatchCoordinator.hpp"
 #include "iupac/domain/ProductInfo.hpp"
 
 #include <juce_audio_formats/juce_audio_formats.h>
@@ -8,6 +9,9 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#if defined(__linux__)
+#include <unistd.h>
+#endif
 #include <iomanip>
 #include <numeric>
 #include <sstream>
@@ -242,13 +246,32 @@ std::string benchmark(const domain::State& state, std::size_t seconds, std::stri
     constexpr double sampleRate = 48000; constexpr std::size_t blockSize = 128;
     if (seconds < 1 || seconds > 60) { error = "benchmark duration must be 1..60 seconds"; return {}; }
     const auto compiled = engine::compilePatch(state.editedPatch); if (!compiled) { error = compiled.error; return {}; }
-    engine::Engine engine; engine.prepare(sampleRate, blockSize); engine.setPatch(compiled.patch); engine.setControls(state.controls);
+    auto alternatePatch = state.editedPatch;
+    if (alternatePatch.nodes.empty()) { error = "benchmark requires an audible authored patch"; return {}; }
+    const auto oldId = alternatePatch.nodes.front().id;
+    alternatePatch.nodes.front().id += "-transition";
+    for (auto& edge : alternatePatch.edges) { if (edge.source == oldId) edge.source = alternatePatch.nodes.front().id; if (edge.destination == oldId) edge.destination = alternatePatch.nodes.front().id; }
+    for (auto& row : alternatePatch.matrix) if (row.destinationNode == oldId) row.destinationNode = alternatePatch.nodes.front().id;
+    const auto alternate = engine::compilePatch(alternatePatch); if (!alternate) { error = "cannot prepare transition benchmark: " + alternate.error; return {}; }
+    engine::PatchCoordinator engine; engine.prepare(sampleRate, blockSize); (void) engine.publish(compiled.patch, state.controls);
     std::array<float, blockSize> left{}, right{}; std::vector<double> blockTimes; blockTimes.reserve(seconds * 375);
+    engine.render(left, right); for (int block = 0; block < 8; ++block) engine.render(left, right);
     std::vector<engine::MidiEvent> starts; for (int i = 0; i < 16; ++i) starts.push_back({0, engine::MidiEventType::noteOn, 1, static_cast<std::uint8_t>(36 + i * 3), 100, 8192}); engine.render(left, right, starts);
-    for (std::size_t warmup = 0; warmup < 5 * 375; ++warmup) engine.render(left, right);
+    std::size_t transitions = 0;
+    for (std::size_t warmup = 0; warmup < 5 * 375; ++warmup) { if (warmup % 32 == 0) (void) engine.publish((transitions++ % 2) ? compiled.patch : alternate.patch, state.controls); engine.render(left, right); }
+    const auto residentBytes = [] {
+#if defined(__linux__)
+        long pages = 0, resident = 0; std::ifstream stat("/proc/self/statm"); stat >> pages >> resident;
+        return resident > 0 ? static_cast<std::uint64_t>(resident) * static_cast<std::uint64_t>(::sysconf(_SC_PAGESIZE)) : 0;
+#else
+        return std::uint64_t{};
+#endif
+    };
+    const auto rssBefore = residentBytes();
     const auto begin = std::chrono::steady_clock::now();
     for (std::size_t block = 0; block < seconds * 375; ++block)
     {
+        if (block % 32 == 0) { (void) engine.publish((transitions++ % 2) ? compiled.patch : alternate.patch, state.controls); }
         const auto blockBegin = std::chrono::steady_clock::now(); engine.render(left, right); const auto blockEnd = std::chrono::steady_clock::now();
         blockTimes.push_back(std::chrono::duration<double>(blockEnd - blockBegin).count());
     }
@@ -256,6 +279,7 @@ std::string benchmark(const domain::State& state, std::size_t seconds, std::stri
     auto root = object(); put(root, "productVersion", juce::String(domain::productVersion().data())); put(root, "architecture", juce::String(domain::architectureVersion().data())); put(root, "command", juce::String("iupac-cli benchmark --snapshot FILE --seconds N"));
     put(root, "sampleRate", sampleRate); put(root, "blockSize", static_cast<int>(blockSize)); put(root, "voices", 16); put(root, "warmupSeconds", 5); put(root, "seconds", static_cast<int>(seconds));
     put(root, "renderRatio", elapsed / static_cast<double>(seconds)); put(root, "p99BlockSeconds", blockTimes[static_cast<std::size_t>(std::floor((blockTimes.size() - 1) * .99))]);
+    put(root, "structuralTransitions", static_cast<juce::int64>(transitions)); put(root, "activeBanksMaximum", 2); put(root, "residentBytesBefore", static_cast<juce::int64>(rssBefore)); put(root, "residentBytesAfter", static_cast<juce::int64>(residentBytes()));
     put(root, "graphSignature", juce::String(graphSignature(compiled.patch))); put(root, "valueSignature", juce::String(valueSignature(compiled.patch, state.controls))); return json(root);
 }
 }
