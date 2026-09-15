@@ -5,5 +5,6 @@
 namespace iupac::domain
 {
 std::string_view productName() noexcept;
+std::string_view productVersion() noexcept;
 std::string_view architectureVersion() noexcept;
 }

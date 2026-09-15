@@ -44,9 +44,14 @@ target_link_libraries(iupac_synth_engine PUBLIC
     juce::juce_dsp
 )
 
+add_library(iupac_synth_tools STATIC src/tools/Headless.cpp)
+target_include_directories(iupac_synth_tools PUBLIC include)
+target_compile_features(iupac_synth_tools PUBLIC cxx_std_20)
+target_link_libraries(iupac_synth_tools PUBLIC iupac_synth_engine juce::juce_audio_formats juce::juce_cryptography)
+
 add_executable(iupac-cli src/cli/Main.cpp)
 target_compile_features(iupac-cli PRIVATE cxx_std_20)
-target_link_libraries(iupac-cli PRIVATE iupac_synth_engine)
+target_link_libraries(iupac-cli PRIVATE iupac_synth_tools)
 
 if(APPLE)
     set(IUPAC_PLUGIN_FORMATS AU VST3 Standalone)
@@ -103,8 +108,10 @@ target_link_libraries(IupacSynth2
 )
 
 if(BUILD_TESTING)
-    add_executable(iupac-tests tests/ProductPathTests.cpp tests/PatchTests.cpp tests/ModuleTests.cpp tests/EngineTests.cpp)
+    add_executable(iupac-tests tests/ProductPathTests.cpp tests/PatchTests.cpp tests/ModuleTests.cpp tests/EngineTests.cpp tests/HeadlessTests.cpp)
     target_compile_features(iupac-tests PRIVATE cxx_std_20)
-    target_link_libraries(iupac-tests PRIVATE iupac_synth_engine)
+    target_link_libraries(iupac-tests PRIVATE iupac_synth_tools)
     add_test(NAME product-path-smoke COMMAND iupac-tests)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(NAME render-distance-metric COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_render_distance.py)
 endif()

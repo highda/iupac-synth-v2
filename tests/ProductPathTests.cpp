@@ -8,6 +8,7 @@
 bool runPatchTests();
 bool runModuleTests();
 bool runEngineTests();
+bool runHeadlessTests();
 
 int main()
 {
@@ -26,7 +27,7 @@ int main()
     const auto identified = iupac::domain::productName() == "IUPAC Synth 2"
         && iupac::domain::architectureVersion() == "3";
 
-    if (! silent || ! configured || ! identified || ! runPatchTests() || ! runModuleTests() || ! runEngineTests())
+    if (! silent || ! configured || ! identified || ! runPatchTests() || ! runModuleTests() || ! runEngineTests() || ! runHeadlessTests())
     {
         std::cerr << "production path smoke failed\n";
         return 1;
