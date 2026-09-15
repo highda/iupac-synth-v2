@@ -23,6 +23,7 @@ public:
     void invalidateAsyncAuthors() noexcept;
     [[nodiscard]] std::uint64_t currentGeneration() const noexcept { return nextGeneration_.load(); }
     void render(std::span<float>, std::span<float>, std::span<const MidiEvent> = {}) noexcept;
+    void setAudioControls(const domain::HostControls&) noexcept;
     [[nodiscard]] Status status() const noexcept;
     [[nodiscard]] std::size_t activeBanks() const noexcept { return transitioning_.load(std::memory_order_acquire) ? 2u : 1u; }
 private:
@@ -45,6 +46,8 @@ private:
     std::array<bool, 16> sustain_{};
     CompiledPatch activePatch_{};
     domain::HostControls activeControls_{};
+    domain::HostControls audioControls_{};
+    bool hasAudioControls_{};
     std::atomic<std::uint64_t> nextGeneration_{0}, accepted_{0}, audible_{0};
     std::size_t active_{}, incoming_{1}, maximumBlockSize_{};
     std::uint64_t fadeSample_{}, fadeLength_{1}, transitionGeneration_{};

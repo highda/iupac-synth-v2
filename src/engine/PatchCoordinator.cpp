@@ -120,6 +120,7 @@ void PatchCoordinator::render(std::span<float> left, std::span<float> right, std
         take(scope.startIndex1, scope.blockSize1); take(scope.startIndex2, scope.blockSize2);
     }
     if (have) accept(newest);
+    if (hasAudioControls_) { activeControls_ = audioControls_; banks_[active_].setControls(audioControls_); if (fading_) banks_[incoming_].setControls(audioControls_); }
     remember(events);
     const auto total = std::min(left.size(), right.size());
     std::size_t offset = 0;
@@ -137,6 +138,12 @@ void PatchCoordinator::render(std::span<float> left, std::span<float> right, std
         offset += count;
         events = {};
     }
+}
+
+void PatchCoordinator::setAudioControls(const domain::HostControls& controls) noexcept
+{
+    audioControls_ = controls;
+    hasAudioControls_ = true;
 }
 
 PatchCoordinator::Status PatchCoordinator::status() const noexcept

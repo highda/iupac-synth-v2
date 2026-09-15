@@ -82,6 +82,34 @@ juce::var doubles(const std::vector<double>& values) { juce::Array<juce::var> a;
 
 DecodeResult fail(std::string e) { return {{}, std::move(e)}; }
 StateDecodeResult stateFail(std::string e) { return {{}, std::move(e)}; }
+
+std::string validateJsonInput(std::string_view input)
+{
+    if (input.size() > maximumDocumentBytes) return "document exceeds 1 MiB";
+    if (!juce::CharPointer_UTF8::isValidString(input.data(), static_cast<int>(input.size()))) return "document is not valid UTF-8";
+    std::size_t depth = 0, containers = 0, stringBytes = 0;
+    bool quoted = false, escaped = false;
+    for (const unsigned char c : input)
+    {
+        if (quoted)
+        {
+            if (escaped) escaped = false;
+            else if (c == '\\') escaped = true;
+            else if (c == '"') { quoted = false; stringBytes = 0; }
+            else if (++stringBytes > 65536) return "JSON string exceeds bound";
+            continue;
+        }
+        if (c == '"') { quoted = true; stringBytes = 0; }
+        else if (c == '{' || c == '[')
+        {
+            if (++depth > maximumJsonDepth) return "JSON nesting exceeds bound";
+            if (++containers > 4096) return "JSON container count exceeds bound";
+        }
+        else if ((c == '}' || c == ']') && depth > 0) --depth;
+    }
+    if (quoted) return "unterminated JSON string";
+    return {};
+}
 }
 
 double ParameterDescriptor::normalize(double value) const noexcept
@@ -187,7 +215,7 @@ DecodeResult decodePatchValue(const juce::var& root)
     const auto* ms=arrayValue(o->getProperty("macros"));if(!ms||ms->size()!=4)return fail("four macros required");for(int i=0;i<4;++i){const auto* x=object((*ms)[i]);double d;if(!x||!exactKeys(*x,{"label","default"})||!x->getProperty("label").isString()||!number(x->getProperty("default"),d))return fail("invalid macro");p.macros[i]={x->getProperty("label").toString().toStdString(),d};}
     if(auto e=validate(p);!e.empty())return fail(std::move(e)); return {std::move(p),{}};
 }
-DecodeResult decodePatchJson(std::string_view json) { auto v=juce::JSON::parse(juce::String::fromUTF8(json.data(),static_cast<int>(json.size())));if(v.isVoid())return fail("malformed JSON");return decodePatchValue(v); }
+DecodeResult decodePatchJson(std::string_view json) { if(auto e=validateJsonInput(json);!e.empty())return fail(std::move(e));auto v=juce::JSON::parse(juce::String::fromUTF8(json.data(),static_cast<int>(json.size())));if(v.isVoid())return fail("malformed JSON");return decodePatchValue(v); }
 
 juce::var encodeStateValue(const State& s)
 {
@@ -198,5 +226,5 @@ StateDecodeResult decodeStateValue(const juce::var& root)
 {
     const auto* o=object(root);if(!o||!exactKeys(*o,{"stateVersion","basePatch","editedPatch","controls"},{"provenance"}))return stateFail("invalid state object fields");std::int64_t v;if(!integer(o->getProperty("stateVersion"),v)||v!=stateVersion)return stateFail("unsupported state version");auto b=decodePatchValue(o->getProperty("basePatch"));if(!b)return stateFail("invalid base patch: "+b.error);auto e=decodePatchValue(o->getProperty("editedPatch"));if(!e)return stateFail("invalid edited patch: "+e.error);const auto* c=object(o->getProperty("controls"));if(!c||!exactKeys(*c,{"macros","outputGain","width","masterTune","bypass"})||!c->getProperty("bypass").isBool())return stateFail("invalid controls");const auto* ma=arrayValue(c->getProperty("macros"));if(!ma||ma->size()!=4)return stateFail("four controls macros required");State s{std::move(*b.value),std::move(*e.value)};for(int i=0;i<4;++i)if(!number((*ma)[i],s.controls.macros[i])||s.controls.macros[i]<0||s.controls.macros[i]>1)return stateFail("invalid macro control");if(!number(c->getProperty("outputGain"),s.controls.outputGain)||s.controls.outputGain < -60||s.controls.outputGain>6||!number(c->getProperty("width"),s.controls.width)||s.controls.width<0||s.controls.width>1||!number(c->getProperty("masterTune"),s.controls.masterTune)||s.controls.masterTune < -12||s.controls.masterTune>12)return stateFail("invalid global control");s.controls.bypass=static_cast<bool>(c->getProperty("bypass"));if(o->hasProperty("provenance"))s.provenance=o->getProperty("provenance");return {std::move(s),{}};
 }
-StateDecodeResult decodeStateJson(std::string_view json){auto v=juce::JSON::parse(juce::String::fromUTF8(json.data(),static_cast<int>(json.size())));if(v.isVoid())return stateFail("malformed JSON");return decodeStateValue(v);}
+StateDecodeResult decodeStateJson(std::string_view json){if(auto e=validateJsonInput(json);!e.empty())return stateFail(std::move(e));auto v=juce::JSON::parse(juce::String::fromUTF8(json.data(),static_cast<int>(json.size())));if(v.isVoid())return stateFail("malformed JSON");return decodeStateValue(v);}
 }

@@ -16,6 +16,8 @@ inline constexpr int stateVersion = 1;
 inline constexpr std::size_t maximumNodes = 8;
 inline constexpr std::size_t maximumEdges = 16;
 inline constexpr std::size_t maximumMatrixRows = 16;
+inline constexpr std::size_t maximumDocumentBytes = 1024 * 1024;
+inline constexpr std::size_t maximumJsonDepth = 32;
 
 enum class ModuleType { harmonic, fm, noise, resonator, filter, shaper, mixer };
 enum class ParameterScale { linear, logarithmic };

@@ -1,48 +1,18 @@
 #include "PluginProcessor.hpp"
 #include "PluginEditor.hpp"
-
-IupacSynthProcessor::IupacSynthProcessor()
-    : AudioProcessor(BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true))
-{
-}
-
-void IupacSynthProcessor::prepareToPlay(const double sampleRate, const int maximumExpectedSamplesPerBlock)
-{
-    engine_.prepare(sampleRate, static_cast<std::size_t>(maximumExpectedSamplesPerBlock));
-}
-
-bool IupacSynthProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
-{
-    return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo()
-        && layouts.getMainInputChannelSet().isDisabled();
-}
-
-void IupacSynthProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
-{
-    juce::ScopedNoDenormals noDenormals;
-    buffer.clear();
-}
-
-void IupacSynthProcessor::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer&)
-{
-    juce::ScopedNoDenormals noDenormals;
-    buffer.clear();
-}
-
-juce::AudioProcessorEditor* IupacSynthProcessor::createEditor()
-{
-    return new IupacSynthEditor(*this);
-}
-
-void IupacSynthProcessor::getStateInformation(juce::MemoryBlock& destination)
-{
-    static constexpr char state[] = "{\"stateVersion\":1}";
-    destination.append(state, sizeof(state) - 1);
-}
-
-void IupacSynthProcessor::setStateInformation(const void*, int) {}
-
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new IupacSynthProcessor();
-}
+#include <algorithm>
+namespace {using namespace iupac;domain::Node makeNode(std::string id,std::string_view type){const auto*d=domain::findModule(type);domain::Node n{std::move(id),d->type,{}};for(const auto&p:d->parameters)n.parameters.push_back({std::string(p.id),std::vector<double>(p.arraySize? p.arraySize:1,p.defaultValue)});if(type=="harmonic"){n.parameters[0].values[0]=1;for(std::size_t i=0;i<16;++i)n.parameters[1].values[i]=static_cast<double>(i+1);}return n;}}
+juce::AudioProcessorValueTreeState::ParameterLayout IupacSynthProcessor::parameterLayout(){using ID=juce::ParameterID;juce::AudioProcessorValueTreeState::ParameterLayout r;for(int i=1;i<=4;++i)r.add(std::make_unique<juce::AudioParameterFloat>(ID{"macro"+juce::String(i),1},"Macro "+juce::String(i),juce::NormalisableRange<float>{0,1},0));r.add(std::make_unique<juce::AudioParameterFloat>(ID{"outputGain",1},"Output gain",juce::NormalisableRange<float>{-60,6},-6));r.add(std::make_unique<juce::AudioParameterFloat>(ID{"width",1},"Width",juce::NormalisableRange<float>{0,1},.5f));r.add(std::make_unique<juce::AudioParameterFloat>(ID{"masterTune",1},"Master tune",juce::NormalisableRange<float>{-12,12},0));r.add(std::make_unique<juce::AudioParameterBool>(ID{"bypass",1},"Bypass",false));return r;}
+iupac::domain::Patch IupacSynthProcessor::defaultPatch(){domain::Patch p;p.noiseSeed=1;p.nodes={makeNode("osc","harmonic")};p.edges={{"osc","output",.35}};p.macros={{{"Macro 1",0},{"Macro 2",0},{"Macro 3",0},{"Macro 4",0}}};return p;}
+IupacSynthProcessor::IupacSynthProcessor():AudioProcessor(BusesProperties().withOutput("Output",juce::AudioChannelSet::stereo(),true)),document_{defaultPatch(),defaultPatch(),{},std::nullopt},parameters_(*this,nullptr,"HostControls",parameterLayout()){constexpr std::array ids{"macro1","macro2","macro3","macro4","outputGain","width","masterTune","bypass"};for(std::size_t i=0;i<ids.size();++i)parameterValues_[i]=parameters_.getRawParameterValue(ids[i]);setLatencySamples(4);}
+void IupacSynthProcessor::prepareToPlay(double rate,int block){coordinator_.prepare(rate,static_cast<std::size_t>(std::max(1,block)));const auto c=engine::compilePatch(document_.editedPatch);if(c)(void)coordinator_.publish(c.patch,readControls());setLatencySamples(4);}
+bool IupacSynthProcessor::isBusesLayoutSupported(const BusesLayout&l)const{return l.getMainOutputChannelSet()==juce::AudioChannelSet::stereo()&&l.getMainInputChannelSet().isDisabled();}
+iupac::domain::HostControls IupacSynthProcessor::readControls()const noexcept{domain::HostControls c;for(std::size_t i=0;i<4;++i)c.macros[i]=parameterValues_[i]->load(std::memory_order_relaxed);c.outputGain=parameterValues_[4]->load(std::memory_order_relaxed);c.width=parameterValues_[5]->load(std::memory_order_relaxed);c.masterTune=parameterValues_[6]->load(std::memory_order_relaxed);c.bypass=parameterValues_[7]->load(std::memory_order_relaxed)>=.5f;return c;}
+void IupacSynthProcessor::writeControls(const domain::HostControls&c){std::array<float,8>v{};for(std::size_t i=0;i<4;++i)v[i]=static_cast<float>(c.macros[i]);v[4]=static_cast<float>(c.outputGain);v[5]=static_cast<float>(c.width);v[6]=static_cast<float>(c.masterTune);v[7]=c.bypass?1.f:0.f;constexpr std::array ids{"macro1","macro2","macro3","macro4","outputGain","width","masterTune","bypass"};for(std::size_t i=0;i<ids.size();++i)if(auto*p=parameters_.getParameter(ids[i]))p->setValueNotifyingHost(p->convertTo0to1(v[i]));}
+void IupacSynthProcessor::render(juce::AudioBuffer<float>&b,const juce::MidiBuffer&m)noexcept{juce::ScopedNoDenormals n;std::array<engine::MidiEvent,engine::maximumMidiEventsPerBlock+1>events{};std::size_t count=0;for(const auto md:m){if(count==events.size())break;const auto msg=md.getMessage();engine::MidiEvent e;e.sampleOffset=static_cast<std::uint32_t>(std::max(0,md.samplePosition));e.channel=static_cast<std::uint8_t>(std::max(1,msg.getChannel()));if(msg.isNoteOn()){e.type=engine::MidiEventType::noteOn;e.data1=static_cast<std::uint8_t>(msg.getNoteNumber());e.data2=static_cast<std::uint8_t>(std::clamp(juce::roundToInt(msg.getFloatVelocity()*127),0,127));}else if(msg.isNoteOff()){e.type=engine::MidiEventType::noteOff;e.data1=static_cast<std::uint8_t>(msg.getNoteNumber());}else if(msg.isPitchWheel()){e.type=engine::MidiEventType::pitchBend;e.bend=static_cast<std::uint16_t>(msg.getPitchWheelValue());}else if(msg.isController()){e.type=engine::MidiEventType::controlChange;e.data1=static_cast<std::uint8_t>(msg.getControllerNumber());e.data2=static_cast<std::uint8_t>(msg.getControllerValue());}else continue;events[count++]=e;}coordinator_.setAudioControls(readControls());coordinator_.render({b.getWritePointer(0),static_cast<std::size_t>(b.getNumSamples())},{b.getWritePointer(1),static_cast<std::size_t>(b.getNumSamples())},{events.data(),count});}
+void IupacSynthProcessor::processBlock(juce::AudioBuffer<float>&b,juce::MidiBuffer&m){render(b,m);}void IupacSynthProcessor::processBlock(juce::AudioBuffer<double>&b,juce::MidiBuffer&){juce::ScopedNoDenormals n;b.clear();}juce::AudioProcessorEditor*IupacSynthProcessor::createEditor(){return new IupacSynthEditor(*this);}
+iupac::domain::State IupacSynthProcessor::snapshot()const{std::scoped_lock lock(documentMutex_);auto r=document_;r.controls=readControls();return r;}
+std::string IupacSynthProcessor::loadState(domain::State s){auto c=engine::compilePatch(s.editedPatch);if(!c)return c.error;writeControls(s.controls);{std::scoped_lock lock(documentMutex_);document_=std::move(s);}(void)coordinator_.publish(c.patch,readControls());return{};}
+std::string IupacSynthProcessor::newDocument(){domain::State s{defaultPatch(),defaultPatch(),{},std::nullopt};return loadState(std::move(s));}std::string IupacSynthProcessor::resetPatchEdits(){auto s=snapshot();s.editedPatch=s.basePatch;return loadState(std::move(s));}void IupacSynthProcessor::resetControls(){auto s=snapshot();for(std::size_t i=0;i<4;++i)s.controls.macros[i]=s.editedPatch.macros[i].defaultValue;s.controls.outputGain=-6;s.controls.width=.5;s.controls.masterTune=0;s.controls.bypass=false;writeControls(s.controls);}
+void IupacSynthProcessor::getStateInformation(juce::MemoryBlock&d){const auto e=domain::encodeStateJson(snapshot());d.replaceAll(e.data(),e.size());}void IupacSynthProcessor::setStateInformation(const void*data,int size){if(!data||size<0||static_cast<std::size_t>(size)>domain::maximumDocumentBytes)return;auto d=domain::decodeStateJson({static_cast<const char*>(data),static_cast<std::size_t>(size)});if(d)(void)loadState(std::move(*d.value));}
+juce::AudioProcessor*JUCE_CALLTYPE createPluginFilter(){return new IupacSynthProcessor();}

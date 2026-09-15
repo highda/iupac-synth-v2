@@ -85,6 +85,11 @@ bool runPatchTests()
     invalid = patch; invalid.matrix.push_back(invalid.matrix.front());
     ok &= expect(!validate(invalid).empty(), "duplicate row rejected");
     ok &= expect(!decodePatchJson("{}").value, "missing required fields rejected");
+    ok &= expect(!decodePatchJson(std::string(maximumDocumentBytes + 1, ' ')).value, "oversized input rejected before parsing");
+    std::string nested(33, '['); nested.append(33, ']');
+    ok &= expect(!decodePatchJson(nested).value, "deeply nested input rejected before parsing");
+    auto provenanceState = state; juce::var provenance(new juce::DynamicObject()); provenance.getDynamicObject()->setProperty("nested", juce::var(new juce::DynamicObject())); provenanceState.provenance = provenance;
+    ok &= expect(decodeStateJson(encodeStateJson(provenanceState)).value.has_value(), "bounded optional provenance accepted");
     auto extra = juce::JSON::parse(encoded); extra.getDynamicObject()->setProperty("chemicalHash", "forbidden");
     ok &= expect(!decodePatchValue(extra).value, "unknown chemistry metadata rejected");
     auto nonfinite = patch; nonfinite.nodes[0].parameters[0].values[0] = INFINITY;
