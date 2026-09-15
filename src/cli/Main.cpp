@@ -1,5 +1,9 @@
 #include "iupac/domain/ProductInfo.hpp"
 #include "iupac/tools/Headless.hpp"
+#if IUPAC_ENABLE_CHEMISTRY
+#include "iupac/chemistry/Analysis.hpp"
+#include "iupac/chemistry/Mapping.hpp"
+#endif
 
 #include <iostream>
 #include <map>
@@ -54,7 +58,18 @@ int main(int argc, char** argv)
             const auto input = tools::readBoundedFile(path); if (!input) return fail(input.error); const auto state = domain::decodeStateJson(*input.value); if (!state) return fail(state.error);
             std::cout << tools::inspectEffective(*state.value) << '\n'; return 0;
         }
-        return fail("stage must be catalog, patch, compiled, or effective");
+#if IUPAC_ENABLE_CHEMISTRY
+        if (stage == "sonic" || stage == "mapping")
+        {
+            const auto path=required(opts,"--analysis",error), request=required(opts,"--request-id",error);
+            if(!error.empty()||opts.size()!=3)return fail(error.empty()?"unexpected chemistry inspect option":error);
+            const auto input=tools::readBoundedFile(path);if(!input)return fail(input.error);
+            const auto analysis=chemistry::decodeAnalysisResponse(*input.value,request);if(!analysis)return fail(analysis.error);
+            const auto generated=chemistry::generate(*analysis.value);if(!generated)return fail(generated.error);
+            std::cout<<juce::JSON::toString(stage=="sonic"?chemistry::encodeSonicIntent(*generated.intent):generated.trace,true)<<'\n';return 0;
+        }
+#endif
+        return fail("unsupported inspection stage");
     }
     if (command == "render")
     {

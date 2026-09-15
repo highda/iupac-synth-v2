@@ -29,11 +29,11 @@ target_compile_definitions(iupac_synth_domain PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE
 target_link_libraries(iupac_synth_domain PUBLIC juce::juce_core)
 
 if(IUPAC_ENABLE_CHEMISTRY)
-    add_library(iupac_chemistry_analysis STATIC src/chemistry/Analysis.cpp)
+    add_library(iupac_chemistry_analysis STATIC src/chemistry/Analysis.cpp src/chemistry/Mapping.cpp)
     target_include_directories(iupac_chemistry_analysis PUBLIC include)
     target_compile_features(iupac_chemistry_analysis PUBLIC cxx_std_20)
     target_compile_definitions(iupac_chemistry_analysis PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
-    target_link_libraries(iupac_chemistry_analysis PUBLIC juce::juce_core)
+    target_link_libraries(iupac_chemistry_analysis PUBLIC iupac_synth_domain juce::juce_core)
 endif()
 
 add_library(iupac_synth_engine STATIC
@@ -57,6 +57,10 @@ target_link_libraries(iupac_synth_tools PUBLIC iupac_synth_engine juce::juce_aud
 add_executable(iupac-cli src/cli/Main.cpp)
 target_compile_features(iupac-cli PRIVATE cxx_std_20)
 target_link_libraries(iupac-cli PRIVATE iupac_synth_tools)
+if(IUPAC_ENABLE_CHEMISTRY)
+    target_link_libraries(iupac-cli PRIVATE iupac_chemistry_analysis)
+    target_compile_definitions(iupac-cli PRIVATE IUPAC_ENABLE_CHEMISTRY=1)
+endif()
 
 if(APPLE)
     set(IUPAC_PLUGIN_FORMATS AU VST3 Standalone)
@@ -122,7 +126,7 @@ if(BUILD_TESTING)
     if(IUPAC_ENABLE_CHEMISTRY)
         add_executable(iupac-analysis-tests tests/AnalysisTests.cpp)
         target_compile_features(iupac-analysis-tests PRIVATE cxx_std_20)
-        target_link_libraries(iupac-analysis-tests PRIVATE iupac_chemistry_analysis)
+        target_link_libraries(iupac-analysis-tests PRIVATE iupac_chemistry_analysis iupac_synth_engine)
         add_test(NAME analysis-schema COMMAND iupac-analysis-tests ${CMAKE_SOURCE_DIR}/tests/fixtures/chemistry-analysis-v1.json)
         add_test(NAME chemistry-source-helper COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/chemistry/test_helper.py)
         add_test(NAME chemistry-panels COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/chemistry/test_panels.py)

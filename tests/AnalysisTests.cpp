@@ -1,7 +1,12 @@
 #include "iupac/chemistry/Analysis.hpp"
+#include "iupac/chemistry/Mapping.hpp"
+#include "iupac/domain/Patch.hpp"
+#include "iupac/engine/Engine.hpp"
 
 #include <iostream>
 #include <fstream>
+#include <map>
+#include <set>
 #include <sstream>
 #include <string>
 
@@ -16,6 +21,12 @@ int main(int argc, char** argv)
     numericResponse.replace(marker, std::string("\"requestId\":\"42\"").size(), "\"requestId\":42");
     if (!iupac::chemistry::decodeAnalysisResponse(numericResponse, "42")) { std::cerr << "rejected integer request ID\n"; return 1; }
     if (iupac::chemistry::decodeAnalysisResponse(std::string(iupac::chemistry::maximumResponseBytes + 1, 'x'), "42")) return 1;
+    const auto generated=iupac::chemistry::generate(*decoded.value);
+    if(!generated||iupac::domain::validate(*generated.patch)!=""||generated.patch->nodes.empty()||generated.patch->matrix.size()!=8){std::cerr<<generated.error<<'\n';return 1;}
+    const auto sonic=juce::JSON::toString(iupac::chemistry::encodeSonicIntent(*generated.intent),false).toStdString();
+    if(sonic.find("filter")!=std::string::npos||sonic.find("resonator")!=std::string::npos||sonic.find("\"fm\"")!=std::string::npos){std::cerr<<"projection leaked module vocabulary\n";return 1;}
+    const auto generatedAgain=iupac::chemistry::generate(*decoded.value);
+    if(!generatedAgain||iupac::domain::encodePatchJson(*generated.patch)!=iupac::domain::encodePatchJson(*generatedAgain.patch)){std::cerr<<"generation is not deterministic\n";return 1;}
 
     if (argc == 2)
     {
@@ -26,6 +37,8 @@ int main(int argc, char** argv)
         const auto* root = fixture.getDynamicObject();
         const auto* records = root != nullptr ? root->getProperty("records").getArray() : nullptr;
         if (!stream || records == nullptr || records->isEmpty()) { std::cerr << "invalid Analysis fixture\n"; return 1; }
+        std::map<std::string,std::string> identityPatches;
+        std::set<std::string> patchValues, graphShapes;
         for (const auto& item : *records)
         {
             const auto* record = item.getDynamicObject();
@@ -33,6 +46,14 @@ int main(int argc, char** argv)
             const auto encoded = juce::JSON::toString(record->getProperty("response"), true).toStdString();
             const auto panelDecoded = iupac::chemistry::decodeAnalysisResponse(encoded, id.toStdString());
             if (!panelDecoded) { std::cerr << "fixture " << id << ": " << panelDecoded.error << '\n'; return 1; }
+            const auto panelGenerated=iupac::chemistry::generate(*panelDecoded.value);
+            if(!panelGenerated){std::cerr<<"mapping "<<id<<": "<<panelGenerated.error<<'\n';return 1;}
+            if(!iupac::engine::compilePatch(*panelGenerated.patch)){std::cerr<<"generated Patch did not compile: "<<id<<'\n';return 1;}
+            const auto patchJson=iupac::domain::encodePatchJson(*panelGenerated.patch);
+            const auto [same,inserted]=identityPatches.emplace(panelDecoded.value->canonicalIsomericSmiles,patchJson);
+            if(!inserted&&same->second!=patchJson){std::cerr<<"canonical identity generated unequal Patch: "<<id<<'\n';return 1;}
+            patchValues.emplace(patchJson);
+            std::string shape;for(const auto& n:panelGenerated.patch->nodes)shape+=std::to_string(static_cast<int>(n.type))+",";shape+='|';for(const auto& e:panelGenerated.patch->edges)shape+=e.source+">"+e.destination+",";graphShapes.emplace(shape);
         }
         const auto* invalid = root->getProperty("invalidResponses").getArray();
         if (invalid == nullptr || invalid->isEmpty()) { std::cerr << "missing invalid Analysis fixtures\n"; return 1; }
@@ -43,6 +64,8 @@ int main(int argc, char** argv)
             const auto encoded = juce::JSON::toString(record->getProperty("response"), true).toStdString();
             if (iupac::chemistry::decodeAnalysisResponse(encoded, id.toStdString())) { std::cerr << "accepted invalid fixture " << id << '\n'; return 1; }
         }
+        if(patchValues.size()<12||graphShapes.size()<6){std::cerr<<"insufficient preliminary mapping coverage: patches="<<patchValues.size()<<" graphs="<<graphShapes.size()<<'\n';return 1;}
+        std::cout<<"mapping coverage: records="<<records->size()<<" identities="<<identityPatches.size()<<" patches="<<patchValues.size()<<" graphs="<<graphShapes.size()<<'\n';
     }
     return 0;
 }
