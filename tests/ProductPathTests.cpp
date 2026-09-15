@@ -23,7 +23,7 @@ int main()
         && std::ranges::all_of(right, [](float sample) { return sample == 0.0f; });
     const auto configured = engine.sampleRate() == 48000.0 && engine.maximumBlockSize() == 128;
     const auto identified = iupac::domain::productName() == "IUPAC Synth 2"
-        && iupac::domain::architectureVersion() == "2";
+        && iupac::domain::architectureVersion() == "3";
 
     if (! silent || ! configured || ! identified || ! runPatchTests() || ! runModuleTests())
     {
