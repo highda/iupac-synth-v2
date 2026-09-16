@@ -10,6 +10,7 @@ from pathlib import Path
 
 from rdkit import Chem, rdBase
 from rdkit.Chem import Crippen, Descriptors, Lipinski, rdMolDescriptors
+from resolution import ResolutionError, exact_records
 
 PROTOCOL_VERSION = 1
 ANALYSIS_VERSION = 1
@@ -61,6 +62,32 @@ def _payload_paths():
         return root / "resources" / "opsin-cli-2.8.0.jar", root / "java" / "bin" / "java"
     jar = Path(os.environ.get("IUPAC_OPSIN_JAR", root / "third_party" / "opsin" / "opsin-cli-2.8.0.jar"))
     return jar, Path(os.environ.get("IUPAC_JAVA_EXECUTABLE", "java"))
+
+
+def _discovery_path():
+    root = _bundle_root()
+    if getattr(sys, "frozen", False):
+        return root / "resources" / "discovery" / "discovery-v1.sqlite3"
+    return Path(os.environ.get("IUPAC_DISCOVERY_INDEX", root / "data" / "discovery" / "discovery-v1.sqlite3"))
+
+
+def _resolve_name(name, opsin_jar=None):
+    """Apply the shared #22 exact-name policy before falling back to OPSIN."""
+    path = _discovery_path()
+    if path.is_file():
+        try:
+            candidates = exact_records(path, name)
+            structures = sorted({item["canonicalIsomericSmiles"] for item in candidates})
+            if len(structures) == 1:
+                return structures[0]
+            if len(structures) > 1:
+                labels = ", ".join(item["displayName"] for item in candidates[:8])
+                raise InputError("name is ambiguous in the offline index; select a candidate: " + labels)
+        except ResolutionError as exc:
+            raise InputError("offline discovery index is damaged: " + str(exc)) from exc
+    bundled_jar, java = _payload_paths()
+    jar = Path(opsin_jar) if opsin_jar else bundled_jar
+    return _opsin(name, jar, java)
 
 
 def _child_environment(java_path):
@@ -156,7 +183,7 @@ def analyze(mode, text, opsin_jar):
     text = _validate_text(text)
     if mode not in ("name", "smiles"):
         raise InputError("mode must be name or smiles")
-    structure = _opsin(text, opsin_jar) if mode == "name" else text
+    structure = _resolve_name(text, opsin_jar) if mode == "name" else text
     canonical, molecule = _molecule(structure)
     atoms = []
     element_counts = {name: 0 for name in ELEMENTS}

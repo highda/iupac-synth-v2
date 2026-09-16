@@ -2,6 +2,7 @@
 #include "iupac/tools/Headless.hpp"
 #if IUPAC_ENABLE_CHEMISTRY
 #include "iupac/chemistry/Analysis.hpp"
+#include "iupac/chemistry/Extension.hpp"
 #include "iupac/chemistry/Mapping.hpp"
 #endif
 
@@ -33,7 +34,13 @@ std::string required(const std::map<std::string, std::string>& opts, const char*
 int main(int argc, char** argv)
 {
     using namespace iupac;
-    if (argc == 1) { std::cout << "{\"product\":\"" << domain::productName() << "\",\"architecture\":" << domain::architectureVersion() << ",\"chemistryEnabled\":false}\n"; return 0; }
+    if (argc == 1) { std::cout << "{\"product\":\"" << domain::productName() << "\",\"architecture\":" << domain::architectureVersion() << ",\"chemistryEnabled\":"
+#if IUPAC_ENABLE_CHEMISTRY
+    << "true"
+#else
+    << "false"
+#endif
+    << "}\n"; return 0; }
     if (argc == 2 && std::string_view(argv[1]) == "--catalog") { std::cout << tools::inspectCatalog() << '\n'; return 0; }
     if (argc == 3 && std::string_view(argv[1]) == "--validate-patch")
     {
@@ -42,6 +49,22 @@ int main(int argc, char** argv)
         std::cout << domain::encodePatchJson(*patch.value, true) << '\n'; return 0;
     }
     const std::string command = argv[1]; std::string error; const auto opts = options(argc, argv, 2, error); if (!error.empty()) return fail(error);
+#if IUPAC_ENABLE_CHEMISTRY
+    if (command == "analyze" || command == "generate")
+    {
+        const auto modeText=required(opts,"--mode",error), text=required(opts,"--text",error);
+        if(!error.empty()||(opts.size()!=2&&opts.size()!=3))return fail(error.empty()?"unexpected chemistry option":error);
+        if(modeText!="name"&&modeText!="smiles")return fail("mode must be name or smiles");
+        chemistry::HelperConfiguration configuration=chemistry::locatePackagedHelper(opts.contains("--helper-root")?opts.at("--helper-root"):std::string{});
+        auto reply=chemistry::invokeHelper(configuration,modeText=="name"?chemistry::InputMode::name:chemistry::InputMode::smiles,text,"cli-1");
+        if(!reply)return fail(reply.error);
+        if(command=="analyze"){std::cout<<reply.responseJson<<'\n';return 0;}
+        auto generated=chemistry::generate(*reply.analysis);if(!generated)return fail(generated.error);
+        chemistry::ApplyResult applied;applied.generation=1;applied.mode=modeText=="name"?chemistry::InputMode::name:chemistry::InputMode::smiles;applied.input=text;applied.analysis=reply.analysis;applied.intent=generated.intent;applied.patch=generated.patch;applied.trace=generated.trace;applied.helperResponse=reply.response;
+        domain::State state{*generated.patch,*generated.patch,{},chemistry::makeProvenance(applied)};
+        std::cout<<domain::encodeStateJson(state,true)<<'\n';return 0;
+    }
+#endif
     if (command == "inspect")
     {
         const auto stage = required(opts, "--stage", error); if (!error.empty()) return fail(error);

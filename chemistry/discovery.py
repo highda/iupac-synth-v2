@@ -6,10 +6,10 @@ import json
 import os
 import sqlite3
 import time
-import unicodedata
 from pathlib import Path
 
 import helper
+from resolution import ResolutionError, normalize_name as _normalize_name
 from rdkit import Chem
 
 SCHEMA_VERSION = 1
@@ -27,12 +27,10 @@ class DiscoveryError(Exception):
 
 
 def normalize_name(value):
-    if not isinstance(value, str) or not value.strip():
-        raise DiscoveryError("query must be non-empty text")
-    if len(value.encode("utf-8")) > MAX_QUERY_BYTES:
-        raise DiscoveryError("query exceeds 256 UTF-8 bytes")
-    value = unicodedata.normalize("NFKC", value)
-    return " ".join(value.replace("\u2010", "-").replace("\u2011", "-").split()).casefold()
+    try:
+        return _normalize_name(value)
+    except ResolutionError as exc:
+        raise DiscoveryError(str(exc)) from exc
 
 
 def _bounded_text(value, field, maximum=1024):
