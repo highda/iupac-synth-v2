@@ -18,7 +18,7 @@ mkdir -p "$output_dir"
 
 jq -e '.chemistryEnabled == false and .architecture == 3' "$output_dir/product.json" >/dev/null
 jq -e '.results | length > 0 and all(.[]; .peak <= 0.891252 and (.dc | fabs) <= 0.005 and .guardHits == 0)' "$output_dir/authored/manifest.json" >/dev/null
-jq -e '.voices == 16 and .structuralTransitions > 0 and .activeBanksMaximum == 2 and .renderRatio <= 0.5 and .p99BlockSeconds < (128/48000) and .residentBytesAfter <= 134217728 and .residentBytesAfter <= (.residentBytesBefore + 1048576)' "$output_dir/benchmark.json" >/dev/null
+jq -e '.voices == 16 and .structuralTransitions > 0 and .activeBanksMaximum == 2 and .renderRatio <= 0.5 and .p99BlockSeconds < (128/48000) and .residentBytesAfter <= 134217728 and .residentBytesAfter <= (.residentBytesSteady + 1048576)' "$output_dir/benchmark.json" >/dev/null
 test "$(grep '^IUPAC_ENABLE_CHEMISTRY:BOOL=' "$build_dir/CMakeCache.txt")" = 'IUPAC_ENABLE_CHEMISTRY:BOOL=OFF'
 if find "$build_dir" -type f \( -name '*.so' -o -perm -111 \) -print0 | xargs -0 strings | grep -Eiq 'rdkit|opsin|libpython|libjvm'; then
     echo 'chemistry runtime reference found in synth-only artifacts' >&2

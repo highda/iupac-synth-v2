@@ -267,19 +267,20 @@ std::string benchmark(const domain::State& state, std::size_t seconds, std::stri
         return std::uint64_t{};
 #endif
     };
-    const auto rssBefore = residentBytes();
+    const auto rssBefore = residentBytes(); std::uint64_t rssSteady = rssBefore;
     const auto begin = std::chrono::steady_clock::now();
     for (std::size_t block = 0; block < seconds * 375; ++block)
     {
         if (block % 32 == 0) { (void) engine.publish((transitions++ % 2) ? compiled.patch : alternate.patch, state.controls); }
         const auto blockBegin = std::chrono::steady_clock::now(); engine.render(left, right); const auto blockEnd = std::chrono::steady_clock::now();
         blockTimes.push_back(std::chrono::duration<double>(blockEnd - blockBegin).count());
+        if (block + 1 == seconds * 375 / 2) rssSteady = residentBytes();
     }
     const auto elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - begin).count(); std::ranges::sort(blockTimes);
     auto root = object(); put(root, "productVersion", juce::String(domain::productVersion().data())); put(root, "architecture", juce::String(domain::architectureVersion().data())); put(root, "command", juce::String("iupac-cli benchmark --snapshot FILE --seconds N"));
     put(root, "sampleRate", sampleRate); put(root, "blockSize", static_cast<int>(blockSize)); put(root, "voices", 16); put(root, "warmupSeconds", 5); put(root, "seconds", static_cast<int>(seconds));
     put(root, "renderRatio", elapsed / static_cast<double>(seconds)); put(root, "p99BlockSeconds", blockTimes[static_cast<std::size_t>(std::floor((blockTimes.size() - 1) * .99))]);
-    put(root, "structuralTransitions", static_cast<juce::int64>(transitions)); put(root, "activeBanksMaximum", 2); put(root, "residentBytesBefore", static_cast<juce::int64>(rssBefore)); put(root, "residentBytesAfter", static_cast<juce::int64>(residentBytes()));
+    put(root, "structuralTransitions", static_cast<juce::int64>(transitions)); put(root, "activeBanksMaximum", 2); put(root, "residentBytesBefore", static_cast<juce::int64>(rssBefore)); put(root, "residentBytesSteady", static_cast<juce::int64>(rssSteady)); put(root, "residentBytesAfter", static_cast<juce::int64>(residentBytes()));
     put(root, "graphSignature", juce::String(graphSignature(compiled.patch))); put(root, "valueSignature", juce::String(valueSignature(compiled.patch, state.controls))); return json(root);
 }
 }

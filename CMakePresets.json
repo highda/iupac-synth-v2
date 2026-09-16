@@ -40,6 +40,12 @@
       }
     },
     {
+      "name": "linux-release",
+      "displayName": "Canonical full-product release build",
+      "inherits": "linux-chemistry",
+      "binaryDir": "${sourceDir}/build/linux-release"
+    },
+    {
       "name": "linux-tsan",
       "displayName": "Linux ThreadSanitizer coordinator build",
       "inherits": "linux-synth",
@@ -54,6 +60,7 @@
   "buildPresets": [
     { "name": "linux-synth", "configurePreset": "linux-synth" },
     { "name": "linux-chemistry", "configurePreset": "linux-chemistry" },
+    { "name": "linux-release", "configurePreset": "linux-release" },
     { "name": "linux-sanitize", "configurePreset": "linux-sanitize" },
     { "name": "linux-tsan", "configurePreset": "linux-tsan" }
   ],
@@ -66,6 +73,11 @@
     {
       "name": "linux-chemistry",
       "configurePreset": "linux-chemistry",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-release",
+      "configurePreset": "linux-release",
       "output": { "outputOnFailure": true }
     },
     {
