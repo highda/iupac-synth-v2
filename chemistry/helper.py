@@ -16,6 +16,7 @@ PROTOCOL_VERSION = 1
 ANALYSIS_VERSION = 1
 MAX_INPUT_BYTES = 4096
 MAX_RESPONSE_BYTES = 256 * 1024
+MAX_REQUEST_BYTES = 1024 * 1024
 OPSIN_TIMEOUT_SECONDS = 10
 OPSIN_SHA256 = "d25bc08f41b8f6fcd6f35e18ab83f3b8d9218cdb003d55c5f74aaefe2e0c68ab"
 
@@ -237,29 +238,62 @@ def analyze(mode, text, opsin_jar):
 
 
 def process(request, opsin_jar):
-    if not isinstance(request, dict) or set(request) != {"protocolVersion", "requestId", "mode", "text"}:
-        raise InputError("request must contain exactly protocolVersion, requestId, mode, and text")
+    if not isinstance(request, dict):
+        raise InputError("request must be an object")
     if request["protocolVersion"] != PROTOCOL_VERSION:
         raise InputError("unsupported protocolVersion")
     request_id = request["requestId"]
     if not isinstance(request_id, (str, int)) or isinstance(request_id, bool):
         raise InputError("requestId must be a string or integer")
-    return {"protocolVersion": PROTOCOL_VERSION, "requestId": request_id, "status": "ok",
-            "analysis": analyze(request["mode"], request["text"], opsin_jar)}
+    action = request.get("action", "analyze")
+    if action == "analyze":
+        if set(request) not in ({"protocolVersion", "requestId", "mode", "text"},
+                                {"protocolVersion", "requestId", "action", "mode", "text"}):
+            raise InputError("analysis request has unexpected fields")
+        result = {"analysis": analyze(request["mode"], request["text"], opsin_jar)}
+    else:
+        import discovery
+        index = discovery.DiscoveryIndex(_discovery_path())
+        if action == "discover":
+            if set(request) - {"protocolVersion", "requestId", "action", "query", "prefix", "limit"}:
+                raise InputError("discovery request has unexpected fields")
+            result = {"discovery": index.search(request.get("query"), bool(request.get("prefix", False)), request.get("limit", discovery.MAX_RESULTS))}
+        elif action == "record":
+            result = {"record": index.record(request.get("recordId"))}
+        elif action.startswith("cache-"):
+            revision = str(index.db.execute("SELECT value FROM metadata WHERE key='recordsSha256'").fetchone()[0])
+            root = Path(os.environ.get("IUPAC_GENERATED_CACHE", Path.home()/".cache"/"iupac-synth-2"))
+            cache = discovery.GeneratedFileCache(root, revision)
+            if action == "cache-put":
+                result = {"cache": cache.put(request.get("identity"), request.get("versions"), request.get("settings", {}), request.get("state"))}
+            elif action == "cache-get":
+                result = {"cache": cache.get(request.get("key"))}
+            elif action == "cache-inspect":
+                result = {"cache": cache.inspect()}
+            elif action == "cache-clear":
+                result = {"cache": {"cleared": cache.clear()}}
+            else:
+                raise InputError("unsupported cache action")
+        else:
+            raise InputError("unsupported helper action")
+    return {"protocolVersion": PROTOCOL_VERSION, "requestId": request_id, "status": "ok", **result}
 
 
 def main():
     request_id = None
     try:
-        raw = sys.stdin.buffer.read(MAX_INPUT_BYTES + 1024)
-        if len(raw) > MAX_INPUT_BYTES + 1023:
+        raw = sys.stdin.buffer.read(MAX_REQUEST_BYTES + 1)
+        if len(raw) > MAX_REQUEST_BYTES:
             raise InputError("request exceeds bounded input size")
         request = json.loads(raw.decode("utf-8"))
         if isinstance(request, dict):
             request_id = request.get("requestId")
         jar_path, _ = _payload_paths()
         response = process(request, str(jar_path))
-    except (InputError, UnicodeError, json.JSONDecodeError) as exc:
+    except (InputError, UnicodeError, json.JSONDecodeError, OSError, ValueError, TypeError) as exc:
+        response = {"protocolVersion": PROTOCOL_VERSION, "requestId": request_id, "status": "error",
+                    "diagnostic": str(exc)[:4096]}
+    except Exception as exc:  # discovery/sqlite boundary: never emit a traceback protocol
         response = {"protocolVersion": PROTOCOL_VERSION, "requestId": request_id, "status": "error",
                     "diagnostic": str(exc)[:4096]}
     encoded = json.dumps(response, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")

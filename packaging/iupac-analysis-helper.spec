@@ -8,7 +8,7 @@ a = Analysis(
     pathex=[".."],
     binaries=rdkit_bins,
     datas=rdkit_data,
-    hiddenimports=["rdkit.Chem.Crippen", "rdkit.Chem.Descriptors", "rdkit.Chem.Lipinski", "rdkit.Chem.rdMolDescriptors"],
+    hiddenimports=["discovery", "resolution", "rdkit.Chem.Crippen", "rdkit.Chem.Descriptors", "rdkit.Chem.Lipinski", "rdkit.Chem.rdMolDescriptors"],
     excludes=["tkinter", "pytest"],
     noarchive=False,
 )

@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <map>
+#include <fstream>
 #include <string>
 
 namespace
@@ -29,6 +30,14 @@ std::string required(const std::map<std::string, std::string>& opts, const char*
     if (it == opts.end() || it->second.empty()) error = "missing required option: " + std::string(key);
     return it == opts.end() ? std::string{} : it->second;
 }
+#if IUPAC_ENABLE_CHEMISTRY
+juce::var protocolRequest(std::string_view action)
+{
+    juce::var value(new juce::DynamicObject); auto* object=value.getDynamicObject();
+    object->setProperty("protocolVersion", iupac::chemistry::protocolVersion);
+    object->setProperty("requestId", "cli-1"); object->setProperty("action", juce::String::fromUTF8(action.data(), static_cast<int>(action.size()))); return value;
+}
+#endif
 }
 
 int main(int argc, char** argv)
@@ -50,6 +59,16 @@ int main(int argc, char** argv)
     }
     const std::string command = argv[1]; std::string error; const auto opts = options(argc, argv, 2, error); if (!error.empty()) return fail(error);
 #if IUPAC_ENABLE_CHEMISTRY
+    if (command == "discover" || command == "record" || command == "cache-inspect" || command == "cache-clear" || command == "cache-get")
+    {
+        auto request=protocolRequest(command); auto* object=request.getDynamicObject();
+        if(command=="discover") { const auto query=required(opts,"--query",error); if(!error.empty())return fail(error); object->setProperty("query",juce::String(query)); object->setProperty("prefix",opts.contains("--prefix")&&opts.at("--prefix")!="0"); if(opts.contains("--limit")){try{object->setProperty("limit",std::stoi(opts.at("--limit")));}catch(...){return fail("discovery limit is invalid");}} }
+        else if(command=="record") object->setProperty("recordId",juce::String(required(opts,"--record-id",error)));
+        else if(command=="cache-get") object->setProperty("key",juce::String(required(opts,"--key",error)));
+        if(!error.empty())return fail(error);
+        auto reply=chemistry::invokeProtocol(chemistry::locatePackagedHelper(opts.contains("--helper-root")?opts.at("--helper-root"):std::string{}),request);
+        if(!reply)return fail(reply.error);std::cout<<reply.responseJson<<'\n';return 0;
+    }
     if (command == "analyze" || command == "generate")
     {
         const auto modeText=required(opts,"--mode",error), text=required(opts,"--text",error);

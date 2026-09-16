@@ -142,6 +142,13 @@ class DiscoveryIndex:
         return {"query": query, "match": "prefix" if prefix else "exact", "candidates": [json.loads(x[0]) for x in rows[:limit]],
                 "truncated": len(rows) > limit, "limit": limit}
 
+    def record(self, record_id):
+        record_id = _bounded_text(record_id, "recordId", 128)
+        row = self.db.execute("SELECT json FROM records WHERE record_id=?", (record_id,)).fetchone()
+        if not row:
+            raise DiscoveryError("discovery record was not found")
+        return json.loads(row[0])
+
 
 class DiscoveryCache:
     def __init__(self, path, revision, backend_version):
@@ -180,3 +187,80 @@ class DiscoveryCache:
             with self.db: self.db.execute("DELETE FROM queries")
             return True
         except sqlite3.Error: return False
+
+
+class GeneratedFileCache:
+    """Disposable metadata index whose values are ordinary State files.
+
+    Files are written with atomic replacement.  The database never owns user
+    preset directories and clear/eviction only unlink paths below this cache.
+    """
+    def __init__(self, root, revision):
+        self.root = Path(root)
+        self.files = self.root / "generated"
+        self.files.mkdir(parents=True, exist_ok=True)
+        self.db = sqlite3.connect(self.root / "generated-cache.sqlite3", timeout=BUSY_TIMEOUT_MS / 1000)
+        self.db.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
+        self.db.executescript("CREATE TABLE IF NOT EXISTS generated("
+            "key TEXT PRIMARY KEY,path TEXT NOT NULL,identity TEXT NOT NULL,versions TEXT NOT NULL,"
+            "settings TEXT NOT NULL,accessed INTEGER NOT NULL);"
+            "CREATE TABLE IF NOT EXISTS generated_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL);")
+        meta = dict(self.db.execute("SELECT key,value FROM generated_meta"))
+        if meta and meta != {"schema": "1", "revision": revision}:
+            self.clear()
+            self.db.execute("DELETE FROM generated_meta")
+        self.db.executemany("INSERT OR REPLACE INTO generated_meta VALUES(?,?)",
+                            {"schema": "1", "revision": revision}.items())
+        self.db.commit()
+
+    @staticmethod
+    def key(identity, versions, settings):
+        value = {"identity": identity, "versions": versions, "settings": settings}
+        return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+    def put(self, identity, versions, settings, state_text):
+        key = self.key(identity, versions, settings)
+        # Validate enough of the shared wire shape to reject arbitrary files;
+        # the C++ State codec remains authoritative when reopening/rendering.
+        state = json.loads(state_text)
+        if not isinstance(state, dict) or state.get("stateVersion") != 1 or "basePatch" not in state or "editedPatch" not in state:
+            raise DiscoveryError("generated cache value is not State v1")
+        target = self.files / (key + ".iupacpatch")
+        temporary = target.with_name(target.name + f".tmp-{os.getpid()}-{time.time_ns()}")
+        with open(temporary, "x", encoding="utf-8") as stream:
+            stream.write(state_text)
+            stream.flush(); os.fsync(stream.fileno())
+        os.replace(temporary, target)
+        with self.db:
+            self.db.execute("INSERT OR REPLACE INTO generated VALUES(?,?,?,?,?,?)", (key, str(target), identity,
+                json.dumps(versions, sort_keys=True), json.dumps(settings, sort_keys=True), time.time_ns()))
+            stale = self.db.execute("SELECT key,path FROM generated ORDER BY accessed DESC LIMIT -1 OFFSET ?", (MAX_CACHE_ENTRIES,)).fetchall()
+            for stale_key, stale_path in stale:
+                Path(stale_path).unlink(missing_ok=True)
+                self.db.execute("DELETE FROM generated WHERE key=?", (stale_key,))
+        return {"key": key, "path": str(target)}
+
+    def get(self, key):
+        row = self.db.execute("SELECT path,identity,versions,settings FROM generated WHERE key=?", (key,)).fetchone()
+        if not row or not Path(row[0]).is_file():
+            return None
+        with self.db:
+            self.db.execute("UPDATE generated SET accessed=? WHERE key=?", (time.time_ns(), key))
+        return {"key": key, "path": row[0], "identity": row[1], "versions": json.loads(row[2]), "settings": json.loads(row[3])}
+
+    def inspect(self):
+        rows = self.db.execute("SELECT key,path,identity,versions,settings FROM generated ORDER BY accessed DESC LIMIT ?", (MAX_RESULTS,)).fetchall()
+        return [{"key": x[0], "path": x[1], "identity": x[2], "versions": json.loads(x[3]), "settings": json.loads(x[4]),
+                 "available": Path(x[1]).is_file()} for x in rows]
+
+    def clear(self):
+        try:
+            rows = self.db.execute("SELECT path FROM generated").fetchall()
+            with self.db: self.db.execute("DELETE FROM generated")
+            for (path,) in rows:
+                candidate = Path(path)
+                if candidate.parent == self.files:
+                    candidate.unlink(missing_ok=True)
+            return True
+        except sqlite3.Error:
+            return False

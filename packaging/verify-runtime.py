@@ -6,6 +6,7 @@ from pathlib import Path
 REQUESTS = [
     {"protocolVersion": 1, "requestId": "smiles", "mode": "smiles", "text": "CCN(CC)C(=O)c1ccc(Cl)cc1"},
     {"protocolVersion": 1, "requestId": "name", "mode": "name", "text": "2,2,2-trifluoroethan-1-ol"},
+    {"protocolVersion": 1, "requestId": "discovery", "action": "discover", "query": "gasotransmitter", "prefix": False, "limit": 8},
 ]
 BLOCKED_ENV = {"PYTHONHOME":"/no/python", "PYTHONPATH":"/no/modules", "JAVA_HOME":"/no/java", "CLASSPATH":"/no/jar", "LD_LIBRARY_PATH":"/no/libs", "JAVA_TOOL_OPTIONS":"-Duser.language=xx"}
 

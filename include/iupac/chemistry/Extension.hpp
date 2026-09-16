@@ -28,6 +28,14 @@ struct HelperReply
     explicit operator bool() const noexcept { return analysis.has_value(); }
 };
 
+struct ProtocolReply
+{
+    juce::var response;
+    std::string responseJson;
+    std::string error;
+    explicit operator bool() const noexcept { return error.empty() && response.getDynamicObject() != nullptr; }
+};
+
 struct ApplyResult
 {
     std::uint64_t generation{};
@@ -50,6 +58,8 @@ struct HelperConfiguration
 };
 
 [[nodiscard]] HelperConfiguration locatePackagedHelper(const std::filesystem::path& anchor = {});
+[[nodiscard]] ProtocolReply invokeProtocol(const HelperConfiguration&, const juce::var& request,
+                                           std::stop_token = {});
 [[nodiscard]] HelperReply invokeHelper(const HelperConfiguration&, InputMode, std::string_view,
                                        std::string requestId, std::stop_token = {});
 [[nodiscard]] juce::var makeProvenance(const ApplyResult&);

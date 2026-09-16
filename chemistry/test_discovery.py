@@ -54,4 +54,22 @@ class DiscoveryTests(unittest.TestCase):
             rebuilt=discovery.DiscoveryIndex(Path(tmp)/"discovery-v1.sqlite3")
             self.assertEqual(rebuilt.search("gasotransmitter"),discovery.DiscoveryIndex(DATA/"discovery-v1.sqlite3").search("gasotransmitter"))
 
+    def test_generated_state_file_cache_is_disposable_and_versioned(self):
+        state=json.dumps({"stateVersion":1,"basePatch":{},"editedPatch":{},"controls":{}},sort_keys=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            cache=discovery.GeneratedFileCache(tmp,"snapshot-a")
+            first=cache.put("CCO",{"analysis":1,"projection":1,"mapper":1},{},state)
+            self.assertTrue(Path(first["path"]).is_file()); self.assertEqual(cache.get(first["key"])["identity"],"CCO")
+            peer=discovery.GeneratedFileCache(tmp,"snapshot-a")
+            second=peer.put("CCN",{"analysis":1,"projection":1,"mapper":1},{},state)
+            self.assertEqual(cache.get(second["key"])["identity"],"CCN")
+            Path(second["path"]).unlink(); self.assertIsNone(cache.get(second["key"])); self.assertFalse(cache.inspect()[0]["available"])
+            user=Path(tmp).parent/"user-preset.iupacpatch"; user.write_text(state)
+            self.assertTrue(cache.clear()); self.assertFalse(Path(first["path"]).exists()); self.assertTrue(user.exists()); user.unlink(); peer.db.close()
+            cache.db.close(); changed=discovery.GeneratedFileCache(tmp,"snapshot-b")
+            self.assertIsNone(changed.get(first["key"])); changed.db.close()
+            (Path(tmp)/"generated-cache.sqlite3").write_bytes(b"corrupt")
+            with self.assertRaises(sqlite3.DatabaseError):
+                discovery.GeneratedFileCache(tmp,"snapshot-b")
+
 if __name__=="__main__": unittest.main()

@@ -86,11 +86,10 @@ HelperConfiguration locatePackagedHelper(const std::filesystem::path& supplied)
     return {};
 }
 
-HelperReply invokeHelper(const HelperConfiguration& configuration, InputMode mode, std::string_view input,
-                         std::string requestId, std::stop_token stop)
+ProtocolReply invokeProtocol(const HelperConfiguration& configuration, const juce::var& requestValue,
+                             std::stop_token stop)
 {
-    HelperReply result;
-    if (auto error = validateInput(input); !error.empty()) { result.error = std::move(error); return result; }
+    ProtocolReply result;
     if (configuration.executable.empty() || !std::filesystem::is_regular_file(configuration.executable)) {
         result.error = "chemistry helper is missing or damaged; repair or reinstall the product"; return result;
     }
@@ -116,7 +115,8 @@ HelperReply invokeHelper(const HelperConfiguration& configuration, InputMode mod
     posix_spawnattr_destroy(&attributes); posix_spawn_file_actions_destroy(&actions);
     closeFd(stdinPipe[0]); closeFd(stdoutPipe[1]); closeFd(stderrPipe[1]);
     if (spawnError != 0) { closeFd(stdinPipe[1]); closeFd(stdoutPipe[0]); closeFd(stderrPipe[0]); result.error = "could not start chemistry helper"; return result; }
-    const auto request = juce::JSON::toString(requestValue(mode, input, requestId), false).toStdString();
+    const auto request = juce::JSON::toString(requestValue, false).toStdString();
+    if (request.size() > domain::maximumDocumentBytes) { result.error = "helper request exceeds 1 MiB"; ::kill(-pid, SIGKILL); closeFd(stdinPipe[1]); closeFd(stdoutPipe[0]); closeFd(stderrPipe[0]); (void)::waitpid(pid, nullptr, 0); return result; }
     sigset_t blockedSignals{}, previousSignals{}; sigemptyset(&blockedSignals); sigaddset(&blockedSignals, SIGPIPE);
     pthread_sigmask(SIG_BLOCK, &blockedSignals, &previousSignals);
     std::size_t written = 0; bool brokenInput = false;
@@ -148,11 +148,24 @@ HelperReply invokeHelper(const HelperConfiguration& configuration, InputMode mod
     if (stop.stop_requested()) { result.error = "chemistry request cancelled"; return result; }
     if (killed) { result.error = "chemistry helper exceeded its deadline"; return result; }
     if (output.size() > maximumResponseBytes) { result.error = "helper response exceeds 256 KiB"; return result; }
-    auto decoded = decodeAnalysisResponse(output, requestId);
-    if (!decoded) { result.error = responseError(output); if (!diagnostic.empty()) result.error += ": " + diagnostic; return result; }
-    result.analysis = std::move(decoded.value); result.responseJson = std::move(output);
+    result.responseJson = std::move(output);
     result.response = juce::JSON::parse(juce::String::fromUTF8(result.responseJson.data(), static_cast<int>(result.responseJson.size())));
+    const auto* object = result.response.getDynamicObject();
+    if (!object || object->getProperty("status").toString() != "ok") { result.error = responseError(result.responseJson); if (!diagnostic.empty()) result.error += ": " + diagnostic; }
     return result;
+}
+
+HelperReply invokeHelper(const HelperConfiguration& configuration, InputMode mode, std::string_view input,
+                         std::string requestId, std::stop_token stop)
+{
+    HelperReply result;
+    if (auto error = validateInput(input); !error.empty()) { result.error = std::move(error); return result; }
+    auto protocol = invokeProtocol(configuration, requestValue(mode, input, requestId), stop);
+    if (!protocol) { result.error = std::move(protocol.error); return result; }
+    auto decoded = decodeAnalysisResponse(protocol.responseJson, requestId);
+    if (!decoded) { result.error = decoded.error; return result; }
+    result.analysis = std::move(decoded.value); result.response = std::move(protocol.response);
+    result.responseJson = std::move(protocol.responseJson); return result;
 }
 
 juce::var makeProvenance(const ApplyResult& value)
