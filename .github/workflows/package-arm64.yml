@@ -2,7 +2,7 @@ name: Linux arm64 private runtime package
 on:
   workflow_dispatch:
   pull_request:
-    paths: ["chemistry/**", "data/discovery/**", "packaging/**", ".github/workflows/package-arm64.yml"]
+    paths: ["chemistry/**", "data/**", "src/**", "include/**", "tests/**", "tools/**", "CMakeLists.txt", "CMakePresets.json", "cmake/**", "docs/**", "packaging/**", ".github/workflows/package-arm64.yml"]
 jobs:
   package:
     runs-on: ubuntu-24.04-arm
@@ -25,5 +25,30 @@ jobs:
         with:
           name: iupac-chemistry-linux-arm64-${{ github.sha }}
           path: out/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Build complete installed product
+        run: docker build --platform linux/arm64 --target runtime -t iupac-product:test -f packaging/ProductDockerfile .
+      - name: V10 installed formats in isolated minimal runtime
+        run: |
+          chmod 0777 out
+          docker run --rm --network none --read-only --tmpfs /tmp:rw,noexec,nosuid,size=128m \
+            --user 65534:65534 -v "$PWD/out:/reports" iupac-product:test \
+            '/opt/IUPAC Synth 2 Preview' /reports/v10-report.json
+      - name: Export exact tested delivery
+        run: |
+          mkdir -p out/product
+          docker build --platform linux/arm64 --target export --output type=local,dest=out/product -f packaging/ProductDockerfile .
+          (cd out/product && sha256sum -c 'IUPAC Synth 2 Preview.tar.gz.sha256')
+          artifact_sha=$(sha256sum 'out/product/IUPAC Synth 2 Preview.tar.gz' | cut -d ' ' -f 1)
+          printf '{"schemaVersion":1,"commit":"%s","testedBy":"v10-report.json","archive":"IUPAC Synth 2 Preview.tar.gz","sha256":"%s"}\n' \
+            '${{ github.event.pull_request.head.sha || github.sha }}' "$artifact_sha" > out/delivery-report.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: iupac-synth-2-linux-arm64-${{ github.sha }}
+          path: |
+            out/product/
+            out/v10-report.json
+            out/delivery-report.json
           if-no-files-found: error
           retention-days: 30

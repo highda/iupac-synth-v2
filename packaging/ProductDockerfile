@@ -1,0 +1,34 @@
+FROM debian:12-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 AS build
+ENV DEBIAN_FRONTEND=noninteractive IUPAC_BUILD_JOBS=4
+RUN apt-get update && apt-get install -y --no-install-recommends \
+ bash build-essential ca-certificates cmake git ninja-build pkg-config binutils \
+ libasound2-dev libfontconfig1-dev libfreetype6-dev libgl1-mesa-dev libjack-jackd2-dev \
+ libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev \
+ openjdk-17-jdk-headless=17.0.20.1+1-1~deb12u1 \
+ python3=3.11.2-1+b1 python3-venv=3.11.2-1+b1 python3-pip=23.0.1+dfsg-1 \
+ python3-rdkit=202209.3-1 python3-numpy=1:1.24.2-1+deb12u1 xvfb xauth \
+ && rm -rf /var/lib/apt/lists/*
+WORKDIR /work/source
+COPY . .
+RUN cmake --preset linux-release && cmake --build --preset linux-release --parallel 4 \
+ && ctest --preset linux-release --output-on-failure \
+ && ./packaging/build-runtime.sh /work/runtime /work/runtime-build \
+ && ./scripts/build-pluginval.sh \
+ && ./packaging/stage-product.sh build/linux-release /work/runtime '/work/IUPAC Synth 2 Preview' \
+ && cp build/pluginval/pluginval_artefacts/Release/pluginval /work/pluginval
+
+FROM debian:12-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+ libasound2 libfontconfig1 libfreetype6 libgl1 libjack-jackd2-0 libx11-6 libxcomposite1 libxcursor1 libxext6 libxinerama1 libxrandr2 libxrender1 xvfb xauth ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && test ! -e /usr/bin/python3 && test ! -e /usr/bin/java
+COPY --from=build ["/work/IUPAC Synth 2 Preview", "/opt/IUPAC Synth 2 Preview"]
+COPY --from=build /work/pluginval /usr/local/bin/pluginval
+COPY packaging/verify-installed.sh /usr/local/bin/verify-installed
+ENTRYPOINT ["/usr/local/bin/verify-installed"]
+
+FROM scratch AS export
+COPY --from=build ["/work/IUPAC Synth 2 Preview.tar.gz", "/IUPAC Synth 2 Preview.tar.gz"]
+COPY --from=build ["/work/IUPAC Synth 2 Preview.tar.gz.sha256", "/IUPAC Synth 2 Preview.tar.gz.sha256"]
+COPY --from=build ["/work/IUPAC Synth 2 Preview/install-report.json", "/install-report.json"]
+COPY --from=build /work/runtime/package-report.json /private-runtime-report.json
