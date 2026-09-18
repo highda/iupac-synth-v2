@@ -17,11 +17,15 @@ RUN cmake --preset linux-release && cmake --build --preset linux-release --paral
  && ./packaging/stage-product.sh build/linux-release /work/runtime '/work/IUPAC Synth 2 Preview' \
  && cp build/pluginval/pluginval_artefacts/Release/pluginval /work/pluginval
 
-FROM debian:12-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 AS runtime
+# Minimal runtime OS layer without the product: prerelease.yml mounts the downloaded release archive
+# into this same image for the round-trip check (#59).
+FROM debian:12-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 AS runtime-base
 RUN apt-get update && apt-get install -y --no-install-recommends \
  libasound2 libfontconfig1 libfreetype6 libgl1 libjack-jackd2-0 libx11-6 libxcomposite1 libxcursor1 libxext6 libxinerama1 libxrandr2 libxrender1 xvfb xauth ca-certificates \
  && rm -rf /var/lib/apt/lists/* \
  && test ! -e /usr/bin/python3 && test ! -e /usr/bin/java
+
+FROM runtime-base AS runtime
 COPY --from=build ["/work/IUPAC Synth 2 Preview", "/opt/IUPAC Synth 2 Preview"]
 COPY --from=build /work/pluginval /usr/local/bin/pluginval
 COPY packaging/verify-installed.sh /usr/local/bin/verify-installed

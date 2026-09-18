@@ -37,7 +37,7 @@ for binary in "$vst3" "$component" "$app" "$cli"; do
     codesign -dv "$binary" 2>&1 | grep -E '^(Identifier|Signature|TeamIdentifier)' | tee -a "$output_dir/codesign.txt"
 done
 grep -q 'Signature=adhoc' "$output_dir/codesign.txt"
-! grep -q 'TeamIdentifier=[A-Z0-9]' "$output_dir/codesign.txt"
+if grep -q 'TeamIdentifier=[A-Z0-9]' "$output_dir/codesign.txt"; then echo 'unexpected Developer ID team identifier' >&2; exit 1; fi
 lipo -archs "$vst3/Contents/MacOS/IUPAC Synth 2" | tee "$output_dir/architectures.txt"
 test "$(lipo -archs "$vst3/Contents/MacOS/IUPAC Synth 2")" = arm64
 otool -l "$vst3/Contents/MacOS/IUPAC Synth 2" | grep -A2 LC_BUILD_VERSION | tee -a "$output_dir/architectures.txt"
@@ -70,6 +70,13 @@ rm -rf "$output_dir/artifacts"; mkdir -p "$output_dir/artifacts"
 cp -R "$vst3" "$component" "$app" "$output_dir/artifacts/"
 cp "$cli" "$output_dir/artifacts/iupac-cli"
 (cd "$output_dir/artifacts" && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 > ../artifacts.sha256)
+# Downloadable bundle archive for the pre-release (#59): bsdtar keeps bundle structure, symlinks and
+# executable bits, which the Actions artifact zip does not; no AppleDouble/xattr side files.
+bundle_archive=IUPAC-Synth-2-Preview-macos-arm64.tar.gz
+rm -f "$output_dir/$bundle_archive" "$output_dir/$bundle_archive.sha256"
+(cd "$output_dir/artifacts" && COPYFILE_DISABLE=1 tar --no-mac-metadata --no-xattrs -czf "../$bundle_archive" \
+    'IUPAC Synth 2.vst3' 'IUPAC Synth 2.component' 'IUPAC Synth 2.app' iupac-cli)
+(cd "$output_dir" && shasum -a 256 "$bundle_archive" > "$bundle_archive.sha256" && shasum -a 256 -c "$bundle_archive.sha256")
 git -C "$repo_root" rev-parse HEAD > "$output_dir/commit.txt"
 { sw_vers; uname -m; clang --version | head -1; } > "$output_dir/host.txt"
 echo "macOS validation passed; reports in $output_dir"

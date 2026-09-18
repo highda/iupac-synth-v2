@@ -1,0 +1,209 @@
+name: Pre-release of tested Linux arm64 and macOS arm64 artifacts
+
+# #59: builds both platform deliveries at the dispatched main commit through the existing gate
+# workflows, verifies every attachment against the tested reports/manifests, tags that exact commit
+# and publishes a GitHub pre-release (or, only for #61 with `final: true`, the v2.0.0 release).
+# Dispatch: gh workflow run prerelease.yml --ref main -f tag=v2.0.0-preview.N
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (v2.0.0-preview.N; v2.0.0 only with final=true)
+        required: true
+        type: string
+      notes:
+        description: Optional operator note appended to the generated release notes
+        required: false
+        type: string
+        default: ""
+      final:
+        description: Publish a full (non-pre-) release with tag v2.0.0 — only #61 may set this
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prerelease
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    name: Refuse off-main, malformed or existing tags; dry-run the notes generator
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Record runner identity
+        run: |
+          mkdir -p out
+          { uname -a; cat /etc/os-release; echo "runner=$RUNNER_NAME image=$ImageOS/$ImageVersion"; gh --version; jq --version; } | tee out/guard-runner-identity.txt
+
+      - name: Refuse to run off main
+        run: |
+          test "$GITHUB_REF" = refs/heads/main || { echo "refusing: dispatched on $GITHUB_REF, not refs/heads/main" >&2; exit 1; }
+          echo "commit=$GITHUB_SHA"
+
+      - name: Validate tag against the final flag
+        env:
+          TAG: ${{ inputs.tag }}
+          FINAL: ${{ inputs.final }}
+        run: |
+          if [ "$FINAL" = true ]; then
+            [[ "$TAG" =~ ^v2\.0\.0$ ]] || { echo "refusing: final release tag must be v2.0.0, got $TAG" >&2; exit 1; }
+          else
+            [[ "$TAG" =~ ^v2\.0\.0-preview\.[0-9]+$ ]] || { echo "refusing: pre-release tag must match v2.0.0-preview.N, got $TAG" >&2; exit 1; }
+          fi
+
+      - name: Refuse an existing tag or release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then echo "refusing: tag $TAG already exists" >&2; exit 1; fi
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then echo "refusing: release $TAG already exists" >&2; exit 1; fi
+
+      - name: Lint workflows and release scripts (pinned actionlint, runner shellcheck)
+        run: |
+          curl -sSfL -o actionlint.tar.gz https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          echo '8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  actionlint.tar.gz' | sha256sum -c
+          tar -xzf actionlint.tar.gz actionlint
+          shellcheck --version
+          ./actionlint -no-color
+          shellcheck -e SC2016 scripts/prerelease-assemble.sh scripts/prerelease-roundtrip.sh scripts/release-notes.sh \
+            scripts/test-release-notes.sh scripts/test-prerelease-assemble.sh scripts/macos-validate.sh
+
+      - name: Dry-run the notes generator (pre-release and final paths) and the hash-verification assembler
+        run: |
+          ./scripts/test-release-notes.sh
+          ./scripts/test-prerelease-assemble.sh
+
+  linux:
+    name: Linux arm64 delivery at this commit
+    needs: guard
+    uses: ./.github/workflows/package-arm64.yml
+
+  macos:
+    name: macOS arm64 delivery at this commit
+    needs: guard
+    uses: ./.github/workflows/macos-arm64.yml
+
+  publish:
+    name: Verify hashes, tag the exact commit and publish
+    needs: [guard, linux, macos]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Record runner identity
+        run: |
+          mkdir -p out
+          { uname -a; cat /etc/os-release; echo "runner=$RUNNER_NAME image=$ImageOS/$ImageVersion"; gh --version; jq --version; sha256sum --version | head -1; } | tee out/publish-runner-identity.txt
+
+      - name: Download the Linux arm64 delivery built in this run
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: iupac-synth-2-linux-arm64-${{ github.sha }}
+          path: in/linux
+
+      - name: Download the macOS arm64 delivery built in this run
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
+        with:
+          name: iupac-synth-2-macos-arm64-${{ github.sha }}
+          path: in/macos
+
+      - name: Verify every attachment against the tested reports and assemble SHA256SUMS
+        run: |
+          ./scripts/prerelease-assemble.sh in/linux in/macos out/release "$GITHUB_SHA"
+          cat out/release/SHA256SUMS
+
+      - name: Generate release notes
+        env:
+          TAG: ${{ inputs.tag }}
+          FINAL: ${{ inputs.final }}
+          NOTES: ${{ inputs.notes }}
+          RELEASE_REPO: ${{ github.repository }}
+        run: |
+          ./scripts/release-notes.sh "$TAG" "$GITHUB_SHA" "$FINAL" out/release \
+            "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" "$NOTES" > out/release-notes.md
+          cat out/release-notes.md
+
+      - name: Tag the exact commit and create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          FINAL: ${{ inputs.final }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$TAG" -f sha="$GITHUB_SHA" --jq '.ref + " -> " + .object.sha'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq .object.sha)" = "$GITHUB_SHA"
+          if [ "$FINAL" = true ]; then
+            title="IUPAC Synth 2 $TAG"; flags=()
+          else
+            title="IUPAC Synth 2 $TAG (pre-release)"; flags=(--prerelease)
+          fi
+          files=()
+          for f in out/release/*; do files+=("$f"); done
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag "${flags[@]}" \
+            --title "$title" --notes-file out/release-notes.md "${files[@]}"
+
+      - name: Confirm the published asset list
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          FINAL: ${{ inputs.final }}
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json url,isPrerelease,isDraft,assets > out/release.json
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json url --jq .url
+          expected_prerelease=$([ "$FINAL" = true ] && echo false || echo true)
+          jq -e --argjson pre "$expected_prerelease" '.isPrerelease == $pre and .isDraft == false' out/release.json >/dev/null
+          diff <(jq -r '.assets[].name' out/release.json | LC_ALL=C sort) <(cd out/release && LC_ALL=C ls -1)
+
+      - name: Retain publication evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: prerelease-evidence-${{ inputs.tag }}-${{ github.sha }}
+          path: |
+            out/release/SHA256SUMS
+            out/release-notes.md
+            out/release.json
+            out/publish-runner-identity.txt
+          if-no-files-found: error
+          retention-days: 90
+
+  roundtrip:
+    name: Download from Releases and re-verify (Linux minimal runtime, macOS archive bytes)
+    needs: publish
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check out source
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Record runner identity
+        run: |
+          mkdir -p out
+          { uname -a; cat /etc/os-release; echo "runner=$RUNNER_NAME image=$ImageOS/$ImageVersion"; docker --version; gh --version; } | tee out/roundtrip-runner-identity.txt
+
+      - name: Download every asset and re-verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+        run: ./scripts/prerelease-roundtrip.sh "$TAG" "$GITHUB_SHA" out/roundtrip
+
+      - name: Retain round-trip evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: prerelease-roundtrip-${{ inputs.tag }}-${{ github.sha }}
+          path: |
+            out/roundtrip/roundtrip-report.json
+            out/roundtrip/linux-roundtrip.log
+            out/roundtrip/release.json
+            out/roundtrip-runner-identity.txt
+          if-no-files-found: error
+          retention-days: 90
