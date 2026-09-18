@@ -14,7 +14,40 @@ void PatchCoordinator::prepare(double sampleRate, std::size_t maximumBlockSize)
     for (auto& bank : banks_) bank.prepare(sampleRate, maximumBlockSize_);
     for (auto& buffer : scratch_) buffer.resize(maximumBlockSize_);
     bend_.fill(8192);
+    clearEffective();
     prepared_ = true;
+}
+
+void PatchCoordinator::clearEffective() noexcept
+{
+    effective_.nodeCount.store(0, std::memory_order_relaxed);
+    for (std::size_t n = 0; n < domain::maximumNodes; ++n) {
+        effective_.nodeIds[n].store(0, std::memory_order_relaxed);
+        for (auto& value : effective_.values[n]) value.store(-1.0f, std::memory_order_relaxed);
+    }
+}
+
+// Once per host block: the audible bank reports the newest-started voice's post-summation, post-clamp
+// normalized values (or the zero-modulation base with no voice) and they are stored with relaxed atomics.
+void PatchCoordinator::publishEffective() noexcept
+{
+    banks_[active_].effectiveValues(effectiveScratch_);
+    for (std::size_t n = 0; n < domain::maximumNodes; ++n) {
+        effective_.nodeIds[n].store(effectiveScratch_.nodeIds[n], std::memory_order_relaxed);
+        for (std::size_t t = 0; t < parameterTargetCount; ++t) effective_.values[n][t].store(effectiveScratch_.values[n][t], std::memory_order_relaxed);
+    }
+    effective_.nodeCount.store(effectiveScratch_.nodeCount, std::memory_order_relaxed);
+}
+
+EffectiveValues PatchCoordinator::effectiveValues() const noexcept
+{
+    EffectiveValues out;
+    out.nodeCount = effective_.nodeCount.load(std::memory_order_relaxed);
+    for (std::size_t n = 0; n < domain::maximumNodes; ++n) {
+        out.nodeIds[n] = effective_.nodeIds[n].load(std::memory_order_relaxed);
+        for (std::size_t t = 0; t < parameterTargetCount; ++t) out.values[n][t] = effective_.values[n][t].load(std::memory_order_relaxed);
+    }
+    return out;
 }
 
 std::uint64_t PatchCoordinator::publish(const CompiledPatch& patch, const domain::HostControls& controls) noexcept
@@ -93,6 +126,7 @@ void PatchCoordinator::accept(const Command& command) noexcept
     seedIncoming();
     activePatch_ = command.patch; activeControls_ = command.controls;
     fadeSample_ = 0; transitionGeneration_ = command.generation; fading_ = true; transitioning_.store(true, std::memory_order_release);
+    clearEffective();
 }
 
 void PatchCoordinator::remember(std::span<const MidiEvent> events) noexcept
@@ -139,6 +173,7 @@ void PatchCoordinator::render(std::span<float> left, std::span<float> right, std
         events = {};
     }
     activeVoices_.store(banks_[active_].activeVoiceCount() + (fading_ ? banks_[incoming_].activeVoiceCount() : 0u), std::memory_order_relaxed);
+    if (prepared_) publishEffective();
 }
 
 void PatchCoordinator::setAudioControls(const domain::HostControls& controls) noexcept

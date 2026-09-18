@@ -98,7 +98,10 @@ private:
 };
 
 enum class ParameterTarget : std::uint8_t { carrierRatio, modulatorRatio, index, burstMilliseconds, tuneRatio, combFeedback, modalQ, cutoff, q, drive, wet, level, pan, outputLevel };
-struct CompiledNode { domain::ModuleType type{}; ModuleValues values{}; std::uint32_t idHash{}; };
+inline constexpr std::size_t parameterTargetCount = static_cast<std::size_t>(ParameterTarget::outputLevel) + 1;
+// Catalog range of one matrix-eligible scalar, resolved at compile time so the audio thread can normalize without catalog lookups.
+struct CompiledRange { float minimum{}, maximum{1}; domain::ParameterScale scale{}; bool eligible{}; };
+struct CompiledNode { domain::ModuleType type{}; ModuleValues values{}; std::uint32_t idHash{}; std::array<CompiledRange, parameterTargetCount> ranges{}; };
 struct CompiledEdge { std::uint8_t source{}, destination{}; float gain{}; bool toOutput{}; };
 struct CompiledRow { domain::ModulationSource source{}; std::uint8_t node{}; ParameterTarget target{}; float depth{}, minimum{}, maximum{}; domain::ParameterScale scale{}; };
 struct CompiledTarget { std::uint8_t node{}; ParameterTarget target{}; float minimum{}, maximum{}; domain::ParameterScale scale{}; std::array<std::uint8_t, domain::maximumMatrixRows> rows{}; std::uint8_t rowCount{}; };
@@ -122,6 +125,15 @@ using ModulationInputs = std::array<float, static_cast<std::size_t>(domain::Modu
 [[nodiscard]] ModuleValues applyModulation(const CompiledPatch&, std::size_t node,
                                             const ModuleValues&, const ModulationInputs&) noexcept;
 
+// Block-rate publication of effective (post-summation, post-clamp) normalized parameter values per compiled node;
+// -1 marks a target that is not a matrix-eligible parameter of that node's type.
+struct EffectiveValues
+{
+    std::uint8_t nodeCount{};
+    std::array<std::uint32_t, domain::maximumNodes> nodeIds{};
+    std::array<std::array<float, parameterTargetCount>, domain::maximumNodes> values{};
+};
+
 enum class MidiEventType : std::uint8_t { noteOn, noteOff, pitchBend, controlChange };
 struct MidiEvent { std::uint32_t sampleOffset{}; MidiEventType type{}; std::uint8_t channel{1}, data1{}, data2{}; std::uint16_t bend{8192}; };
 
@@ -139,6 +151,8 @@ public:
     [[nodiscard]] std::size_t maximumBlockSize() const noexcept { return maximumBlockSize_; }
     [[nodiscard]] int latencySamples() const noexcept; [[nodiscard]] std::uint64_t guardHits() const noexcept;
     [[nodiscard]] std::uint64_t midiOverflowCount() const noexcept; [[nodiscard]] std::size_t activeVoiceCount() const noexcept;
+    // Effective values of the newest-started active voice (D7 baseline), or the zero-modulation base when no voice is active.
+    void effectiveValues(EffectiveValues&) const noexcept;
 private:
     class Impl; std::unique_ptr<Impl> impl_; double sampleRate_{}; std::size_t maximumBlockSize_{};
 };

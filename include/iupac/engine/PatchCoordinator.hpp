@@ -27,7 +27,18 @@ public:
     [[nodiscard]] Status status() const noexcept;
     [[nodiscard]] std::size_t activeVoiceCount() const noexcept { return activeVoices_.load(std::memory_order_relaxed); }
     [[nodiscard]] std::size_t activeBanks() const noexcept { return transitioning_.load(std::memory_order_acquire) ? 2u : 1u; }
+    // Non-blocking copy of the block-rate effective-parameter table (audible bank, newest-started voice; see ARCHITECTURE
+    // "Voice engine"). Relaxed per-element loads: values may straddle one block boundary, which is acceptable for display.
+    [[nodiscard]] EffectiveValues effectiveValues() const noexcept;
 private:
+    struct EffectiveTable
+    {
+        std::atomic<std::uint8_t> nodeCount{0};
+        std::array<std::atomic<std::uint32_t>, domain::maximumNodes> nodeIds{};
+        std::array<std::array<std::atomic<float>, parameterTargetCount>, domain::maximumNodes> values{};
+    };
+    void publishEffective() noexcept;
+    void clearEffective() noexcept;
     struct Command { CompiledPatch patch{}; domain::HostControls controls{}; std::uint64_t generation{}; };
     static constexpr int queueSlots = 5;
     bool enqueuePending() noexcept;
@@ -54,6 +65,8 @@ private:
     std::uint64_t fadeSample_{}, fadeLength_{1}, transitionGeneration_{};
     std::atomic<bool> transitioning_{false};
     std::atomic<std::size_t> activeVoices_{0};
+    EffectiveTable effective_{};
+    EffectiveValues effectiveScratch_{};
     bool prepared_{}, fading_{};
 };
 
