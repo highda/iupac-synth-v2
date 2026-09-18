@@ -43,7 +43,8 @@ make_fixture() {
 }
 
 make_fixture "$work/good"
-"$assemble" "$work/good/linux" "$work/good/macos" "$work/good/out" "$sha"
+# Relative paths, as the workflow passes them (in/linux in/macos out/release).
+(cd "$work/good" && "$assemble" linux macos out "$sha")
 test "$(find "$work/good/out" -maxdepth 1 -type f | wc -l | tr -d ' ')" = 15
 (cd "$work/good/out" && sha256sum -c --quiet SHA256SUMS)
 test "$(wc -l < "$work/good/out/SHA256SUMS" | tr -d ' ')" = 14

@@ -16,6 +16,9 @@ fail() { echo "prerelease-assemble: $*" >&2; exit 1; }
 [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || fail "not a full sha: $sha"
 test ! -e "$out" || fail "output directory already exists: $out"
 mkdir -p "$out"
+# Absolute inputs: later checks run inside subshells that have changed directory.
+linux_in=$(cd "$linux_in" && pwd)
+macos_in=$(cd "$macos_in" && pwd)
 
 # --- Linux arm64: exact tested delivery (package-arm64.yml) ---
 linux_archive="$linux_in/product/IUPAC Synth 2 Preview.tar.gz"
@@ -48,7 +51,7 @@ jq -e '.product == "IUPAC Synth 2" and .architecture == 3' "$macos_in/product.js
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT
 tar -xzf "$macos_archive" -C "$scratch"
-(cd "$scratch" && sha256sum -c --quiet "$(cd "$macos_in" && pwd)/artifacts.sha256") || fail 'macOS archive contents differ from artifacts.sha256'
+(cd "$scratch" && sha256sum -c --quiet "$macos_in/artifacts.sha256") || fail 'macOS archive contents differ from artifacts.sha256'
 for exe in 'IUPAC Synth 2.vst3/Contents/MacOS/IUPAC Synth 2' 'IUPAC Synth 2.component/Contents/MacOS/IUPAC Synth 2' \
            'IUPAC Synth 2.app/Contents/MacOS/IUPAC Synth 2' iupac-cli; do
     test -x "$scratch/$exe" || fail "executable bit lost in archive: $exe"
