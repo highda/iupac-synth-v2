@@ -25,7 +25,11 @@ public:
 #endif
 private:
  static juce::AudioProcessorValueTreeState::ParameterLayout parameterLayout();static iupac::domain::Patch defaultPatch();iupac::domain::HostControls readControls()const noexcept;void writeControls(const iupac::domain::HostControls&);void render(juce::AudioBuffer<float>&,const juce::MidiBuffer&)noexcept;
- mutable std::mutex documentMutex_;iupac::domain::State document_;iupac::engine::PatchCoordinator coordinator_;juce::AudioProcessorValueTreeState parameters_;std::array<std::atomic<float>*,8> parameterValues_{};juce::MidiKeyboardState keyboardState_;std::atomic<float> outputPeak_{0};
+ void publishDocument(const iupac::engine::CompiledPatch&);// enqueue, or keep retrying from the message thread while the audio FIFO is full
+ // The command FIFO holds a bounded number of publications between audio callbacks; a publication that finds it full stays
+ // producer-pending and is retried here so the newest edit is never dropped while the host is not rendering.
+ struct PublishRetry final:juce::Timer{explicit PublishRetry(IupacSynthProcessor&o):owner(o){}~PublishRetry()override{stopTimer();}void timerCallback()override;IupacSynthProcessor&owner;};
+ mutable std::mutex documentMutex_;iupac::domain::State document_;iupac::engine::PatchCoordinator coordinator_;PublishRetry publishRetry_{*this};juce::AudioProcessorValueTreeState parameters_;std::array<std::atomic<float>*,8> parameterValues_{};juce::MidiKeyboardState keyboardState_;std::atomic<float> outputPeak_{0};
 #if IUPAC_ENABLE_CHEMISTRY
  mutable std::mutex chemistryMutex_;ChemistryStatus chemistryStatus_;
  mutable std::mutex discoveryMutex_;DiscoveryStatus discoveryStatus_;std::atomic<std::uint64_t> discoveryGeneration_{0};std::jthread discoveryWorker_;juce::var pendingDiscoveryRecord_;std::uint64_t pendingDiscoveryGeneration_{};std::unique_ptr<iupac::chemistry::ExtensionCoordinator> chemistry_;

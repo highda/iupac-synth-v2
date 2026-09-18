@@ -1,23 +1,111 @@
+// Native editor smoke and gesture tests (VERIFICATION V0 editor-gesture requirement, V9 native editor smoke).
+// Every gesture below is a synthesized juce::MouseEvent delivered to the production component, and every assertion
+// reads the processor's document through the shared codec. `--screenshot <dir>` writes the documentation screenshots.
 #include "PluginEditor.hpp"
 #include "PluginProcessor.hpp"
+#if IUPAC_ENABLE_CHEMISTRY
+#include "ChemistryPopup.hpp"
+#endif
 #include <cmath>
 #include <filesystem>
 #include <iostream>
-
-namespace { bool expect(bool c,const char*m){if(!c)std::cerr<<"editor test failed: "<<m<<'\n';return c;} }
-int main()
+namespace
 {
- juce::ScopedJuceInitialiser_GUI gui;bool ok=true;IupacSynthProcessor processor;processor.prepareToPlay(48000,128);
- ok&=expect(processor.editPatch([](auto&p){p.nodes.clear();p.edges.clear();p.matrix.clear();}).empty(),"empty valid patch accepted");
- IupacSynthEditor editor(processor);editor.setVisible(true);editor.setSize(1000,700);editor.setSize(1800,1200);editor.setSize(1200,800);
- for(auto type:{"harmonic","fm","noise","resonator","filter","shaper","mixer"})ok&=expect(editor.addModule(type),"every catalog module can be authored");
- auto state=processor.snapshot();ok&=expect(state.editedPatch.nodes.size()==7,"seven module types are present");
- const auto oldRatio=state.editedPatch.nodes[0].parameters[1].values[15];ok&=expect(editor.setSelectedParameter("inharmonicity",0,.01),"harmonic convenience control is editable");state=processor.snapshot();ok&=expect(std::abs(state.editedPatch.nodes[0].parameters[1].values[15]-oldRatio)>1.0e-6,"convenience edit stores regenerated explicit array");
- ok&=expect(editor.addEdge(state.editedPatch.nodes[0].id,state.editedPatch.nodes[4].id,.8),"source to processor edge accepted");
- ok&=expect(editor.addEdge(state.editedPatch.nodes[4].id,"output",.7),"processor to output edge accepted");
- ok&=expect(editor.addMatrixRow(),"matrix route can be authored");
- const auto valid=iupac::domain::encodeStateJson(processor.snapshot());ok&=expect(!editor.addEdge(state.editedPatch.nodes[4].id,state.editedPatch.nodes[0].id,1),"edge entering a source is rejected");ok&=expect(iupac::domain::encodeStateJson(processor.snapshot())==valid,"invalid edit preserves complete valid state");
- const auto path=std::filesystem::temp_directory_path()/"iupac-editor-roundtrip.iupacpatch";ok&=expect(processor.saveStateFile(path).empty(),"editor state saves through shared codec");ok&=expect(processor.newDocument().empty()&&processor.loadStateFile(path).empty(),"file state loads through shared codec");ok&=expect(iupac::domain::encodeStateJson(processor.snapshot())==valid,"file round trip is exact");std::error_code ec;std::filesystem::remove(path,ec);
- juce::AudioBuffer<float> audio(2,128);juce::MidiBuffer midi;processor.keyboardState().noteOn(1,60,.8f);processor.processBlock(audio,midi);ok&=expect(processor.activeVoiceCount()>0,"audition keyboard reaches production MIDI path");ok&=expect(editor.setSelectedParameter("outputLevel",0,.5),"scalar editor action is accepted");processor.processBlock(audio,midi);ok&=expect(processor.activeVoiceCount()>0,"scalar editor action preserves held audition note");processor.keyboardState().allNotesOff(1);
+bool expect(bool c,const char*m){if(!c)std::cerr<<"editor test failed: "<<m<<'\n';return c;}
+using namespace iupac;
+juce::MouseEvent event(juce::Component&c,juce::Point<float>position,juce::ModifierKeys mods=juce::ModifierKeys::leftButtonModifier,juce::Point<float>downPosition={},int clicks=1,bool dragged=false)
+{
+ return juce::MouseEvent(juce::Desktop::getInstance().getMainMouseSource(),position,mods,0.0f,0.0f,0.0f,0.0f,0.0f,&c,&c,juce::Time::getCurrentTime(),dragged?downPosition:position,juce::Time::getCurrentTime(),clicks,dragged);
+}
+juce::Point<float>centreOf(juce::Component&c){return c.getLocalBounds().toFloat().getCentre();}
+// Press on `from`, drag to `to` (any component), release: JUCE delivers drag/up events to the pressed component.
+void drag(juce::Component&from,juce::Component&to,juce::Point<float>toPosition)
+{
+ const auto start=centreOf(from);const auto target=from.getLocalPoint(&to,toPosition);from.mouseDown(event(from,start));from.mouseDrag(event(from,start+(target-start)*0.5f,juce::ModifierKeys::leftButtonModifier,start,1,true));from.mouseDrag(event(from,target,juce::ModifierKeys::leftButtonModifier,start,1,true));from.mouseUp(event(from,target,juce::ModifierKeys::leftButtonModifier,start,1,true));
+}
+const domain::AudioEdge*edge(const domain::Patch&p,std::string_view s,std::string_view d){for(const auto&e:p.edges)if(e.source==s&&e.destination==d)return&e;return nullptr;}
+const domain::Node*node(const domain::Patch&p,std::string_view id){for(const auto&n:p.nodes)if(n.id==id)return&n;return nullptr;}
+const std::vector<double>&values(const domain::Patch&p,std::string_view id,std::string_view parameter){static const std::vector<double>none;const auto*n=node(p,id);if(!n)return none;for(const auto&x:n->parameters)if(x.id==parameter)return x.values;return none;}
+// Runs due message-thread timers (editor ≤30 Hz refresh, processor publish retry) without a dispatch loop; JUCE's timer
+// thread re-arms at most every 300 ms while its message stays unhandled, so wait longer than that before calling.
+void tick(){juce::Thread::sleep(350);juce::Timer::callPendingTimersSynchronously();}
+bool anyNoteOn(juce::MidiKeyboardState&k){for(int n=0;n<128;++n)if(k.isNoteOnForChannels(0xffff,n))return true;return false;}
+void buildDemo(IupacSynthEditor&e)
+{
+ e.activateSlot("harmonic",0);e.activateSlot("fm",1);e.activateSlot("noise",2);e.activateSlot("resonator",3);e.activateSlot("filter",5);e.activateSlot("shaper",7);e.activateSlot("mixer",9);
+ e.connect("src1","filt1",.8);e.connect("src2","res1",.7);e.connect("res1","mix1",.9);e.connect("filt1","shape1",.6);e.connect("shape1","mix1",.5);e.connect("src3","mix1",.3);e.connect("mix1","output",.8);e.connect("src1","res1",.4);
+ e.addLane();e.setLane(0,{"route1",true,domain::ModulationSource::l1,"filt1","cutoff",.6});e.addLane();e.setLane(1,{"route2",true,domain::ModulationSource::e2,"src2","index",-.4});e.addLane();e.setLane(2,{"route3",true,domain::ModulationSource::macro1,"mix1","pan",.8});
+ e.setParameter("res1","mode",0,1);e.setParameter("src1","tilt",0,-.6);
+}
+int screenshots(const std::filesystem::path&dir)
+{
+ std::error_code ec;std::filesystem::create_directories(dir,ec);IupacSynthProcessor processor;processor.prepareToPlay(48000,128);(void)processor.editPatch([](auto&p){p.nodes.clear();p.edges.clear();p.matrix.clear();});
+ IupacSynthEditor editor(processor);editor.setVisible(true);editor.setSize(1200,800);buildDemo(editor);editor.lanes().select(0);
+ auto write=[&](juce::Component&c,const char*name){auto image=c.createComponentSnapshot(c.getLocalBounds(),false,2.0f);juce::File file((dir/name).string());file.deleteFile();juce::FileOutputStream out(file);juce::PNGImageFormat png;if(!out.openedOk()||!png.writeImageToStream(image,out)){std::cerr<<"could not write "<<name<<'\n';return false;}std::cout<<"wrote "<<file.getFullPathName()<<'\n';return true;};
+ bool ok=write(editor,"editor-default.png");ok&=write(editor.field(),"editor-field.png");editor.setSize(1000,700);ok&=write(editor,"editor-minimum.png");editor.setSize(1200,800);
+#if IUPAC_ENABLE_CHEMISTRY
+ ChemistryPopup popup(processor);popup.setLookAndFeel(&editor.getLookAndFeel());popup.setVisible(true);ok&=write(popup,"editor-chemistry-popup.png");popup.setLookAndFeel(nullptr);
+#endif
  editor.setVisible(false);return ok?0:1;
+}
+}
+int main(int argc,char**argv)
+{
+ juce::ScopedJuceInitialiser_GUI gui;if(argc==3&&std::string_view(argv[1])=="--screenshot")return screenshots(argv[2]);
+ bool ok=true;IupacSynthProcessor processor;processor.prepareToPlay(48000,128);
+ ok&=expect(processor.editPatch([](auto&p){p.nodes.clear();p.edges.clear();p.matrix.clear();}).empty(),"empty valid patch accepted");
+ auto editor=std::make_unique<IupacSynthEditor>(processor);editor->setVisible(true);
+ for(auto size:{std::pair{1000,700},std::pair{1800,1200},std::pair{1200,800}}){editor->setSize(size.first,size.second);ok&=expect(editor->getWidth()==size.first&&editor->field().getWidth()==size.first,"resize sweep keeps the field at window width");}
+ ok&=expect(editor->textFieldCount()==0,"default screen contains no text-entry field");
+ // Slot activation in place: each catalog type lands in a typed slot and keeps its canonical id.
+ ok&=expect(editor->activateSlot("harmonic",0)&&editor->activateSlot("fm",1)&&editor->activateSlot("noise",2)&&editor->activateSlot("resonator",3)&&editor->activateSlot("filter",5)&&editor->activateSlot("shaper",7)&&editor->activateSlot("mixer",9),"every catalog module can be activated in its slot");
+ ok&=expect(!editor->activateSlot("filter",0)&&!editor->activateSlot("harmonic",0),"wrong-kind and occupied slots reject activation");
+ auto patch=processor.snapshot().editedPatch;ok&=expect(patch.nodes.size()==7&&node(patch,"src1")&&node(patch,"src3")&&node(patch,"res1")&&node(patch,"filt1")&&node(patch,"shape1")&&node(patch,"mix1"),"seven module types are present with slot ids");
+ const auto&map=editor->field().slotMap();ok&=expect(map.node[0]>=0&&map.node[1]>=0&&map.node[2]>=0&&map.node[3]>=0&&map.node[4]<0&&map.node[5]>=0&&map.node[9]>=0&&map.node[10]<0,"slot map mirrors the patch");
+ // Gesture: drag OUT→IN creates an edge through the production editPatch path.
+ auto&field=editor->field();drag(*field.outputPort(0),*field.inputPort(5),centreOf(*field.inputPort(5)));patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"src1","filt1")!=nullptr,"synthesized OUT→IN drag creates an audio edge");
+ drag(*field.outputPort(5),*field.inputPort(ui::outputSlot),centreOf(*field.inputPort(ui::outputSlot)));patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"filt1","output")!=nullptr,"drag into the OUT bus creates the output edge");
+ ok&=expect(field.cables().cables().size()==2,"one cable is routed per edge");
+ // Illegal targets are inert: dropping on a source IN (none exists) or creating a cycle changes nothing.
+ const auto before=domain::encodeStateJson(processor.snapshot());drag(*field.outputPort(5),*field.inputPort(5),centreOf(*field.inputPort(5)));ok&=expect(domain::encodeStateJson(processor.snapshot())==before,"self-loop drop is inert");
+ field.beginConnect(5);ok&=expect(field.inputPort(5)->isVisible()&&!field.edgeLegal("filt1","filt1")&&!field.edgeLegal("filt1","src1"),"would-cycle and source targets are illegal during a drag");field.endDrag({-50.0f,-50.0f});ok&=expect(domain::encodeStateJson(processor.snapshot())==before,"dropping nowhere during a connect drag changes nothing");
+ // Gesture: dragging the IN end off the port removes the edge.
+ drag(*field.inputPort(5),field,{4.0f,4.0f});patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"src1","filt1")==nullptr&&edge(patch,"filt1","output")!=nullptr,"drag-off from the IN port removes exactly that edge");
+ ok&=expect(editor->connect("src1","filt1",.8),"programmatic connect restores the edge");ok&=expect(!editor->connect("filt1","src1",1),"edge entering a source is rejected");
+ ok&=expect(editor->setEdgeGain("src1","filt1",.25)&&std::abs(edge(processor.snapshot().editedPatch,"src1","filt1")->gain-.25)<1e-9,"cable gain edits the edge");
+ // Control kit gestures on production controls.
+ auto*cutoff=field.slot(5).control("cutoff");ok&=expect(cutoff!=nullptr,"filter slot exposes a cutoff knob");
+ if(cutoff){const double was=cutoff->value();const auto c=centreOf(*cutoff);cutoff->mouseDown(event(*cutoff,c));cutoff->mouseDrag(event(*cutoff,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));cutoff->mouseUp(event(*cutoff,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));const auto now=values(processor.snapshot().editedPatch,"filt1","cutoff")[0];ok&=expect(now>was,"vertical knob drag raises the stored cutoff");}
+ auto*amplitudes=field.slot(0).forest("partialAmplitudes");ok&=expect(amplitudes!=nullptr,"harmonic slot exposes the amplitude forest");
+ if(amplitudes){const float w=(float)amplitudes->getWidth(),h=(float)amplitudes->getHeight();amplitudes->mouseDown(event(*amplitudes,{1.0f,2.0f}));amplitudes->mouseDrag(event(*amplitudes,{w-1.0f,h-2.0f},juce::ModifierKeys::leftButtonModifier,{1.0f,2.0f},1,true));amplitudes->mouseUp(event(*amplitudes,{w-1.0f,h-2.0f},juce::ModifierKeys::leftButtonModifier,{1.0f,2.0f},1,true));
+  const auto v=values(processor.snapshot().editedPatch,"src1","partialAmplitudes");bool monotone=v.size()==16;for(std::size_t i=1;i<v.size()&&monotone;++i)monotone=v[i]<=v[i-1]+1e-9;ok&=expect(monotone&&v[0]>.9&&v[15]<.1,"one press-drag paints every crossed partial with interpolated values");}
+ const auto oldRatio=values(processor.snapshot().editedPatch,"src1","partialRatios")[15];ok&=expect(editor->setParameter("src1","inharmonicity",0,.01),"harmonic convenience control is editable");ok&=expect(std::abs(values(processor.snapshot().editedPatch,"src1","partialRatios")[15]-oldRatio)>1e-6,"convenience edit stores the regenerated explicit array");
+ auto*mode=field.slot(3).toggle("mode");if(expect(mode!=nullptr,"resonator slot exposes the mode toggle")){mode->mouseDown(event(*mode,{(float)mode->getWidth()-2.0f,2.0f}));ok&=expect(values(processor.snapshot().editedPatch,"res1","mode")[0]==1.0,"segment toggle click stores the enum");}
+ ok&=expect(editor->setEnvelope(0,{.05,.2,.5,.8})&&std::abs(processor.snapshot().editedPatch.envelopes[0].sustain-.5)<1e-9,"envelope curve edits store the ADSR");
+ // Lanes.
+ ok&=expect(editor->addLane()&&editor->lanes().laneCount()==1,"lane can be added");ok&=expect(editor->setLane(0,{"",true,domain::ModulationSource::l1,"filt1","cutoff",1.0}),"lane can be edited");
+ patch=processor.snapshot().editedPatch;ok&=expect(patch.matrix.size()==1&&patch.matrix[0].source==domain::ModulationSource::l1&&patch.matrix[0].destinationParameter=="cutoff","lane edits reach the matrix");ok&=expect(editor->lanes().lane(0).sourcePicker().getSelectedId()==4&&editor->lanes().lane(0).depthBar().value()==1.0,"lane view mirrors the row");
+ // Effective rings: with an L1→cutoff lane the knob carries an accent value from the engine snapshot; without, none.
+ juce::AudioBuffer<float>audio(2,128);juce::MidiBuffer midi;auto block=[&]{midi.clear();processor.processBlock(audio,midi);};for(int i=0;i<8;++i)block();tick();for(int i=0;i<16;++i)block();processor.keyboardState().noteOn(1,60,.8f);for(int i=0;i<16;++i)block();ok&=expect(processor.activeVoiceCount()>0,"audition keyboard reaches production MIDI path");
+field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effective().has_value(),"targeted knob shows the effective value");ok&=expect(field.slot(5).control("q")&&!field.slot(5).control("q")->effective().has_value(),"untargeted knob shows no ring");
+ ok&=expect(editor->setLane(0,{"",false,domain::ModulationSource::l1,"filt1","cutoff",1.0}),"lane can be disabled");for(int i=0;i<8;++i)block();tick();for(int i=0;i<16;++i)block();field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&!cutoff->effective().has_value(),"disabled lane removes the ring");
+ block();ok&=expect(processor.activeVoiceCount()>0,"lane edit preserves held audition note");
+ // Precision entry never sends audition MIDI.
+ processor.keyboardState().allNotesOff(1);for(int i=0;i<40;++i)block();
+ if(cutoff){cutoff->mouseDoubleClick(event(*cutoff,centreOf(*cutoff),juce::ModifierKeys::leftButtonModifier,{},2));ok&=expect(editor->entryOpen(),"double-click opens precision entry");auto&entry=editor->precisionEntry();for(auto ch:{'6','0','0'})entry.keyPressed(juce::KeyPress(ch,{},(juce::juce_wchar)ch));entry.keyPressed(juce::KeyPress('a',{},'a'));
+  ok&=expect(!anyNoteOn(processor.keyboardState()),"typing in precision entry sends no audition MIDI");entry.keyPressed(juce::KeyPress(juce::KeyPress::returnKey));ok&=expect(!editor->entryOpen()&&std::abs(values(processor.snapshot().editedPatch,"filt1","cutoff")[0]-600.0)<1e-6,"Enter commits the typed cutoff");
+  cutoff->mouseDoubleClick(event(*cutoff,centreOf(*cutoff),juce::ModifierKeys::leftButtonModifier,{},2));editor->precisionEntry().keyPressed(juce::KeyPress(juce::KeyPress::escapeKey));ok&=expect(!editor->entryOpen()&&std::abs(values(processor.snapshot().editedPatch,"filt1","cutoff")[0]-600.0)<1e-6,"Escape cancels precision entry");}
+ // Deactivating a connected slot removes its node, cables and lanes in one transaction.
+ ok&=expect(editor->deactivateSlot(5),"connected slot can be deactivated");patch=processor.snapshot().editedPatch;ok&=expect(!node(patch,"filt1")&&patch.edges.empty()&&patch.matrix.empty()&&!field.slot(5).active(),"deactivation removes node, edges and rows");
+ ok&=expect(editor->activateSlot("filter",5)&&editor->connect("src1","filt1",.8)&&editor->connect("filt1","output",.7),"slot reactivates in place");
+ // Exact round trip through the shared codec.
+ const auto valid=domain::encodeStateJson(processor.snapshot());const auto path=std::filesystem::temp_directory_path()/"iupac-editor-roundtrip.iupacpatch";ok&=expect(processor.saveStateFile(path).empty(),"editor state saves through shared codec");ok&=expect(processor.newDocument().empty()&&processor.loadStateFile(path).empty(),"file state loads through shared codec");ok&=expect(domain::encodeStateJson(processor.snapshot())==valid,"file round trip is exact");std::error_code ec;std::filesystem::remove(path,ec);
+ editor->refresh();ok&=expect(field.slot(0).active()&&field.slot(5).active()&&field.cables().cables().size()==2,"loaded document re-populates slots and cables");
+ // Open/close while notes are held.
+ processor.keyboardState().noteOn(1,64,.9f);block();ok&=expect(processor.activeVoiceCount()>0,"note is held before closing the editor");editor->setVisible(false);editor.reset();block();ok&=expect(processor.activeVoiceCount()>0,"closing the editor keeps the held note");
+ editor=std::make_unique<IupacSynthEditor>(processor);editor->setVisible(true);block();ok&=expect(processor.activeVoiceCount()>0&&editor->field().slot(0).active(),"reopened editor shows the document and keeps the note");processor.keyboardState().allNotesOff(1);
+#if IUPAC_ENABLE_CHEMISTRY
+ {ChemistryPopup popup(processor);popup.setVisible(true);ok&=expect(popup.getWidth()>0,"chemistry popup constructs in the extension build");}
+#endif
+ editor->setVisible(false);editor.reset();return ok?0:1;
 }

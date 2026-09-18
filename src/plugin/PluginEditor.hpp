@@ -1,18 +1,35 @@
 #pragma once
+// Single-screen graph editor (ARCHITECTURE "State, editing and UI", D6). Top strip → module field → modulator strip →
+// lane matrix → audition keyboard, all on one always-visible screen; every action is a document transaction on the
+// processor and the screen is re-synced from the resulting snapshot. Programmatic hooks mirror the gestures for tests.
+#include "EditorControls.hpp"
+#include "EditorField.hpp"
+#include "EditorLanes.hpp"
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <filesystem>
 #include <memory>
 class IupacSynthProcessor;
-class IupacSynthEditor final : public juce::AudioProcessorEditor, private juce::Timer
+class IupacSynthEditor final:public juce::AudioProcessorEditor,public iupac::ui::EditorShell,private juce::Timer
 {
 public:
  explicit IupacSynthEditor(IupacSynthProcessor&);~IupacSynthEditor()override;void paint(juce::Graphics&)override;void resized()override;
- bool addModule(std::string_view);bool removeSelectedModule();bool addEdge(std::string,std::string,double);bool removeSelectedEdge();bool addMatrixRow();bool updateSelectedMatrixRow();bool setSelectedParameter(std::string_view,std::size_t,double);void refresh();[[nodiscard]]juce::String statusText()const{return status_.getText();}
+ // Programmatic hooks (same transactions as the gestures).
+ bool activateSlot(std::string_view type,std::size_t slot);bool deactivateSlot(std::size_t slot);bool connect(std::string source,std::string destination,double gain);bool disconnect(std::string source,std::string destination);bool setEdgeGain(std::string source,std::string destination,double gain);
+ bool addLane();bool setLane(std::size_t row,iupac::domain::MatrixRow);bool removeLane(std::size_t row);bool setParameter(std::string_view nodeId,std::string_view parameter,std::size_t index,double value);bool setParameterArray(std::string_view nodeId,std::string_view parameter,std::vector<double>);bool setEnvelope(std::size_t,iupac::domain::Envelope);bool setLfo(std::size_t,iupac::domain::Lfo);bool setMacro(std::size_t,iupac::domain::Macro);
+ void refresh();[[nodiscard]]juce::String statusText()const{return status_;}
+ [[nodiscard]]iupac::ui::ModuleField&field()noexcept{return field_;}[[nodiscard]]iupac::ui::LaneMatrix&lanes()noexcept{return lanes_;}[[nodiscard]]iupac::ui::PrecisionEntry&precisionEntry()noexcept{return entry_;}[[nodiscard]]juce::MidiKeyboardComponent&keyboard()noexcept{return keyboard_;}[[nodiscard]]iupac::ui::AdsrCurve&envelopeCurve(std::size_t i)noexcept{return envelopes_[i];}[[nodiscard]]iupac::ui::Knob&macroKnob(std::size_t i)noexcept{return*macroKnobs_[i];}
+ [[nodiscard]]std::size_t textFieldCount()const;// visible text-entry components on the default screen (0 by contract)
+ // EditorShell
+ void showValue(juce::Component&,juce::String)override;void hideValue()override;void openEntry(juce::Component&,juce::Rectangle<int>,juce::String,std::function<void(juce::String)>)override;[[nodiscard]]bool entryOpen()const override{return entry_.isVisible();}
 private:
- void timerCallback()override;void refreshModules();void refreshDetail();void refreshGraph();void refreshMatrix();void refreshPresets();void showResult(const std::string&,juce::String);std::filesystem::path presetDirectory()const;static juce::String sourceName(int);
- IupacSynthProcessor&owner_;juce::TextButton newButton_{"New"},loadButton_{"Load"},saveButton_{"Save"},savePresetButton_{"Save preset"},resetPatchButton_{"Reset edits"},resetControlsButton_{"Reset controls"};juce::ComboBox presetList_;juce::Label status_,meter_,graph_;juce::TabbedComponent tabs_{juce::TabbedButtonBar::TabsAtTop};juce::Component modulesTab_,matrixTab_;juce::ListBox moduleList_,edgeList_,matrixList_;juce::ComboBox addType_,edgeSource_,edgeDestination_,matrixSource_,matrixDestination_;juce::TextButton addModuleButton_{"Add module"},removeModuleButton_{"Remove selected"},addEdgeButton_{"Add edge"},removeEdgeButton_{"Remove selected edge"},addRowButton_{"Add route"},updateRowButton_{"Update selected route"},removeRowButton_{"Remove selected route"};juce::Slider edgeGain_,matrixDepth_;juce::ToggleButton matrixEnabled_{"Enabled"};juce::Viewport detailViewport_;juce::Component detailContent_;juce::OwnedArray<juce::Label>detailLabels_;juce::OwnedArray<juce::Slider>detailSliders_;juce::OwnedArray<juce::ComboBox>detailChoices_;juce::OwnedArray<juce::TextEditor>arrayEditors_;std::array<juce::Label,4>macroLabels_;std::array<juce::Slider,8>hostSliders_;std::array<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>,8>hostAttachments_;juce::MidiKeyboardComponent keyboard_;std::unique_ptr<juce::FileChooser>chooser_;std::vector<std::filesystem::path>presets_;int selectedModule_{},selectedEdge_{},selectedRow_{};struct ModulesModel;struct EdgesModel;struct MatrixModel;std::unique_ptr<ModulesModel>modulesModel_;std::unique_ptr<EdgesModel>edgesModel_;std::unique_ptr<MatrixModel>matrixModel_;std::array<juce::Slider,14>modulatorSliders_;std::array<juce::ComboBox,2>lfoWaveforms_;std::array<juce::TextEditor,4>macroEditors_;
+ struct MacroLabel;struct MeterView;struct ValueBubble;
+ void timerCallback()override;bool apply(const std::function<void(iupac::domain::Patch&)>&,juce::String ok);void showResult(const std::string&,juce::String ok);void refreshPresets();void closeEntry();std::filesystem::path presetDirectory()const;void syncModulators(const iupac::domain::Patch&);
+ iupac::ui::EditorLookAndFeel laf_;IupacSynthProcessor&owner_;
+ juce::TextButton newButton_{"new"},loadButton_{"load"},saveButton_{"save"},savePresetButton_{"preset"},resetPatchButton_{"reset edits"},resetControlsButton_{"reset controls"};juce::ComboBox presetList_;juce::String status_;bool statusError_{};std::unique_ptr<MeterView>meter_;
+ std::array<std::unique_ptr<iupac::ui::Knob>,4>macroKnobs_;std::array<std::unique_ptr<MacroLabel>,4>macroLabels_;std::unique_ptr<iupac::ui::Knob>outputGain_,masterTune_;std::unique_ptr<iupac::ui::Fader>width_;juce::TextButton bypass_{"bypass"};std::array<std::unique_ptr<juce::ParameterAttachment>,8>attachments_;
+ iupac::ui::ModuleField field_;std::array<iupac::ui::AdsrCurve,3>envelopes_;std::array<std::unique_ptr<iupac::ui::Knob>,2>lfoRates_;std::array<iupac::ui::LfoPreview,2>lfoPreviews_;std::array<std::unique_ptr<iupac::ui::SegmentToggle>,2>lfoWaveforms_;iupac::ui::LaneMatrix lanes_;juce::MidiKeyboardComponent keyboard_;
+ std::unique_ptr<ValueBubble>bubble_;iupac::ui::PrecisionEntry entry_;std::function<void(juce::String)>entryCommit_;std::unique_ptr<juce::FileChooser>chooser_;std::vector<std::filesystem::path>presets_;std::uint64_t shownGeneration_{};
 #if IUPAC_ENABLE_CHEMISTRY
- juce::Component chemistryBar_;juce::ComboBox chemistryMode_;juce::TextEditor chemistryInput_,chemistryTrace_;juce::TextButton chemistryApply_{"Apply"},chemistryReapply_{"Reapply"};juce::ToggleButton chemistryDetails_{"Analysis / SonicIntent / mapping trace"};std::uint64_t shownChemistryGeneration_{};
- juce::TextEditor discoveryQuery_;juce::TextButton discoverySearch_{"Search local"},discoveryApply_{"Apply / reopen"},cacheList_{"Cached"},cacheClear_{"Clear cache"};juce::ComboBox discoveryResults_;juce::Label discoveryMetadata_;juce::Array<juce::var> discoveryCandidates_;std::uint64_t shownDiscoveryGeneration_{};
+ juce::TextButton chemistryButton_{"chemistry"};juce::Component::SafePointer<juce::DialogWindow>chemistryDialog_;std::uint64_t shownChemistryGeneration_{};void openChemistry();
 #endif
 };

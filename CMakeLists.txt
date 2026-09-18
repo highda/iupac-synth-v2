@@ -90,6 +90,16 @@ juce_add_plugin(IupacSynth2
     COPY_PLUGIN_AFTER_BUILD FALSE
 )
 target_sources(IupacSynth2 PRIVATE
+    src/plugin/ChemistryPopup.cpp
+    src/plugin/ChemistryPopup.hpp
+    src/plugin/EditorControls.cpp
+    src/plugin/EditorControls.hpp
+    src/plugin/EditorField.cpp
+    src/plugin/EditorField.hpp
+    src/plugin/EditorLanes.cpp
+    src/plugin/EditorLanes.hpp
+    src/plugin/EditorLookAndFeel.cpp
+    src/plugin/EditorLookAndFeel.hpp
     src/plugin/PluginEditor.cpp
     src/plugin/PluginEditor.hpp
     src/plugin/PluginProcessor.cpp
@@ -121,6 +131,7 @@ endif()
 target_link_libraries(IupacSynth2
     PRIVATE
         iupac_synth_engine
+        iupac_synth_layout
         juce::juce_audio_basics
         juce::juce_audio_processors
         juce::juce_audio_devices

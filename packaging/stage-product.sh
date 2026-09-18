@@ -26,6 +26,7 @@ cp -a "$repo_root/data/panels" "$prefix/share/iupac-synth-2/panels"
 cp "$repo_root/data/panels/authored-synth/held-note.midi.json" "$prefix/share/iupac-synth-2/factory/held-note.midi.json"
 cp "$repo_root/docs/package-notices.md" "$repo_root/docs/USER-GUIDE.md" \
   "$repo_root/cmake/Dependencies.lock" "$prefix/share/iupac-synth-2/notices/"
+cp -a "$repo_root/docs/images" "$prefix/share/iupac-synth-2/notices/images"
 cp "$repo_root/packaging/product-doctor.sh" "$prefix/bin/iupac-product-doctor"
 chmod 0755 "$prefix/bin/iupac-product-doctor"
 

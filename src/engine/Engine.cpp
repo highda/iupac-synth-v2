@@ -25,6 +25,9 @@ ModuleValues interpolate(const ModuleValues&a,const ModuleValues&b,float x)noexc
 domain::HostControls interpolate(const domain::HostControls&a,const domain::HostControls&b,float x)noexcept{domain::HostControls r=b;for(std::size_t i=0;i<r.macros.size();++i)r.macros[i]=std::lerp(a.macros[i],b.macros[i],static_cast<double>(x));r.outputGain=std::lerp(a.outputGain,b.outputGain,static_cast<double>(x));r.width=std::lerp(a.width,b.width,static_cast<double>(x));r.masterTune=std::lerp(a.masterTune,b.masterTune,static_cast<double>(x));return r;}
 }
 
+std::uint32_t hashNodeId(std::string_view id) noexcept {return hashId(id);}
+std::optional<ParameterTarget> parameterTarget(std::string_view id) noexcept {return targetFor(id);}
+
 ModuleValues applyModulation(const CompiledPatch& patch,std::size_t node,const ModuleValues& base,const ModulationInputs& inputs)noexcept
 {
  ModuleValues values=base;

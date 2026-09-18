@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <cstddef>
 #include <memory>
+#include <optional>
+#include <string_view>
 #include <limits>
 #include <span>
 #include <string>
@@ -119,6 +121,9 @@ struct CompiledPatch
     std::uint32_t noiseSeed{};
     std::uint8_t nodeCount{}, edgeCount{}, rowCount{}, targetCount{};
 };
+// Node identity as published in EffectiveValues::nodeIds and the matrix target of a catalog parameter id (display lookups).
+[[nodiscard]] std::uint32_t hashNodeId(std::string_view) noexcept;
+[[nodiscard]] std::optional<ParameterTarget> parameterTarget(std::string_view) noexcept;
 struct CompileResult { CompiledPatch patch{}; std::string error; explicit operator bool() const noexcept { return error.empty(); } };
 [[nodiscard]] CompileResult compilePatch(const domain::Patch&);
 using ModulationInputs = std::array<float, static_cast<std::size_t>(domain::ModulationSource::macro4) + 1>;
