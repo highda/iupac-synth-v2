@@ -1,0 +1,32 @@
+// Input for scripts/layout-slots.py (#69): the complete eligible-edge graph of the fixed
+// editor slot set. Columns are pinned with rank=same so dot only decides the vertical order
+// and spacing inside each column. Sizes are inches; the script rescales into 1000x700.
+digraph slots {
+    rankdir=LR;
+    ranksep=0.6;
+    nodesep=0.2;
+    splines=false;
+    node [shape=box, fixedsize=true, width=1.35, height=1.6];
+
+    { rank=same; SRC1; SRC2; SRC3; }
+    { rank=same; RES1; RES2; }
+    { rank=same; FILT1; FILT2; }
+    { rank=same; SHAPE1; SHAPE2; }
+    { rank=same; MIX1; MIX2; }
+    { rank=same; OUT [width=0.75, height=1.6]; }
+
+    // sources -> every processor and the OUT bus
+    SRC1 -> {RES1 RES2 FILT1 FILT2 SHAPE1 SHAPE2 MIX1 MIX2 OUT};
+    SRC2 -> {RES1 RES2 FILT1 FILT2 SHAPE1 SHAPE2 MIX1 MIX2 OUT};
+    SRC3 -> {RES1 RES2 FILT1 FILT2 SHAPE1 SHAPE2 MIX1 MIX2 OUT};
+    // processors -> every other processor and the OUT bus (backward runs are legal in the
+    // patch as long as the graph stays acyclic; the router returns them below the field)
+    RES1 -> {RES2 FILT1 FILT2 SHAPE1 SHAPE2 MIX1 MIX2 OUT};
+    RES2 -> {RES1 FILT1 FILT2 SHAPE1 SHAPE2 MIX1 MIX2 OUT};
+    FILT1 -> {RES1 RES2 FILT2 SHAPE1 SHAPE2 MIX1 MIX2 OUT};
+    FILT2 -> {RES1 RES2 FILT1 SHAPE1 SHAPE2 MIX1 MIX2 OUT};
+    SHAPE1 -> {RES1 RES2 FILT1 FILT2 SHAPE2 MIX1 MIX2 OUT};
+    SHAPE2 -> {RES1 RES2 FILT1 FILT2 SHAPE1 MIX1 MIX2 OUT};
+    MIX1 -> {RES1 RES2 FILT1 FILT2 SHAPE1 SHAPE2 MIX2 OUT};
+    MIX2 -> {RES1 RES2 FILT1 FILT2 SHAPE1 SHAPE2 MIX1 OUT};
+}

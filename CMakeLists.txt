@@ -36,6 +36,11 @@ if(IUPAC_ENABLE_CHEMISTRY)
     target_link_libraries(iupac_chemistry_analysis PUBLIC iupac_synth_domain juce::juce_core)
 endif()
 
+# JUCE-free editor geometry: fixed slot table and orthogonal cable router (#69).
+add_library(iupac_synth_layout STATIC src/ui/CableRouter.cpp)
+target_include_directories(iupac_synth_layout PUBLIC include)
+target_compile_features(iupac_synth_layout PUBLIC cxx_std_20)
+
 add_library(iupac_synth_engine STATIC
     src/engine/Engine.cpp
     src/engine/Modules.cpp
@@ -133,6 +138,10 @@ if(BUILD_TESTING)
     target_compile_features(iupac-tests PRIVATE cxx_std_20)
     target_link_libraries(iupac-tests PRIVATE iupac_synth_tools)
     add_test(NAME product-path-smoke COMMAND iupac-tests)
+    add_executable(iupac-layout-tests tests/LayoutTests.cpp)
+    target_compile_features(iupac-layout-tests PRIVATE cxx_std_20)
+    target_link_libraries(iupac-layout-tests PRIVATE iupac_synth_layout iupac_synth_domain)
+    add_test(NAME editor-layout-router COMMAND iupac-layout-tests)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     add_test(NAME render-distance-metric COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_render_distance.py)
     if(IUPAC_ENABLE_CHEMISTRY)
