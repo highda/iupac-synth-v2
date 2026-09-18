@@ -177,33 +177,9 @@ jobs:
           retention-days: 90
 
   roundtrip:
-    name: Download from Releases and re-verify (Linux minimal runtime, macOS archive bytes)
+    name: Download from Releases and re-verify
     needs: publish
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Check out source
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
-
-      - name: Record runner identity
-        run: |
-          mkdir -p out
-          { uname -a; cat /etc/os-release; echo "runner=$RUNNER_NAME image=$ImageOS/$ImageVersion"; docker --version; gh --version; } | tee out/roundtrip-runner-identity.txt
-
-      - name: Download every asset and re-verify
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_REPO: ${{ github.repository }}
-          TAG: ${{ inputs.tag }}
-        run: ./scripts/prerelease-roundtrip.sh "$TAG" "$GITHUB_SHA" out/roundtrip
-
-      - name: Retain round-trip evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: prerelease-roundtrip-${{ inputs.tag }}-${{ github.sha }}
-          path: |
-            out/roundtrip/roundtrip-report.json
-            out/roundtrip/linux-roundtrip.log
-            out/roundtrip/release.json
-            out/roundtrip-runner-identity.txt
-          if-no-files-found: error
-          retention-days: 90
+    uses: ./.github/workflows/prerelease-roundtrip.yml
+    with:
+      tag: ${{ inputs.tag }}
+      sha: ${{ github.sha }}

@@ -15,6 +15,7 @@ fail() { echo "prerelease-roundtrip: $*" >&2; exit 1; }
 
 test ! -e "$work" || fail "work directory already exists: $work"
 mkdir -p "$work/download" "$work/linux" "$work/macos"
+work=$(cd "$work" && pwd)   # docker -v needs an absolute host path
 gh release download "$tag" --repo "$repo" --dir "$work/download"
 gh release view "$tag" --repo "$repo" --json targetCommitish,isPrerelease,isDraft,assets > "$work/release.json"
 cat "$work/release.json"
