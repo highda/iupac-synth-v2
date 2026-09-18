@@ -1,7 +1,8 @@
+# CI is dormant: no automatic triggers (owner decision 2026-09-18, GitHub Actions quota).
+# Dispatch this workflow by hand only during release verification.
 name: TSan arm64
 
 on:
-  pull_request:
   workflow_dispatch:
 
 permissions:

@@ -1,10 +1,10 @@
+# CI is dormant: no automatic triggers (owner decision 2026-09-18, GitHub Actions quota).
+# Dispatch this workflow by hand only during release verification.
 name: macOS arm64 native build
 
 on:
   workflow_dispatch:
   workflow_call:   # prerelease.yml builds the delivery at the caller's exact commit (#59)
-  pull_request:
-    paths: ["src/**", "include/**", "tests/**", "tools/**", "CMakeLists.txt", "CMakePresets.json", "cmake/**", "scripts/build-pluginval.sh", "scripts/verify-v0.sh", "scripts/macos-validate.sh", ".github/workflows/macos-arm64.yml"]
 
 permissions:
   contents: read
