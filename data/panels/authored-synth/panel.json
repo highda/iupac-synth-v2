@@ -5,6 +5,7 @@
   "sampleRate": 48000,
   "blockSize": 128,
   "cases": [
-    {"id":"all-modules-routes","snapshot":"all-modules.snapshot.json","midi":"held-note.midi.json","samples":144000}
+    {"id":"all-modules-routes","snapshot":"all-modules.snapshot.json","midi":"held-note.midi.json","samples":144000},
+    {"id":"maximal-bounds","snapshot":"maximal.snapshot.json","midi":"held-note.midi.json","samples":144000}
   ]
 }

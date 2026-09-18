@@ -1,4 +1,5 @@
 #include "iupac/engine/PatchCoordinator.hpp"
+#include "MaximalPatch.hpp"
 
 #include <array>
 #include <atomic>
@@ -6,6 +7,13 @@
 #include <iostream>
 #include <new>
 #include <thread>
+#include <memory>
+#include <vector>
+#if defined(__APPLE__)
+#include <malloc/malloc.h>
+#elif defined(__linux__)
+#include <malloc.h>
+#endif
 
 namespace {
 thread_local bool auditRealtimeMemory = false;
@@ -27,6 +35,19 @@ void release(void* pointer) noexcept
     if (auditRealtimeMemory && pointer) ++realtimeFrees;
     std::free(pointer);
 }
+
+// Heap bytes currently in use by this process; JUCE buffers go through malloc/calloc rather
+// than operator new, so the allocator's own accounting is the honest measure.
+std::size_t heapBytesInUse()
+{
+#if defined(__APPLE__)
+    malloc_statistics_t statistics{}; malloc_zone_statistics(nullptr, &statistics); return statistics.size_in_use;
+#elif defined(__linux__)
+    return static_cast<std::size_t>(mallinfo2().uordblks) + static_cast<std::size_t>(mallinfo2().hblkhd);
+#else
+    return 0;
+#endif
+}
 }
 
 void* operator new(std::size_t size) { return allocate(size); }
@@ -45,27 +66,37 @@ void operator delete[](void* pointer, std::size_t, std::align_val_t) noexcept { 
 bool runRealtimeAllocationTests()
 {
     using namespace iupac;
-    domain::Patch patch;
-    const auto* harmonic = domain::findModule("harmonic");
-    domain::Node node{"osc", harmonic->type, {}};
-    for (const auto& parameter : harmonic->parameters)
-        node.parameters.push_back({std::string(parameter.id), std::vector<double>(parameter.arraySize ? parameter.arraySize : 1, parameter.defaultValue)});
-    node.parameters[0].values[0] = 1.0;
-    for (std::size_t i = 0; i < 16; ++i) node.parameters[1].values[i] = static_cast<double>(i + 1);
-    patch.nodes.push_back(std::move(node));
-    patch.edges.push_back({"osc", "output", 1.0});
+    // Fully populated patch: every slot active, maximumEdges edges and maximumMatrixRows rows.
+    const auto patch = iupac::testing::maximalPatch();
     const auto compiled = engine::compilePatch(patch);
+    if (!compiled || compiled.patch.nodeCount != domain::maximumNodes || compiled.patch.edgeCount != domain::maximumEdges || compiled.patch.rowCount != domain::maximumMatrixRows) {
+        std::cerr << "realtime allocation test failed: maximal patch did not compile fully\n";
+        return false;
+    }
 
-    engine::PatchCoordinator coordinator;
-    coordinator.prepare(48000.0, 128);
-    (void) coordinator.publish(compiled.patch, {});
+    // Working storage for sixteen voices x two banks plus the command FIFO: the coordinator
+    // object itself plus the net heap growth while preparing it.
+    auto coordinator = std::make_unique<engine::PatchCoordinator>();
+    const auto heapBefore = heapBytesInUse();
+    coordinator->prepare(48000.0, 128);
+    const auto heapAfter = heapBytesInUse();
+    const auto workingStorage = sizeof(engine::PatchCoordinator) + (heapAfter > heapBefore ? heapAfter - heapBefore : 0);
+    constexpr std::size_t workingStorageBound = 128u * 1024u * 1024u;
+    std::cout << "prepared working storage: " << workingStorage << " bytes (" << (workingStorage / (1024.0 * 1024.0)) << " MiB of the 128 MiB bound; sizeof(PatchCoordinator) "
+              << sizeof(engine::PatchCoordinator) << ", sizeof(CompiledPatch) " << sizeof(engine::CompiledPatch) << ")\n";
+    if (workingStorage > workingStorageBound) {
+        std::cerr << "realtime allocation test failed: prepared working storage exceeds 128 MiB\n";
+        return false;
+    }
+    (void) coordinator->publish(compiled.patch, {});
     std::array<float, 128> left{}, right{};
-    std::array events{engine::MidiEvent{0, engine::MidiEventType::noteOn, 1, 60, 100, 8192}};
+    std::vector<engine::MidiEvent> events;
+    for (std::uint8_t note = 48; note < 48 + engine::maximumVoices; ++note) events.push_back({0, engine::MidiEventType::noteOn, 1, note, 100, 8192});
 
     realtimeAllocations = realtimeFrees = 0;
     auditRealtimeMemory = true;
-    coordinator.render(left, right, events);
-    for (int block = 0; block < 12; ++block) coordinator.render(left, right);
+    coordinator->render(left, right, events);
+    for (int block = 0; block < 12; ++block) coordinator->render(left, right);
     auditRealtimeMemory = false;
 
     if (realtimeAllocations != 0 || realtimeFrees != 0) {

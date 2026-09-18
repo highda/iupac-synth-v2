@@ -13,9 +13,9 @@ namespace iupac::domain
 {
 inline constexpr int patchVersion = 1;
 inline constexpr int stateVersion = 1;
-inline constexpr std::size_t maximumNodes = 8;
-inline constexpr std::size_t maximumEdges = 16;
-inline constexpr std::size_t maximumMatrixRows = 16;
+inline constexpr std::size_t maximumNodes = 11;
+inline constexpr std::size_t maximumEdges = 32;
+inline constexpr std::size_t maximumMatrixRows = 24;
 inline constexpr std::size_t maximumDocumentBytes = 1024 * 1024;
 inline constexpr std::size_t maximumJsonDepth = 32;
 

@@ -44,13 +44,22 @@ std::string kindName(domain::ParameterKind kind)
 }
 std::string scaleName(domain::ParameterScale scale) { return scale == domain::ParameterScale::linear ? "linear" : "logarithmic"; }
 
-// At eight nodes an exhaustive canonical labelling is small and prevents user IDs or
-// compiler tie-breaking from manufacturing graph variety.
+// Canonical labelling prevents user IDs or compiler tie-breaking from manufacturing graph
+// variety. The lexicographic minimum over all node relabellings always lists module types in
+// sorted name order, so only permutations inside each same-type group can change the result;
+// with the per-type slot caps that is at most 3!*2!^4 candidates at the 11-node cap, and the
+// minimum is identical to the exhaustive search over every permutation.
 std::string canonicalGraph(const engine::CompiledPatch& patch)
 {
     std::vector<std::size_t> order(patch.nodeCount); std::iota(order.begin(), order.end(), 0);
-    std::string best;
-    do
+    std::ranges::stable_sort(order, {}, [&](std::size_t node) { return moduleName(patch.nodes[node].type); });
+    std::vector<std::pair<std::size_t, std::size_t>> groups;
+    for (std::size_t i = 0; i < order.size();)
+    {
+        std::size_t j = i; while (j < order.size() && patch.nodes[order[j]].type == patch.nodes[order[i]].type) ++j;
+        groups.emplace_back(i, j); i = j;
+    }
+    const auto candidateFor = [&]
     {
         std::array<std::size_t, domain::maximumNodes> label{};
         for (std::size_t i = 0; i < order.size(); ++i) label[order[i]] = i;
@@ -70,9 +79,18 @@ std::string canonicalGraph(const engine::CompiledPatch& patch)
             rows.push_back(sourceName(row.source) + ">" + std::to_string(label[row.node]) + ':' + targetName(row.target));
         }
         std::ranges::sort(rows); stream << '|'; for (const auto& row : rows) stream << row << ';';
-        const auto candidate = stream.str(); if (best.empty() || candidate < best) best = candidate;
+        return stream.str();
+    };
+    // Odometer over the per-group permutations: advance the first group with a next permutation;
+    // std::next_permutation has already reset every exhausted group before it.
+    std::string best;
+    for (;;)
+    {
+        const auto candidate = candidateFor(); if (best.empty() || candidate < best) best = candidate;
+        std::size_t group = 0;
+        while (group < groups.size() && !std::next_permutation(order.begin() + static_cast<std::ptrdiff_t>(groups[group].first), order.begin() + static_cast<std::ptrdiff_t>(groups[group].second))) ++group;
+        if (group == groups.size()) break;
     }
-    while (std::next_permutation(order.begin(), order.end()));
     return best;
 }
 

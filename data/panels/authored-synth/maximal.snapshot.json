@@ -1,0 +1,1205 @@
+{
+  "stateVersion": 1,
+  "basePatch": {
+    "patchVersion": 1,
+    "noiseSeed": 38177486,
+    "nodes": [
+      {
+        "id": "h1",
+        "type": "harmonic",
+        "parameters": {
+          "partialAmplitudes": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "partialRatios": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0,
+            12.0,
+            13.0,
+            14.0,
+            15.0,
+            16.0
+          ],
+          "partialPans": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "tilt": 0.0,
+          "inharmonicity": 0.0,
+          "outputLevel": 0.7
+        }
+      },
+      {
+        "id": "f1",
+        "type": "fm",
+        "parameters": {
+          "carrierRatio": 1.0,
+          "modulatorRatio": 1.0,
+          "index": 0.0,
+          "outputLevel": 0.7
+        }
+      },
+      {
+        "id": "n1",
+        "type": "noise",
+        "parameters": {
+          "color": 0.0,
+          "mode": 0.0,
+          "burstMs": 80.0,
+          "outputLevel": 0.3
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resonator",
+        "parameters": {
+          "mode": 0.0,
+          "tuneRatio": 1.0,
+          "combFeedback": 0.4,
+          "modalQ": 3.0,
+          "modeRatios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "modeLevels": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "outputLevel": 0.8
+        }
+      },
+      {
+        "id": "r2",
+        "type": "resonator",
+        "parameters": {
+          "mode": 1.0,
+          "tuneRatio": 1.0,
+          "combFeedback": 0.4,
+          "modalQ": 3.0,
+          "modeRatios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "modeLevels": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "outputLevel": 0.8
+        }
+      },
+      {
+        "id": "q1",
+        "type": "filter",
+        "parameters": {
+          "mode": 0.0,
+          "cutoff": 1000.0,
+          "q": 0.707,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "q2",
+        "type": "filter",
+        "parameters": {
+          "mode": 0.0,
+          "cutoff": 1000.0,
+          "q": 0.707,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "s1",
+        "type": "shaper",
+        "parameters": {
+          "drive": 1.0,
+          "wet": 1.0,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "s2",
+        "type": "shaper",
+        "parameters": {
+          "drive": 1.0,
+          "wet": 1.0,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "m1",
+        "type": "mixer",
+        "parameters": {
+          "level": 1.0,
+          "pan": 0.0,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "m2",
+        "type": "mixer",
+        "parameters": {
+          "level": 1.0,
+          "pan": 0.0,
+          "outputLevel": 1.0
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "h1",
+        "destination": "r1",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "r2",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "q1",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "q2",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "s1",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "s2",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "m1",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "m2",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "r1",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "r2",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "q1",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "q2",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "s1",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "s2",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "m1",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "m2",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "r1",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "r2",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "q1",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "q2",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "s1",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "s2",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "m1",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "m2",
+        "gain": 0.1
+      },
+      {
+        "source": "r1",
+        "destination": "q1",
+        "gain": 0.5
+      },
+      {
+        "source": "r2",
+        "destination": "q2",
+        "gain": 0.5
+      },
+      {
+        "source": "q1",
+        "destination": "s1",
+        "gain": 0.5
+      },
+      {
+        "source": "q2",
+        "destination": "s2",
+        "gain": 0.5
+      },
+      {
+        "source": "s1",
+        "destination": "m1",
+        "gain": 0.5
+      },
+      {
+        "source": "s2",
+        "destination": "m2",
+        "gain": 0.5
+      },
+      {
+        "source": "m1",
+        "destination": "output",
+        "gain": 1.0
+      },
+      {
+        "source": "m2",
+        "destination": "output",
+        "gain": 1.0
+      }
+    ],
+    "envelopes": [
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      }
+    ],
+    "lfos": [
+      {
+        "rate": 1.0,
+        "waveform": "sine"
+      },
+      {
+        "rate": 1.0,
+        "waveform": "sine"
+      }
+    ],
+    "matrix": [
+      {
+        "id": "row-0",
+        "enabled": true,
+        "source": "e1",
+        "destinationNode": "r1",
+        "destinationParameter": "tuneRatio",
+        "depth": 0.3
+      },
+      {
+        "id": "row-1",
+        "enabled": true,
+        "source": "e2",
+        "destinationNode": "r2",
+        "destinationParameter": "modalQ",
+        "depth": -0.3
+      },
+      {
+        "id": "row-2",
+        "enabled": true,
+        "source": "e3",
+        "destinationNode": "q1",
+        "destinationParameter": "cutoff",
+        "depth": 0.3
+      },
+      {
+        "id": "row-3",
+        "enabled": true,
+        "source": "l1",
+        "destinationNode": "q2",
+        "destinationParameter": "q",
+        "depth": -0.3
+      },
+      {
+        "id": "row-4",
+        "enabled": true,
+        "source": "l2",
+        "destinationNode": "s1",
+        "destinationParameter": "drive",
+        "depth": 0.3
+      },
+      {
+        "id": "row-5",
+        "enabled": true,
+        "source": "velocity",
+        "destinationNode": "s2",
+        "destinationParameter": "wet",
+        "depth": -0.3
+      },
+      {
+        "id": "row-6",
+        "enabled": true,
+        "source": "keyTracking",
+        "destinationNode": "m1",
+        "destinationParameter": "level",
+        "depth": 0.3
+      },
+      {
+        "id": "row-7",
+        "enabled": true,
+        "source": "pitchBend",
+        "destinationNode": "m2",
+        "destinationParameter": "pan",
+        "depth": -0.3
+      },
+      {
+        "id": "row-8",
+        "enabled": true,
+        "source": "cc1",
+        "destinationNode": "h1",
+        "destinationParameter": "outputLevel",
+        "depth": 0.3
+      },
+      {
+        "id": "row-9",
+        "enabled": true,
+        "source": "macro1",
+        "destinationNode": "f1",
+        "destinationParameter": "index",
+        "depth": -0.3
+      },
+      {
+        "id": "row-10",
+        "enabled": true,
+        "source": "macro2",
+        "destinationNode": "n1",
+        "destinationParameter": "burstMs",
+        "depth": 0.3
+      },
+      {
+        "id": "row-11",
+        "enabled": true,
+        "source": "macro3",
+        "destinationNode": "r1",
+        "destinationParameter": "combFeedback",
+        "depth": -0.3
+      },
+      {
+        "id": "row-12",
+        "enabled": true,
+        "source": "macro4",
+        "destinationNode": "r1",
+        "destinationParameter": "tuneRatio",
+        "depth": 0.3
+      },
+      {
+        "id": "row-13",
+        "enabled": true,
+        "source": "e1",
+        "destinationNode": "r2",
+        "destinationParameter": "modalQ",
+        "depth": -0.3
+      },
+      {
+        "id": "row-14",
+        "enabled": true,
+        "source": "e2",
+        "destinationNode": "q1",
+        "destinationParameter": "cutoff",
+        "depth": 0.3
+      },
+      {
+        "id": "row-15",
+        "enabled": true,
+        "source": "e3",
+        "destinationNode": "q2",
+        "destinationParameter": "q",
+        "depth": -0.3
+      },
+      {
+        "id": "row-16",
+        "enabled": true,
+        "source": "l1",
+        "destinationNode": "s1",
+        "destinationParameter": "drive",
+        "depth": 0.3
+      },
+      {
+        "id": "row-17",
+        "enabled": true,
+        "source": "l2",
+        "destinationNode": "s2",
+        "destinationParameter": "wet",
+        "depth": -0.3
+      },
+      {
+        "id": "row-18",
+        "enabled": true,
+        "source": "velocity",
+        "destinationNode": "m1",
+        "destinationParameter": "level",
+        "depth": 0.3
+      },
+      {
+        "id": "row-19",
+        "enabled": true,
+        "source": "keyTracking",
+        "destinationNode": "m2",
+        "destinationParameter": "pan",
+        "depth": -0.3
+      },
+      {
+        "id": "row-20",
+        "enabled": true,
+        "source": "pitchBend",
+        "destinationNode": "h1",
+        "destinationParameter": "outputLevel",
+        "depth": 0.3
+      },
+      {
+        "id": "row-21",
+        "enabled": true,
+        "source": "cc1",
+        "destinationNode": "f1",
+        "destinationParameter": "index",
+        "depth": -0.3
+      },
+      {
+        "id": "row-22",
+        "enabled": true,
+        "source": "macro1",
+        "destinationNode": "n1",
+        "destinationParameter": "burstMs",
+        "depth": 0.3
+      },
+      {
+        "id": "row-23",
+        "enabled": true,
+        "source": "macro2",
+        "destinationNode": "r1",
+        "destinationParameter": "combFeedback",
+        "depth": -0.3
+      }
+    ],
+    "macros": [
+      {
+        "label": "Macro 1",
+        "default": 0.5
+      },
+      {
+        "label": "Macro 2",
+        "default": 0.25
+      },
+      {
+        "label": "Macro 3",
+        "default": 0.0
+      },
+      {
+        "label": "Macro 4",
+        "default": 1.0
+      }
+    ]
+  },
+  "editedPatch": {
+    "patchVersion": 1,
+    "noiseSeed": 38177486,
+    "nodes": [
+      {
+        "id": "h1",
+        "type": "harmonic",
+        "parameters": {
+          "partialAmplitudes": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "partialRatios": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0,
+            12.0,
+            13.0,
+            14.0,
+            15.0,
+            16.0
+          ],
+          "partialPans": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "tilt": 0.0,
+          "inharmonicity": 0.0,
+          "outputLevel": 0.7
+        }
+      },
+      {
+        "id": "f1",
+        "type": "fm",
+        "parameters": {
+          "carrierRatio": 1.0,
+          "modulatorRatio": 1.0,
+          "index": 0.0,
+          "outputLevel": 0.7
+        }
+      },
+      {
+        "id": "n1",
+        "type": "noise",
+        "parameters": {
+          "color": 0.0,
+          "mode": 0.0,
+          "burstMs": 80.0,
+          "outputLevel": 0.3
+        }
+      },
+      {
+        "id": "r1",
+        "type": "resonator",
+        "parameters": {
+          "mode": 0.0,
+          "tuneRatio": 1.0,
+          "combFeedback": 0.4,
+          "modalQ": 3.0,
+          "modeRatios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "modeLevels": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "outputLevel": 0.8
+        }
+      },
+      {
+        "id": "r2",
+        "type": "resonator",
+        "parameters": {
+          "mode": 1.0,
+          "tuneRatio": 1.0,
+          "combFeedback": 0.4,
+          "modalQ": 3.0,
+          "modeRatios": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "modeLevels": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "outputLevel": 0.8
+        }
+      },
+      {
+        "id": "q1",
+        "type": "filter",
+        "parameters": {
+          "mode": 0.0,
+          "cutoff": 1000.0,
+          "q": 0.707,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "q2",
+        "type": "filter",
+        "parameters": {
+          "mode": 0.0,
+          "cutoff": 1000.0,
+          "q": 0.707,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "s1",
+        "type": "shaper",
+        "parameters": {
+          "drive": 1.0,
+          "wet": 1.0,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "s2",
+        "type": "shaper",
+        "parameters": {
+          "drive": 1.0,
+          "wet": 1.0,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "m1",
+        "type": "mixer",
+        "parameters": {
+          "level": 1.0,
+          "pan": 0.0,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "m2",
+        "type": "mixer",
+        "parameters": {
+          "level": 1.0,
+          "pan": 0.0,
+          "outputLevel": 1.0
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "h1",
+        "destination": "r1",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "r2",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "q1",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "q2",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "s1",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "s2",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "m1",
+        "gain": 0.1
+      },
+      {
+        "source": "h1",
+        "destination": "m2",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "r1",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "r2",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "q1",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "q2",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "s1",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "s2",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "m1",
+        "gain": 0.1
+      },
+      {
+        "source": "f1",
+        "destination": "m2",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "r1",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "r2",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "q1",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "q2",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "s1",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "s2",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "m1",
+        "gain": 0.1
+      },
+      {
+        "source": "n1",
+        "destination": "m2",
+        "gain": 0.1
+      },
+      {
+        "source": "r1",
+        "destination": "q1",
+        "gain": 0.5
+      },
+      {
+        "source": "r2",
+        "destination": "q2",
+        "gain": 0.5
+      },
+      {
+        "source": "q1",
+        "destination": "s1",
+        "gain": 0.5
+      },
+      {
+        "source": "q2",
+        "destination": "s2",
+        "gain": 0.5
+      },
+      {
+        "source": "s1",
+        "destination": "m1",
+        "gain": 0.5
+      },
+      {
+        "source": "s2",
+        "destination": "m2",
+        "gain": 0.5
+      },
+      {
+        "source": "m1",
+        "destination": "output",
+        "gain": 1.0
+      },
+      {
+        "source": "m2",
+        "destination": "output",
+        "gain": 1.0
+      }
+    ],
+    "envelopes": [
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      }
+    ],
+    "lfos": [
+      {
+        "rate": 1.0,
+        "waveform": "sine"
+      },
+      {
+        "rate": 1.0,
+        "waveform": "sine"
+      }
+    ],
+    "matrix": [
+      {
+        "id": "row-0",
+        "enabled": true,
+        "source": "e1",
+        "destinationNode": "r1",
+        "destinationParameter": "tuneRatio",
+        "depth": 0.3
+      },
+      {
+        "id": "row-1",
+        "enabled": true,
+        "source": "e2",
+        "destinationNode": "r2",
+        "destinationParameter": "modalQ",
+        "depth": -0.3
+      },
+      {
+        "id": "row-2",
+        "enabled": true,
+        "source": "e3",
+        "destinationNode": "q1",
+        "destinationParameter": "cutoff",
+        "depth": 0.3
+      },
+      {
+        "id": "row-3",
+        "enabled": true,
+        "source": "l1",
+        "destinationNode": "q2",
+        "destinationParameter": "q",
+        "depth": -0.3
+      },
+      {
+        "id": "row-4",
+        "enabled": true,
+        "source": "l2",
+        "destinationNode": "s1",
+        "destinationParameter": "drive",
+        "depth": 0.3
+      },
+      {
+        "id": "row-5",
+        "enabled": true,
+        "source": "velocity",
+        "destinationNode": "s2",
+        "destinationParameter": "wet",
+        "depth": -0.3
+      },
+      {
+        "id": "row-6",
+        "enabled": true,
+        "source": "keyTracking",
+        "destinationNode": "m1",
+        "destinationParameter": "level",
+        "depth": 0.3
+      },
+      {
+        "id": "row-7",
+        "enabled": true,
+        "source": "pitchBend",
+        "destinationNode": "m2",
+        "destinationParameter": "pan",
+        "depth": -0.3
+      },
+      {
+        "id": "row-8",
+        "enabled": true,
+        "source": "cc1",
+        "destinationNode": "h1",
+        "destinationParameter": "outputLevel",
+        "depth": 0.3
+      },
+      {
+        "id": "row-9",
+        "enabled": true,
+        "source": "macro1",
+        "destinationNode": "f1",
+        "destinationParameter": "index",
+        "depth": -0.3
+      },
+      {
+        "id": "row-10",
+        "enabled": true,
+        "source": "macro2",
+        "destinationNode": "n1",
+        "destinationParameter": "burstMs",
+        "depth": 0.3
+      },
+      {
+        "id": "row-11",
+        "enabled": true,
+        "source": "macro3",
+        "destinationNode": "r1",
+        "destinationParameter": "combFeedback",
+        "depth": -0.3
+      },
+      {
+        "id": "row-12",
+        "enabled": true,
+        "source": "macro4",
+        "destinationNode": "r1",
+        "destinationParameter": "tuneRatio",
+        "depth": 0.3
+      },
+      {
+        "id": "row-13",
+        "enabled": true,
+        "source": "e1",
+        "destinationNode": "r2",
+        "destinationParameter": "modalQ",
+        "depth": -0.3
+      },
+      {
+        "id": "row-14",
+        "enabled": true,
+        "source": "e2",
+        "destinationNode": "q1",
+        "destinationParameter": "cutoff",
+        "depth": 0.3
+      },
+      {
+        "id": "row-15",
+        "enabled": true,
+        "source": "e3",
+        "destinationNode": "q2",
+        "destinationParameter": "q",
+        "depth": -0.3
+      },
+      {
+        "id": "row-16",
+        "enabled": true,
+        "source": "l1",
+        "destinationNode": "s1",
+        "destinationParameter": "drive",
+        "depth": 0.3
+      },
+      {
+        "id": "row-17",
+        "enabled": true,
+        "source": "l2",
+        "destinationNode": "s2",
+        "destinationParameter": "wet",
+        "depth": -0.3
+      },
+      {
+        "id": "row-18",
+        "enabled": true,
+        "source": "velocity",
+        "destinationNode": "m1",
+        "destinationParameter": "level",
+        "depth": 0.3
+      },
+      {
+        "id": "row-19",
+        "enabled": true,
+        "source": "keyTracking",
+        "destinationNode": "m2",
+        "destinationParameter": "pan",
+        "depth": -0.3
+      },
+      {
+        "id": "row-20",
+        "enabled": true,
+        "source": "pitchBend",
+        "destinationNode": "h1",
+        "destinationParameter": "outputLevel",
+        "depth": 0.3
+      },
+      {
+        "id": "row-21",
+        "enabled": true,
+        "source": "cc1",
+        "destinationNode": "f1",
+        "destinationParameter": "index",
+        "depth": -0.3
+      },
+      {
+        "id": "row-22",
+        "enabled": true,
+        "source": "macro1",
+        "destinationNode": "n1",
+        "destinationParameter": "burstMs",
+        "depth": 0.3
+      },
+      {
+        "id": "row-23",
+        "enabled": true,
+        "source": "macro2",
+        "destinationNode": "r1",
+        "destinationParameter": "combFeedback",
+        "depth": -0.3
+      }
+    ],
+    "macros": [
+      {
+        "label": "Macro 1",
+        "default": 0.5
+      },
+      {
+        "label": "Macro 2",
+        "default": 0.25
+      },
+      {
+        "label": "Macro 3",
+        "default": 0.0
+      },
+      {
+        "label": "Macro 4",
+        "default": 1.0
+      }
+    ]
+  },
+  "controls": {
+    "macros": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "outputGain": -6.0,
+    "width": 0.5,
+    "masterTune": 0.0,
+    "bypass": false
+  }
+}

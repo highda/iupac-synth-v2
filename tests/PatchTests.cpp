@@ -1,4 +1,5 @@
 #include "iupac/domain/Patch.hpp"
+#include "MaximalPatch.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -95,6 +96,24 @@ bool runPatchTests()
     auto nonfinite = patch; nonfinite.nodes[0].parameters[0].values[0] = INFINITY;
     ok &= expect(!validate(nonfinite).empty(), "nonfinite coefficient rejected");
     invalid = patch; while (invalid.nodes.size() <= maximumNodes) invalid.nodes.push_back(defaults("n" + std::to_string(invalid.nodes.size()), "mixer"));
-    ok &= expect(!validate(invalid).empty(), "node cap rejected");
+    ok &= expect(validate(invalid) == "patch exceeds structural cap", "node cap rejected");
+    invalid = patch; invalid.nodes.push_back(defaults("mix2", "mixer")); invalid.nodes.push_back(defaults("mix3", "mixer"));
+    ok &= expect(validate(invalid) == "module type cap exceeded", "per-type cap still enforced below the node cap");
+
+    const auto maximal = iupac::testing::maximalPatch();
+    ok &= expect(maximal.nodes.size() == maximumNodes && maximal.edges.size() == maximumEdges && maximal.matrix.size() == maximumMatrixRows, "authored maximal patch fills every bound");
+    ok &= expect(validate(maximal).empty(), "maximal patch with every slot active and routed is valid");
+    auto maximalDecoded = decodePatchJson(encodePatchJson(maximal, true));
+    ok &= expect(static_cast<bool>(maximalDecoded) && encodePatchJson(*maximalDecoded.value) == encodePatchJson(maximal), "maximal patch round-trips through the shared codec");
+    State maximalState {maximal, maximal, {}};
+    auto maximalStateDecoded = decodeStateJson(encodeStateJson(maximalState));
+    ok &= expect(static_cast<bool>(maximalStateDecoded) && encodeStateJson(*maximalStateDecoded.value) == encodeStateJson(maximalState), "maximal state round-trips through the shared codec");
+    invalid = maximal; invalid.nodes.push_back(defaults("n12", "mixer"));
+    ok &= expect(validate(invalid) == "patch exceeds structural cap", "twelfth node rejected");
+    invalid = maximal; invalid.edges.push_back({"r1", "q2", 0.5});
+    ok &= expect(validate(invalid) == "patch exceeds structural cap", "thirty-third edge rejected");
+    invalid = maximal; invalid.matrix.push_back({"row-24", true, ModulationSource::e1, "q1", "q", 0.1});
+    ok &= expect(validate(invalid) == "patch exceeds structural cap", "twenty-fifth row rejected");
+    ok &= expect(!decodePatchJson(encodePatchJson(invalid)).value, "decoder rejects rows beyond the cap");
     return ok;
 }
