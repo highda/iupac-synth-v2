@@ -83,4 +83,36 @@ grep -q 'executable bit lost in archive: iupac-cli' "$work/no-exec.log"
 make_fixture "$work/v10-fail"
 printf '{"schemaVersion":1,"status":"fail"}\n' > "$work/v10-fail/linux/v10-report.json"
 expect_fail "$assemble" "$work/v10-fail/linux" "$work/v10-fail/macos" "$work/v10-fail/out" "$sha"
+
+# --- commit.txt provenance (#71): CI checks out the release commit, the #85 local recipe builds
+# from a `git archive` export whose synthetic commit is what macos-validate.sh records there.
+remanifest() { (cd "$1" && rm -f manifest.sha256 && find . -type f -print0 | sort -z | xargs -0 sha256sum > ../manifest.sha256 && mv ../manifest.sha256 manifest.sha256); }
+export_sha=89abcdef0123456789abcdef0123456789abcdef
+
+make_fixture "$work/ci-export-commit"   # CI artifact whose commit.txt is not the release commit
+printf '%s\n' "$export_sha" > "$work/ci-export-commit/macos/commit.txt"
+remanifest "$work/ci-export-commit/macos"
+expect_fail "$assemble" "$work/ci-export-commit/linux" "$work/ci-export-commit/macos" "$work/ci-export-commit/out" "$sha"
+
+make_fixture "$work/local-recipe"       # local stand-in artifact: export commit, release head-commit
+printf 'local-recipe=local-macos-arm64.sh user=u host=h date=d\nDarwin h arm64\n' > "$work/local-recipe/macos/runner-identity.txt"
+printf '%s\n' "$export_sha" > "$work/local-recipe/macos/commit.txt"
+remanifest "$work/local-recipe/macos"
+"$assemble" "$work/local-recipe/linux" "$work/local-recipe/macos" "$work/local-recipe/out" "$sha" > /dev/null
+test "$(find "$work/local-recipe/out" -maxdepth 1 -type f | wc -l | tr -d ' ')" = 15
+(cd "$work/local-recipe/out" && sha256sum -c --quiet SHA256SUMS)
+
+make_fixture "$work/local-bad-commit"   # local stand-in that lost its build commit entirely
+printf 'local-recipe=local-macos-arm64.sh user=u host=h date=d\n' > "$work/local-bad-commit/macos/runner-identity.txt"
+printf 'unknown\n' > "$work/local-bad-commit/macos/commit.txt"
+remanifest "$work/local-bad-commit/macos"
+expect_fail "$assemble" "$work/local-bad-commit/linux" "$work/local-bad-commit/macos" "$work/local-bad-commit/out" "$sha"
+
+make_fixture "$work/local-wrong-head"   # local stand-in exported from another commit
+printf 'local-recipe=local-macos-arm64.sh user=u host=h date=d\n' > "$work/local-wrong-head/macos/runner-identity.txt"
+printf '%s\n' "$export_sha" > "$work/local-wrong-head/macos/head-commit.txt"
+printf '%s\n' "$export_sha" > "$work/local-wrong-head/macos/commit.txt"
+remanifest "$work/local-wrong-head/macos"
+expect_fail "$assemble" "$work/local-wrong-head/linux" "$work/local-wrong-head/macos" "$work/local-wrong-head/out" "$sha"
+
 echo 'prerelease-assemble test passed'

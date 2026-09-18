@@ -37,9 +37,20 @@ cp "$linux_in/product/install-report.json" "$out/linux-install-report.json"
 test "$(sha256 "$out/IUPAC-Synth-2-Preview-linux-arm64.tar.gz")" = "$linux_hash" || fail 'Linux copy changed'
 
 # --- macOS arm64: exact validated bundles (macos-arm64.yml) ---
-test "$(tr -d '[:space:]' < "$macos_in/head-commit.txt")" = "$sha" || fail 'macOS head-commit.txt differs from release commit'
-test "$(tr -d '[:space:]' < "$macos_in/commit.txt")" = "$sha" || fail 'macOS commit.txt differs from release commit'
 (cd "$macos_in" && sha256sum -c --quiet manifest.sha256) || fail 'macOS manifest.sha256 mismatch'
+test "$(tr -d '[:space:]' < "$macos_in/head-commit.txt")" = "$sha" || fail 'macOS head-commit.txt differs from release commit'
+# head-commit.txt is the release commit the run was asked for; commit.txt is the HEAD of the
+# checkout that actually built these bundles. macos-arm64.yml checks out the release commit, so
+# both carry it. The #85 local stand-in builds from a `git archive` export of that commit whose
+# one-commit history is synthetic (scripts/local-lib.sh), so there commit.txt records that export
+# commit and head-commit.txt alone names the release commit. runner-identity.txt tells the two
+# apart and is covered by the manifest verified immediately above.
+macos_commit=$(tr -d '[:space:]' < "$macos_in/commit.txt")
+if grep -q '^local-recipe=' "$macos_in/runner-identity.txt"; then
+    [[ "$macos_commit" =~ ^[0-9a-f]{40}$ ]] || fail 'macOS commit.txt is not a commit sha'
+else
+    test "$macos_commit" = "$sha" || fail 'macOS commit.txt differs from release commit'
+fi
 (cd "$macos_in/artifacts" && sha256sum -c --quiet ../artifacts.sha256) || fail 'macOS artifacts.sha256 mismatch'
 macos_archive="$macos_in/IUPAC-Synth-2-Preview-macos-arm64.tar.gz"
 test -f "$macos_archive" || fail "missing $macos_archive"
