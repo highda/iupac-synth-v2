@@ -1,5 +1,5 @@
-# CI is dormant: no automatic triggers (owner decision 2026-09-18, GitHub Actions quota).
-# Dispatch this workflow by hand only during release verification.
+# Dispatch-only (owner decision 2026-09-18, #73/#75): macOS runners bill at 10x minutes, so this never runs on pull requests.
+# Run it once by hand on a release candidate or the #42 platform-lock commit.
 name: macOS arm64 native build
 
 on:

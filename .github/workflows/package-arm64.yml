@@ -1,9 +1,14 @@
-# CI is dormant: no automatic triggers (owner decision 2026-09-18, GitHub Actions quota).
-# Dispatch this workflow by hand only during release verification.
+# Source-gated CI (owner decision 2026-09-18, #73/#75): runs only for pull requests touching source or packaging paths.
+# Docs-only and script-only changes never trigger it.
 name: Linux arm64 private runtime package
 on:
   workflow_dispatch:
   workflow_call:   # prerelease.yml builds the delivery at the caller's exact commit (#59)
+  pull_request:
+    paths: ["src/**", "include/**", "tests/**", "tools/**", "chemistry/**", "data/**", "cmake/**", "CMakeLists.txt", "CMakePresets.json", "third_party/**", "packaging/**", ".github/workflows/package-arm64.yml"]
+concurrency:
+  group: package-arm64-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   package:
     runs-on: ubuntu-24.04-arm
