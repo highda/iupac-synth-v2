@@ -41,5 +41,7 @@ bool runHeadlessTests()
     domain::State state {patch(), patch(), controls}; tools::RenderSettings settings {48000, 127, 2048}; const auto rendered = tools::renderSnapshot(state, midi.events, settings, directory / "render.wav");
     const auto manifest = juce::JSON::parse(rendered.manifestJson); const auto digest = manifest.getProperty("pcmSha256", {}).toString();
     ok &= expect(rendered && std::filesystem::file_size(directory / "render.wav") > 44 && digest.length() == 64, "production render writes float WAV manifest");
+    std::string benchmarkError; const auto benchmark = juce::JSON::parse(tools::benchmark(state, 1, benchmarkError));
+    ok &= expect(benchmarkError.empty() && static_cast<juce::int64>(benchmark.getProperty("residentBytesAfter", 0)) > 0, "V8 benchmark samples a real resident set on this platform");
     std::error_code ignored; std::filesystem::remove_all(directory, ignored); return ok;
 }

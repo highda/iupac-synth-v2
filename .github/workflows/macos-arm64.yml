@@ -1,0 +1,71 @@
+name: macOS arm64 native build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ["src/**", "include/**", "tests/**", "tools/**", "CMakeLists.txt", "CMakePresets.json", "cmake/**", "scripts/build-pluginval.sh", "scripts/verify-v0.sh", "scripts/macos-validate.sh", ".github/workflows/macos-arm64.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-arm64-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Native macOS arm64 build, tests, pluginval and auval
+    # macos-15 defaults to Xcode 16.4, whose libc++ lacks std::jthread/stop_token used by the chemistry supervisor;
+    # macos-26 ships Xcode 26 (Apple clang 21), matching the owner host toolchain.
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - name: Check out source
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Record runner identity
+        run: |
+          mkdir -p out/macos
+          { sw_vers; uname -m; xcodebuild -version; clang --version; cmake --version; ninja --version || true; python3 --version; } | tee out/macos/runner-identity.txt
+          [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 ]
+
+      - name: Install Ninja and a NumPy venv on the hosted runner
+        run: |
+          command -v ninja >/dev/null || brew install ninja
+          python3 -m venv build/venv
+          build/venv/bin/pip install --quiet numpy
+          echo "$PWD/build/venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$PWD/build/venv" >> "$GITHUB_ENV"
+          { ninja --version; build/venv/bin/python3 -c 'import sys, numpy; print(sys.version); print("numpy", numpy.__version__)'; } | tee -a out/macos/runner-identity.txt
+
+      - name: Configure, build and test mac-synth (chemistry OFF)
+        run: |
+          cmake --preset mac-synth
+          cmake --build --preset mac-synth --parallel 4
+          ctest --preset mac-synth --output-on-failure 2>&1 | tee out/macos/mac-synth-ctest.log
+
+      - name: Configure and build mac-release (chemistry ON compile)
+        run: |
+          cmake --preset mac-release
+          cmake --build --preset mac-release --parallel 4
+
+      - name: Build pinned pluginval from source
+        run: IUPAC_BUILD_JOBS=4 ./scripts/build-pluginval.sh
+
+      - name: Validate VST3, AU, editor and Standalone
+        run: ./scripts/macos-validate.sh build/mac-synth out/macos
+
+      - name: Write artifact manifest
+        run: |
+          printf '%s\n' '${{ github.event.pull_request.head.sha || github.sha }}' > out/macos/head-commit.txt
+          (cd out/macos && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 > ../macos-manifest.sha256)
+          mv out/macos-manifest.sha256 out/macos/manifest.sha256
+          cat out/macos/manifest.sha256
+
+      - name: Upload retained macOS artifacts and reports
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: iupac-synth-2-macos-arm64-${{ github.event.pull_request.head.sha || github.sha }}
+          path: out/macos/
+          if-no-files-found: error
+          retention-days: 30

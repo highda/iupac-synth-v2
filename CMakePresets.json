@@ -55,6 +55,35 @@
         "CMAKE_CXX_FLAGS": "-fsanitize=thread -fno-omit-frame-pointer",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=thread"
       }
+    },
+    {
+      "name": "mac-synth",
+      "displayName": "Native macOS arm64 synth-only build",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/mac-synth",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_OSX_ARCHITECTURES": "arm64",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "12.0",
+        "Python3_FIND_STRATEGY": "LOCATION",
+        "Python3_FIND_FRAMEWORK": "LAST",
+        "IUPAC_ENABLE_CHEMISTRY": "OFF",
+        "JUCE_BUILD_EXAMPLES": "OFF",
+        "JUCE_BUILD_EXTRAS": "OFF"
+      }
+    },
+    {
+      "name": "mac-release",
+      "displayName": "Native macOS arm64 full-product build",
+      "inherits": "mac-synth",
+      "binaryDir": "${sourceDir}/build/mac-release",
+      "cacheVariables": {
+        "IUPAC_ENABLE_CHEMISTRY": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -62,7 +91,9 @@
     { "name": "linux-chemistry", "configurePreset": "linux-chemistry" },
     { "name": "linux-release", "configurePreset": "linux-release" },
     { "name": "linux-sanitize", "configurePreset": "linux-sanitize" },
-    { "name": "linux-tsan", "configurePreset": "linux-tsan" }
+    { "name": "linux-tsan", "configurePreset": "linux-tsan" },
+    { "name": "mac-synth", "configurePreset": "mac-synth" },
+    { "name": "mac-release", "configurePreset": "mac-release" }
   ],
   "testPresets": [
     {
@@ -88,6 +119,16 @@
     {
       "name": "linux-tsan",
       "configurePreset": "linux-tsan",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "mac-synth",
+      "configurePreset": "mac-synth",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "mac-release",
+      "configurePreset": "mac-release",
       "output": { "outputOnFailure": true }
     }
   ]

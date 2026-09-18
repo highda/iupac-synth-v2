@@ -11,6 +11,8 @@
 #include <fstream>
 #if defined(__linux__)
 #include <unistd.h>
+#elif defined(__APPLE__)
+#include <mach/mach.h>
 #endif
 #include <iomanip>
 #include <numeric>
@@ -263,6 +265,9 @@ std::string benchmark(const domain::State& state, std::size_t seconds, std::stri
 #if defined(__linux__)
         long pages = 0, resident = 0; std::ifstream stat("/proc/self/statm"); stat >> pages >> resident;
         return resident > 0 ? static_cast<std::uint64_t>(resident) * static_cast<std::uint64_t>(::sysconf(_SC_PAGESIZE)) : 0;
+#elif defined(__APPLE__)
+        mach_task_basic_info info{}; mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+        return ::task_info(mach_task_self(), MACH_TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&info), &count) == KERN_SUCCESS ? static_cast<std::uint64_t>(info.resident_size) : 0;
 #else
         return std::uint64_t{};
 #endif

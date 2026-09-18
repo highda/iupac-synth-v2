@@ -7,6 +7,7 @@
 #include <cerrno>
 #include <csignal>
 #include <cstring>
+#include <fcntl.h>
 #include <fstream>
 #include <poll.h>
 #include <pthread.h>
@@ -98,6 +99,9 @@ ProtocolReply invokeProtocol(const HelperConfiguration& configuration, const juc
         for (auto* pair : {stdinPipe, stdoutPipe, stderrPipe}) { closeFd(pair[0]); closeFd(pair[1]); }
         result.error = "could not create private helper pipes"; return result;
     }
+#if defined(__APPLE__)
+    (void)::fcntl(stdinPipe[1], F_SETNOSIGPIPE, 1);
+#endif
     const auto executable = configuration.executable.string();
     std::vector<std::string> environmentStorage; std::vector<char*> environment;
     const auto blocked = [](std::string_view entry) {
@@ -121,7 +125,11 @@ ProtocolReply invokeProtocol(const HelperConfiguration& configuration, const juc
     pthread_sigmask(SIG_BLOCK, &blockedSignals, &previousSignals);
     std::size_t written = 0; bool brokenInput = false;
     while (written < request.size()) { const auto count = ::write(stdinPipe[1], request.data() + written, request.size() - written); if (count <= 0) { brokenInput = true; break; } written += static_cast<std::size_t>(count); }
+#if defined(__APPLE__)
+    // Darwin has no sigtimedwait to drain a pending SIGPIPE; the descriptor was opened with F_SETNOSIGPIPE instead.
+#else
     if (brokenInput) { timespec now{}; (void)::sigtimedwait(&blockedSignals, nullptr, &now); }
+#endif
     pthread_sigmask(SIG_SETMASK, &previousSignals, nullptr);
     closeFd(stdinPipe[1]);
     const auto deadline = std::chrono::steady_clock::now() + configuration.deadline;

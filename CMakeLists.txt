@@ -95,6 +95,14 @@ target_compile_features(IupacSynth2_VST3 PRIVATE cxx_std_20)
 target_compile_features(IupacSynth2_Standalone PRIVATE cxx_std_20)
 if(APPLE)
     target_compile_features(IupacSynth2_AU PRIVATE cxx_std_20)
+    # The linker's ad-hoc signature predates JUCE's post-link bundle steps (moduleinfo.json, Info.plist,
+    # PkgInfo), which leaves every bundle seal invalid. Re-seal with an ad-hoc signature as the final
+    # post-build step; Developer ID signing, hardened runtime and notarization stay out of scope.
+    foreach(bundle_target IupacSynth2_VST3 IupacSynth2_AU IupacSynth2_Standalone)
+        add_custom_command(TARGET ${bundle_target} POST_BUILD
+            COMMAND codesign --force --sign - "$<TARGET_BUNDLE_DIR:${bundle_target}>"
+            COMMENT "Ad-hoc sealing ${bundle_target} bundle")
+    endforeach()
 endif()
 target_compile_definitions(IupacSynth2 PRIVATE
     JUCE_WEB_BROWSER=0
@@ -179,8 +187,12 @@ if(BUILD_TESTING)
     if(IUPAC_ENABLE_CHEMISTRY)
         target_compile_definitions(iupac-editor-tests PRIVATE IUPAC_ENABLE_CHEMISTRY=1)
     endif()
-    find_program(XVFB_RUN xvfb-run)
-    if(XVFB_RUN)
-        add_test(NAME native-editor-smoke COMMAND ${XVFB_RUN} -a $<TARGET_FILE:iupac-editor-tests>)
+    if(APPLE)
+        add_test(NAME native-editor-smoke COMMAND iupac-editor-tests)
+    else()
+        find_program(XVFB_RUN xvfb-run)
+        if(XVFB_RUN)
+            add_test(NAME native-editor-smoke COMMAND ${XVFB_RUN} -a $<TARGET_FILE:iupac-editor-tests>)
+        endif()
     endif()
 endif()

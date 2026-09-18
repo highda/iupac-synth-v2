@@ -16,6 +16,7 @@ done
 if find "$root" -type l -exec sh -c 'root=$1; shift; for p do case "$(readlink -f "$p")" in "$root"/*) ;; *) exit 1;; esac; done' sh "$root" {} +; then :; else
     echo 'repair or reinstall product; escaping symlink' >&2; exit 2
 fi
-(cd "$root" && sha256sum -c install-manifest.sha256 >/dev/null) || { echo 'repair or reinstall product; manifest mismatch' >&2; exit 2; }
+if command -v sha256sum >/dev/null 2>&1; then sha256='sha256sum'; else sha256='shasum -a 256'; fi
+(cd "$root" && $sha256 -c install-manifest.sha256 >/dev/null) || { echo 'repair or reinstall product; manifest mismatch' >&2; exit 2; }
 test "$("$root/bin/iupac-cli")" = '{"product":"IUPAC Synth 2","architecture":3,"chemistryEnabled":true}' || { echo 'wrong product identity' >&2; exit 2; }
 printf '{"status":"ok","prefix":"%s"}\n' "$root"
