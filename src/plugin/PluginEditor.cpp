@@ -13,20 +13,20 @@ domain::ParameterDescriptor hostDescriptor(std::string_view id,std::string_view 
 struct IupacSynthEditor::MacroLabel final:juce::Component
 {
  MacroLabel(IupacSynthEditor&e,std::size_t i):editor(e),index(i){setName("Macro "+juce::String((int)i+1)+" label and default");}
- void paint(juce::Graphics&g)override{g.setColour(ui::ink);ui::drawCaption(g,text,getLocalBounds(),juce::Justification::centred,9.0f);}
+ void paint(juce::Graphics&g)override{g.setColour(ui::ink);ui::drawCaption(g,text,getLocalBounds(),juce::Justification::centred,ui::scaledText(*this,9.0f));}
  void mouseDoubleClick(const juce::MouseEvent&)override{editor.openEntry(*this,getLocalBounds().withSizeKeepingCentre(juce::jmax(getWidth(),90),16),text+" | "+juce::String(defaultValue,3),[this](juce::String t){const auto bar=t.indexOfChar('|');const auto label=(bar>=0?t.substring(0,bar):t).trim().toStdString();const double value=bar>=0?juce::jlimit(0.0,1.0,t.substring(bar+1).getDoubleValue()):defaultValue;editor.setMacro(index,{label,value});});}
  IupacSynthEditor&editor;std::size_t index;juce::String text;double defaultValue{};
 };
 struct IupacSynthEditor::MeterView final:juce::Component
 {
  MeterView(){setName("Output meter, active voices, and audible generation");setInterceptsMouseClicks(false,false);}
- void paint(juce::Graphics&g)override{auto r=getLocalBounds();auto bar=r.removeFromBottom(4).reduced(2,0);g.setColour(ui::ink.withAlpha(0.2f));g.fillRect(bar);const float n=juce::jlimit(0.0f,1.0f,(peakDb+60.0f)/66.0f);g.setColour(peakDb>-0.1f?ui::accent:ui::ink);g.fillRect(bar.withWidth(juce::roundToInt(n*(float)bar.getWidth())));g.setColour(ui::ink);ui::drawCaption(g,text,r,juce::Justification::centredRight,9.0f);}
+ void paint(juce::Graphics&g)override{auto r=getLocalBounds();auto bar=r.removeFromBottom(4).reduced(2,0);g.setColour(ui::ink.withAlpha(0.2f));g.fillRect(bar);const float n=juce::jlimit(0.0f,1.0f,(peakDb+60.0f)/66.0f);g.setColour(peakDb>-0.1f?ui::accent:ui::ink);g.fillRect(bar.withWidth(juce::roundToInt(n*(float)bar.getWidth())));g.setColour(ui::ink);ui::drawCaption(g,text,r,juce::Justification::centredRight,ui::scaledText(*this,9.0f));}
  float peakDb{-100.0f};juce::String text;
 };
 struct IupacSynthEditor::ValueBubble final:juce::Component
 {
  ValueBubble(){setInterceptsMouseClicks(false,false);setAlwaysOnTop(true);}
- void paint(juce::Graphics&g)override{auto r=getLocalBounds().toFloat().reduced(0.5f);g.setColour(ui::ground);g.fillRoundedRectangle(r,2.0f);g.setColour(ui::ink);g.drawRoundedRectangle(r,2.0f,ui::hairline);ui::drawCaption(g,text,getLocalBounds(),juce::Justification::centred,9.0f);}
+ void paint(juce::Graphics&g)override{auto r=getLocalBounds().toFloat().reduced(0.5f);g.setColour(ui::ground);g.fillRoundedRectangle(r,2.0f);g.setColour(ui::ink);g.drawRoundedRectangle(r,2.0f,ui::hairline);ui::drawCaption(g,text,getLocalBounds(),juce::Justification::centred,ui::scaledText(*this,9.0f));}
  juce::String text;
 };
 IupacSynthEditor::IupacSynthEditor(IupacSynthProcessor&o):AudioProcessorEditor(o),owner_(o),keyboard_(o.keyboardState(),juce::MidiKeyboardComponent::horizontalKeyboard)
@@ -71,24 +71,28 @@ IupacSynthEditor::~IupacSynthEditor()
 }
 void IupacSynthEditor::paint(juce::Graphics&g)
 {
- g.fillAll(ui::ground);g.setColour(ui::ink);const auto strip=getLocalBounds().withHeight(78);g.drawLine(0,(float)strip.getBottom()+0.5f,(float)getWidth(),(float)strip.getBottom()+0.5f,ui::hairline);
- const auto statusArea=juce::Rectangle<int>(newButton_.getX(),newButton_.getBottom()+2,meter_->getX()-newButton_.getX()-8,14);g.setColour(statusError_?ui::accent:ui::ink);ui::drawCaption(g,status_,statusArea,juce::Justification::centredLeft,8.0f);
+ g.fillAll(ui::ground);g.setColour(ui::ink);const auto strip=getLocalBounds().withHeight(stripHeight());g.drawLine(0,(float)strip.getBottom()+0.5f,(float)getWidth(),(float)strip.getBottom()+0.5f,ui::hairline);
+ const auto statusArea=juce::Rectangle<int>(newButton_.getX(),newButton_.getBottom()+2,meter_->getX()-newButton_.getX()-8,juce::roundToInt(ui::scaledText(*this,14.0f)));g.setColour(statusError_?ui::accent:ui::ink);ui::drawCaption(g,status_,statusArea,juce::Justification::centredLeft,ui::scaledText(*this,8.0f));
  g.setColour(ui::ink);g.drawLine(0,(float)field_.getBottom()+0.5f,(float)getWidth(),(float)field_.getBottom()+0.5f,ui::hairline);g.drawLine(0,(float)lanes_.getY()-0.5f,(float)getWidth(),(float)lanes_.getY()-0.5f,ui::hairline);g.drawLine(0,(float)keyboard_.getY()-0.5f,(float)getWidth(),(float)keyboard_.getY()-0.5f,ui::hairline);
 }
 void IupacSynthEditor::resized()
 {
- auto r=getLocalBounds();auto strip=r.removeFromTop(78).reduced(8,4);auto row=strip.removeFromTop(24);
- for(auto*b:{&newButton_,&loadButton_,&saveButton_,&savePresetButton_,&resetPatchButton_,&resetControlsButton_}){b->setBounds(row.removeFromLeft(b==&resetPatchButton_||b==&resetControlsButton_?112:84));row.removeFromLeft(4);}
- presetList_.setBounds(row.removeFromLeft(150));meter_->setBounds(row.removeFromRight(230));
- strip.removeFromTop(16);auto controls=strip;const int knob=controls.getHeight();
+ // Every fixed band below is a height in the 1000x700 reference frame multiplied by the live text scale (#89):
+ // the chrome has to grow with its text, or larger captions would simply clip inside a constant-height strip.
+ laf_.setScale((float)ui::textScale(getWidth(),getHeight()));
+ const float s=scale();auto px=[s](int reference){return juce::roundToInt((float)reference*s);};
+ auto r=getLocalBounds();auto strip=r.removeFromTop(stripHeight()).reduced(px(8),px(4));auto row=strip.removeFromTop(px(24));
+ for(auto*b:{&newButton_,&loadButton_,&saveButton_,&savePresetButton_,&resetPatchButton_,&resetControlsButton_}){b->setBounds(row.removeFromLeft(px(b==&resetPatchButton_||b==&resetControlsButton_?112:84)));row.removeFromLeft(px(4));}
+ presetList_.setBounds(row.removeFromLeft(px(150)));meter_->setBounds(row.removeFromRight(px(230)));
+ strip.removeFromTop(px(16));auto controls=strip;const int knob=controls.getHeight();
 #if IUPAC_ENABLE_CHEMISTRY
- chemistryButton_.setBounds(controls.removeFromRight(110).withSizeKeepingCentre(110,24));controls.removeFromRight(12);
+ chemistryButton_.setBounds(controls.removeFromRight(px(110)).withSizeKeepingCentre(px(110),px(24)));controls.removeFromRight(px(12));
 #endif
- bypass_.setBounds(controls.removeFromRight(64).withSizeKeepingCentre(64,20));controls.removeFromRight(8);masterTune_->setBounds(controls.removeFromRight(knob));controls.removeFromRight(8);width_->setBounds(controls.removeFromRight(90).withSizeKeepingCentre(90,26));controls.removeFromRight(8);outputGain_->setBounds(controls.removeFromRight(knob));controls.removeFromRight(16);
- for(std::size_t i=0;i<4;++i){auto cell=controls.removeFromLeft(juce::jmin(96,controls.getWidth()/6));macroLabels_[i]->setBounds(cell.removeFromBottom(12));macroKnobs_[i]->setBounds(cell.withSizeKeepingCentre(cell.getHeight(),cell.getHeight()));}
- keyboard_.setBounds(r.removeFromBottom(52));lanes_.setBounds(r.removeFromBottom(juce::jmax(96,r.getHeight()/5)).reduced(8,2));auto modulators=r.removeFromBottom(60).reduced(8,2);field_.setBounds(r);
- const int envelope=juce::jmin(150,modulators.getWidth()/6);for(auto&e:envelopes_){e.setBounds(modulators.removeFromLeft(envelope));modulators.removeFromLeft(8);}
- const int lfoWidth=juce::jmin(200,(modulators.getWidth()-8)/2);for(std::size_t i=0;i<2;++i){auto cell=modulators.removeFromLeft(lfoWidth);lfoRates_[i]->setBounds(cell.removeFromLeft(cell.getHeight()));lfoWaveforms_[i]->setBounds(cell.removeFromRight(50).withSizeKeepingCentre(50,14));cell.removeFromRight(4);lfoPreviews_[i].setBounds(cell);modulators.removeFromLeft(8);}
+ bypass_.setBounds(controls.removeFromRight(px(64)).withSizeKeepingCentre(px(64),px(20)));controls.removeFromRight(px(8));masterTune_->setBounds(controls.removeFromRight(knob));controls.removeFromRight(px(8));width_->setBounds(controls.removeFromRight(px(90)).withSizeKeepingCentre(px(90),px(26)));controls.removeFromRight(px(8));outputGain_->setBounds(controls.removeFromRight(knob));controls.removeFromRight(px(16));
+ for(std::size_t i=0;i<4;++i){auto cell=controls.removeFromLeft(juce::jmin(px(96),controls.getWidth()/6));macroLabels_[i]->setBounds(cell.removeFromBottom(juce::roundToInt(ui::scaledText(*this,12.0f))));macroKnobs_[i]->setBounds(cell.withSizeKeepingCentre(cell.getHeight(),cell.getHeight()));}
+ keyboard_.setKeyWidth(14.0f*s);keyboard_.setBounds(r.removeFromBottom(px(52)));lanes_.setBounds(r.removeFromBottom(juce::jmax(px(96),r.getHeight()/5)).reduced(px(8),px(2)));auto modulators=r.removeFromBottom(px(60)).reduced(px(8),px(2));field_.setBounds(r);
+ const int envelope=juce::jmin(px(150),modulators.getWidth()/6);for(auto&e:envelopes_){e.setBounds(modulators.removeFromLeft(envelope));modulators.removeFromLeft(px(8));}
+ const int lfoWidth=juce::jmin(px(200),(modulators.getWidth()-px(8))/2);for(std::size_t i=0;i<2;++i){auto cell=modulators.removeFromLeft(lfoWidth);lfoRates_[i]->setBounds(cell.removeFromLeft(cell.getHeight()));lfoWaveforms_[i]->setBounds(cell.removeFromRight(px(50)).withSizeKeepingCentre(px(50),px(14)));cell.removeFromRight(px(4));lfoPreviews_[i].setBounds(cell);modulators.removeFromLeft(px(8));}
  if(entry_.isVisible())closeEntry();
 }
 std::size_t IupacSynthEditor::textFieldCount()const
@@ -97,12 +101,12 @@ std::size_t IupacSynthEditor::textFieldCount()const
 }
 void IupacSynthEditor::showValue(juce::Component&anchor,juce::String text)
 {
- bubble_->text=text;const int w=juce::jmax(40,(int)juce::GlyphArrangement::getStringWidth(ui::labelFont(9.0f),text.toUpperCase())+14);auto area=getLocalArea(&anchor,anchor.getLocalBounds());auto b=juce::Rectangle<int>(w,16).withCentre({area.getCentreX(),area.getY()-10});if(b.getY()<0)b.setY(area.getBottom()+2);b.setX(juce::jlimit(0,juce::jmax(0,getWidth()-w),b.getX()));bubble_->setBounds(b);bubble_->setVisible(true);bubble_->toFront(false);bubble_->repaint();
+ bubble_->text=text;const float height=ui::scaledText(*this,9.0f);const int w=juce::jmax(40,(int)juce::GlyphArrangement::getStringWidth(ui::labelFont(height),text.toUpperCase())+14);auto area=getLocalArea(&anchor,anchor.getLocalBounds());auto b=juce::Rectangle<int>(w,juce::roundToInt(height)+7).withCentre({area.getCentreX(),area.getY()-10});if(b.getY()<0)b.setY(area.getBottom()+2);b.setX(juce::jlimit(0,juce::jmax(0,getWidth()-w),b.getX()));bubble_->setBounds(b);bubble_->setVisible(true);bubble_->toFront(false);bubble_->repaint();
 }
 void IupacSynthEditor::hideValue(){bubble_->setVisible(false);}
 void IupacSynthEditor::openEntry(juce::Component&anchor,juce::Rectangle<int>bounds,juce::String initial,std::function<void(juce::String)>commit)
 {
- hideValue();entryCommit_=std::move(commit);auto b=getLocalArea(&anchor,bounds);b=b.withSizeKeepingCentre(juce::jmax(b.getWidth(),52),juce::jmax(16,juce::jmin(b.getHeight(),18)));b.setX(juce::jlimit(0,juce::jmax(0,getWidth()-b.getWidth()),b.getX()));entry_.setBounds(b);entry_.setText(initial,false);entry_.setVisible(true);entry_.toFront(true);entry_.grabKeyboardFocus();entry_.selectAll();
+ hideValue();entryCommit_=std::move(commit);auto b=getLocalArea(&anchor,bounds);const int entryHeight=juce::roundToInt(ui::scaledText(*this,16.0f));b=b.withSizeKeepingCentre(juce::jmax(b.getWidth(),juce::roundToInt(52.0f*scale())),juce::jmax(entryHeight,juce::jmin(b.getHeight(),entryHeight+2)));entry_.setScale(scale());b.setX(juce::jlimit(0,juce::jmax(0,getWidth()-b.getWidth()),b.getX()));entry_.setBounds(b);entry_.setText(initial,false);entry_.setVisible(true);entry_.toFront(true);entry_.grabKeyboardFocus();entry_.selectAll();
 }
 void IupacSynthEditor::closeEntry(){if(!entry_.isVisible())return;entry_.setVisible(false);entry_.giveAwayKeyboardFocus();}
 void IupacSynthEditor::showResult(const std::string&e,juce::String ok){status_=e.empty()?ok:juce::String("Rejected: ")+e;statusError_=!e.empty();repaint(0,24,getWidth(),24);}

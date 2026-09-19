@@ -29,25 +29,25 @@ void ValueControl::openEntry(){if(auto*s=shellOf(*this)){juce::Component::SafePo
 double Knob::dragDelta(const juce::MouseEvent&e)const{return-e.getDistanceFromDragStartY()/(e.mods.isShiftDown()?1200.0:220.0);}
 void Knob::paint(juce::Graphics&g)
 {
- auto area=getLocalBounds().toFloat();const bool captioned=caption_.isNotEmpty()&&area.getHeight()>=22;juce::Rectangle<float>captionArea;if(captioned)captionArea=area.removeFromBottom(juce::jmin(10.0f,area.getHeight()*0.3f));
+ auto area=getLocalBounds().toFloat();const bool captioned=caption_.isNotEmpty()&&area.getHeight()>=22;juce::Rectangle<float>captionArea;if(captioned)captionArea=area.removeFromBottom(juce::jmin(scaledText(*this,10.0f),area.getHeight()*0.3f));
  const float d=juce::jmin(area.getWidth(),area.getHeight());auto circle=juce::Rectangle<float>(d,d).withCentre(area.getCentre());const float r=d*0.5f-1.5f;const auto c=circle.getCentre();constexpr float start=-2.356f,span=4.712f;
  juce::Path track;track.addCentredArc(c.x,c.y,r,r,0,start,start+span,true);g.setColour(ink.withAlpha(0.25f));g.strokePath(track,juce::PathStrokeType(hairline));
  const float n=(float)normalized();juce::Path base;base.addCentredArc(c.x,c.y,r,r,0,start,start+span*n,true);g.setColour(ink);g.strokePath(base,juce::PathStrokeType(2.0f));
  g.drawLine(c.x,c.y,c.x+std::sin(start+span*n)*r,c.y-std::cos(start+span*n)*r,hairline);
  if(effective_){juce::Path ring;const float lo=juce::jmin(n,*effective_),hi=juce::jmax(n,*effective_);ring.addCentredArc(c.x,c.y,r-3.0f,r-3.0f,0,start+span*lo,start+span*hi,true);g.setColour(accent);g.strokePath(ring,juce::PathStrokeType(2.0f));g.fillEllipse(c.x+std::sin(start+span**effective_)*(r-3.0f)-1.5f,c.y-std::cos(start+span**effective_)*(r-3.0f)-1.5f,3.0f,3.0f);}
  if(highlighted_){g.setColour(accent);g.drawEllipse(circle.reduced(0.5f),hairline);}
- if(captioned){g.setColour(ink);drawCaption(g,caption_,captionArea.toNearestInt(),juce::Justification::centred,juce::jmin(9.0f,captionArea.getHeight()));}
+ if(captioned){g.setColour(ink);drawCaption(g,caption_,captionArea.toNearestInt(),juce::Justification::centred,juce::jmin(scaledText(*this,9.0f),captionArea.getHeight()));}
 }
 Fader::Fader(domain::ParameterDescriptor d,bool vertical,bool bipolar):ValueControl(std::move(d)),vertical_(vertical),bipolar_(bipolar){}
 double Fader::dragDelta(const juce::MouseEvent&e)const{const double fine=e.mods.isShiftDown()?0.2:1.0;const double delta=vertical_?-e.getDistanceFromDragStartY()/juce::jmax(8.0,(double)getHeight()-4):e.getDistanceFromDragStartX()/juce::jmax(8.0,(double)getWidth()-4);double n=dragStart_+delta*fine;if(bipolar_&&std::abs(n-0.5)<0.025)n=0.5;return n-dragStart_;}
 void Fader::paint(juce::Graphics&g)
 {
- auto area=getLocalBounds().toFloat();const bool captioned=caption_.isNotEmpty()&&!vertical_&&area.getHeight()>=18;juce::Rectangle<float>captionArea;if(captioned)captionArea=area.removeFromBottom(8.0f);
+ auto area=getLocalBounds().toFloat();const bool captioned=caption_.isNotEmpty()&&!vertical_&&area.getHeight()>=18;juce::Rectangle<float>captionArea;if(captioned)captionArea=area.removeFromBottom(juce::jmin(scaledText(*this,8.0f),area.getHeight()*0.5f));
  const float n=(float)normalized(),origin=bipolar_?0.5f:0.0f;g.setColour(ink.withAlpha(0.25f));
  if(vertical_){const float x=area.getCentreX(),top=area.getY()+2,bottom=area.getBottom()-2,h=bottom-top;g.drawLine(x,top,x,bottom,hairline);auto y=[&](float v){return bottom-v*h;};g.setColour(ink);g.drawLine(x,y(origin),x,y(n),3.0f);g.drawLine(x-3.5f,y(n),x+3.5f,y(n),hairline);if(effective_){g.setColour(accent);g.drawLine(x+3.0f,y(n),x+3.0f,y(*effective_),2.0f);g.fillEllipse(x+1.5f,y(*effective_)-1.5f,3.0f,3.0f);}if(bipolar_){g.setColour(ink);g.drawLine(x-2.0f,y(0.5f),x+2.0f,y(0.5f),hairline);}}
  else{const float y=area.getCentreY(),left=area.getX()+2,right=area.getRight()-2,w=right-left;g.drawLine(left,y,right,y,hairline);auto x=[&](float v){return left+v*w;};g.setColour(ink);g.drawLine(x(origin),y,x(n),y,3.0f);g.drawLine(x(n),y-3.5f,x(n),y+3.5f,hairline);if(effective_){g.setColour(accent);g.drawLine(x(n),y+3.0f,x(*effective_),y+3.0f,2.0f);g.fillEllipse(x(*effective_)-1.5f,y+1.5f,3.0f,3.0f);}if(bipolar_){g.setColour(ink);g.drawLine(x(0.5f),y-2.0f,x(0.5f),y+2.0f,hairline);}}
  if(highlighted_){g.setColour(accent);g.drawRect(getLocalBounds(),(int)hairline);}
- if(captioned){g.setColour(ink);drawCaption(g,caption_,captionArea.toNearestInt(),juce::Justification::centredLeft,8.0f);}
+ if(captioned){g.setColour(ink);drawCaption(g,caption_,captionArea.toNearestInt(),juce::Justification::centredLeft,juce::jmin(scaledText(*this,8.0f),captionArea.getHeight()));}
 }
 Forest::Forest(domain::ParameterDescriptor d,Mode m,std::vector<double>defaults):descriptor_(std::move(d)),mode_(m),defaults_(std::move(defaults)),values_(descriptor_.arraySize,descriptor_.defaultValue){if(defaults_.size()!=values_.size())defaults_.assign(values_.size(),descriptor_.defaultValue);setRepaintsOnMouseActivity(true);}
 void Forest::setValues(std::vector<double>v){if(v.size()==values_.size()){values_=std::move(v);repaint();}}
@@ -69,7 +69,7 @@ void Forest::paint(juce::Graphics&g)
 {
  const int n=(int)values_.size();g.setColour(ink.withAlpha(0.35f));const float by=valueToY(0,mode_==Mode::unipolar?descriptor_.minimum:mode_==Mode::bipolar?0.0:defaults_[0]);g.drawLine(0,by,(float)getWidth(),by,hairline);
  for(int i=0;i<n;++i){const float x=columnX(i),y=valueToY(i,values_[(std::size_t)i]),b=mode_==Mode::logDeviation?valueToY(i,defaults_[(std::size_t)i]):by;g.setColour(i==hovered_?accent:ink);g.drawLine(x,b,x,y,i==hovered_?2.0f:hairline);g.fillEllipse(x-1.0f,y-1.0f,2.0f,2.0f);}
- if(caption_.isNotEmpty()){g.setColour(ink.withAlpha(0.6f));drawCaption(g,caption_,getLocalBounds().removeFromTop(8).withTrimmedLeft(2),juce::Justification::topLeft,7.0f);}
+ if(caption_.isNotEmpty()){g.setColour(ink.withAlpha(0.6f));drawCaption(g,caption_,getLocalBounds().removeFromTop(juce::roundToInt(scaledText(*this,8.0f))).withTrimmedLeft(2),juce::Justification::topLeft,scaledText(*this,7.0f));}
 }
 void Forest::mouseMove(const juce::MouseEvent&e){hovered_=columnAt(e.position.x);repaint();if(auto*s=shellOf(*this))s->showValue(*this,caption_.toUpperCase()+" "+juce::String(hovered_+1)+"  "+formatValue(values_[(std::size_t)hovered_],descriptor_.unit));}
 void Forest::mouseExit(const juce::MouseEvent&){if(!last_){hovered_=-1;repaint();if(auto*s=shellOf(*this))s->hideValue();}}
@@ -98,13 +98,13 @@ void SegmentToggle::setIndex(int i,bool notify){i=juce::jlimit(0,(int)segments_.
 void SegmentToggle::paint(juce::Graphics&g)
 {
  auto r=getLocalBounds().toFloat().reduced(0.5f);const float w=r.getWidth()/(float)segments_.size();g.setColour(ink);g.drawRoundedRectangle(r,2.0f,hairline);
- for(std::size_t i=0;i<segments_.size();++i){auto seg=juce::Rectangle<float>(r.getX()+w*(float)i,r.getY(),w,r.getHeight());if((int)i==index_){g.setColour(ink);g.fillRoundedRectangle(seg.reduced(1.0f),1.5f);}if(i)g.drawLine(seg.getX(),seg.getY(),seg.getX(),seg.getBottom(),hairline);g.setColour((int)i==index_?ground:ink);drawCaption(g,segments_[i],seg.toNearestInt(),juce::Justification::centred,juce::jlimit(7.0f,9.0f,r.getHeight()*0.6f));}
+ for(std::size_t i=0;i<segments_.size();++i){auto seg=juce::Rectangle<float>(r.getX()+w*(float)i,r.getY(),w,r.getHeight());if((int)i==index_){g.setColour(ink);g.fillRoundedRectangle(seg.reduced(1.0f),1.5f);}if(i)g.drawLine(seg.getX(),seg.getY(),seg.getX(),seg.getBottom(),hairline);g.setColour((int)i==index_?ground:ink);drawCaption(g,segments_[i],seg.toNearestInt(),juce::Justification::centred,juce::jlimit(minimumTextHeight,scaledText(*this,9.0f),r.getHeight()*0.6f));}
 }
 void SegmentToggle::mouseDown(const juce::MouseEvent&e){if(e.mods.isPopupMenu())return;setIndex((int)std::floor(e.position.x/juce::jmax(1.0f,(float)getWidth())*(float)segments_.size()),true);}
 void AdsrCurve::setEnvelope(domain::Envelope env,bool notify){envelope_=env;repaint();if(notify&&onChange)onChange(envelope_);}
 std::array<juce::Point<float>,4>AdsrCurve::handles()const noexcept
 {
- const float w=(float)getWidth()-6.0f,top=10.0f,bottom=(float)getHeight()-3.0f,x0=3.0f;const float a=x0+w*0.28f*(float)attackDescriptor.normalize(envelope_.attack),d=a+w*0.28f*(float)decayDescriptor.normalize(envelope_.decay),s=d+w*0.12f,r=s+w*0.28f*(float)releaseDescriptor.normalize(envelope_.release);const float sy=bottom-(bottom-top)*(float)envelope_.sustain;
+ const float w=(float)getWidth()-6.0f,top=scaledText(*this,10.0f),bottom=(float)getHeight()-3.0f,x0=3.0f;const float a=x0+w*0.28f*(float)attackDescriptor.normalize(envelope_.attack),d=a+w*0.28f*(float)decayDescriptor.normalize(envelope_.decay),s=d+w*0.12f,r=s+w*0.28f*(float)releaseDescriptor.normalize(envelope_.release);const float sy=bottom-(bottom-top)*(float)envelope_.sustain;
  return{juce::Point<float>(a,top),juce::Point<float>(d,sy),juce::Point<float>(s,sy),juce::Point<float>(r,bottom)};
 }
 int AdsrCurve::handleAt(juce::Point<float>p)const noexcept{const auto h=handles();int best=-1;float dist=64.0f;for(int i=0;i<4;++i){const float d=h[(std::size_t)i].getDistanceSquaredFrom(p);if(d<dist){dist=d;best=i;}}return best;}
@@ -112,7 +112,7 @@ void AdsrCurve::paint(juce::Graphics&g)
 {
  const auto h=handles();const float bottom=(float)getHeight()-3.0f;juce::Path p;p.startNewSubPath(3.0f,bottom);p.lineTo(h[0]);p.lineTo(h[1]);p.lineTo(h[2]);p.lineTo(h[3]);g.setColour(ink.withAlpha(0.35f));g.drawLine(3.0f,bottom,(float)getWidth()-3.0f,bottom,hairline);g.setColour(ink);g.strokePath(p,juce::PathStrokeType(hairline));
  for(int i=0;i<4;++i){g.setColour(i==hovered_||i==dragged_?accent:ink);g.fillEllipse(h[(std::size_t)i].x-2.0f,h[(std::size_t)i].y-2.0f,4.0f,4.0f);}
- if(caption_.isNotEmpty()){g.setColour(ink.withAlpha(0.6f));drawCaption(g,caption_,getLocalBounds().removeFromTop(8).withTrimmedLeft(2),juce::Justification::topLeft,7.0f);}
+ if(caption_.isNotEmpty()){g.setColour(ink.withAlpha(0.6f));drawCaption(g,caption_,getLocalBounds().removeFromTop(juce::roundToInt(scaledText(*this,8.0f))).withTrimmedLeft(2),juce::Justification::topLeft,scaledText(*this,7.0f));}
 }
 void AdsrCurve::bubble(int i){if(auto*s=shellOf(*this)){static constexpr std::array names{"ATTACK","DECAY","SUSTAIN","RELEASE"};const double v=i==0?envelope_.attack:i==1?envelope_.decay:i==2?envelope_.sustain:envelope_.release;s->showValue(*this,caption_.toUpperCase()+" "+names[(std::size_t)juce::jlimit(0,3,i)]+"  "+formatValue(v,i==2?"":"s"));}}
 void AdsrCurve::mouseMove(const juce::MouseEvent&e){hovered_=handleAt(e.position);repaint();if(hovered_>=0)bubble(hovered_);else if(auto*s=shellOf(*this))s->hideValue();}
@@ -120,7 +120,7 @@ void AdsrCurve::mouseExit(const juce::MouseEvent&){if(dragged_<0){hovered_=-1;re
 void AdsrCurve::mouseDown(const juce::MouseEvent&e){if(e.mods.isPopupMenu())return;dragged_=handleAt(e.position);repaint();}
 void AdsrCurve::mouseDrag(const juce::MouseEvent&e)
 {
- if(dragged_<0)return;const auto h=handles();const float w=(float)getWidth()-6.0f,top=10.0f,bottom=(float)getHeight()-3.0f;auto env=envelope_;
+ if(dragged_<0)return;const auto h=handles();const float w=(float)getWidth()-6.0f,top=scaledText(*this,10.0f),bottom=(float)getHeight()-3.0f;auto env=envelope_;
  auto timeFrom=[&](const domain::ParameterDescriptor&d,float x,float origin){return d.denormalize(juce::jlimit(0.0,1.0,(double)(x-origin)/(double)(w*0.28f)));};
  switch(dragged_){case 0:env.attack=timeFrom(attackDescriptor,e.position.x,3.0f);break;case 1:env.decay=timeFrom(decayDescriptor,e.position.x,h[0].x);env.sustain=juce::jlimit(0.0,1.0,(double)(bottom-e.position.y)/(double)(bottom-top));break;case 2:env.sustain=juce::jlimit(0.0,1.0,(double)(bottom-e.position.y)/(double)(bottom-top));break;default:env.release=timeFrom(releaseDescriptor,e.position.x,h[2].x);}
  setEnvelope(env,true);bubble(dragged_);
@@ -133,26 +133,27 @@ void AdsrCurve::mouseDoubleClick(const juce::MouseEvent&e)
 }
 void LfoPreview::paint(juce::Graphics&g)
 {
- auto r=getLocalBounds().toFloat().reduced(3.0f,3.0f);r.removeFromTop(7.0f);juce::Path p;const int n=48;const float cycles=2.0f;
+ auto r=getLocalBounds().toFloat().reduced(3.0f,3.0f);r.removeFromTop(scaledText(*this,7.0f));juce::Path p;const int n=48;const float cycles=2.0f;
  for(int i=0;i<=n;++i){const float t=(float)i/(float)n*cycles;float v=lfo_.waveform==domain::LfoWaveform::sine?std::sin(t*juce::MathConstants<float>::twoPi):(4.0f*std::abs(t-std::floor(t+0.5f))-1.0f);const auto pt=juce::Point<float>(r.getX()+(float)i/(float)n*r.getWidth(),r.getCentreY()-v*r.getHeight()*0.45f);if(i)p.lineTo(pt);else p.startNewSubPath(pt);}
  g.setColour(ink.withAlpha(0.35f));g.drawLine(r.getX(),r.getCentreY(),r.getRight(),r.getCentreY(),hairline);g.setColour(ink);g.strokePath(p,juce::PathStrokeType(hairline));
- if(caption_.isNotEmpty()){g.setColour(ink.withAlpha(0.6f));drawCaption(g,caption_+"  "+formatValue(lfo_.rate,"Hz"),getLocalBounds().removeFromTop(8).withTrimmedLeft(2),juce::Justification::topLeft,7.0f);}
+ if(caption_.isNotEmpty()){g.setColour(ink.withAlpha(0.6f));drawCaption(g,caption_+"  "+formatValue(lfo_.rate,"Hz"),getLocalBounds().removeFromTop(juce::roundToInt(scaledText(*this,8.0f))).withTrimmedLeft(2),juce::Justification::topLeft,scaledText(*this,7.0f));}
 }
 void GlyphButton::paintButton(juce::Graphics&g,bool over,bool down){auto r=getLocalBounds().toFloat();const bool on=down||getToggleState();if(on){g.setColour(ink);g.fillRoundedRectangle(r.reduced(0.5f),2.0f);}else if(over){g.setColour(ink.withAlpha(0.1f));g.fillRoundedRectangle(r.reduced(0.5f),2.0f);}drawGlyph(g,glyph_.toStdString(),r.reduced(juce::jmax(2.0f,r.getWidth()*0.25f)),on?ground:ink);}
-ArrayTable::ArrayTable(std::vector<Column>c):columns_(std::move(c))
+ArrayTable::ArrayTable(std::vector<Column>c,float scale):columns_(std::move(c)),scale_(juce::jmax(1.0f,scale))
 {
  const std::size_t rows=columns_.empty()?0:columns_[0].values.size();
- for(std::size_t col=0;col<columns_.size();++col)for(std::size_t row=0;row<rows;++row){auto*e=cells_.add(new juce::TextEditor);e->setText(formatEntry(columns_[col].values[row]),false);e->setJustification(juce::Justification::centredRight);e->setFont(labelFont(10.0f));e->setSelectAllWhenFocused(true);e->onReturnKey=[this,col,row]{commitCell(col,row);};e->onFocusLost=[this,col,row]{commitCell(col,row);};addAndMakeVisible(e);}
- setSize(juce::jmax(80,40+(int)columns_.size()*64),18+(int)rows*18);
+ for(std::size_t col=0;col<columns_.size();++col)for(std::size_t row=0;row<rows;++row){auto*e=cells_.add(new juce::TextEditor);e->setText(formatEntry(columns_[col].values[row]),false);e->setJustification(juce::Justification::centredRight);e->setFont(labelFont((float)fontHeight(10.0,scale_)));e->setSelectAllWhenFocused(true);e->onReturnKey=[this,col,row]{commitCell(col,row);};e->onFocusLost=[this,col,row]{commitCell(col,row);};addAndMakeVisible(e);}
+ setSize(juce::jmax(juce::roundToInt(80.0f*scale_),labelWidth()+(int)columns_.size()*columnWidth()),rowHeight()*(int)(rows+1));
 }
-void ArrayTable::resized(){const std::size_t rows=columns_.empty()?0:columns_[0].values.size();for(std::size_t col=0;col<columns_.size();++col)for(std::size_t row=0;row<rows;++row)cells_[(int)(col*rows+row)]->setBounds(40+(int)col*64,18+(int)row*18,62,17);}
-void ArrayTable::paint(juce::Graphics&g){g.fillAll(ground);g.setColour(ink);const std::size_t rows=columns_.empty()?0:columns_[0].values.size();for(std::size_t col=0;col<columns_.size();++col)drawCaption(g,columns_[col].caption,juce::Rectangle<int>(40+(int)col*64,0,62,18),juce::Justification::centred,8.0f);for(std::size_t row=0;row<rows;++row)drawCaption(g,juce::String((int)row+1),juce::Rectangle<int>(0,18+(int)row*18,36,17),juce::Justification::centredRight,8.0f);}
+void ArrayTable::resized(){const std::size_t rows=columns_.empty()?0:columns_[0].values.size();const int h=rowHeight(),w=columnWidth();for(std::size_t col=0;col<columns_.size();++col)for(std::size_t row=0;row<rows;++row)cells_[(int)(col*rows+row)]->setBounds(labelWidth()+(int)col*w,h+(int)row*h,w-2,h-1);}
+void ArrayTable::paint(juce::Graphics&g){g.fillAll(ground);g.setColour(ink);const std::size_t rows=columns_.empty()?0:columns_[0].values.size();const int h=rowHeight(),w=columnWidth();const float text=(float)fontHeight(8.0,scale_);for(std::size_t col=0;col<columns_.size();++col)drawCaption(g,columns_[col].caption,juce::Rectangle<int>(labelWidth()+(int)col*w,0,w-2,h),juce::Justification::centred,text);for(std::size_t row=0;row<rows;++row)drawCaption(g,juce::String((int)row+1),juce::Rectangle<int>(0,h+(int)row*h,labelWidth()-4,h-1),juce::Justification::centredRight,text);}
 void ArrayTable::commitCell(std::size_t col,std::size_t row)
 {
  auto&column=columns_[col];auto*cell=cells_[(int)(col*column.values.size()+row)];const auto v=parseNumber(cell->getText());const double clamped=v?juce::jlimit(column.descriptor.minimum,column.descriptor.maximum,*v):column.values[row];cell->setText(formatEntry(clamped),false);
  if(!juce::approximatelyEqual(clamped,column.values[row])){column.values[row]=clamped;if(column.commit)column.commit(column.values);}
 }
 PrecisionEntry::PrecisionEntry(){setJustification(juce::Justification::centred);setFont(labelFont(10.0f));setSelectAllWhenFocused(true);setIndents(2,1);}
+void PrecisionEntry::setScale(float scale)noexcept{applyFontToAllText(labelFont((float)fontHeight(10.0,scale)));}
 bool PrecisionEntry::keyPressed(const juce::KeyPress&k){if(k==juce::KeyPress::returnKey){if(onCommit)onCommit(getText());return true;}if(k==juce::KeyPress::escapeKey){if(onCancel)onCancel();return true;}return juce::TextEditor::keyPressed(k);}
 void PrecisionEntry::focusLost(FocusChangeType t){juce::TextEditor::focusLost(t);if(onCancel)onCancel();}
 }

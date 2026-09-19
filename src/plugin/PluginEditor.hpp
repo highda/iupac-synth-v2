@@ -23,6 +23,9 @@ public:
  void showValue(juce::Component&,juce::String)override;void hideValue()override;void openEntry(juce::Component&,juce::Rectangle<int>,juce::String,std::function<void(juce::String)>)override;[[nodiscard]]bool entryOpen()const override{return entry_.isVisible();}
 private:
  struct MacroLabel;struct MeterView;struct ValueBubble;
+ // Live text scale (#89): published on `laf_` by resized() and read back by every child through its look-and-feel.
+ [[nodiscard]]float scale()const noexcept{return laf_.scale();}
+ [[nodiscard]]int stripHeight()const noexcept{return juce::roundToInt(78.0f*scale());}
  void timerCallback()override;bool apply(const std::function<void(iupac::domain::Patch&)>&,juce::String ok);void showResult(const std::string&,juce::String ok);void refreshPresets();void closeEntry();std::filesystem::path presetDirectory()const;void syncModulators(const iupac::domain::Patch&);
  iupac::ui::EditorLookAndFeel laf_;IupacSynthProcessor&owner_;
  juce::TextButton newButton_{"new"},loadButton_{"load"},saveButton_{"save"},savePresetButton_{"preset"},resetPatchButton_{"reset edits"},resetControlsButton_{"reset controls"};juce::ComboBox presetList_;juce::String status_;bool statusError_{};std::unique_ptr<MeterView>meter_;

@@ -112,6 +112,26 @@ inline constexpr std::array<Slot, slotCount> slotTable {{
 inline constexpr double minimumFieldHeight = 396.0;
 inline constexpr double minimumFieldVerticalScale = minimumFieldHeight / referenceHeight;
 
+// Text scale (#89). Captions and control text are authored as heights in the 1000x700 reference
+// frame and multiplied by `textScale` of the live editor, so they grow with the window exactly like
+// the geometry around them. The smaller of the two axis scales is used: a window stretched in one
+// direction only must not push text out of the slot it labels. `minimumFontHeight` is the absolute
+// legibility floor and is the height every reference size collapses to at and below the reference
+// frame, where the scale is 1.
+inline constexpr double minimumFontHeight = 8.0;
+
+[[nodiscard]] constexpr double textScale(double windowWidth, double windowHeight) noexcept
+{
+    const double sx = windowWidth / referenceWidth, sy = windowHeight / referenceHeight;
+    return sx < sy ? sx : sy;
+}
+
+[[nodiscard]] constexpr double fontHeight(double referenceFontHeight, double scale) noexcept
+{
+    const double height = referenceFontHeight * scale;
+    return height < minimumFontHeight ? minimumFontHeight : height;
+}
+
 // Inter-column channel `c` (0..columnCount-2) is the horizontal gap between column c and c+1.
 struct Channel
 {

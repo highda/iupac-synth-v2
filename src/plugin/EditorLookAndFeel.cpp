@@ -2,6 +2,8 @@
 namespace iupac::ui
 {
 juce::Font labelFont(float height){return juce::Font(juce::FontOptions(height,juce::Font::plain)).withExtraKerningFactor(0.08f);}
+float editorScale(const juce::Component&c)noexcept{if(const auto*l=dynamic_cast<const EditorLookAndFeel*>(&c.getLookAndFeel()))return l->scale();return 1.0f;}
+float scaledText(const juce::Component&c,float referenceText)noexcept{return(float)fontHeight(referenceText,editorScale(c));}
 void drawCaption(juce::Graphics&g,juce::StringRef text,juce::Rectangle<int>area,juce::Justification just,float height){g.setFont(labelFont(height));g.drawText(juce::String(text).toUpperCase(),area,just,false);}
 namespace
 {
@@ -44,10 +46,12 @@ EditorLookAndFeel::EditorLookAndFeel()
  setColour(juce::AlertWindow::backgroundColourId,ground);setColour(juce::AlertWindow::textColourId,ink);setColour(juce::AlertWindow::outlineColourId,ink);
  setColour(juce::FileBrowserComponent::currentPathBoxBackgroundColourId,ground);setColour(juce::FileBrowserComponent::currentPathBoxTextColourId,ink);setColour(juce::FileBrowserComponent::filenameBoxBackgroundColourId,ground);setColour(juce::FileBrowserComponent::filenameBoxTextColourId,ink);setColour(juce::DirectoryContentsDisplayComponent::highlightColourId,ink);setColour(juce::DirectoryContentsDisplayComponent::textColourId,ink);setColour(juce::DirectoryContentsDisplayComponent::highlightedTextColourId,ground);
 }
-juce::Font EditorLookAndFeel::getTextButtonFont(juce::TextButton&,int h){return labelFont(juce::jlimit(8.0f,11.0f,(float)h*0.42f));}
-juce::Font EditorLookAndFeel::getComboBoxFont(juce::ComboBox&b){return labelFont(juce::jlimit(8.0f,11.0f,(float)b.getHeight()*0.5f));}
-juce::Font EditorLookAndFeel::getPopupMenuFont(){return labelFont(11.0f);}
-juce::Font EditorLookAndFeel::getLabelFont(juce::Label&l){return labelFont(juce::jlimit(8.0f,11.0f,(float)l.getHeight()*0.55f));}
+// The caps are reference-frame heights scaled by the live editor scale (#89): the control heights these read grow
+// with the window, so without a scaled cap every label froze at 11 px however large the editor became.
+juce::Font EditorLookAndFeel::getTextButtonFont(juce::TextButton&,int h){return labelFont(juce::jlimit(minimumTextHeight,scaled(11.0f),(float)h*0.42f));}
+juce::Font EditorLookAndFeel::getComboBoxFont(juce::ComboBox&b){return labelFont(juce::jlimit(minimumTextHeight,scaled(11.0f),(float)b.getHeight()*0.5f));}
+juce::Font EditorLookAndFeel::getPopupMenuFont(){return labelFont(scaled(11.0f));}
+juce::Font EditorLookAndFeel::getLabelFont(juce::Label&l){return labelFont(juce::jlimit(minimumTextHeight,scaled(11.0f),(float)l.getHeight()*0.55f));}
 void EditorLookAndFeel::drawButtonBackground(juce::Graphics&g,juce::Button&b,const juce::Colour&,bool over,bool down)
 {
  auto r=b.getLocalBounds().toFloat().reduced(0.5f);const bool on=b.getToggleState()||down;g.setColour(on?ink:ground);g.fillRoundedRectangle(r,2.0f);g.setColour(ink);g.drawRoundedRectangle(r,2.0f,hairline);if(over&&!on){g.setColour(ink.withAlpha(0.08f));g.fillRoundedRectangle(r,2.0f);}
@@ -55,20 +59,21 @@ void EditorLookAndFeel::drawButtonBackground(juce::Graphics&g,juce::Button&b,con
 void EditorLookAndFeel::drawButtonText(juce::Graphics&g,juce::TextButton&b,bool,bool down)
 {
  const bool on=b.getToggleState()||down;g.setColour(on?ground:ink);auto r=b.getLocalBounds();const auto id=b.getComponentID();
- if(id.isNotEmpty()){const int s=juce::jmin(r.getHeight()-8,12);drawGlyph(g,id.toStdString(),juce::Rectangle<float>((float)r.getX()+6.0f,(float)r.getCentreY()-(float)s/2.0f,(float)s,(float)s),on?ground:ink);r.removeFromLeft(s+8);g.setColour(on?ground:ink);}
+ if(id.isNotEmpty()){const int s=juce::jmin(r.getHeight()-8,juce::roundToInt(scaled(12.0f)));drawGlyph(g,id.toStdString(),juce::Rectangle<float>((float)r.getX()+6.0f,(float)r.getCentreY()-(float)s/2.0f,(float)s,(float)s),on?ground:ink);r.removeFromLeft(s+8);g.setColour(on?ground:ink);}
  g.setFont(getTextButtonFont(b,b.getHeight()));g.drawText(b.getButtonText().toUpperCase(),r.reduced(4,0),id.isNotEmpty()?juce::Justification::centredLeft:juce::Justification::centred,false);
 }
 void EditorLookAndFeel::drawComboBox(juce::Graphics&g,int w,int h,bool,int,int,int,int,juce::ComboBox&)
 {
  auto r=juce::Rectangle<float>(0,0,(float)w,(float)h).reduced(0.5f);g.setColour(ground);g.fillRoundedRectangle(r,2.0f);g.setColour(ink);g.drawRoundedRectangle(r,2.0f,hairline);
- const float ax=(float)w-9.0f,ay=(float)h*0.5f;juce::Path p;p.startNewSubPath(ax-3.0f,ay-1.5f);p.lineTo(ax,ay+1.5f);p.lineTo(ax+3.0f,ay-1.5f);g.strokePath(p,juce::PathStrokeType(hairline));
+ const float a=scaled(3.0f)/3.0f;// the arrow keeps its proportion to the text inside the box (#89)
+ const float ax=(float)w-3.0f*a,ay=(float)h*0.5f;juce::Path p;p.startNewSubPath(ax-a,ay-a*0.5f);p.lineTo(ax,ay+a*0.5f);p.lineTo(ax+a,ay-a*0.5f);g.strokePath(p,juce::PathStrokeType(hairline));
 }
-void EditorLookAndFeel::positionComboBoxText(juce::ComboBox&b,juce::Label&l){l.setBounds(2,0,b.getWidth()-16,b.getHeight());l.setFont(getComboBoxFont(b));}
+void EditorLookAndFeel::positionComboBoxText(juce::ComboBox&b,juce::Label&l){l.setBounds(2,0,b.getWidth()-juce::roundToInt(scaled(16.0f)),b.getHeight());l.setFont(getComboBoxFont(b));}
 void EditorLookAndFeel::drawPopupMenuBackground(juce::Graphics&g,int w,int h){g.fillAll(ground);g.setColour(ink);g.drawRect(0,0,w,h,(int)hairline);}
 void EditorLookAndFeel::drawPopupMenuItem(juce::Graphics&g,const juce::Rectangle<int>&area,bool separator,bool active,bool highlighted,bool ticked,bool,const juce::String&text,const juce::String&,const juce::Drawable*,const juce::Colour*)
 {
  if(separator){g.setColour(ink);g.fillRect(area.reduced(6,0).withHeight(1).withY(area.getCentreY()));return;}
- if(highlighted&&active){g.setColour(ink);g.fillRect(area);}g.setColour(highlighted&&active?ground:ink.withAlpha(active?1.0f:0.4f));g.setFont(getPopupMenuFont());auto r=area.reduced(8,0);if(ticked){g.fillEllipse((float)r.getX(),(float)r.getCentreY()-2.0f,4.0f,4.0f);}r.removeFromLeft(8);g.drawText(text.toUpperCase(),r,juce::Justification::centredLeft,true);
+ if(highlighted&&active){g.setColour(ink);g.fillRect(area);}g.setColour(highlighted&&active?ground:ink.withAlpha(active?1.0f:0.4f));g.setFont(getPopupMenuFont());const int pad=juce::roundToInt(scaled(8.0f));auto r=area.reduced(pad,0);if(ticked){const float dot=scaled(4.0f);g.fillEllipse((float)r.getX(),(float)r.getCentreY()-dot*0.5f,dot,dot);}r.removeFromLeft(pad);g.drawText(text.toUpperCase(),r,juce::Justification::centredLeft,true);
 }
 void EditorLookAndFeel::drawScrollbar(juce::Graphics&g,juce::ScrollBar&,int x,int y,int w,int h,bool vertical,int start,int size,bool,bool)
 {
@@ -77,8 +82,8 @@ void EditorLookAndFeel::drawScrollbar(juce::Graphics&g,juce::ScrollBar&,int x,in
 void EditorLookAndFeel::fillTextEditorBackground(juce::Graphics&g,int w,int h,juce::TextEditor&){g.setColour(ground);g.fillRect(0,0,w,h);}
 void EditorLookAndFeel::drawTextEditorOutline(juce::Graphics&g,int w,int h,juce::TextEditor&){g.setColour(ink);g.drawRect(0,0,w,h,(int)hairline);}
 void EditorLookAndFeel::drawLabel(juce::Graphics&g,juce::Label&l){if(l.isBeingEdited())return;g.setColour(l.findColour(juce::Label::textColourId).withMultipliedAlpha(l.isEnabled()?1.0f:0.5f));g.setFont(getLabelFont(l));g.drawFittedText(l.getText().toUpperCase(),l.getBorderSize().subtractedFrom(l.getLocalBounds()),l.getJustificationType(),1,1.0f);}
-void EditorLookAndFeel::drawToggleButton(juce::Graphics&g,juce::ToggleButton&b,bool,bool){auto r=b.getLocalBounds().toFloat().reduced(0.5f);g.setColour(b.getToggleState()?ink:ground);g.fillRoundedRectangle(r,2.0f);g.setColour(ink);g.drawRoundedRectangle(r,2.0f,hairline);g.setColour(b.getToggleState()?ground:ink);g.setFont(labelFont(juce::jlimit(8.0f,10.0f,(float)b.getHeight()*0.45f)));g.drawText(b.getButtonText().toUpperCase(),b.getLocalBounds(),juce::Justification::centred,false);}
-void EditorLookAndFeel::drawDocumentWindowTitleBar(juce::DocumentWindow&w,juce::Graphics&g,int width,int h,int,int,const juce::Image*,bool){g.fillAll(ground);g.setColour(ink);g.fillRect(0,h-1,width,1);drawCaption(g,w.getName(),juce::Rectangle<int>(12,0,width-24,h),juce::Justification::centredLeft,11.0f);}
+void EditorLookAndFeel::drawToggleButton(juce::Graphics&g,juce::ToggleButton&b,bool,bool){auto r=b.getLocalBounds().toFloat().reduced(0.5f);g.setColour(b.getToggleState()?ink:ground);g.fillRoundedRectangle(r,2.0f);g.setColour(ink);g.drawRoundedRectangle(r,2.0f,hairline);g.setColour(b.getToggleState()?ground:ink);g.setFont(labelFont(juce::jlimit(minimumTextHeight,scaled(10.0f),(float)b.getHeight()*0.45f)));g.drawText(b.getButtonText().toUpperCase(),b.getLocalBounds(),juce::Justification::centred,false);}
+void EditorLookAndFeel::drawDocumentWindowTitleBar(juce::DocumentWindow&w,juce::Graphics&g,int width,int h,int,int,const juce::Image*,bool){g.fillAll(ground);g.setColour(ink);g.fillRect(0,h-1,width,1);drawCaption(g,w.getName(),juce::Rectangle<int>(12,0,width-24,h),juce::Justification::centredLeft,scaled(11.0f));}
 void EditorLookAndFeel::drawCallOutBoxBackground(juce::CallOutBox&,juce::Graphics&g,const juce::Path&path,juce::Image&){g.setColour(ground);g.fillPath(path);g.setColour(ink);g.strokePath(path,juce::PathStrokeType(hairline));}
 juce::Button*EditorLookAndFeel::createDocumentWindowButton(int type){auto*b=new juce::TextButton(type==juce::DocumentWindow::closeButton?"":type==juce::DocumentWindow::minimiseButton?"min":"max");if(type==juce::DocumentWindow::closeButton)b->setComponentID("remove");return b;}
 }

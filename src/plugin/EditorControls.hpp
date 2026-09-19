@@ -108,15 +108,19 @@ class ArrayTable final:public juce::Component
 {
 public:
  struct Column{juce::String caption;domain::ParameterDescriptor descriptor;std::vector<double>values;std::function<void(const std::vector<double>&)>commit;};
- explicit ArrayTable(std::vector<Column>);void resized()override;void paint(juce::Graphics&)override;
+ // `scale` is the owning editor's text scale (#89); the table is built before it is parented, so it is passed in.
+ explicit ArrayTable(std::vector<Column>,float scale=1.0f);void resized()override;void paint(juce::Graphics&)override;
 private:
  void commitCell(std::size_t column,std::size_t row);
- std::vector<Column>columns_;juce::OwnedArray<juce::TextEditor>cells_;
+ [[nodiscard]]int rowHeight()const noexcept{return juce::roundToInt(18.0f*scale_);}
+ [[nodiscard]]int columnWidth()const noexcept{return juce::roundToInt(64.0f*scale_);}
+ [[nodiscard]]int labelWidth()const noexcept{return juce::roundToInt(40.0f*scale_);}
+ std::vector<Column>columns_;juce::OwnedArray<juce::TextEditor>cells_;float scale_{1.0f};
 };
 class PrecisionEntry final:public juce::TextEditor
 {
 public:
- PrecisionEntry();std::function<void(juce::String)>onCommit;std::function<void()>onCancel;
+ PrecisionEntry();void setScale(float)noexcept;std::function<void(juce::String)>onCommit;std::function<void()>onCancel;
  bool keyPressed(const juce::KeyPress&)override;void focusLost(FocusChangeType)override;
 };
 }

@@ -14,7 +14,13 @@ LaneView::LaneView(LaneMatrix&m,std::size_t row):matrix_(m),row_(row),depth_(dom
  source_.onChange=[this]{changed();};destination_.onChange=[this]{changed();};depth_.onChange=[this](double){changed();};enable_.onClick=[this]{changed();};remove_.onClick=[this]{if(matrix_.onRemove)matrix_.onRemove(row_);};
  for(auto*c:std::initializer_list<juce::Component*>{&source_,&destination_,&depth_,&enable_,&remove_})addAndMakeVisible(c);
 }
-void LaneView::resized(){auto r=getLocalBounds().reduced(2);r.removeFromLeft(4);remove_.setBounds(r.removeFromRight(r.getHeight()));r.removeFromRight(4);enable_.setBounds(r.removeFromRight(30));r.removeFromRight(6);source_.setBounds(r.removeFromLeft(juce::jmax(60,r.getWidth()/6)));r.removeFromLeft(6);destination_.setBounds(r.removeFromLeft(juce::jmax(100,r.getWidth()*2/5)));r.removeFromLeft(8);depth_.setBounds(r);}
+void LaneView::resized()
+{
+ // Minimum widths follow the editor scale (#89) so the combo-box text inside them grows with the window.
+ const float s=editorScale(*this);auto px=[s](int reference){return juce::roundToInt((float)reference*s);};
+ auto r=getLocalBounds().reduced(2);r.removeFromLeft(px(4));remove_.setBounds(r.removeFromRight(r.getHeight()));r.removeFromRight(px(4));enable_.setBounds(r.removeFromRight(px(30)));r.removeFromRight(px(6));
+ source_.setBounds(r.removeFromLeft(juce::jmax(px(60),r.getWidth()/6)));r.removeFromLeft(px(6));destination_.setBounds(r.removeFromLeft(juce::jmax(px(100),r.getWidth()*2/5)));r.removeFromLeft(px(8));depth_.setBounds(r);
+}
 void LaneView::paint(juce::Graphics&g){g.setColour(ink.withAlpha(0.25f));g.drawLine(0,(float)getHeight()-0.5f,(float)getWidth(),(float)getHeight()-0.5f,hairline);if(selected_){g.setColour(accent);g.fillRect(0,2,3,getHeight()-4);}}
 void LaneView::mouseDown(const juce::MouseEvent&){matrix_.select(row_);}
 void LaneView::sync(const domain::MatrixRow&row,const std::vector<LaneDestination>&destinations)
@@ -30,8 +36,8 @@ domain::MatrixRow LaneView::row()const
 }
 void LaneView::changed(){if(syncing_)return;matrix_.select(row_);if(matrix_.onEdit)matrix_.onEdit(row_,row());}
 LaneMatrix::LaneMatrix(){setName("Lane matrix");add_.setName("Add lane");add_.onClick=[this]{if(onAdd)onAdd();};addAndMakeVisible(add_);viewport_.setViewedComponent(&content_,false);viewport_.setScrollBarsShown(true,false);addAndMakeVisible(viewport_);}
-void LaneMatrix::resized(){auto r=getLocalBounds();auto top=r.removeFromTop(20);add_.setBounds(top.removeFromRight(70).reduced(0,2));viewport_.setBounds(r);const int h=22;content_.setSize(viewport_.getMaximumVisibleWidth(),(int)lanes_.size()*h);for(std::size_t i=0;i<lanes_.size();++i)lanes_[i]->setBounds(0,(int)i*h,content_.getWidth(),h);}
-void LaneMatrix::paint(juce::Graphics&g){g.setColour(ink);drawCaption(g,"modulation lanes",juce::Rectangle<int>(4,0,200,20),juce::Justification::centredLeft,9.0f);g.drawLine(0,19.5f,(float)getWidth(),19.5f,hairline);}
+void LaneMatrix::resized(){const float s=editorScale(*this);auto r=getLocalBounds();auto top=r.removeFromTop(headerHeight());add_.setBounds(top.removeFromRight(juce::roundToInt(70.0f*s)).reduced(0,2));viewport_.setBounds(r);const int h=juce::roundToInt(22.0f*s);content_.setSize(viewport_.getMaximumVisibleWidth(),(int)lanes_.size()*h);for(std::size_t i=0;i<lanes_.size();++i)lanes_[i]->setBounds(0,(int)i*h,content_.getWidth(),h);}
+void LaneMatrix::paint(juce::Graphics&g){g.setColour(ink);const int header=headerHeight();drawCaption(g,"modulation lanes",juce::Rectangle<int>(4,0,juce::roundToInt(200.0f*editorScale(*this)),header),juce::Justification::centredLeft,scaledText(*this,9.0f));g.drawLine(0,(float)header-0.5f,(float)getWidth(),(float)header-0.5f,hairline);}
 void LaneMatrix::setPatch(const domain::Patch&p)
 {
  destinations_=laneDestinations(p);while(lanes_.size()>p.matrix.size())lanes_.pop_back();while(lanes_.size()<p.matrix.size()){lanes_.push_back(std::make_unique<LaneView>(*this,lanes_.size()));content_.addAndMakeVisible(*lanes_.back());}

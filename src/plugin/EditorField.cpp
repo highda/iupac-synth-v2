@@ -47,12 +47,12 @@ void PortView::mouseUp(const juce::MouseEvent&e){field_.endDrag(e.getEventRelati
 SlotView::SlotView(ModuleField&f,std::size_t slot):field_(f),slot_(slot){setRepaintsOnMouseActivity(true);setName(juce::String(slotKindName(slotTable[slot].kind).data())+(slot==outputSlot?juce::String():juce::String(slotTable[slot].instance+1)));}
 void SlotView::paint(juce::Graphics&g)
 {
- const auto&s=slotTable[slot_];auto r=getLocalBounds().toFloat().reduced(0.5f);const float glyph=juce::jmin(r.getHeight()*0.28f,r.getWidth()*0.3f,26.0f);
- if(slot_==outputSlot){g.setColour(ink);g.drawRoundedRectangle(r,3.0f,hairline);drawGlyph(g,"OUT",juce::Rectangle<float>(glyph,glyph).withCentre(r.getCentre().translated(0,-glyph*0.3f)),ink);drawCaption(g,"OUT",r.toNearestInt().withTop((int)(r.getCentreY()+glyph*0.35f)).withHeight(12),juce::Justification::centred,9.0f);return;}
+ const auto&s=slotTable[slot_];auto r=getLocalBounds().toFloat().reduced(0.5f);const float glyph=juce::jmin(r.getHeight()*0.28f,r.getWidth()*0.3f,26.0f*editorScale(*this));
+ if(slot_==outputSlot){g.setColour(ink);g.drawRoundedRectangle(r,3.0f,hairline);drawGlyph(g,"OUT",juce::Rectangle<float>(glyph,glyph).withCentre(r.getCentre().translated(0,-glyph*0.3f)),ink);drawCaption(g,"OUT",r.toNearestInt().withTop((int)(r.getCentreY()+glyph*0.35f)).withHeight(juce::roundToInt(scaledText(*this,12.0f))),juce::Justification::centred,scaledText(*this,9.0f));return;}
  if(!active()){const float dash[]{3.0f,3.0f};juce::Path p;p.addRoundedRectangle(r,3.0f);juce::PathStrokeType(hairline).createDashedStroke(p,p,dash,2);g.setColour(ink.withAlpha(0.7f));g.fillPath(p);if(isMouseOver()){g.setColour(ink.withAlpha(0.05f));g.fillRoundedRectangle(r,3.0f);}
-  drawGlyph(g,slotKindName(s.kind),juce::Rectangle<float>(glyph,glyph).withCentre(r.getCentre().translated(0,-glyph*0.3f)),ink.withAlpha(0.7f));g.setColour(ink.withAlpha(0.7f));drawCaption(g,juce::String(slotKindName(s.kind).data())+" "+juce::String(s.instance+1),r.toNearestInt().withTop((int)(r.getCentreY()+glyph*0.35f)).withHeight(12),juce::Justification::centred,9.0f);return;}
+  drawGlyph(g,slotKindName(s.kind),juce::Rectangle<float>(glyph,glyph).withCentre(r.getCentre().translated(0,-glyph*0.3f)),ink.withAlpha(0.7f));g.setColour(ink.withAlpha(0.7f));drawCaption(g,juce::String(slotKindName(s.kind).data())+" "+juce::String(s.instance+1),r.toNearestInt().withTop((int)(r.getCentreY()+glyph*0.35f)).withHeight(juce::roundToInt(scaledText(*this,12.0f))),juce::Justification::centred,scaledText(*this,9.0f));return;}
  g.setColour(ground);g.fillRoundedRectangle(r,3.0f);g.setColour(ink);g.drawRoundedRectangle(r,3.0f,hairline);
- const int header=juce::jlimit(10,14,(int)((float)getHeight()*0.16f));const auto&d=domain::moduleCatalog()[(std::size_t)type_];const float gs=(float)header-4.0f;drawGlyph(g,d.id,juce::Rectangle<float>(4.0f,2.0f,gs,gs),ink);g.setColour(ink);drawCaption(g,juce::String(d.id.data()),juce::Rectangle<int>(header+2,0,getWidth()-header-24,header),juce::Justification::centredLeft,juce::jmin(9.0f,(float)header-3.0f));
+ const int header=juce::jlimit(juce::roundToInt(scaledText(*this,10.0f)),juce::roundToInt(scaledText(*this,14.0f)),(int)((float)getHeight()*0.16f));const auto&d=domain::moduleCatalog()[(std::size_t)type_];const float gs=(float)header-4.0f;drawGlyph(g,d.id,juce::Rectangle<float>(4.0f,2.0f,gs,gs),ink);g.setColour(ink);drawCaption(g,juce::String(d.id.data()),juce::Rectangle<int>(header+2,0,getWidth()-header-24,header),juce::Justification::centredLeft,juce::jmin(scaledText(*this,9.0f),(float)header-3.0f));
  g.setColour(ink.withAlpha(0.35f));g.drawLine(2.0f,(float)header+0.5f,(float)getWidth()-2.0f,(float)header+0.5f,hairline);
 }
 void SlotView::mouseDown(const juce::MouseEvent&e){pressed_=!active()&&slot_!=outputSlot&&!e.mods.isPopupMenu();}
@@ -107,24 +107,27 @@ void SlotView::setEffective(const std::array<float,engine::parameterTargetCount>
 }
 void SlotView::resized()
 {
- if(!active())return;const int header=juce::jlimit(10,14,(int)((float)getHeight()*0.16f));auto r=getLocalBounds();auto top=r.removeFromTop(header);remove_->setBounds(top.removeFromRight(header).reduced(1));if(edit_)edit_->setBounds(top.removeFromRight(header).reduced(1));
- auto body=r.reduced(3,2);if(auto*out=control("outputLevel"))out->setBounds(body.removeFromRight(10));body.removeFromRight(2);
+ if(!active())return;const int header=juce::jlimit(juce::roundToInt(scaledText(*this,10.0f)),juce::roundToInt(scaledText(*this,14.0f)),(int)((float)getHeight()*0.16f));auto r=getLocalBounds();auto top=r.removeFromTop(header);remove_->setBounds(top.removeFromRight(header).reduced(1));if(edit_)edit_->setBounds(top.removeFromRight(header).reduced(1));
+ // The control bands inside a slot are reference-frame heights: scaled with the editor (#89) so the captions they
+ // hold grow with it, instead of pinning a 2x window's text to a 13 px strip.
+ const float s=editorScale(*this);auto px=[s](int reference){return juce::roundToInt((float)reference*s);};
+ auto body=r.reduced(px(3),px(2));if(auto*out=control("outputLevel"))out->setBounds(body.removeFromRight(px(10)));body.removeFromRight(px(2));
  auto place=[&](std::string_view id,juce::Rectangle<int>b){for(auto&[cid,c]:controls_)if(cid==id){c->setBounds(b);c->setVisible(true);}};auto hide=[&](std::string_view id){for(auto&[cid,c]:controls_)if(cid==id)c->setVisible(false);};
  switch(type_)
  {
-  case domain::ModuleType::harmonic:{auto faders=body.removeFromBottom(juce::jmin(14,body.getHeight()/4));const int h=body.getHeight()/3;place("partialAmplitudes",body.removeFromTop(h));place("partialRatios",body.removeFromTop(h));place("partialPans",body);place("tilt",faders.removeFromLeft(faders.getWidth()/2).reduced(1,0));place("inharmonicity",faders.reduced(1,0));break;}
+  case domain::ModuleType::harmonic:{auto faders=body.removeFromBottom(juce::jmin(px(14),body.getHeight()/4));const int h=body.getHeight()/3;place("partialAmplitudes",body.removeFromTop(h));place("partialRatios",body.removeFromTop(h));place("partialPans",body);place("tilt",faders.removeFromLeft(faders.getWidth()/2).reduced(1,0));place("inharmonicity",faders.reduced(1,0));break;}
   case domain::ModuleType::fm:{const int w=body.getWidth()/3;place("carrierRatio",body.removeFromLeft(w));place("modulatorRatio",body.removeFromLeft(w));place("index",body);break;}
-  case domain::ModuleType::noise:{auto left=body.removeFromLeft(body.getWidth()*11/20);const int h=juce::jmin(14,left.getHeight()/2);place("color",left.removeFromTop(h).reduced(0,1));place("mode",left.removeFromTop(h).reduced(0,1));place("burstMs",body);break;}
-  case domain::ModuleType::resonator:{place("mode",body.removeFromTop(juce::jmin(13,body.getHeight()/5)).reduced(0,1));if(mode_==0){hide("modalQ");hide("modeRatios");hide("modeLevels");const int w=body.getWidth()/2;place("tuneRatio",body.removeFromLeft(w));place("combFeedback",body);}else{hide("combFeedback");auto knobs=body.removeFromTop(body.getHeight()*2/5);const int w=knobs.getWidth()/2;place("tuneRatio",knobs.removeFromLeft(w));place("modalQ",knobs);const int h=body.getHeight()/2;place("modeRatios",body.removeFromTop(h));place("modeLevels",body);}break;}
-  case domain::ModuleType::filter:{place("mode",body.removeFromTop(juce::jmin(13,body.getHeight()/5)).reduced(0,1));const int w=body.getWidth()/2;place("cutoff",body.removeFromLeft(w));place("q",body);break;}
-  case domain::ModuleType::shaper:{place("drive",body.removeFromLeft(body.getWidth()/2));place("wet",body.withSizeKeepingCentre(body.getWidth(),juce::jmin(24,body.getHeight())));break;}
-  case domain::ModuleType::mixer:{const int h=body.getHeight()/2;place("level",body.removeFromTop(h).withSizeKeepingCentre(body.getWidth(),juce::jmin(22,h)));place("pan",body.withSizeKeepingCentre(body.getWidth(),juce::jmin(22,h)));break;}
+  case domain::ModuleType::noise:{auto left=body.removeFromLeft(body.getWidth()*11/20);const int h=juce::jmin(px(14),left.getHeight()/2);place("color",left.removeFromTop(h).reduced(0,1));place("mode",left.removeFromTop(h).reduced(0,1));place("burstMs",body);break;}
+  case domain::ModuleType::resonator:{place("mode",body.removeFromTop(juce::jmin(px(13),body.getHeight()/5)).reduced(0,1));if(mode_==0){hide("modalQ");hide("modeRatios");hide("modeLevels");const int w=body.getWidth()/2;place("tuneRatio",body.removeFromLeft(w));place("combFeedback",body);}else{hide("combFeedback");auto knobs=body.removeFromTop(body.getHeight()*2/5);const int w=knobs.getWidth()/2;place("tuneRatio",knobs.removeFromLeft(w));place("modalQ",knobs);const int h=body.getHeight()/2;place("modeRatios",body.removeFromTop(h));place("modeLevels",body);}break;}
+  case domain::ModuleType::filter:{place("mode",body.removeFromTop(juce::jmin(px(13),body.getHeight()/5)).reduced(0,1));const int w=body.getWidth()/2;place("cutoff",body.removeFromLeft(w));place("q",body);break;}
+  case domain::ModuleType::shaper:{place("drive",body.removeFromLeft(body.getWidth()/2));place("wet",body.withSizeKeepingCentre(body.getWidth(),juce::jmin(px(24),body.getHeight())));break;}
+  case domain::ModuleType::mixer:{const int h=body.getHeight()/2;place("level",body.removeFromTop(h).withSizeKeepingCentre(body.getWidth(),juce::jmin(px(22),h)));place("pan",body.withSizeKeepingCentre(body.getWidth(),juce::jmin(px(22),h)));break;}
  }
 }
 void SlotView::openTable()
 {
  std::vector<ArrayTable::Column>columns;for(auto&[id,c]:controls_)if(auto*f=dynamic_cast<Forest*>(c.get()))columns.push_back({juce::String(id).replace("partial","").replace("mode",""),f->descriptor(),f->values(),[this,p=id](const std::vector<double>&v){commit(p,v);}});
- if(columns.empty()||!edit_)return;auto table=std::make_unique<ArrayTable>(std::move(columns));auto&box=juce::CallOutBox::launchAsynchronously(std::move(table),edit_->getScreenBounds(),nullptr);box.setLookAndFeel(&getLookAndFeel());
+ if(columns.empty()||!edit_)return;auto table=std::make_unique<ArrayTable>(std::move(columns),editorScale(*this));auto&box=juce::CallOutBox::launchAsynchronously(std::move(table),edit_->getScreenBounds(),nullptr);box.setLookAndFeel(&getLookAndFeel());
 }
 CableLayer::CableLayer(ModuleField&f):field_(f){setName("Cables");}
 bool CableLayer::hitTest(int x,int y){for(const auto&[key,k]:knobs_)if(k->getBounds().contains(x,y))return true;return cableAt({(float)x,(float)y},6.0f)>=0;}

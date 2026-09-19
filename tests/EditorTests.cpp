@@ -42,7 +42,8 @@ int screenshots(const std::filesystem::path&dir)
  std::error_code ec;std::filesystem::create_directories(dir,ec);IupacSynthProcessor processor;processor.prepareToPlay(48000,128);(void)processor.editPatch([](auto&p){p.nodes.clear();p.edges.clear();p.matrix.clear();});
  IupacSynthEditor editor(processor);editor.setVisible(true);editor.setSize(1200,800);buildDemo(editor);editor.lanes().select(0);
  auto write=[&](juce::Component&c,const char*name){auto image=c.createComponentSnapshot(c.getLocalBounds(),false,2.0f);juce::File file((dir/name).string());file.deleteFile();juce::FileOutputStream out(file);juce::PNGImageFormat png;if(!out.openedOk()||!png.writeImageToStream(image,out)){std::cerr<<"could not write "<<name<<'\n';return false;}std::cout<<"wrote "<<file.getFullPathName()<<'\n';return true;};
- bool ok=write(editor,"editor-default.png");ok&=write(editor.field(),"editor-field.png");editor.setSize(1000,700);ok&=write(editor,"editor-minimum.png");editor.setSize(1200,800);
+ bool ok=write(editor,"editor-default.png");ok&=write(editor.field(),"editor-field.png");editor.setSize(1000,700);ok&=write(editor,"editor-minimum.png");
+ editor.setSize(2000,1400);ok&=write(editor,"editor-doubled.png");editor.setSize(1200,800);// #89: text scales with the frame
 #if IUPAC_ENABLE_CHEMISTRY
  ChemistryPopup popup(processor);popup.setLookAndFeel(&editor.getLookAndFeel());popup.setVisible(true);ok&=write(popup,"editor-chemistry-popup.png");popup.setLookAndFeel(nullptr);
 #endif
@@ -56,6 +57,22 @@ int main(int argc,char**argv)
  ok&=expect(processor.editPatch([](auto&p){p.nodes.clear();p.edges.clear();p.matrix.clear();}).empty(),"empty valid patch accepted");
  auto editor=std::make_unique<IupacSynthEditor>(processor);editor->setVisible(true);
  for(auto size:{std::pair{1000,700},std::pair{1800,1200},std::pair{1200,800}}){editor->setSize(size.first,size.second);ok&=expect(editor->getWidth()==size.first&&editor->field().getWidth()==size.first,"resize sweep keeps the field at window width");}
+ // #89: captions and control text are reference-frame heights scaled by the live editor, not frozen 8-11 px clamps.
+ {
+  auto&look=dynamic_cast<ui::EditorLookAndFeel&>(editor->getLookAndFeel());
+  editor->setSize(1000,700);
+  const float captionAtOne=ui::scaledText(editor->field(),9.0f),menuAtOne=look.getPopupMenuFont().getHeight();
+  ok&=expect(std::abs(look.scale()-1.0f)<1.0e-4f,"the reference window is text scale 1.0");
+  ok&=expect(std::abs(captionAtOne-9.0f)<0.01f,"a 9 px caption is 9 px at scale 1.0");
+  editor->setSize(2000,1400);
+  const float captionAtTwo=ui::scaledText(editor->field(),9.0f),menuAtTwo=look.getPopupMenuFont().getHeight();
+  ok&=expect(std::abs(look.scale()-2.0f)<1.0e-4f,"twice the reference window is text scale 2.0");
+  ok&=expect(std::abs(captionAtTwo-18.0f)<0.01f,"the same caption is 18 px at scale 2.0");
+  ok&=expect(menuAtTwo>=menuAtOne*1.99f,"menu and control text scale with the editor instead of clamping at 11 px");
+  editor->setSize(600,420);
+  ok&=expect(ui::scaledText(editor->field(),9.0f)>=ui::minimumTextHeight,"text never falls below the legibility floor");
+  editor->setSize(1200,800);
+ }
  ok&=expect(editor->textFieldCount()==0,"default screen contains no text-entry field");
  // Slot activation in place: each catalog type lands in a typed slot and keeps its canonical id.
  ok&=expect(editor->activateSlot("harmonic",0)&&editor->activateSlot("fm",1)&&editor->activateSlot("noise",2)&&editor->activateSlot("resonator",3)&&editor->activateSlot("filter",5)&&editor->activateSlot("shaper",7)&&editor->activateSlot("mixer",9),"every catalog module can be activated in its slot");

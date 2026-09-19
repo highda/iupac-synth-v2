@@ -27,6 +27,8 @@ public:
  void select(std::optional<std::size_t>);[[nodiscard]]std::optional<std::size_t>selected()const noexcept{return selected_;}
  std::function<void()>onAdd;std::function<void(std::size_t,domain::MatrixRow)>onEdit;std::function<void(std::size_t)>onRemove;std::function<void(std::optional<std::size_t>)>onSelect;
  [[nodiscard]]juce::Button&addButton()noexcept{return add_;}
+ // Title band and lane row height follow the editor text scale (#89).
+ [[nodiscard]]int headerHeight()const noexcept{return juce::roundToInt(20.0f*editorScale(*this));}
 private:
  juce::TextButton add_{"+ route"};juce::Viewport viewport_;juce::Component content_;std::vector<std::unique_ptr<LaneView>>lanes_;std::vector<LaneDestination>destinations_;std::optional<std::size_t>selected_;
 };

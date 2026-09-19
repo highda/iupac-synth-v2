@@ -228,6 +228,17 @@ int main()
     const auto crossings = countCrossings(cables);
     std::cout << "layout: maximal patch routes " << cables.size() << " cables with " << crossings << " crossings (baseline)\n";
 
+    // #89: text is authored in reference-frame heights and scaled with the window, with an absolute floor.
+    expect(near(textScale(referenceWidth, referenceHeight), 1.0), "the reference frame is scale 1");
+    expect(near(textScale(2.0 * referenceWidth, 2.0 * referenceHeight), 2.0), "twice the reference frame is scale 2");
+    expect(near(textScale(2.0 * referenceWidth, referenceHeight), 1.0), "a window stretched on one axis takes the smaller scale");
+    expect(near(fontHeight(9.0, 1.0), 9.0), "a 9 px caption is 9 px at scale 1");
+    expect(near(fontHeight(9.0, 2.0), 18.0), "a 9 px caption is 18 px at scale 2");
+    expect(near(fontHeight(9.0, 1.5), 13.5), "caption height is linear in the scale");
+    expect(near(fontHeight(7.0, 1.0), minimumFontHeight), "the floor lifts sub-8 px reference heights at scale 1");
+    expect(near(fontHeight(9.0, 0.5), minimumFontHeight), "the floor holds below the reference frame");
+    expect(fontHeight(7.0, 2.0) > minimumFontHeight, "the floor does not flatten scaled text");
+
     constexpr int iterations = 500;
     std::vector<double> samples;
     for (int i = 0; i < iterations; ++i)
