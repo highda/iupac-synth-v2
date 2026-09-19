@@ -127,12 +127,33 @@ void SlotView::openTable()
  if(columns.empty()||!edit_)return;auto table=std::make_unique<ArrayTable>(std::move(columns));auto&box=juce::CallOutBox::launchAsynchronously(std::move(table),edit_->getScreenBounds(),nullptr);box.setLookAndFeel(&getLookAndFeel());
 }
 CableLayer::CableLayer(ModuleField&f):field_(f){setName("Cables");}
-bool CableLayer::hitTest(int x,int y){for(auto*k:knobs_)if(k->getBounds().contains(x,y))return true;return cableAt({(float)x,(float)y},6.0f)>=0;}
+bool CableLayer::hitTest(int x,int y){for(const auto&[key,k]:knobs_)if(k->getBounds().contains(x,y))return true;return cableAt({(float)x,(float)y},6.0f)>=0;}
+Knob*CableLayer::gainKnob(std::string_view s,std::string_view d)const{const auto i=knobs_.find(EdgeKey{std::string(s),std::string(d)});return i==knobs_.end()?nullptr:i->second.get();}
 int CableLayer::cableAt(juce::Point<float>p,float tol)const noexcept{int best=-1;float bestDistance=tol;for(std::size_t i=0;i<cables_.size();++i){const auto&pts=cables_[i].points;for(std::size_t s=0;s+1<pts.size();++s){const float d=segmentDistance(p,pts[s],pts[s+1]);if(d<bestDistance){bestDistance=d;best=(int)i;}}}return best;}
 void CableLayer::setCables(std::vector<Drawn>c)
 {
- cables_=std::move(c);knobs_.clear();hovered_=-1;
- for(const auto&d:cables_){auto*k=knobs_.add(new Knob(domain::ParameterDescriptor{"gain","",0,1,d.edge.gain,domain::ParameterScale::linear,domain::ParameterKind::continuous,false,0,20.0,{}}));k->setValue(d.edge.gain,false);k->setStep(0.02);k->setCaption("gain");k->setName("Cable gain "+juce::String(d.edge.source)+" to "+juce::String(d.edge.destination));const auto a=field_.toWindow(d.cable.knobAnchor);k->setBounds(juce::Rectangle<int>(18,18).withCentre(a.toInt()));k->onChange=[this,e=d.edge](double v){if(field_.onGain)field_.onGain(e.source,e.destination,v);};addAndMakeVisible(k);}
+ cables_=std::move(c);hovered_=-1;
+ // Reconcile the gain knobs against the new cable set instead of rebuilding them: every gain edit re-enters here
+ // through the document transaction, and destroying the knob under the mouse ended the gesture after one step (#87).
+ std::map<EdgeKey,std::unique_ptr<Knob>>kept;
+ for(const auto&d:cables_)
+ {
+  EdgeKey key{d.edge.source,d.edge.destination};std::unique_ptr<Knob>k;
+  if(const auto existing=knobs_.find(key);existing!=knobs_.end()){k=std::move(existing->second);knobs_.erase(existing);}
+  else
+  {
+   k=std::make_unique<Knob>(domain::ParameterDescriptor{"gain","",0,1,d.edge.gain,domain::ParameterScale::linear,domain::ParameterKind::continuous,false,0,20.0,{}});
+   k->setStep(0.02);k->setCaption("gain");k->setName("Cable gain "+juce::String(d.edge.source)+" to "+juce::String(d.edge.destination));
+   k->onChange=[this,e=key](double v){if(field_.onGain)field_.onGain(e.first,e.second,v);};
+   addAndMakeVisible(*k);
+  }
+  // A knob in mid-gesture owns its own value until mouse-up; the drag already tracks the pointer from its own
+  // mouse-down anchor, so echoing the applied patch value back would only add a frame of lag.
+  if(!k->dragging())k->setValue(d.edge.gain,false);
+  const auto a=field_.toWindow(d.cable.knobAnchor);k->setBounds(juce::Rectangle<int>(18,18).withCentre(a.toInt()));
+  kept.insert_or_assign(std::move(key),std::move(k));
+ }
+ knobs_=std::move(kept);// whatever is left in the old map belongs to removed cables and is destroyed here
  repaint();
 }
 void CableLayer::paint(juce::Graphics&g)

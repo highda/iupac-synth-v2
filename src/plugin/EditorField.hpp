@@ -6,6 +6,9 @@
 #include "EditorControls.hpp"
 #include "iupac/engine/Engine.hpp"
 #include <map>
+#include <memory>
+#include <string>
+#include <utility>
 namespace iupac::ui
 {
 inline constexpr std::size_t moduleSlotCount=outputSlot;// the eleven typed slots precede the OUT bus row
@@ -46,9 +49,13 @@ public:
  void mouseMove(const juce::MouseEvent&)override;void mouseExit(const juce::MouseEvent&)override;void mouseDown(const juce::MouseEvent&)override;void mouseDrag(const juce::MouseEvent&)override;void mouseUp(const juce::MouseEvent&)override;
  struct Drawn{Cable cable;std::vector<juce::Point<float>>points;juce::Path path;juce::Colour colour;domain::AudioEdge edge;std::size_t sourceSlot{},destinationSlot{};};
  void setCables(std::vector<Drawn>);[[nodiscard]]const std::vector<Drawn>&cables()const noexcept{return cables_;}[[nodiscard]]int hovered()const noexcept{return hovered_;}
+ // Gain knobs are keyed by their edge and reconciled in place, so an ordinary gain edit never destroys the
+ // component a gesture is running on (#87); only a topology change adds or removes one.
+ using EdgeKey=std::pair<std::string,std::string>;
+ [[nodiscard]]Knob*gainKnob(std::string_view source,std::string_view destination)const;
 private:
  [[nodiscard]]int cableAt(juce::Point<float>,float tolerance)const noexcept;
- ModuleField&field_;std::vector<Drawn>cables_;juce::OwnedArray<Knob>knobs_;int hovered_{-1};
+ ModuleField&field_;std::vector<Drawn>cables_;std::map<EdgeKey,std::unique_ptr<Knob>>knobs_;int hovered_{-1};
 };
 class ModuleField final:public juce::Component
 {

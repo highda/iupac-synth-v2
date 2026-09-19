@@ -31,6 +31,7 @@ public:
  void setCaption(juce::String c){caption_=std::move(c);repaint();}[[nodiscard]]const juce::String&caption()const noexcept{return caption_;}
  void setStep(double normalizedStep)noexcept{step_=normalizedStep;}[[nodiscard]]double normalized()const noexcept{return descriptor_.normalize(value_);}
  void setHighlighted(bool h){if(highlighted_!=h){highlighted_=h;repaint();}}
+ [[nodiscard]]bool dragging()const noexcept{return dragging_;}// a live gesture owns the value until mouse-up
  [[nodiscard]]juce::String formatted()const{return formatValue(value_,descriptor_.unit);}
  std::function<void(double)>onChange;std::function<void()>onGestureStart,onGestureEnd;
  void mouseEnter(const juce::MouseEvent&)override;void mouseExit(const juce::MouseEvent&)override;void mouseDown(const juce::MouseEvent&)override;void mouseDrag(const juce::MouseEvent&)override;void mouseUp(const juce::MouseEvent&)override;void mouseDoubleClick(const juce::MouseEvent&)override;void mouseWheelMove(const juce::MouseEvent&,const juce::MouseWheelDetails&)override;

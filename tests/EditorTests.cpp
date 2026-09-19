@@ -73,6 +73,23 @@ int main(int argc,char**argv)
  drag(*field.inputPort(5),field,{4.0f,4.0f});patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"src1","filt1")==nullptr&&edge(patch,"filt1","output")!=nullptr,"drag-off from the IN port removes exactly that edge");
  ok&=expect(editor->connect("src1","filt1",.8),"programmatic connect restores the edge");ok&=expect(!editor->connect("filt1","src1",1),"edge entering a source is rejected");
  ok&=expect(editor->setEdgeGain("src1","filt1",.25)&&std::abs(edge(processor.snapshot().editedPatch,"src1","filt1")->gain-.25)<1e-9,"cable gain edits the edge");
+ // Regression (#87): the gain knob is reconciled in place, so a whole drag gesture runs on one component instead of
+ // dying with the knob that the refresh it triggered destroyed.
+ if(auto*gain=field.cables().gainKnob("src1","filt1");expect(gain!=nullptr,"each cable exposes a gain knob"))
+ {
+  const double was=edge(processor.snapshot().editedPatch,"src1","filt1")->gain;const auto c=centreOf(*gain);
+  gain->mouseDown(event(*gain,c));
+  gain->mouseDrag(event(*gain,c.translated(0,-20),juce::ModifierKeys::leftButtonModifier,c,1,true));
+  ok&=expect(field.cables().gainKnob("src1","filt1")==gain&&gain->getParentComponent()==&field.cables(),"the dragged gain knob survives the document refresh it triggers");
+  gain->mouseDrag(event(*gain,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));
+  gain->mouseUp(event(*gain,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));
+  const double now=edge(processor.snapshot().editedPatch,"src1","filt1")->gain;
+  ok&=expect(now-was>0.02&&field.cables().gainKnob("src1","filt1")==gain,"one continuous drag moves the cable gain by more than one step");
+  ok&=expect(std::abs(gain->value()-now)<1e-9,"knob and stored edge gain agree after the gesture");
+  ok&=expect(editor->setParameter("filt1","q",0,.5)&&field.cables().gainKnob("src1","filt1")==gain,"an ordinary parameter edit does not rebuild the cable gain knobs");
+  ok&=expect(editor->disconnect("src1","filt1")&&field.cables().gainKnob("src1","filt1")==nullptr,"a topology change removes the knob of the removed cable");
+  ok&=expect(editor->connect("src1","filt1",.25)&&field.cables().gainKnob("src1","filt1")!=nullptr,"reconnecting restores the edge and its knob");
+ }
  // Control kit gestures on production controls.
  auto*cutoff=field.slot(5).control("cutoff");ok&=expect(cutoff!=nullptr,"filter slot exposes a cutoff knob");
  if(cutoff){const double was=cutoff->value();const auto c=centreOf(*cutoff);cutoff->mouseDown(event(*cutoff,c));cutoff->mouseDrag(event(*cutoff,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));cutoff->mouseUp(event(*cutoff,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));const auto now=values(processor.snapshot().editedPatch,"filt1","cutoff")[0];ok&=expect(now>was,"vertical knob drag raises the stored cutoff");}
