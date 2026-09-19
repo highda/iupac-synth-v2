@@ -102,6 +102,14 @@ void checkCableGeometry(const Cable& cable, const CableEdge& edge)
     for (std::size_t i = 0; i + 1 < cable.points.size(); ++i)
         if (cable.points[i].y == cable.points[i + 1].y)
             expect(std::abs(cable.points[i + 1].x - cable.points[i].x) <= std::abs(k1.x - k0.x), "knob sits on the longest horizontal segment");
+    // #88: the gain knob is an overlay of fixed pixel size centred on the anchor. At the smallest scale
+    // the live field is ever drawn at its rectangle must still lie inside the cable layer, which takes the
+    // field's local bounds; the field sits entirely below the macro strip, so "inside the layer" is also
+    // "clear of the strip and the status line".
+    const double halfY = knobHalfExtentPixels / minimumFieldVerticalScale;
+    const double halfX = knobHalfExtentPixels; // the field is never narrower than the reference width
+    expect(cable.knobAnchor.y - halfY >= 0.0 && cable.knobAnchor.y + halfY <= referenceHeight, "knob rectangle stays inside the field's top and bottom edges at the minimum window size");
+    expect(cable.knobAnchor.x - halfX >= 0.0 && cable.knobAnchor.x + halfX <= referenceWidth, "knob rectangle stays inside the field's left and right edges at the minimum window size");
     expect(cable.colourIndex >= 0 && cable.colourIndex < static_cast<int>(cablePalette.size()), "colour index in palette");
     expect(cable.colourIndex == cableColourIndex(edge.sourceId, edge.destinationId), "colour is the stable edge identity colour");
     const int columnGap = slotTable[edge.destination].column - slotTable[edge.source].column;
@@ -166,6 +174,7 @@ int main()
     expect(slotTable[outputSlot].kind == SlotKind::output && slotTable[outputSlot].column == columnCount - 1, "OUT bus is the last column");
     expect(fieldTop() > 0.0 && fieldBottom() < referenceHeight, "corridors exist above and below the field");
     for (int c = 0; c + 1 < columnCount; ++c) expect(channelExtent(c).right - channelExtent(c).left > 2.0 * channelInset, "channel wide enough for lanes");
+    expect(fieldTop() > 2.0 * corridorInset && referenceHeight - fieldBottom() > 2.0 * corridorInset, "both corridors leave a lane band after reserving the knob's half extent");
 
     // scaling is a pure function of window size
     const auto same = scaleToWindow(slotTable[0].frame, referenceWidth, referenceHeight);

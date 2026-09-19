@@ -90,6 +90,27 @@ int main(int argc,char**argv)
   ok&=expect(editor->disconnect("src1","filt1")&&field.cables().gainKnob("src1","filt1")==nullptr,"a topology change removes the knob of the removed cable");
   ok&=expect(editor->connect("src1","filt1",.25)&&field.cables().gainKnob("src1","filt1")!=nullptr,"reconnecting restores the edge and its knob");
  }
+ // Regression (#88): the gain knob is a fixed-size overlay centred on the router's anchor, so at every window
+ // size its rectangle must lie inside the cable layer. Cables routed through the corridors above and below the
+ // field had their knob clipped by the field edge, and above the field that edge is the macro strip.
+ {
+  ok&=expect(editor->connect("src3","mix1",.3)&&editor->connect("res1","mix1",.9)&&editor->connect("src2","shape1",.5)&&editor->connect("shape1","res1",.4),"corridor-routed cables can be connected");
+  for(auto size:{std::pair{1000,700},std::pair{1800,1200},std::pair{1200,800}})
+  {
+   editor->setSize(size.first,size.second);auto&layer=field.cables();int above=0,below=0;
+   ok&=expect((double)field.getHeight()/ui::referenceHeight>=ui::minimumFieldVerticalScale-1e-9,"the field is never drawn below the vertical scale the corridor reservation assumes");
+   for(const auto&d:layer.cables())
+   {
+    const auto*knob=layer.gainKnob(d.edge.source,d.edge.destination);
+    if(knob==nullptr){ok&=expect(false,"every routed cable has a gain knob");continue;}
+    if(d.cable.knobAnchor.y<ui::fieldTop())++above;else if(d.cable.knobAnchor.y>ui::fieldBottom())++below;
+    ok&=expect(layer.getLocalBounds().contains(knob->getBounds()),"gain knob is fully inside the cable layer at every window size");
+   }
+   std::cout<<"editor: "<<size.first<<"x"<<size.second<<" routes "<<layer.cables().size()<<" cables, "<<above<<" knobs in the top corridor and "<<below<<" in the return channel\n";
+   ok&=expect(above>=4&&below>=1,"the sweep covers corridor-routed knobs above and below the field");
+  }
+  ok&=expect(editor->disconnect("shape1","res1")&&editor->disconnect("src2","shape1")&&editor->disconnect("res1","mix1")&&editor->disconnect("src3","mix1"),"corridor cables can be removed again");
+ }
  // Control kit gestures on production controls.
  auto*cutoff=field.slot(5).control("cutoff");ok&=expect(cutoff!=nullptr,"filter slot exposes a cutoff knob");
  if(cutoff){const double was=cutoff->value();const auto c=centreOf(*cutoff);cutoff->mouseDown(event(*cutoff,c));cutoff->mouseDrag(event(*cutoff,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));cutoff->mouseUp(event(*cutoff,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));const auto now=values(processor.snapshot().editedPatch,"filt1","cutoff")[0];ok&=expect(now>was,"vertical knob drag raises the stored cutoff");}

@@ -59,6 +59,16 @@ inline constexpr double maximumCornerRadius = 8.0;
 inline constexpr double maximumStubSpread = 8.0; // reference units between neighbouring stubs at one port
 inline constexpr double channelInset = 6.0;      // reference units kept clear at both channel edges
 
+// The gain knob is an overlay of fixed pixel size at every window size, centred on `knobAnchor`.
+inline constexpr double knobDiameterPixels = 20.0;
+inline constexpr double knobHalfExtentPixels = knobDiameterPixels / 2.0 + 0.5; // + the hairline ring
+// Corridor lanes above and below the field therefore keep the knob's half extent clear of the field
+// border, in reference units at the smallest scale the field is ever drawn at (#88): a lane inset of
+// `channelInset` put the outermost lane ~4 px from the border, so the knob was clipped by the field
+// edge and the macro strip above it. The corridors are 70 and 90 units tall, so the wider inset
+// still leaves a lane band.
+inline constexpr double corridorInset = knobHalfExtentPixels / minimumFieldVerticalScale;
+
 // Deterministic from the stable edge identity so a cable keeps its colour across edits.
 [[nodiscard]] int cableColourIndex(std::string_view sourceId, std::string_view destinationId) noexcept;
 

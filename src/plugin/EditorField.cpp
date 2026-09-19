@@ -150,7 +150,9 @@ void CableLayer::setCables(std::vector<Drawn>c)
   // A knob in mid-gesture owns its own value until mouse-up; the drag already tracks the pointer from its own
   // mouse-down anchor, so echoing the applied patch value back would only add a frame of lag.
   if(!k->dragging())k->setValue(d.edge.gain,false);
-  const auto a=field_.toWindow(d.cable.knobAnchor);k->setBounds(juce::Rectangle<int>(18,18).withCentre(a.toInt()));
+  // The router reserves the knob's half extent inside the field on every corridor lane (#88), so the
+  // fixed-size box always lands inside the layer; painting below uses the same anchor and diameter.
+  const int box=(int)knobDiameterPixels;const auto a=field_.toWindow(d.cable.knobAnchor);k->setBounds(juce::Rectangle<int>(box,box).withCentre(a.toInt()));
   kept.insert_or_assign(std::move(key),std::move(k));
  }
  knobs_=std::move(kept);// whatever is left in the old map belongs to removed cables and is destroyed here
@@ -159,7 +161,7 @@ void CableLayer::setCables(std::vector<Drawn>c)
 void CableLayer::paint(juce::Graphics&g)
 {
  for(std::size_t i=0;i<cables_.size();++i){const auto&d=cables_[i];const float w=1.0f+3.0f*(float)d.edge.gain;if((int)i==hovered_){g.setColour(ink);g.strokePath(d.path,juce::PathStrokeType(w+3.0f,juce::PathStrokeType::curved,juce::PathStrokeType::rounded));}g.setColour(d.colour);g.strokePath(d.path,juce::PathStrokeType(w,juce::PathStrokeType::curved,juce::PathStrokeType::rounded));
-  const auto a=field_.toWindow(d.cable.knobAnchor);g.setColour(ground);g.fillEllipse(a.x-10.0f,a.y-10.0f,20.0f,20.0f);g.setColour(d.colour);g.drawEllipse(a.x-10.0f,a.y-10.0f,20.0f,20.0f,hairline);}
+  const float diameter=(float)knobDiameterPixels,radius=diameter/2.0f;const auto a=field_.toWindow(d.cable.knobAnchor);g.setColour(ground);g.fillEllipse(a.x-radius,a.y-radius,diameter,diameter);g.setColour(d.colour);g.drawEllipse(a.x-radius,a.y-radius,diameter,diameter,hairline);}
 }
 void CableLayer::mouseMove(const juce::MouseEvent&e)
 {

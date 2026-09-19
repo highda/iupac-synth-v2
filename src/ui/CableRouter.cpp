@@ -119,7 +119,7 @@ std::vector<Cable> routeCables(std::span<const CableEdge> edges, const std::arra
             return a->edge < b->edge;
         });
         for (std::size_t i = 0; i < users.size(); ++i)
-            users[i]->corridorY = lanePosition(static_cast<int>(i), static_cast<int>(users.size()), low, high, channelInset);
+            users[i]->corridorY = lanePosition(static_cast<int>(i), static_cast<int>(users.size()), low, high, corridorInset);
     };
     assignCorridor(false, 0.0, fieldTop());
     assignCorridor(true, fieldBottom(), referenceHeight);

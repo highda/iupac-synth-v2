@@ -105,6 +105,13 @@ inline constexpr std::array<Slot, slotCount> slotTable {{
     return bottom;
 }
 
+// Smallest vertical scale the live field is ever drawn at: the editor's minimum window is 1000x700
+// and its fixed bands (macro strip, modulator row, lane table, keyboard) leave the field 396 px of
+// the 700 reference units. Overlays painted at a fixed pixel size (the cable gain knob) reserve
+// their room in reference units through this factor; `EditorTests` pins it against the real editor.
+inline constexpr double minimumFieldHeight = 396.0;
+inline constexpr double minimumFieldVerticalScale = minimumFieldHeight / referenceHeight;
+
 // Inter-column channel `c` (0..columnCount-2) is the horizontal gap between column c and c+1.
 struct Channel
 {
