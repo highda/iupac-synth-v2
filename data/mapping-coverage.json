@@ -1,0 +1,43 @@
+{
+  "coverageVersion": 1,
+  "note": "Mapper-coverage invariant, docs/architecture/CHEMISTRY.md#mapper-coverage-invariant (D8, issue #105). Every continuous/discrete/convenience/coefficientArray parameter of the production module catalog has exactly one entry here. status 'mapped' = the production generator assigns it today from the listed drivers and ruleId appears in the generation trace; status 'provisional' = reachable and declared, coefficient explicitly uncalibrated, note names the owning leaf. An empty drivers list is a failure, not a status. Drivers are existing SonicIntent axes (density, brightness, rigidity, roughness, decay, harmonicity, motion) and structuralDetail fields (bondOrderMean, bondOrderSpread, heteroPlacement, motifPlacement); phase 4 adds no new analysis fields.",
+  "entries": [
+    {"module": "harmonic", "parameter": "partialAmplitudes", "status": "mapped", "ruleId": "M1-primary-harmonic", "drivers": ["brightness"], "note": "authored by applyHarmonicSpectrum from tilt"},
+    {"module": "harmonic", "parameter": "partialRatios", "status": "mapped", "ruleId": "M1-primary-harmonic", "drivers": ["rigidity", "bondOrderSpread"], "note": "authored by applyHarmonicSpectrum from inharmonicity"},
+    {"module": "harmonic", "parameter": "partialPans", "status": "provisional", "ruleId": "M1-partial-pan", "drivers": ["motion", "heteroPlacement"], "note": "dead before D8: the generator never authors partial pans. W19 mapping-coverage leaf."},
+    {"module": "harmonic", "parameter": "tilt", "status": "mapped", "ruleId": "M1-primary-harmonic", "drivers": ["brightness"], "note": ""},
+    {"module": "harmonic", "parameter": "inharmonicity", "status": "mapped", "ruleId": "M1-primary-harmonic", "drivers": ["rigidity", "bondOrderSpread"], "note": ""},
+    {"module": "harmonic", "parameter": "outputLevel", "status": "mapped", "ruleId": "M1-primary", "drivers": ["density", "motion"], "note": "primary and secondary roles use different coefficients"},
+
+    {"module": "fm", "parameter": "carrierRatio", "status": "mapped", "ruleId": "M1-primary", "drivers": ["rigidity"], "note": "assigned only when FM is the primary source; the secondary FM role leaves the default"},
+    {"module": "fm", "parameter": "modulatorRatio", "status": "mapped", "ruleId": "M1-primary", "drivers": ["motifPlacement", "heteroPlacement"], "note": ""},
+    {"module": "fm", "parameter": "index", "status": "mapped", "ruleId": "M1-primary", "drivers": ["roughness", "motion"], "note": ""},
+    {"module": "fm", "parameter": "outputLevel", "status": "mapped", "ruleId": "M1-primary", "drivers": ["density", "motion"], "note": ""},
+
+    {"module": "noise", "parameter": "color", "status": "mapped", "ruleId": "M2-noise", "drivers": ["brightness"], "note": ""},
+    {"module": "noise", "parameter": "mode", "status": "mapped", "ruleId": "M2-noise", "drivers": ["decay"], "note": ""},
+    {"module": "noise", "parameter": "burstMs", "status": "mapped", "ruleId": "M2-noise", "drivers": ["decay"], "note": ""},
+    {"module": "noise", "parameter": "outputLevel", "status": "mapped", "ruleId": "M2-noise", "drivers": ["roughness"], "note": ""},
+
+    {"module": "resonator", "parameter": "mode", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["rigidity"], "note": ""},
+    {"module": "resonator", "parameter": "tuneRatio", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["density", "motifPlacement"], "note": ""},
+    {"module": "resonator", "parameter": "combFeedback", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["decay"], "note": ""},
+    {"module": "resonator", "parameter": "modalQ", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["rigidity"], "note": ""},
+    {"module": "resonator", "parameter": "modeRatios", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["bondOrderMean", "heteroPlacement", "motifPlacement"], "note": ""},
+    {"module": "resonator", "parameter": "modeLevels", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["brightness", "bondOrderSpread", "motion"], "note": ""},
+    {"module": "resonator", "parameter": "outputLevel", "status": "provisional", "ruleId": "M3-resonator-level", "drivers": ["density"], "note": "generator writes the fixed value 0.7. W19 mapping-coverage leaf."},
+
+    {"module": "filter", "parameter": "mode", "status": "mapped", "ruleId": "M4-filter", "drivers": ["brightness"], "note": ""},
+    {"module": "filter", "parameter": "cutoff", "status": "mapped", "ruleId": "M4-filter", "drivers": ["brightness"], "note": ""},
+    {"module": "filter", "parameter": "q", "status": "mapped", "ruleId": "M4-filter", "drivers": ["harmonicity"], "note": ""},
+    {"module": "filter", "parameter": "outputLevel", "status": "provisional", "ruleId": "M4-filter-level", "drivers": ["density"], "note": "dead before D8: left at the descriptor default. W19 mapping-coverage leaf."},
+
+    {"module": "shaper", "parameter": "drive", "status": "mapped", "ruleId": "M4-shaper", "drivers": ["roughness", "bondOrderSpread"], "note": ""},
+    {"module": "shaper", "parameter": "wet", "status": "mapped", "ruleId": "M4-shaper", "drivers": ["roughness"], "note": ""},
+    {"module": "shaper", "parameter": "outputLevel", "status": "provisional", "ruleId": "M4-shaper-level", "drivers": ["density"], "note": "dead before D8: left at the descriptor default. W19 mapping-coverage leaf."},
+
+    {"module": "mixer", "parameter": "level", "status": "provisional", "ruleId": "M4-mixer", "drivers": ["density"], "note": "dead before D8: the generator never emits a mixer node. W19 mapping-coverage leaf."},
+    {"module": "mixer", "parameter": "pan", "status": "provisional", "ruleId": "M4-mixer", "drivers": ["motion", "heteroPlacement"], "note": "dead before D8: the generator never emits a mixer node. W19 mapping-coverage leaf."},
+    {"module": "mixer", "parameter": "outputLevel", "status": "provisional", "ruleId": "M4-mixer", "drivers": ["density"], "note": "dead before D8: the generator never emits a mixer node. W19 mapping-coverage leaf."}
+  ]
+}

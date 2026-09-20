@@ -155,6 +155,10 @@ if(BUILD_TESTING)
     add_test(NAME editor-layout-router COMMAND iupac-layout-tests)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
     add_test(NAME render-distance-metric COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_render_distance.py)
+    # Mapper-coverage invariant (#105, D8): every catalog parameter has a mapping entry.
+    # Reads the live catalog through the production CLI, so it guards chemistry-OFF builds too.
+    add_test(NAME mapping-coverage COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_mapping_coverage.py
+        $<TARGET_FILE:iupac-cli> ${CMAKE_SOURCE_DIR}/data/mapping-coverage.json)
     if(IUPAC_ENABLE_CHEMISTRY)
         add_executable(iupac-analysis-tests tests/AnalysisTests.cpp)
         target_compile_features(iupac-analysis-tests PRIVATE cxx_std_20)
