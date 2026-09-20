@@ -1,0 +1,20 @@
+;; Clean-machine isolation profile for the installed macOS arm64 preview (#42).
+;; sandbox-exec is the macOS analogue of the Linux minimal runtime container: the
+;; runner deletes every removable external interpreter, and this profile denies
+;; what SIP prevents deleting plus all networking, so the product can only use
+;; its own private payload.
+(version 1)
+(allow default)
+(deny network*)
+;; SIP-protected interpreters that cannot be removed from the host at all.
+(deny file-read* (literal "/usr/bin/python3") (literal "/usr/bin/python3.9")
+                 (literal "/usr/bin/java") (literal "/usr/bin/javac") (literal "/usr/bin/pip3"))
+(deny file-read* (subpath "/System/Library/Frameworks/Python.framework")
+                 (subpath "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework")
+                 (subpath "/Library/Developer/CommandLineTools/usr/bin"))
+;; Removable on an ephemeral runner, denied here so the owner's own host
+;; reproduces the same gate without deleting their tools.
+(deny file-read* (subpath "/opt/homebrew") (subpath "/usr/local") (subpath "/opt/local")
+                 (subpath "/Library/Java/JavaVirtualMachines") (subpath "/Library/Frameworks/Python.framework"))
+;; No source checkout, build tree or provisioning venv may be reachable.
+(deny file-read* (subpath (param "source-tree")) (subpath (param "provisioning")))

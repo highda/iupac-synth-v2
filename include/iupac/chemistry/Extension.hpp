@@ -54,7 +54,12 @@ struct HelperConfiguration
 {
     std::filesystem::path executable;
     std::filesystem::path resourceRoot;
-    std::chrono::milliseconds deadline{15000};
+    // 45 s, not 15 s: measured first-use cost of a freshly installed private payload
+    // on macOS arm64 (#42, D4 budget). The first execution of the frozen helper after
+    // its files are written takes 15.8 s while the system validates the ~700 Mach-O
+    // files of the RDKit closure, and the first OPSIN run 7.9 s; steady state is 0.2 s
+    // and 5.3 s. CHEMISTRY.md records the same value.
+    std::chrono::milliseconds deadline{45000};
 };
 
 [[nodiscard]] HelperConfiguration locatePackagedHelper(const std::filesystem::path& anchor = {});

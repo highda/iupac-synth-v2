@@ -17,7 +17,9 @@ ANALYSIS_VERSION = 1
 MAX_INPUT_BYTES = 4096
 MAX_RESPONSE_BYTES = 256 * 1024
 MAX_REQUEST_BYTES = 1024 * 1024
-OPSIN_TIMEOUT_SECONDS = 10
+# 25 s, not 10 s: a freshly installed payload's first OPSIN run costs 7.9 s against
+# 5.3 s in steady state on macOS arm64 (#42), inside the 45 s helper deadline.
+OPSIN_TIMEOUT_SECONDS = 25
 OPSIN_SHA256 = "d25bc08f41b8f6fcd6f35e18ab83f3b8d9218cdb003d55c5f74aaefe2e0c68ab"
 
 MOTIFS = (
@@ -50,6 +52,22 @@ def _validate_text(text):
     return text
 
 
+# The frozen payload states where its own artifacts are, relative to the
+# directory holding the frozen executable. The flat payload (Linux VST3
+# resources, Standalone/CLI distribution directory) uses DEFAULT_PAYLOAD_LAYOUT;
+# a macOS bundle splits Mach-O code under Contents/Helpers from pure data under
+# Contents/Resources and ships payload-layout.json to say so. Every artifact is
+# named explicitly so resolution never depends on a case-insensitive filesystem
+# folding "resources" onto a bundle's "Resources" (#42, D4 payload layout).
+PAYLOAD_LAYOUT_FILE = "payload-layout.json"
+PAYLOAD_LAYOUT_KEYS = ("opsinJar", "javaExecutable", "discoveryIndex")
+DEFAULT_PAYLOAD_LAYOUT = {
+    "opsinJar": "../resources/opsin-cli-2.8.0.jar",
+    "javaExecutable": "../java/bin/java",
+    "discoveryIndex": "../resources/discovery/discovery-v1.sqlite3",
+}
+
+
 def _bundle_root():
     """Return the immutable payload root for a frozen helper."""
     if getattr(sys, "frozen", False):
@@ -57,18 +75,36 @@ def _bundle_root():
     return Path(__file__).resolve().parent.parent
 
 
+def _frozen_layout():
+    """Resolve the frozen payload's declared artifact paths to absolute paths."""
+    base = Path(sys.executable).resolve().parent
+    declaration = base / PAYLOAD_LAYOUT_FILE
+    layout = dict(DEFAULT_PAYLOAD_LAYOUT)
+    if declaration.is_file():
+        try:
+            declared = json.loads(declaration.read_text(encoding="utf-8"))
+            entries = {key: declared[key] for key in PAYLOAD_LAYOUT_KEYS}
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            raise InputError("payload layout declaration is damaged: " + str(exc)) from exc
+        if not all(isinstance(value, str) and value for value in entries.values()):
+            raise InputError("payload layout declaration is damaged: entries must be non-empty strings")
+        layout = entries
+    return {key: (base / value).resolve() for key, value in layout.items()}
+
+
 def _payload_paths():
-    root = _bundle_root()
     if getattr(sys, "frozen", False):
-        return root / "resources" / "opsin-cli-2.8.0.jar", root / "java" / "bin" / "java"
+        layout = _frozen_layout()
+        return layout["opsinJar"], layout["javaExecutable"]
+    root = _bundle_root()
     jar = Path(os.environ.get("IUPAC_OPSIN_JAR", root / "third_party" / "opsin" / "opsin-cli-2.8.0.jar"))
     return jar, Path(os.environ.get("IUPAC_JAVA_EXECUTABLE", "java"))
 
 
 def _discovery_path():
-    root = _bundle_root()
     if getattr(sys, "frozen", False):
-        return root / "resources" / "discovery" / "discovery-v1.sqlite3"
+        return _frozen_layout()["discoveryIndex"]
+    root = _bundle_root()
     return Path(os.environ.get("IUPAC_DISCOVERY_INDEX", root / "data" / "discovery" / "discovery-v1.sqlite3"))
 
 

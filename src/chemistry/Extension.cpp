@@ -24,6 +24,8 @@ namespace
 {
 constexpr std::size_t maximumInputBytes = 4096;
 constexpr std::size_t maximumDiagnosticBytes = 64 * 1024;
+// See HelperConfiguration::deadline for the measured first-use evidence behind 45 s.
+constexpr std::chrono::milliseconds helperDeadline{45000};
 
 std::string modeName(InputMode mode) { return mode == InputMode::name ? "name" : "smiles"; }
 std::string validateInput(std::string_view text)
@@ -56,6 +58,24 @@ std::string responseError(std::string_view text)
     }
     return "helper returned an invalid or unsuccessful response";
 }
+#if defined(__APPLE__)
+// macOS bundle probe (#42): resolve the enclosing bundle from the loaded module
+// location, never from the host executable or the working directory, and look for
+// the private payload in that bundle's resources. The payload is one complete
+// tree under Contents/Resources/chemistry, the same layout the Linux VST3 and the
+// CLI distribution directory carry; see the TOOLCHAIN Placement bullet for why a
+// nested-code location does not survive codesign for this payload shape.
+std::vector<std::filesystem::path> bundleHelperCandidates(const std::filesystem::path& start)
+{
+    std::vector<std::filesystem::path> candidates;
+    for (auto directory = start; !directory.empty() && directory != directory.root_path();
+         directory = directory.parent_path()) {
+        if (directory.filename() != "Contents" || !std::filesystem::is_regular_file(directory / "Info.plist")) continue;
+        candidates.push_back(directory / "Resources" / "chemistry" / "helper" / "iupac-analysis-helper");
+    }
+    return candidates;
+}
+#endif
 void closeFd(int& fd) { if (fd >= 0) { ::close(fd); fd = -1; } }
 void appendBounded(std::string& destination, const char* bytes, std::size_t count, std::size_t limit)
 {
@@ -68,18 +88,27 @@ HelperConfiguration locatePackagedHelper(const std::filesystem::path& supplied)
 {
     if (const auto executable = juce::SystemStats::getEnvironmentVariable("IUPAC_CHEMISTRY_HELPER", {}); executable.isNotEmpty()) {
         std::filesystem::path path{executable.toStdString()};
-        return {path, path.parent_path().parent_path(), std::chrono::milliseconds{15000}};
+        return {path, path.parent_path().parent_path(), helperDeadline};
     }
     std::vector<std::filesystem::path> roots;
     if (!supplied.empty()) roots.push_back(supplied);
     if (const auto configured = juce::SystemStats::getEnvironmentVariable("IUPAC_CHEMISTRY_ROOT", {}); configured.isNotEmpty())
         roots.emplace_back(configured.toStdString());
-    roots.emplace_back(juce::File::getSpecialLocation(juce::File::currentExecutableFile).getParentDirectory().getFullPathName().toStdString());
+    const std::filesystem::path module{juce::File::getSpecialLocation(juce::File::currentExecutableFile).getFullPathName().toStdString()};
+#if defined(__APPLE__)
+    std::vector<std::filesystem::path> bundleStarts;
+    for (const auto& root : roots) bundleStarts.push_back(root / "Contents");
+    bundleStarts.push_back(module.parent_path());
+    for (const auto& start : bundleStarts)
+        for (const auto& candidate : bundleHelperCandidates(start))
+            if (std::filesystem::is_regular_file(candidate)) return {candidate, candidate.parent_path().parent_path(), helperDeadline};
+#endif
+    roots.emplace_back(module.parent_path().string());
     for (auto root : roots) {
         for (int up = 0; up < 4; ++up) {
             for (const auto& relative : {std::filesystem::path{"helper/iupac-analysis-helper"}, std::filesystem::path{"Resources/chemistry/helper/iupac-analysis-helper"}, std::filesystem::path{"resources/chemistry/helper/iupac-analysis-helper"}}) {
                 auto executable = root / relative;
-                if (std::filesystem::is_regular_file(executable)) return {executable, executable.parent_path().parent_path(), std::chrono::milliseconds{15000}};
+                if (std::filesystem::is_regular_file(executable)) return {executable, executable.parent_path().parent_path(), helperDeadline};
             }
             root = root.parent_path();
         }

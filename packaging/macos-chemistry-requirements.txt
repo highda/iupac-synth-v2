@@ -1,0 +1,17 @@
+# macOS arm64 chemistry payload interpreter closure (#42).
+#
+# The Debian 12 arm64 payload takes RDKit from the distribution (python3-rdkit
+# 202209.3~dfsg-2). There is no Debian-equivalent wheel, so the macOS payload
+# pins the PyPI wheel of the same upstream release line, 2022.09.3, for the same
+# pinned interpreter line (CPython 3.11). Cross-platform V1 parity against the
+# committed Linux expectations is the acceptance for this pin; a divergence is an
+# architecture-deviation, never a silent version bump.
+rdkit==2022.9.3 --hash=sha256:68b3af3ebbed4165b2c2b6029e0143cf9cd9e41b279bff774cb0c10cac10eff4
+# RDKit's declared runtime dependencies. numpy is loaded by the production
+# helper's descriptor path, so it is pinned to Debian 12's 1.24 line rather than
+# the provisioning venv's numpy 2: RDKit 2022.09 predates the numpy 2 C API and
+# reaches numpy.core directly, and V1 parity is measured against the Debian
+# payload. Pillow is only reachable from rdkit.Chem.Draw, which the helper never
+# imports and the spec excludes from the frozen payload.
+numpy==1.24.2 --hash=sha256:4173bde9fa2a005c2c6e2ea8ac1618e2ed2c1c6ec8a7657237854d42094123a0
+pillow==12.3.0 --hash=sha256:37d6d0a00072fd2948eb22bce7e1475f34569d90c87c59f7a2ec59541b77f7a6

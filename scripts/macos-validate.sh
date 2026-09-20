@@ -8,10 +8,18 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 build_dir=${1:-$repo_root/build/mac-synth}
 output_dir=${2:-$repo_root/out/macos}
 artefacts="$build_dir/IupacSynth2_artefacts/Release"
-vst3="$artefacts/VST3/IUPAC Synth 2.vst3"
-component="$artefacts/AU/IUPAC Synth 2.component"
-app="$artefacts/Standalone/IUPAC Synth 2.app"
-cli="$build_dir/iupac-cli"
+# The bundles under test default to the ones this build produced, but #42 points
+# them at the staged chemistry-ON product so the validated bundles and the
+# archived ones are the same files, payload included.
+vst3=${IUPAC_VALIDATE_VST3:-$artefacts/VST3/IUPAC Synth 2.vst3}
+component=${IUPAC_VALIDATE_AU:-$artefacts/AU/IUPAC Synth 2.component}
+app=${IUPAC_VALIDATE_APP:-$artefacts/Standalone/IUPAC Synth 2.app}
+cli=${IUPAC_VALIDATE_CLI:-$build_dir/iupac-cli}
+expected_chemistry=${IUPAC_VALIDATE_CHEMISTRY:-false}
+# When a staged product prefix is named, the retained artifacts and the downloadable
+# archive are that complete distribution directory, payload included (#42), rather
+# than the bare bundles of a build tree.
+staged_prefix=${IUPAC_VALIDATE_PREFIX:-}
 pluginval="$repo_root/build/pluginval/pluginval_artefacts/Release/pluginval.app/Contents/MacOS/pluginval"
 components_dir="$HOME/Library/Audio/Plug-Ins/Components"
 
@@ -28,7 +36,7 @@ test "$(plist "$component" AudioComponents:0:type)" = aumu
 test "$(plist "$component" AudioComponents:0:subtype)" = Iup2
 test "$(plist "$component" AudioComponents:0:manufacturer)" = Iups
 test "$(plist "$component" AudioComponents:0:name)" = 'HighDA: IUPAC Synth 2'
-if grep -rIl --exclude='*.json' Iup1 "$artefacts" "$cli"; then echo 'v1 identifier Iup1 found in artifacts' >&2; exit 1; fi
+if grep -rIl --exclude='*.json' Iup1 "$vst3" "$component" "$app" "$cli"; then echo 'v1 identifier Iup1 found in artifacts' >&2; exit 1; fi
 if grep -a -c Iup1 "$vst3/Contents/MacOS/IUPAC Synth 2" "$component/Contents/MacOS/IUPAC Synth 2" "$app/Contents/MacOS/IUPAC Synth 2" "$cli" | grep -v ':0$'; then
     echo 'v1 identifier Iup1 found in binaries' >&2; exit 1
 fi
@@ -64,18 +72,23 @@ wait "$standalone_pid" || true
 printf 'standalone launched for 8 s and exited on SIGTERM\n' | tee -a "$output_dir/standalone.log"
 
 "$cli" > "$output_dir/product.json"
-jq -e '.product == "IUPAC Synth 2" and .architecture == 3 and .chemistryEnabled == false' "$output_dir/product.json" >/dev/null
+jq -e --argjson chemistry "$expected_chemistry" \
+    '.product == "IUPAC Synth 2" and .architecture == 3 and .chemistryEnabled == $chemistry' \
+    "$output_dir/product.json" >/dev/null
 
 rm -rf "$output_dir/artifacts"; mkdir -p "$output_dir/artifacts"
-cp -R "$vst3" "$component" "$app" "$output_dir/artifacts/"
-cp "$cli" "$output_dir/artifacts/iupac-cli"
+if [[ -n "$staged_prefix" ]]; then
+    cp -R "$staged_prefix"/. "$output_dir/artifacts/"
+else
+    cp -R "$vst3" "$component" "$app" "$output_dir/artifacts/"
+    cp "$cli" "$output_dir/artifacts/iupac-cli"
+fi
 (cd "$output_dir/artifacts" && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 > ../artifacts.sha256)
 # Downloadable bundle archive for the pre-release (#59): bsdtar keeps bundle structure, symlinks and
 # executable bits, which the Actions artifact zip does not; no AppleDouble/xattr side files.
 bundle_archive=IUPAC-Synth-2-Preview-macos-arm64.tar.gz
 rm -f "$output_dir/$bundle_archive" "$output_dir/$bundle_archive.sha256"
-(cd "$output_dir/artifacts" && COPYFILE_DISABLE=1 tar --no-mac-metadata --no-xattrs -czf "../$bundle_archive" \
-    'IUPAC Synth 2.vst3' 'IUPAC Synth 2.component' 'IUPAC Synth 2.app' iupac-cli)
+(cd "$output_dir/artifacts" && COPYFILE_DISABLE=1 tar --no-mac-metadata --no-xattrs -czf "../$bundle_archive" .)
 (cd "$output_dir" && shasum -a 256 "$bundle_archive" > "$bundle_archive.sha256" && shasum -a 256 -c "$bundle_archive.sha256")
 git -C "$repo_root" rev-parse HEAD > "$output_dir/commit.txt"
 { sw_vers; uname -m; clang --version | head -1; } > "$output_dir/host.txt"

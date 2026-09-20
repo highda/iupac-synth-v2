@@ -70,3 +70,85 @@ jobs:
           path: out/macos/
           if-no-files-found: error
           retention-days: 30
+
+  delivery:
+    name: Self-contained payload, bundle staging and installed V10 (macOS arm64)
+    # #42. Ephemeral runner only: the clean-machine step deletes every removable
+    # external Python/Java, which is why it is refused unless CI is true.
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - name: Check out source
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Record runner identity
+        run: |
+          [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 ]
+          mkdir -p out/macos-delivery
+          { sw_vers; uname -m; xcodebuild -version; clang --version; cmake --version; } | tee out/macos-delivery/runner-identity.txt
+
+      - name: Install the pinned payload prerequisites
+        run: |
+          command -v ninja >/dev/null || brew install ninja
+          brew install python@3.11 openjdk@17
+          echo "PAYLOAD_PYTHON=$(brew --prefix python@3.11)/bin/python3.11" >> "$GITHUB_ENV"
+          echo "PAYLOAD_JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home" >> "$GITHUB_ENV"
+          { "$(brew --prefix python@3.11)/bin/python3.11" --version
+            "$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home/bin/java" -version 2>&1
+          } | tee -a out/macos-delivery/runner-identity.txt
+
+      - name: Build and verify the private chemistry payload
+        run: |
+          PYTHON="$PAYLOAD_PYTHON" JAVA_HOME="$PAYLOAD_JAVA_HOME" ./packaging/build-runtime-macos.sh
+          cp out/iupac-chemistry-macos/package-report.json out/macos-delivery/package-report.json
+
+      - name: Build and test mac-release with the payload interpreter, and pluginval
+        # The payload venv, not a fresh one: the helper-dependent CTest cases run the
+        # production helper, so they need the interpreter closure the payload pins.
+        run: |
+          export PATH="$PWD/build/package-macos/venv/bin:$PATH" VIRTUAL_ENV="$PWD/build/package-macos/venv"
+          cmake --preset mac-release
+          cmake --build --preset mac-release --parallel 4
+          ctest --preset mac-release --output-on-failure 2>&1 | tee out/macos-delivery/mac-release-ctest.log
+          IUPAC_BUILD_JOBS=4 ./scripts/build-pluginval.sh
+
+      - name: Cross-platform V1 parity against the Linux arm64 expectations
+        run: |
+          ./tools/verify_panel_parity.py --cli build/mac-release/iupac-cli \
+            --helper-root "$PWD/out/iupac-chemistry-macos" \
+            --report out/macos-delivery/parity-report.json
+
+      - name: Stage the complete product
+        run: |
+          ./packaging/stage-product-macos.sh build/mac-release out/iupac-chemistry-macos \
+            "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS"
+          cp "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS/install-report.json" out/macos-delivery/
+          cp "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS/install-manifest.sha256" out/macos-delivery/
+          cp "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS.tar.gz.sha256" out/macos-delivery/
+
+      - name: Remove every removable external interpreter from the runner
+        env:
+          IUPAC_DESTRUCTIVE_RUNNER: '1'
+        run: ./packaging/macos-clean-machine.sh out/macos-delivery/clean-machine-inventory.txt
+
+      - name: Installed V10 analogue, network denied
+        run: |
+          ./packaging/test-verify-installed-macos.sh
+          ./packaging/verify-installed-macos.sh "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS" \
+            out/macos-delivery/v10-report.json
+          cat out/macos-delivery/v10-report.json
+
+      - name: Write artifact manifest
+        run: |
+          printf '%s\n' '${{ github.event.pull_request.head.sha || github.sha }}' > out/macos-delivery/head-commit.txt
+          (cd out/macos-delivery && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 > ../macos-delivery-manifest.sha256)
+          mv out/macos-delivery-manifest.sha256 out/macos-delivery/manifest.sha256
+          cat out/macos-delivery/manifest.sha256
+
+      - name: Upload retained delivery reports
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: iupac-synth-2-macos-delivery-${{ github.event.pull_request.head.sha || github.sha }}
+          path: out/macos-delivery/
+          if-no-files-found: error
+          retention-days: 30

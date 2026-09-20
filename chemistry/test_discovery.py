@@ -37,8 +37,26 @@ class DiscoveryTests(unittest.TestCase):
         source={"schemaVersion":1,"sourceId":"Q1","revision":2,"retrievedAt":"2026-09-15T00:00:00Z","structure":"CCO","referenceStructure":"CCN","structureFormat":"smiles","names":[{"language":"en","value":"shared"}],"categories":[]}
         self.assertEqual(discovery.convert_record(source)["validationStatus"],"conflict")
         source.pop("referenceStructure"); source["inchiKey"]="LFQSCWFLJHTTHZ-UHFFFAOYSA-N"
-        with self.assertRaisesRegex(discovery.DiscoveryError,"InChIKey support"):
-            discovery.convert_record(source)
+        # Debian's python3-rdkit is built without InChI, the macOS arm64 wheel with it
+        # (#42). Either way a claimed InChIKey may never be accepted silently: a build
+        # that cannot derive one refuses the record, and a build that can performs the
+        # cross-check and records the disagreement.
+        try:
+            from rdkit.Chem import inchi
+            derives_keys = hasattr(inchi, "MolToInchiKey") and bool(inchi.MolToInchiKey(discovery.Chem.MolFromSmiles("CCO")))
+        except Exception:
+            derives_keys = False
+        if derives_keys:
+            # LFQSCWFLJHTTHZ-UHFFFAOYSA-N is ethanol's real key, so the cross-check
+            # accepts it and rejects a wrong one.
+            self.assertEqual(discovery.convert_record(source)["validationStatus"], "validated")
+            wrong = dict(source, inchiKey="QTBSBXVTEAMEQO-UHFFFAOYSA-N")
+            converted = discovery.convert_record(wrong)
+            self.assertEqual(converted["validationStatus"], "conflict")
+            self.assertTrue(any("InChIKey" in x for x in converted["diagnostics"]))
+        else:
+            with self.assertRaisesRegex(discovery.DiscoveryError,"InChIKey support"):
+                discovery.convert_record(source)
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/"cache.db"; cache=discovery.DiscoveryCache(path,"data-1","rdkit-1")
             self.assertIsNone(cache.get("x")); self.assertTrue(cache.put("x",{"ids":[1]})); self.assertEqual(cache.get("x"),{"ids":[1]})

@@ -2,6 +2,8 @@
 
 #include <chrono>
 #include <condition_variable>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <mutex>
 
@@ -22,6 +24,26 @@ int main(int argc, char** argv)
     HelperConfiguration missing{"/definitely/missing/iupac-helper", {}, 50ms};
     ok &= expect(invokeHelper(missing, InputMode::smiles, "CCO", "missing").error.find("repair or reinstall") != std::string::npos, "corrupt install has a distinct recovery diagnostic");
     auto shortDeadline=configuration;shortDeadline.deadline=100ms;const auto deadlineStart=std::chrono::steady_clock::now();auto hung=invokeHelper(shortDeadline,InputMode::smiles,"closed-stream-hang","hung");ok&=expect(!hung&&hung.error.find("deadline")!=std::string::npos&&std::chrono::steady_clock::now()-deadlineStart<1s,"closed output cannot bypass deadline and tree cleanup");
+
+#if defined(__APPLE__)
+    {   // #42: the macOS bundle probe resolves the payload from the bundle itself,
+        // not from a working directory, and only for a real bundle.
+        const auto enclosing = std::filesystem::temp_directory_path() / "iupac bundle probe";
+        const auto bundle = enclosing / "IUPAC Synth 2.vst3";
+        const auto expected = bundle / "Contents/Resources/chemistry/helper/iupac-analysis-helper";
+        std::filesystem::remove_all(enclosing);
+        std::filesystem::create_directories(expected.parent_path());
+        std::ofstream(bundle / "Contents/Info.plist") << "<plist version=\"1.0\"><dict/></plist>\n";
+        std::filesystem::copy_file(argv[1], expected);
+        const auto located = locatePackagedHelper(bundle);
+        ok &= expect(located.executable == expected, "bundle probe finds the payload in the bundle's resources");
+        auto fromBundle = invokeHelper({located.executable, located.resourceRoot, 2s}, InputMode::smiles, "CCO", "bundle");
+        ok &= expect(fromBundle && fromBundle.analysis->canonicalIsomericSmiles == "CCO", "the payload found in a bundle answers");
+        std::filesystem::remove(bundle / "Contents/Info.plist");
+        ok &= expect(locatePackagedHelper(bundle).executable.empty(), "a directory without Info.plist is not treated as a bundle");
+        std::filesystem::remove_all(enclosing);
+    }
+#endif
 
     std::mutex mutex; std::condition_variable wake; std::optional<ApplyResult> completed;
     {

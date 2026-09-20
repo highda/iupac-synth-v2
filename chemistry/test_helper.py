@@ -86,5 +86,52 @@ class HelperTests(unittest.TestCase):
                     os.environ[name] = value
 
 
+class PayloadLayoutTests(unittest.TestCase):
+    """#42: a frozen payload states where its own artifacts are."""
+
+    def setUp(self):
+        import tempfile
+        self.temp = tempfile.TemporaryDirectory()
+        # resolve(): /tmp is a symlink to /private/tmp on macOS.
+        self.root = helper.Path(self.temp.name).resolve()
+        (self.root / "helper").mkdir()
+        self.executable = self.root / "helper" / "iupac-analysis-helper"
+        self.executable.write_text("")
+        self.old = (getattr(sys, "frozen", None), sys.executable)
+        sys.frozen = True
+        sys.executable = str(self.executable)
+
+    def tearDown(self):
+        if self.old[0] is None:
+            del sys.frozen
+        else:
+            sys.frozen = self.old[0]
+        sys.executable = self.old[1]
+        self.temp.cleanup()
+
+    def test_default_flat_layout_resolves_beside_the_executable(self):
+        jar, java = helper._payload_paths()
+        self.assertEqual(jar, self.root / "resources" / "opsin-cli-2.8.0.jar")
+        self.assertEqual(java, self.root / "java" / "bin" / "java")
+        self.assertEqual(helper._discovery_path(), self.root / "resources" / "discovery" / "discovery-v1.sqlite3")
+
+    def test_declared_layout_is_honoured_without_filesystem_case_folding(self):
+        (self.root / "helper" / helper.PAYLOAD_LAYOUT_FILE).write_text(json.dumps({
+            "schemaVersion": 1, "layout": "test",
+            "opsinJar": "../../Resources/chemistry/resources/opsin-cli-2.8.0.jar",
+            "javaExecutable": "../java/bin/java",
+            "discoveryIndex": "../../Resources/chemistry/resources/discovery/discovery-v1.sqlite3"}))
+        jar, java = helper._payload_paths()
+        self.assertEqual(jar, (self.root.parent / "Resources/chemistry/resources/opsin-cli-2.8.0.jar").resolve())
+        self.assertEqual(java, self.root / "java" / "bin" / "java")
+        self.assertEqual(helper._discovery_path(),
+                         (self.root.parent / "Resources/chemistry/resources/discovery/discovery-v1.sqlite3").resolve())
+
+    def test_damaged_declaration_is_a_bounded_input_error(self):
+        (self.root / "helper" / helper.PAYLOAD_LAYOUT_FILE).write_text('{"opsinJar": 4}')
+        with self.assertRaises(helper.InputError):
+            helper._payload_paths()
+
+
 if __name__ == "__main__":
     unittest.main()
