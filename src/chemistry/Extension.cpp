@@ -213,8 +213,20 @@ juce::var makeProvenance(const ApplyResult& value)
     object->setProperty("mappingTrace", value.trace.clone()); return root;
 }
 
-ExtensionCoordinator::ExtensionCoordinator(HelperConfiguration configuration, Completion completion)
-    : configuration_(std::move(configuration)), completion_(std::move(completion)), worker_([this](std::stop_token stop){ run(stop); }) {}
+std::string_view stageDescription(Stage stage) noexcept
+{
+    switch (stage) {
+        case Stage::warming:    return "Preparing the chemistry helper for its first use...";
+        case Stage::analysing:  return "Analyzing the molecule...";
+        case Stage::generating: return "Generating the patch...";
+        case Stage::idle:       break;
+    }
+    return "Ready";
+}
+
+ExtensionCoordinator::ExtensionCoordinator(HelperConfiguration configuration, Completion completion, Progress progress)
+    : configuration_(std::move(configuration)), completion_(std::move(completion)), progress_(std::move(progress)),
+      worker_([this](std::stop_token stop){ run(stop); }) {}
 ExtensionCoordinator::~ExtensionCoordinator() { cancel(); worker_.request_stop(); wake_.notify_all(); }
 std::uint64_t ExtensionCoordinator::apply(InputMode mode, std::string input)
 {
@@ -222,23 +234,63 @@ std::uint64_t ExtensionCoordinator::apply(InputMode mode, std::string input)
     { std::scoped_lock lock(mutex_); generation = generation_.fetch_add(1) + 1; pending_ = Request{generation, mode, std::move(input)}; }
     wake_.notify_all(); return generation;
 }
-void ExtensionCoordinator::cancel() { { std::scoped_lock lock(mutex_); generation_.fetch_add(1); pending_.reset(); } wake_.notify_all(); }
+void ExtensionCoordinator::prewarm()
+{
+    { std::scoped_lock lock(mutex_); if (warmRequested_ || warmed_.load()) return; warmRequested_ = true; }
+    wake_.notify_all();
+}
+void ExtensionCoordinator::cancel() { { std::scoped_lock lock(mutex_); generation_.fetch_add(1); pending_.reset(); warmRequested_ = false; } wake_.notify_all(); }
+void ExtensionCoordinator::publishStage(Stage stage, std::uint64_t generation)
+{
+    stage_.store(stage);
+    if (progress_) progress_(stage, generation);
+}
+void ExtensionCoordinator::runWarmUp(std::stop_token stop)
+{
+    // The warm-up carries no user input and never publishes a document. Its only
+    // effect is that the payload has already been executed once by the time the user
+    // applies anything; a failure is not worth reporting, because the analysis that
+    // follows reports the same failure with the user's own input attached.
+    const auto expected = generation_.load();
+    publishStage(Stage::warming, expected);
+    std::stop_source operationStop; std::stop_callback stopWorker(stop, [&]{ operationStop.request_stop(); });
+    std::jthread cancellationWatcher([this, expected, &operationStop](std::stop_token watcherStop){
+        while (!watcherStop.stop_requested() && generation_.load() == expected) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        if (!watcherStop.stop_requested()) operationStop.request_stop();
+    });
+    auto request = juce::var(new juce::DynamicObject);
+    auto* object = request.getDynamicObject();
+    object->setProperty("protocolVersion", protocolVersion);
+    object->setProperty("requestId", "warm");
+    object->setProperty("action", "warm");
+    const auto reply = invokeProtocol(configuration_, request, operationStop.get_token());
+    cancellationWatcher.request_stop();
+    if (reply) warmed_.store(true);
+    // Report idle against the generation the warm-up started with, so an apply() that
+    // arrived while it ran (and bumped the generation) is not mistaken for finished work.
+    publishStage(Stage::idle, expected);
+}
 void ExtensionCoordinator::run(std::stop_token stop)
 {
     while (!stop.stop_requested()) {
-        std::optional<Request> request;
-        { std::unique_lock lock(mutex_); wake_.wait(lock, stop, [this]{ return pending_.has_value(); }); if (stop.stop_requested()) return; request = std::move(pending_); pending_.reset(); }
+        std::optional<Request> request; bool warmUp = false;
+        { std::unique_lock lock(mutex_); wake_.wait(lock, stop, [this]{ return pending_.has_value() || warmRequested_; }); if (stop.stop_requested()) return;
+          if (pending_.has_value()) { request = std::move(pending_); pending_.reset(); } else { warmUp = true; warmRequested_ = false; } }
+        if (warmUp) { runWarmUp(stop); continue; }
         std::stop_source operationStop; std::stop_callback stopWorker(stop, [&]{ operationStop.request_stop(); });
         std::jthread cancellationWatcher([this, expected=request->generation, &operationStop](std::stop_token watcherStop){
             while (!watcherStop.stop_requested() && generation_.load() == expected) std::this_thread::sleep_for(std::chrono::milliseconds(10));
             if (!watcherStop.stop_requested()) operationStop.request_stop();
         });
         ApplyResult result; result.generation=request->generation; result.mode=request->mode; result.input=request->input;
+        publishStage(Stage::analysing, request->generation);
         auto reply=invokeHelper(configuration_,request->mode,request->input,std::to_string(request->generation),operationStop.get_token());
         cancellationWatcher.request_stop();
-        if (reply) { auto generated=generate(*reply.analysis); result.analysis=reply.analysis; result.helperResponse=reply.response;
+        if (reply) { warmed_.store(true); publishStage(Stage::generating, request->generation);
+            auto generated=generate(*reply.analysis); result.analysis=reply.analysis; result.helperResponse=reply.response;
             if (generated) { result.intent=generated.intent; result.patch=generated.patch; result.trace=generated.trace; } else result.error=generated.error;
         } else result.error=reply.error;
+        publishStage(Stage::idle, request->generation);
         if (generation_.load() == request->generation && completion_) completion_(std::move(result));
     }
 }

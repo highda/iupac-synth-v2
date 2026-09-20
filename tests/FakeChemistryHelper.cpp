@@ -1,5 +1,6 @@
 #include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -12,6 +13,15 @@ int main()
     const auto begin = request.find('"', marker + 12), end = request.find('"', begin + 1);
     const auto requestId = request.substr(begin + 1, end - begin - 1);
     if (request.find("closed-stream-hang") != std::string::npos) { std::fclose(stdout); std::fclose(stderr); std::this_thread::sleep_for(std::chrono::seconds(5)); return 0; }
+    // #97 pre-warm: answer the warm action the coordinator sends before any user input,
+    // after an optional delay that stands in for a real payload's first-execution cost.
+    if (request.find("\"action\":\"warm\"") != std::string::npos) {
+        if (const auto* delay = std::getenv("IUPAC_FAKE_WARM_DELAY_MS"))
+            std::this_thread::sleep_for(std::chrono::milliseconds(std::atoi(delay)));
+        std::cout << "{\"protocolVersion\":1,\"requestId\":\"" << requestId
+                  << "\",\"status\":\"ok\",\"warm\":{\"discovery\":\"ok\",\"opsin\":\"ok\"}}";
+        return 0;
+    }
     if (request.find("slow") != std::string::npos) std::this_thread::sleep_for(std::chrono::seconds(5));
     if (request.find("reject") != std::string::npos) {
         std::cout << "{\"diagnostic\":\"unsupported fixture\",\"protocolVersion\":1,\"requestId\":\"" << requestId << "\",\"status\":\"error\"}";

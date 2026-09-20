@@ -8,8 +8,12 @@ a = Analysis(
     pathex=[".."],
     binaries=rdkit_bins,
     datas=rdkit_data,
-    hiddenimports=["discovery", "resolution", "rdkit.Chem.Crippen", "rdkit.Chem.Descriptors", "rdkit.Chem.Lipinski", "rdkit.Chem.rdMolDescriptors"],
-    excludes=["tkinter", "pytest"],
+    hiddenimports=["discovery", "resolution", "rdkit.Chem.rdMolDescriptors"],
+    # numpy and PIL are reachable only through rdkit.Chem.Crippen/Descriptors/Lipinski,
+    # which chemistry/helper.py no longer imports. Excluding them removes 18 of the 95
+    # Mach-O files one analysis maps, each of which macOS evaluates individually on first
+    # execution (#97, docs/chemistry-cold-start.md). Analysis output is unchanged.
+    excludes=["tkinter", "pytest", "numpy", "PIL"],
     noarchive=False,
 )
 pyz = PYZ(a.pure)

@@ -6,9 +6,11 @@
 #if IUPAC_ENABLE_CHEMISTRY
 #include "ChemistryPopup.hpp"
 #endif
+#include <chrono>
 #include <cmath>
 #include <filesystem>
 #include <iostream>
+#include <cstdlib>
 namespace
 {
 bool expect(bool c,const char*m){if(!c)std::cerr<<"editor test failed: "<<m<<'\n';return c;}
@@ -50,9 +52,37 @@ int screenshots(const std::filesystem::path&dir)
  editor.setVisible(false);return ok?0:1;
 }
 }
+#if IUPAC_ENABLE_CHEMISTRY
+// Find a production component by the accessibility name the popup already sets on it, so
+// these tests drive the same widgets the user does rather than test-only handles.
+template<typename Component> Component* named(juce::Component& parent, juce::StringRef name)
+{
+ for(auto*child:parent.getChildren()){if(child->getName()==name)if(auto*typed=dynamic_cast<Component*>(child))return typed;
+  if(auto*found=named<Component>(*child,name))return found;}
+ return nullptr;
+}
+juce::TextButton* labelled(juce::Component& parent, juce::StringRef text)
+{
+ for(auto*child:parent.getChildren()){if(auto*button=dynamic_cast<juce::TextButton*>(child))if(button->getButtonText()==text)return button;
+  if(auto*found=labelled(*child,text))return found;}
+ return nullptr;
+}
+// Press a production button the way a user does: enter, press, release. Button narrows
+// these to protected overrides, so they are called through the Component interface.
+void click(juce::Button& button)
+{
+ juce::Component& component=button;const auto at=centreOf(component);
+ component.mouseEnter(event(component,at));component.mouseDown(event(component,at));component.mouseUp(event(component,at));
+}
+#endif
 int main(int argc,char**argv)
 {
  juce::ScopedJuceInitialiser_GUI gui;if(argc==3&&std::string_view(argv[1])=="--screenshot")return screenshots(argv[2]);
+#if IUPAC_ENABLE_CHEMISTRY
+ // argv[1] is the fake helper: point the production locator at it before the processor is
+ // built, so the popup exercises the real spawn/poll path against a deliberately slow helper.
+ if(argc==2)::setenv("IUPAC_CHEMISTRY_HELPER",argv[1],1);
+#endif
  bool ok=true;IupacSynthProcessor processor;processor.prepareToPlay(48000,128);
  ok&=expect(processor.editPatch([](auto&p){p.nodes.clear();p.edges.clear();p.matrix.clear();}).empty(),"empty valid patch accepted");
  auto editor=std::make_unique<IupacSynthEditor>(processor);editor->setVisible(true);
@@ -161,6 +191,40 @@ field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effec
  editor=std::make_unique<IupacSynthEditor>(processor);editor->setVisible(true);block();ok&=expect(processor.activeVoiceCount()>0&&editor->field().slot(0).active(),"reopened editor shows the document and keeps the note");processor.keyboardState().allNotesOff(1);
 #if IUPAC_ENABLE_CHEMISTRY
  {ChemistryPopup popup(processor);popup.setVisible(true);ok&=expect(popup.getWidth()>0,"chemistry popup constructs in the extension build");}
+ // #97: a slow helper must not become a frozen editor. Apply hands the work to the
+ // coordinator's worker and returns; the popup stays open, says which stage it is in,
+ // keeps its input, and Cancel is the way out.
+ if(argc==2)
+ {
+  ChemistryPopup popup(processor);popup.setVisible(true);
+  auto*input=named<juce::TextEditor>(popup,"Molecular input");auto*status=named<juce::Label>(popup,"Chemistry status");
+  auto*apply=labelled(popup,"apply");auto*cancel=labelled(popup,"cancel");
+  ok&=expect(input!=nullptr&&status!=nullptr&&apply!=nullptr&&cancel!=nullptr,"the popup exposes its molecular input, status and buttons");
+  if(input&&status&&apply&&cancel)
+  {
+   input->setText("slow");
+   const auto pressed=std::chrono::steady_clock::now();
+   click(*apply);
+   const auto waited=std::chrono::steady_clock::now()-pressed;
+   // One frame at the editor's 30 Hz refresh is 33 ms; the helper fixture sleeps 5 s.
+   ok&=expect(waited<std::chrono::milliseconds(33),"Apply never waits for the helper on the message thread");
+   ok&=expect(popup.isVisible(),"the popup stays open while its request runs");
+   ok&=expect(!apply->isEnabled(),"Apply is unavailable while its own request is in flight");
+   ok&=expect(input->getText()=="slow","the pending popup keeps the input that is being analysed");
+   ok&=expect(processor.chemistryStatus().busy,"the processor reports the request as busy");
+   ok&=expect(status->getText().isNotEmpty()&&status->getText()!="Ready","the popup shows the stage it is waiting in");
+   // Let the popup's own 10 Hz refresh run. A helper that has not answered yet must leave
+   // the popup pending; only a finished request may release it.
+   tick();
+   ok&=expect(!apply->isEnabled()&&popup.isVisible()&&processor.chemistryStatus().busy,"a helper that has not answered leaves the popup pending, not closed");
+   ok&=expect(status->getText()==juce::String(std::string(chemistry::stageDescription(chemistry::Stage::analysing))),"the pending status names the stage the coordinator reports");
+   const auto cancelled=std::chrono::steady_clock::now();
+   click(*cancel);
+   ok&=expect(std::chrono::steady_clock::now()-cancelled<std::chrono::milliseconds(33),"Cancel never waits on the message thread either");
+   ok&=expect(apply->isEnabled()&&popup.isVisible(),"cancelling returns the open popup to an interactive state");
+   ok&=expect(!processor.chemistryStatus().busy,"a cancelled request is no longer busy");
+  }
+ }
 #endif
  editor->setVisible(false);editor.reset();return ok?0:1;
 }

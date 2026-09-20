@@ -12,7 +12,10 @@ public:
  std::function<void()>onClose;std::function<void(const std::string&,juce::String)>onResult;
 private:
  void timerCallback()override;void close();
- IupacSynthProcessor&owner_;iupac::ui::SegmentToggle mode_{{"name","smiles"}};juce::TextEditor input_,trace_,query_;juce::TextButton apply_{"apply"},reapply_{"reapply"},cancel_{"cancel"},inspector_{"inspector"},search_{"search"},cached_{"cached"},clearCache_{"clear cache"},open_{"apply / reopen"},closeButton_{"close"};juce::Label status_,metadata_;juce::ComboBox results_;juce::Array<juce::var>candidates_;std::uint64_t shownChemistryGeneration_{},shownDiscoveryGeneration_{};juce::Rectangle<int>browserTitle_;
+ // Reflect a request that is still running: the popup stays open and interactive,
+ // Apply is unavailable while its own request is in flight, and Cancel is the way out (#97).
+ void showPending(bool);
+ IupacSynthProcessor&owner_;iupac::ui::SegmentToggle mode_{{"name","smiles"}};juce::TextEditor input_,trace_,query_;juce::TextButton apply_{"apply"},reapply_{"reapply"},cancel_{"cancel"},inspector_{"inspector"},search_{"search"},cached_{"cached"},clearCache_{"clear cache"},open_{"apply / reopen"},closeButton_{"close"};juce::Label status_,metadata_;juce::ComboBox results_;juce::Array<juce::var>candidates_;std::uint64_t shownChemistryGeneration_{},shownDiscoveryGeneration_{},awaitedGeneration_{};bool awaiting_{};juce::Rectangle<int>browserTitle_;
 };
 // Modal dialog that still lets the audition keyboard receive mouse events while the popup is open.
 class ChemistryDialog final:public juce::DialogWindow

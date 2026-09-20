@@ -18,9 +18,9 @@ public:
  [[nodiscard]]std::string editPatch(const std::function<void(iupac::domain::Patch&)>&);[[nodiscard]]std::string saveStateFile(const std::filesystem::path&)const;[[nodiscard]]std::string loadStateFile(const std::filesystem::path&);[[nodiscard]]std::vector<std::filesystem::path> presetFiles(const std::filesystem::path&)const;
  [[nodiscard]]juce::MidiKeyboardState& keyboardState()noexcept{return keyboardState_;}[[nodiscard]]float outputPeak()const noexcept{return outputPeak_.load(std::memory_order_relaxed);}[[nodiscard]]std::size_t activeVoiceCount()const noexcept{return coordinator_.activeVoiceCount();}[[nodiscard]]iupac::engine::PatchCoordinator::Status publicationStatus()const noexcept{return coordinator_.status();}[[nodiscard]]iupac::engine::EffectiveValues effectiveValues()const noexcept{return coordinator_.effectiveValues();}
 #if IUPAC_ENABLE_CHEMISTRY
- struct ChemistryStatus{bool busy{};std::uint64_t generation{};std::string text{"Ready"};juce::String trace;};
+ struct ChemistryStatus{bool busy{};std::uint64_t generation{};std::string text{"Ready"};juce::String trace;iupac::chemistry::Stage stage{iupac::chemistry::Stage::idle};bool failed{};};
  struct DiscoveryStatus{bool busy{};std::uint64_t generation{};std::string text{"Ready"};juce::var result;};
- std::uint64_t applyChemistry(iupac::chemistry::InputMode,std::string);std::string reapplyChemistry();void cancelChemistry();[[nodiscard]]ChemistryStatus chemistryStatus()const;
+ std::uint64_t applyChemistry(iupac::chemistry::InputMode,std::string);std::string reapplyChemistry();void cancelChemistry();void prewarmChemistry();[[nodiscard]]ChemistryStatus chemistryStatus()const;
  std::uint64_t searchDiscovery(std::string,bool prefix=true);std::uint64_t inspectGeneratedCache();std::string clearGeneratedCache();std::string applyDiscovery(const juce::var&);void cancelDiscovery();[[nodiscard]]DiscoveryStatus discoveryStatus()const;
 #endif
 private:

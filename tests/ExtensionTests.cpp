@@ -1,11 +1,13 @@
 #include "iupac/chemistry/Extension.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <condition_variable>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <mutex>
+#include <vector>
 
 namespace { bool expect(bool condition, const char* message) { if (!condition) std::cerr << "extension test failed: " << message << '\n'; return condition; } }
 
@@ -57,5 +59,51 @@ int main(int argc, char** argv)
     const auto start = std::chrono::steady_clock::now();
     { ExtensionCoordinator coordinator(configuration, [](ApplyResult){}); coordinator.apply(InputMode::smiles, "slow"); }
     ok &= expect(std::chrono::steady_clock::now() - start < 1s, "teardown cancels and reaps an active helper tree");
+
+    // #97 pre-warm. The payload's first execution costs 13-30 s on a fresh macOS install
+    // (docs/chemistry-cold-start.md); prewarm() pays it on the worker before the user asks
+    // for anything, and never blocks the caller.
+    {
+        std::mutex stageMutex; std::vector<Stage> stages;
+        ExtensionCoordinator coordinator(configuration, [](ApplyResult){},
+            [&](Stage stage, std::uint64_t){ std::scoped_lock lock(stageMutex); stages.push_back(stage); });
+        const auto requested = std::chrono::steady_clock::now();
+        coordinator.prewarm();
+        ok &= expect(std::chrono::steady_clock::now() - requested < 50ms, "prewarm returns to its caller without waiting for the helper");
+        for (int i = 0; i < 300 && !coordinator.warmed(); ++i) std::this_thread::sleep_for(10ms);
+        ok &= expect(coordinator.warmed(), "prewarm runs the warm protocol action against the helper");
+        coordinator.prewarm();
+        std::this_thread::sleep_for(100ms);
+        std::scoped_lock lock(stageMutex);
+        ok &= expect(std::count(stages.begin(), stages.end(), Stage::warming) == 1, "a warmed coordinator does not warm again");
+        ok &= expect(!stages.empty() && stages.front() == Stage::warming && stages.back() == Stage::idle, "the warm-up reports a warming stage and returns to idle");
+        ok &= expect(coordinator.stage() == Stage::idle, "no stage is left in flight after a warm-up");
+    }
+    {   // An analysis asked for during a warm-up still completes, and the stages it reports
+        // are the real ones, in order.
+        std::mutex mutex; std::condition_variable wake; std::optional<ApplyResult> completed;
+        std::mutex stageMutex; std::vector<Stage> stages;
+        ExtensionCoordinator coordinator(configuration, [&](ApplyResult result){ std::scoped_lock lock(mutex); completed = std::move(result); wake.notify_all(); },
+            [&](Stage stage, std::uint64_t){ std::scoped_lock lock(stageMutex); stages.push_back(stage); });
+        coordinator.prewarm();
+        const auto generation = coordinator.apply(InputMode::smiles, "CCO");
+        std::unique_lock lock(mutex); wake.wait_for(lock, 5s, [&]{ return completed.has_value(); });
+        ok &= expect(completed && completed->generation == generation && *completed, "an apply during a warm-up still publishes its own result");
+        std::scoped_lock stageLock(stageMutex);
+        const auto analysing = std::find(stages.begin(), stages.end(), Stage::analysing);
+        const auto generating = std::find(stages.begin(), stages.end(), Stage::generating);
+        ok &= expect(analysing != stages.end() && generating != stages.end() && analysing < generating, "analysing is reported before generating");
+    }
+    {   // Cancel must reach a warm-up too, or the popup's Cancel button would be a lie
+        // during the one wait it exists for.
+        ExtensionCoordinator coordinator(configuration, [](ApplyResult){});
+        coordinator.prewarm();
+        std::this_thread::sleep_for(50ms);
+        const auto cancelled = std::chrono::steady_clock::now();
+        coordinator.cancel();
+        for (int i = 0; i < 200 && coordinator.stage() != Stage::idle; ++i) std::this_thread::sleep_for(10ms);
+        ok &= expect(coordinator.stage() == Stage::idle && std::chrono::steady_clock::now() - cancelled < 2s, "cancel ends a running warm-up");
+    }
+    ok &= expect(stageDescription(Stage::idle) == "Ready" && !stageDescription(Stage::warming).empty(), "every stage has a description the popup can show");
     return ok ? 0 : 1;
 }

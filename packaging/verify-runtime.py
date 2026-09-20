@@ -62,6 +62,21 @@ def main():
         timings.append({"requestId":request["requestId"],"seconds":elapsed})
     bad=subprocess.run([str(exe)],input="{}",text=True,capture_output=True,env=frozen_env,timeout=15)
     if bad.returncode != 2 or json.loads(bad.stdout).get("status") != "error": raise RuntimeError("damaged request handling failed")
+    # The frozen helper must stay silent on stderr. src/chemistry/Extension.cpp appends helper
+    # stderr to a failed request's diagnostic, so any loader chatter -- for instance RDKit's
+    # Boost.Python modules probing for the numpy the payload deliberately does not ship (#97) --
+    # would reach the user as a fake "damaged install" message.
+    quiet=subprocess.run([str(exe)],input=json.dumps(REQUESTS[0]),text=True,capture_output=True,env=frozen_env,timeout=45)
+    if quiet.returncode != 0 or quiet.stderr != "":
+        raise RuntimeError(f"frozen helper wrote to stderr on a successful request: {quiet.stderr[:512]!r}")
+    # The pre-warm action the plugin sends when an editor opens (#97) must answer from the
+    # frozen payload, best-effort per stage, and stay just as silent.
+    warm_request={"protocolVersion":1,"requestId":"warm","action":"warm"}
+    warm=subprocess.run([str(exe)],input=json.dumps(warm_request),text=True,capture_output=True,env=frozen_env,timeout=COPY_TIMEOUT)
+    warm_response=json.loads(warm.stdout) if warm.stdout else {}
+    if warm.returncode != 0 or warm.stderr != "" or warm_response.get("status") != "ok" \
+            or warm_response.get("warm",{}).get("discovery") != "ok" or warm_response.get("warm",{}).get("opsin") != "ok":
+        raise RuntimeError(f"frozen pre-warm failed: {warm.stdout[:512]} {warm.stderr[:512]}")
     with tempfile.TemporaryDirectory(prefix="iupac payload with spaces ") as temp:
         moved=Path(temp)/"read only payload"; shutil.copytree(payload,moved,symlinks=True)
         for path in moved.rglob("*"):
@@ -86,6 +101,6 @@ def main():
         else: raise RuntimeError("deadline left an OPSIN descendant running")
     modules=subprocess.check_output([str(payload/"java/bin/java"),"--list-modules"],text=True).splitlines()
     files=[x for x in payload.rglob("*") if x.is_file()]
-    report={"schemaVersion":1,"architecture":os.uname().machine,"files":len(files),"unpackedBytes":sum(x.stat().st_size for x in files),"startup":timings,"javaModules":modules,"nativeDependencies":{"helper":native_dependencies(exe),"java":native_dependencies(payload/"java/bin/java")},"artifacts":{str(x.relative_to(payload)):sha(x) for x in required[1:]},"negativeIsolation":{"path":frozen_env["PATH"],"poisonedEnvironment":sorted(BLOCKED_ENV),"sourceTreeRequired":False,"damagedPayload":"diagnosed","deadlineTreeCleanup":"passed"},"sqliteVersion":subprocess.check_output([os.sys.executable,"-c","import sqlite3;print(sqlite3.sqlite_version)"],text=True).strip()}
+    report={"schemaVersion":1,"architecture":os.uname().machine,"files":len(files),"unpackedBytes":sum(x.stat().st_size for x in files),"startup":timings,"javaModules":modules,"nativeDependencies":{"helper":native_dependencies(exe),"java":native_dependencies(payload/"java/bin/java")},"artifacts":{str(x.relative_to(payload)):sha(x) for x in required[1:]},"negativeIsolation":{"path":frozen_env["PATH"],"poisonedEnvironment":sorted(BLOCKED_ENV),"sourceTreeRequired":False,"damagedPayload":"diagnosed","deadlineTreeCleanup":"passed","silentStderr":"passed","prewarm":"passed"},"sqliteVersion":subprocess.check_output([os.sys.executable,"-c","import sqlite3;print(sqlite3.sqlite_version)"],text=True).strip()}
     a.report.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
 if __name__=="__main__": main()

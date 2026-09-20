@@ -6,10 +6,32 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
-from rdkit import Chem, rdBase
-from rdkit.Chem import Crippen, Descriptors, Lipinski, rdMolDescriptors
+# Import the narrowest RDKit surface that produces this Analysis (#97). Crippen,
+# Descriptors and Lipinski are thin one-line aliases over the rdMolDescriptors
+# entry points used directly below, but importing them drags in numpy (and, through
+# it, PIL) -- 18 extra Mach-O files that macOS evaluates individually on first
+# execution at ~130 ms each. `from rdkit import Chem` needs neither.
+# See docs/chemistry-cold-start.md for the measurement; the computed values are
+# unchanged, which cross-platform V1 parity asserts.
+# RDKit's Boost.Python extension modules probe for numpy as they load and print the bare
+# ImportError to stderr when it is absent. The payload deliberately no longer ships numpy,
+# and src/chemistry/Extension.cpp appends helper stderr to a failed request's diagnostic, so
+# that probe would masquerade as a damaged install. Silence fd 2 for the duration of this
+# import only -- a genuine failure still raises, and its traceback reaches the restored
+# stderr. packaging/verify-runtime.py gates the frozen helper's stderr as empty.
+_saved_stderr_fd = os.dup(2)
+_discard_fd = os.open(os.devnull, os.O_WRONLY)
+os.dup2(_discard_fd, 2)
+try:
+    from rdkit import Chem, rdBase
+    from rdkit.Chem import rdMolDescriptors
+finally:
+    os.dup2(_saved_stderr_fd, 2)
+    os.close(_discard_fd)
+    os.close(_saved_stderr_fd)
 from resolution import ResolutionError, exact_records
 
 PROTOCOL_VERSION = 1
@@ -260,17 +282,50 @@ def analyze(mode, text, opsin_jar):
         "backend": {"rdkitVersion": rdBase.rdkitVersion, "opsinVersion": "2.8.0", "opsinSha256": OPSIN_SHA256},
         "canonicalIsomericSmiles": canonical,
         "descriptors": {
-            "heavyAtoms": heavy, "molecularWeight": Descriptors.MolWt(molecule),
+            "heavyAtoms": heavy, "molecularWeight": rdMolDescriptors._CalcMolWt(molecule),
             "formalCharge": Chem.GetFormalCharge(molecule), "elementCounts": element_counts,
             "aromaticAtomFraction": sum(a.GetIsAromatic() for a in molecule.GetAtoms()) / heavy,
             "ringCount": len(rings), "fusedRingAdjacencyCount": fused,
-            "rotatableBonds": Lipinski.NumRotatableBonds(molecule), "fractionCsp3": rdMolDescriptors.CalcFractionCSP3(molecule),
-            "hbd": Lipinski.NumHDonors(molecule), "hba": Lipinski.NumHAcceptors(molecule),
-            "tpsa": rdMolDescriptors.CalcTPSA(molecule), "logP": Crippen.MolLogP(molecule),
+            "rotatableBonds": rdMolDescriptors.CalcNumRotatableBonds(molecule), "fractionCsp3": rdMolDescriptors.CalcFractionCSP3(molecule),
+            "hbd": rdMolDescriptors.CalcNumHBD(molecule), "hba": rdMolDescriptors.CalcNumHBA(molecule),
+            "tpsa": rdMolDescriptors.CalcTPSA(molecule), "logP": rdMolDescriptors.CalcCrippenDescriptors(molecule)[0],
             "motifCounts": {name: len(matches) for name, matches in motif_matches.items()},
         },
         "detail": {"atoms": atoms, "bonds": bonds, "motifMatches": motif_matches},
     }
+
+
+def warm(opsin_jar):
+    """Pay this payload's first-execution cost without producing an Analysis (#97).
+
+    Reaching this function has already paid the dominant cost: the frozen payload's
+    Mach-O closure is mapped and RDKit is imported by the time main() runs. What is
+    left is best-effort -- open the discovery index once, and start the private JVM
+    once on a trivial name so OPSIN's first parse is not the user's first parse.
+    A warm-up never fails a caller: every stage reports its own outcome.
+    """
+    stages = {}
+    started = time.monotonic()
+    try:
+        path = _discovery_path()
+        if path.is_file():
+            exact_records(path, "water")
+            stages["discovery"] = "ok"
+        else:
+            stages["discovery"] = "absent"
+    except (ResolutionError, OSError) as exc:
+        stages["discovery"] = str(exc)[:256]
+    stages["discoverySeconds"] = round(time.monotonic() - started, 4)
+    started = time.monotonic()
+    try:
+        bundled_jar, java = _payload_paths()
+        _opsin("methane", Path(opsin_jar) if opsin_jar else bundled_jar, java)
+        stages["opsin"] = "ok"
+    except (InputError, OSError) as exc:
+        stages["opsin"] = str(exc)[:256]
+    stages["opsinSeconds"] = round(time.monotonic() - started, 4)
+    stages["rdkitVersion"] = rdBase.rdkitVersion
+    return stages
 
 
 def process(request, opsin_jar):
@@ -287,6 +342,10 @@ def process(request, opsin_jar):
                                 {"protocolVersion", "requestId", "action", "mode", "text"}):
             raise InputError("analysis request has unexpected fields")
         result = {"analysis": analyze(request["mode"], request["text"], opsin_jar)}
+    elif action == "warm":
+        if set(request) != {"protocolVersion", "requestId", "action"}:
+            raise InputError("warm request has unexpected fields")
+        result = {"warm": warm(opsin_jar)}
     else:
         import discovery
         index = discovery.DiscoveryIndex(_discovery_path())
