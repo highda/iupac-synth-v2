@@ -191,6 +191,42 @@ field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effec
  editor=std::make_unique<IupacSynthEditor>(processor);editor->setVisible(true);block();ok&=expect(processor.activeVoiceCount()>0&&editor->field().slot(0).active(),"reopened editor shows the document and keeps the note");processor.keyboardState().allNotesOff(1);
 #if IUPAC_ENABLE_CHEMISTRY
  {ChemistryPopup popup(processor);popup.setVisible(true);ok&=expect(popup.getWidth()>0,"chemistry popup constructs in the extension build");}
+ // #99: the launcher must produce a dialog the user can actually see and dismiss. The dialog is found through
+ // JUCE's own modal stack rather than an editor accessor, and blocking is read through the production predicate
+ // `isCurrentlyBlockedByAnotherModalComponent()` — the same one Component::internalMouseDown consults.
+ {
+  auto*launcher=labelled(*editor,"chemistry");
+  ok&=expect(launcher!=nullptr,"the editor exposes the chemistry launcher");
+  if(launcher)
+  {
+   ok&=expect(!launcher->isCurrentlyBlockedByAnotherModalComponent(),"the editor accepts clicks before the dialog opens");
+   click(*launcher);
+   auto*dialog=dynamic_cast<ChemistryDialog*>(juce::Component::getCurrentlyModalComponent(0));
+   ok&=expect(dialog!=nullptr,"the launcher makes the chemistry dialog the current modal component");
+   if(dialog)
+   {
+    ok&=expect(dialog->isOnDesktop(),"the modal chemistry dialog owns a desktop peer");
+    ok&=expect(dialog->isVisible()&&dialog->isShowing(),"the chemistry dialog is visible and showing");
+    ok&=expect(!dialog->getScreenBounds().isEmpty(),"the chemistry dialog has non-zero bounds on screen");
+    ok&=expect(launcher->isCurrentlyBlockedByAnotherModalComponent(),"the open dialog blocks the launcher-adjacent editor control");
+    ok&=expect(!editor->keyboard().isCurrentlyBlockedByAnotherModalComponent(),"the audition keyboard still receives events while the dialog is open");
+    dialog->closeButtonPressed();
+    // Hiding cancels the modal item at once; the manager deletes the window on a later message, so the assertions
+    // below deliberately do not depend on that delete having happened yet.
+    ok&=expect(juce::Component::getCurrentlyModalComponent(0)==nullptr,"closing the dialog leaves nothing modal");
+    ok&=expect(!dialog->isShowing(),"the closed dialog is no longer showing");
+    ok&=expect(!launcher->isCurrentlyBlockedByAnotherModalComponent(),"the editor accepts the click again after the dialog closes");
+    // Re-opening must give a fresh window: the editor drops its pointer to the dismissed one instead of bringing
+    // that hidden corpse to front, which is the state a stale pointer would leave the user stuck in.
+    click(*launcher);
+    auto*reopened=dynamic_cast<ChemistryDialog*>(juce::Component::getCurrentlyModalComponent(0));
+    ok&=expect(reopened!=nullptr&&reopened!=dialog,"the launcher opens a fresh dialog after the first was dismissed");
+    ok&=expect(reopened!=nullptr&&reopened->isOnDesktop()&&reopened->isShowing()&&!reopened->getScreenBounds().isEmpty(),"the reopened dialog is on the desktop and showing");
+    if(reopened)reopened->closeButtonPressed();
+    ok&=expect(juce::Component::getCurrentlyModalComponent(0)==nullptr,"the reopened dialog dismisses the same way");
+   }
+  }
+ }
  // #97: a slow helper must not become a frozen editor. Apply hands the work to the
  // coordinator's worker and returns; the popup stays open, says which stage it is in,
  // keeps its input, and Cancel is the way out.

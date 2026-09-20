@@ -161,9 +161,14 @@ void IupacSynthEditor::timerCallback()
 #if IUPAC_ENABLE_CHEMISTRY
 void IupacSynthEditor::openChemistry()
 {
- if(chemistryDialog_!=nullptr){chemistryDialog_->toFront(true);return;}auto popup=std::make_unique<ChemistryPopup>(owner_);popup->setLookAndFeel(&laf_);popup->onResult=[this](const std::string&e,juce::String ok){showResult(e,std::move(ok));refresh();};
+ // A dismissed dialog is hidden immediately but deleted by the modal manager on a later message; between the two,
+ // the SafePointer is still live and bringing that hidden window to front would silently do nothing (#99).
+ if(chemistryDialog_!=nullptr&&chemistryDialog_->isShowing()){chemistryDialog_->toFront(true);return;}
+ chemistryDialog_=nullptr;auto popup=std::make_unique<ChemistryPopup>(owner_);popup->setLookAndFeel(&laf_);popup->onResult=[this](const std::string&e,juce::String ok){showResult(e,std::move(ok));refresh();};
  auto*content=popup.get();auto*dialog=new ChemistryDialog(keyboard_);dialog->setLookAndFeel(&laf_);dialog->setContentOwned(popup.release(),true);dialog->centreAroundComponent(this,dialog->getWidth(),dialog->getHeight());chemistryDialog_=dialog;
  juce::Component::SafePointer<juce::DialogWindow>safe(dialog);content->onClose=[safe]{if(safe!=nullptr)safe->setVisible(false);};// hiding a modal dialog dismisses and auto-deletes it
- dialog->setVisible(true);dialog->enterModalState(true,nullptr,true);
+ // The dialog already has its desktop peer (#99), so showing it makes it `isShowing()`; only then does the modal
+ // state it enters here have a dismissal path — hiding it cancels the modal item, which auto-deletes it.
+ dialog->setVisible(true);dialog->enterModalState(true,nullptr,true);dialog->toFront(true);
 }
 #endif
