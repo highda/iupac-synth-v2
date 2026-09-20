@@ -22,6 +22,25 @@ int main()
                   << "\",\"status\":\"ok\",\"warm\":{\"discovery\":\"ok\",\"opsin\":\"ok\"}}";
         return 0;
     }
+    // #103: a bounded offline search returns far more candidates than a popup menu shows. Answer `discover`
+    // with 50 synthetic records so the editor test drives the production search/populate path and can assert
+    // that the candidate list scrolls to reach every one of them.
+    // The protocol is written with juce::JSON::toString(v, false), so match the value, not a packed "key":"value".
+    if (request.find("\"discover\"") != std::string::npos) {
+        std::string reply = "{\"protocolVersion\":1,\"requestId\":\"" + requestId
+                          + "\",\"status\":\"ok\",\"discovery\":{\"query\":\"acid\",\"candidates\":[";
+        for (int i = 0; i < 50; ++i) {
+            const auto n = std::to_string(i);
+            if (i != 0) reply += ',';
+            reply += "{\"displayName\":\"fixture acid " + n + "\",\"identity\":\"fixture-" + n
+                   + "\",\"recordId\":\"Q" + std::to_string(1000 + i)
+                   + "\",\"canonicalIsomericSmiles\":\"CCO\",\"validationStatus\":\"validated\""
+                   + ",\"revisionUrl\":\"offline\"}";
+        }
+        reply += "]}}";
+        std::cout << reply;
+        return 0;
+    }
     if (request.find("slow") != std::string::npos) std::this_thread::sleep_for(std::chrono::seconds(5));
     if (request.find("reject") != std::string::npos) {
         std::cout << "{\"diagnostic\":\"unsupported fixture\",\"protocolVersion\":1,\"requestId\":\"" << requestId << "\",\"status\":\"error\"}";

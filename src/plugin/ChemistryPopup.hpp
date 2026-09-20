@@ -6,7 +6,7 @@
 #include "EditorControls.hpp"
 #include <memory>
 class IupacSynthProcessor;
-class ChemistryPopup final:public juce::Component,private juce::Timer
+class ChemistryPopup final:public juce::Component,private juce::Timer,private juce::ListBoxModel
 {
 public:
  explicit ChemistryPopup(IupacSynthProcessor&);~ChemistryPopup()override;void resized()override;void paint(juce::Graphics&)override;
@@ -15,10 +15,15 @@ public:
  std::function<void(int,int)>onPreferredSize;
 private:
  void timerCallback()override;void close();
+ // The candidate list is a juce::ListBox, not a ComboBox popup menu (#103): a bounded search returns far more
+ // entries than a menu shows, and only a viewport-backed list gives the wheel, the drag and the arrow keys at once.
+ int getNumRows()override;void paintListBoxItem(int,juce::Graphics&,int,int,bool)override;void selectedRowsChanged(int)override;
+ // Index into `candidates_` of the row the user has explicitly selected, or -1.
+ [[nodiscard]]int selectedCandidate()const;
  // Reflect a request that is still running: the popup stays open and interactive,
  // Apply is unavailable while its own request is in flight, and Cancel is the way out (#97).
  void showPending(bool);
- IupacSynthProcessor&owner_;iupac::ui::SegmentToggle mode_{{"name","smiles"}};juce::TextEditor input_,trace_,query_;juce::TextButton apply_{"apply"},reapply_{"reapply"},cancel_{"cancel"},inspector_{"inspector"},search_{"search"},cached_{"cached"},clearCache_{"clear cache"},open_{"apply / reopen"},closeButton_{"close"};juce::Label status_,metadata_;juce::ComboBox results_;juce::Array<juce::var>candidates_;std::uint64_t shownChemistryGeneration_{},shownDiscoveryGeneration_{},awaitedGeneration_{};bool awaiting_{};juce::Rectangle<int>browserTitle_;
+ IupacSynthProcessor&owner_;iupac::ui::SegmentToggle mode_{{"name","smiles"}};juce::TextEditor input_,trace_,query_;juce::TextButton apply_{"apply"},reapply_{"reapply"},cancel_{"cancel"},inspector_{"inspector"},search_{"search"},cached_{"cached"},clearCache_{"clear cache"},open_{"apply / reopen"},closeButton_{"close"};juce::Label status_,metadata_;juce::ListBox results_;juce::StringArray labels_;juce::Array<juce::var>candidates_;std::uint64_t shownChemistryGeneration_{},shownDiscoveryGeneration_{},awaitedGeneration_{};bool awaiting_{};juce::Rectangle<int>browserTitle_;
 };
 // In-editor modal overlay (#101). The popup is a child of the editor, never a desktop window: a separate window
 // floats above every application system-wide and, in the out-of-process AU, has no parent relationship to the host's
@@ -36,7 +41,7 @@ public:
  {
   setName("Chemistry overlay");setWantsKeyboardFocus(true);setInterceptsMouseClicks(true,true);
   addAndMakeVisible(closeButton_);closeButton_.setName("Close chemistry");closeButton_.onClick=[this]{dismiss();};
-  addAndMakeVisible(*popup_);
+  addAndMakeVisible(*popup_);content_={popup_->getWidth(),popup_->getHeight()};
  }
  std::function<void()>onDismiss;
  [[nodiscard]]ChemistryPopup&popup()noexcept{return*popup_;}

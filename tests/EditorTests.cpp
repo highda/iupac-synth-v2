@@ -281,6 +281,53 @@ field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effec
    ok&=expect(!processor.chemistryStatus().busy,"a cancelled request is no longer busy");
   }
  }
+ // #103: a bounded offline search returns far more candidates than one line of UI shows. The candidate list must be
+ // a real viewport — every entry reachable by wheel, by scrollbar drag and by arrow key, with the selection applying
+ // to the record the row stands for. Driven through the production search/populate path, not by poking the list.
+ if(argc==2)
+ {
+  ChemistryPopup popup(processor);popup.setLookAndFeel(&editor->getLookAndFeel());popup.setVisible(true);
+  auto*query=named<juce::TextEditor>(popup,"Offline discovery query");
+  auto*search=labelled(popup,"search");
+  auto*list=named<juce::ListBox>(popup,"Bounded offline discovery candidates or cached results");
+  auto*metadata=named<juce::Label>(popup,"Selected record structure and provenance");
+  ok&=expect(query!=nullptr&&search!=nullptr&&list!=nullptr&&metadata!=nullptr,"the popup exposes the offline query and the candidate list");
+  if(query&&search&&list&&metadata)
+  {
+   query->setText("acid");click(*search);
+   for(int i=0;i<300&&processor.discoveryStatus().busy;++i)juce::Thread::sleep(10);
+   tick();// the popup's own 10 Hz refresh is what moves a finished search into the list
+   const int rows=list->getListBoxModel()!=nullptr?list->getListBoxModel()->getNumRows():0;
+   ok&=expect(rows==50,"the finished search populates the candidate list with every returned record");
+   auto*viewport=list->getViewport();
+   ok&=expect(viewport!=nullptr&&viewport->getViewedComponent()!=nullptr,"the candidate list is backed by a viewport");
+   if(rows==50&&viewport&&viewport->getViewedComponent())
+   {
+    const int content=rows*list->getRowHeight();
+    ok&=expect(viewport->getViewHeight()<content,"the visible candidate viewport is smaller than its content");
+    ok&=expect(list->getNumRowsOnScreen()<rows,"more candidates exist than fit on screen");
+    ok&=expect(list->getVerticalScrollBar().isVisible(),"the candidate list shows the scrollbar that makes it draggable");
+    // Wheel.
+    const int top=viewport->getViewPositionY();
+    juce::MouseWheelDetails wheel{};wheel.deltaY=-1.0f;
+    viewport->mouseWheelMove(event(*viewport,centreOf(*viewport)),wheel);
+    ok&=expect(viewport->getViewPositionY()>top,"the mouse wheel scrolls the candidate list");
+    // Arrow keys move the selection and drag the viewport along to it, including past the visible window.
+    list->selectRow(0);
+    ok&=expect(list->getSelectedRow()==0,"the first candidate selects");
+    ok&=expect(list->keyPressed(juce::KeyPress(juce::KeyPress::downKey))&&list->getSelectedRow()==1,"the down arrow moves the candidate selection");
+    list->selectRow(rows-1);
+    ok&=expect(list->getSelectedRow()==rows-1,"the last candidate is reachable");
+    const auto last=juce::Rectangle<int>(0,(rows-1)*list->getRowHeight(),1,list->getRowHeight());
+    ok&=expect(viewport->getViewArea().intersects(last),"selecting the last candidate scrolls it into view");
+    // Selection applies: the provenance label names the record the selected row stands for.
+    ok&=expect(metadata->getText().contains("Q1049"),"the selected candidate's record drives the provenance label");
+    list->deselectAllRows();
+    ok&=expect(metadata->getText().isEmpty(),"deselecting clears the provenance label");
+   }
+  }
+  popup.setLookAndFeel(nullptr);
+ }
 #endif
  editor->setVisible(false);editor.reset();return ok?0:1;
 }
