@@ -65,7 +65,8 @@ IupacSynthEditor::~IupacSynthEditor()
 {
  stopTimer();
 #if IUPAC_ENABLE_CHEMISTRY
- if(chemistryDialog_!=nullptr)delete chemistryDialog_.getComponent();
+ // The overlay is an owned child; destroying it cancels its modal item through `ModalItem::componentBeingDeleted`.
+ chemistryOverlay_.reset();
 #endif
  setLookAndFeel(nullptr);
 }
@@ -94,6 +95,9 @@ void IupacSynthEditor::resized()
  const int envelope=juce::jmin(px(150),modulators.getWidth()/6);for(auto&e:envelopes_){e.setBounds(modulators.removeFromLeft(envelope));modulators.removeFromLeft(px(8));}
  const int lfoWidth=juce::jmin(px(200),(modulators.getWidth()-px(8))/2);for(std::size_t i=0;i<2;++i){auto cell=modulators.removeFromLeft(lfoWidth);lfoRates_[i]->setBounds(cell.removeFromLeft(cell.getHeight()));lfoWaveforms_[i]->setBounds(cell.removeFromRight(px(50)).withSizeKeepingCentre(px(50),px(14)));cell.removeFromRight(px(4));lfoPreviews_[i].setBounds(cell);modulators.removeFromLeft(px(8));}
  if(entry_.isVisible())closeEntry();
+#if IUPAC_ENABLE_CHEMISTRY
+ layoutChemistryOverlay();
+#endif
 }
 std::size_t IupacSynthEditor::textFieldCount()const
 {
@@ -159,16 +163,28 @@ void IupacSynthEditor::timerCallback()
 #endif
 }
 #if IUPAC_ENABLE_CHEMISTRY
+// The overlay spans the editor down to the audition keyboard, which stays visible and clickable while it is open.
+void IupacSynthEditor::layoutChemistryOverlay()
+{
+ if(chemistryOverlay_!=nullptr)chemistryOverlay_->setBounds(getLocalBounds().withBottom(juce::jmax(1,keyboard_.getY())));
+}
 void IupacSynthEditor::openChemistry()
 {
- // A dismissed dialog is hidden immediately but deleted by the modal manager on a later message; between the two,
- // the SafePointer is still live and bringing that hidden window to front would silently do nothing (#99).
- if(chemistryDialog_!=nullptr&&chemistryDialog_->isShowing()){chemistryDialog_->toFront(true);return;}
- chemistryDialog_=nullptr;auto popup=std::make_unique<ChemistryPopup>(owner_);popup->setLookAndFeel(&laf_);popup->onResult=[this](const std::string&e,juce::String ok){showResult(e,std::move(ok));refresh();};
- auto*content=popup.get();auto*dialog=new ChemistryDialog(keyboard_);dialog->setLookAndFeel(&laf_);dialog->setContentOwned(popup.release(),true);dialog->centreAroundComponent(this,dialog->getWidth(),dialog->getHeight());chemistryDialog_=dialog;
- juce::Component::SafePointer<juce::DialogWindow>safe(dialog);content->onClose=[safe]{if(safe!=nullptr)safe->setVisible(false);};// hiding a modal dialog dismisses and auto-deletes it
- // The dialog already has its desktop peer (#99), so showing it makes it `isShowing()`; only then does the modal
- // state it enters here have a dismissal path — hiding it cancels the modal item, which auto-deletes it.
- dialog->setVisible(true);dialog->enterModalState(true,nullptr,true);dialog->toFront(true);
+ // A dismissed overlay is hidden immediately and destroyed on a later message; between the two, bringing that hidden
+ // component to front would silently do nothing (#99). Only a showing overlay is re-focused; otherwise start fresh.
+ if(chemistryOverlay_!=nullptr&&chemistryOverlay_->isShowing()){chemistryOverlay_->toFront(true);return;}
+ chemistryOverlay_.reset();
+ auto popup=std::make_unique<ChemistryPopup>(owner_);popup->setLookAndFeel(&laf_);popup->onResult=[this](const std::string&e,juce::String ok){showResult(e,std::move(ok));refresh();};
+ chemistryOverlay_=std::make_unique<ChemistryOverlay>(keyboard_,std::move(popup));chemistryOverlay_->setLookAndFeel(&laf_);
+ auto*overlay=chemistryOverlay_.get();
+ overlay->popup().onClose=[overlay]{overlay->dismiss();};
+ overlay->popup().onPreferredSize=[overlay](int w,int h){overlay->setContentSize(w,h);};
+ // Destroying the overlay from inside its own dismissal would delete the component that is still on the call stack,
+ // so the hidden overlay is dropped on the next message instead; its popup timer stops with it.
+ overlay->onDismiss=[this,safe=juce::Component::SafePointer<IupacSynthEditor>(this)]{juce::MessageManager::callAsync([this,safe]{if(safe==nullptr)return;if(chemistryOverlay_!=nullptr&&!chemistryOverlay_->isShowing())chemistryOverlay_.reset();});};
+ addAndMakeVisible(*overlay);layoutChemistryOverlay();
+ // The overlay has a parent, so showing it makes it `isShowing()` and the modal state it enters here has a real
+ // dismissal path (#99): hiding it cancels the modal item. No desktop peer and no always-on-top (#101).
+ overlay->enterModalState(true,nullptr,false);overlay->toFront(true);
 }
 #endif

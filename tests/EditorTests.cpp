@@ -191,41 +191,61 @@ field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effec
  editor=std::make_unique<IupacSynthEditor>(processor);editor->setVisible(true);block();ok&=expect(processor.activeVoiceCount()>0&&editor->field().slot(0).active(),"reopened editor shows the document and keeps the note");processor.keyboardState().allNotesOff(1);
 #if IUPAC_ENABLE_CHEMISTRY
  {ChemistryPopup popup(processor);popup.setVisible(true);ok&=expect(popup.getWidth()>0,"chemistry popup constructs in the extension build");}
- // #99: the launcher must produce a dialog the user can actually see and dismiss. The dialog is found through
- // JUCE's own modal stack rather than an editor accessor, and blocking is read through the production predicate
- // `isCurrentlyBlockedByAnotherModalComponent()` — the same one Component::internalMouseDown consults.
+ // #99/#101: the launcher must produce a popup the user can see and dismiss, and it must be an in-editor overlay —
+ // a child of the editor, with no desktop peer and no always-on-top — so it can never float above other applications
+ // and always travels with the host window. Found through JUCE's own modal stack rather than an editor accessor;
+ // blocking is read through the production predicate `isCurrentlyBlockedByAnotherModalComponent()`, the same one
+ // Component::internalMouseDown consults.
  {
+  // A host always gives the editor a window. Without a peer nothing in the editor is `isShowing()`, and `isShowing()`
+  // is precisely what JUCE's modal dismissal reads (#99), so the guard has to run against a hosted editor.
+  editor->addToDesktop(juce::ComponentPeer::windowIsTemporary);
   auto*launcher=labelled(*editor,"chemistry");
   ok&=expect(launcher!=nullptr,"the editor exposes the chemistry launcher");
   if(launcher)
   {
-   ok&=expect(!launcher->isCurrentlyBlockedByAnotherModalComponent(),"the editor accepts clicks before the dialog opens");
+   ok&=expect(!launcher->isCurrentlyBlockedByAnotherModalComponent(),"the editor accepts clicks before the overlay opens");
    click(*launcher);
-   auto*dialog=dynamic_cast<ChemistryDialog*>(juce::Component::getCurrentlyModalComponent(0));
-   ok&=expect(dialog!=nullptr,"the launcher makes the chemistry dialog the current modal component");
-   if(dialog)
+   auto*overlay=dynamic_cast<ChemistryOverlay*>(juce::Component::getCurrentlyModalComponent(0));
+   ok&=expect(overlay!=nullptr,"the launcher makes the chemistry overlay the current modal component");
+   if(overlay)
    {
-    ok&=expect(dialog->isOnDesktop(),"the modal chemistry dialog owns a desktop peer");
-    ok&=expect(dialog->isVisible()&&dialog->isShowing(),"the chemistry dialog is visible and showing");
-    ok&=expect(!dialog->getScreenBounds().isEmpty(),"the chemistry dialog has non-zero bounds on screen");
-    ok&=expect(launcher->isCurrentlyBlockedByAnotherModalComponent(),"the open dialog blocks the launcher-adjacent editor control");
-    ok&=expect(!editor->keyboard().isCurrentlyBlockedByAnotherModalComponent(),"the audition keyboard still receives events while the dialog is open");
-    dialog->closeButtonPressed();
-    // Hiding cancels the modal item at once; the manager deletes the window on a later message, so the assertions
-    // below deliberately do not depend on that delete having happened yet.
-    ok&=expect(juce::Component::getCurrentlyModalComponent(0)==nullptr,"closing the dialog leaves nothing modal");
-    ok&=expect(!dialog->isShowing(),"the closed dialog is no longer showing");
-    ok&=expect(!launcher->isCurrentlyBlockedByAnotherModalComponent(),"the editor accepts the click again after the dialog closes");
-    // Re-opening must give a fresh window: the editor drops its pointer to the dismissed one instead of bringing
-    // that hidden corpse to front, which is the state a stale pointer would leave the user stuck in.
+    // #101: the three properties that made the old dialog a system-wide floating window.
+    ok&=expect(!overlay->isOnDesktop(),"the chemistry overlay owns no desktop peer");
+    ok&=expect(!overlay->isAlwaysOnTop(),"the chemistry overlay is not always-on-top");
+    ok&=expect(overlay->getParentComponent()==editor.get(),"the chemistry overlay is a child of the editor");
+    ok&=expect(overlay->isVisible()&&overlay->isShowing(),"the chemistry overlay is visible and showing");
+    ok&=expect(editor->getLocalBounds().contains(overlay->getBounds()),"the overlay lies inside the editor");
+    ok&=expect(overlay->getBounds().contains(overlay->contentBounds())&&!overlay->contentBounds().isEmpty(),"the popup lies inside the overlay with non-zero bounds");
+    ok&=expect(launcher->isCurrentlyBlockedByAnotherModalComponent(),"the open overlay blocks the launcher-adjacent editor control");
+    ok&=expect(!editor->keyboard().isCurrentlyBlockedByAnotherModalComponent(),"the audition keyboard still receives events while the overlay is open");
+    ok&=expect(overlay->getBottom()<=editor->keyboard().getY(),"the overlay stops above the audition keyboard it leaves clickable");
+    // #101: resizing the editor keeps the popup inside it rather than leaving a detached window behind.
+    editor->setSize(1000,700);
+    ok&=expect(editor->getLocalBounds().contains(overlay->getBounds())&&overlay->getBottom()<=editor->keyboard().getY(),"the overlay follows an editor resize");
+    ok&=expect(overlay->getBounds().contains(overlay->contentBounds()),"the popup stays inside the overlay after a resize");
+    editor->setSize(1200,800);
+    juce::Component::SafePointer<ChemistryOverlay>first(overlay);
+    overlay->dismiss();
+    // Hiding cancels the modal item at once; the editor drops the overlay on a later message, so the assertions
+    // below deliberately do not depend on that having happened yet.
+    ok&=expect(juce::Component::getCurrentlyModalComponent(0)==nullptr,"closing the overlay leaves nothing modal");
+    ok&=expect(!overlay->isShowing(),"the closed overlay is no longer showing");
+    ok&=expect(!launcher->isCurrentlyBlockedByAnotherModalComponent(),"the editor accepts the click again after the overlay closes");
+    // Re-opening must give a fresh overlay: the editor drops its pointer to the dismissed one instead of bringing
+    // that hidden corpse to front, which is the state a stale pointer would leave the user stuck in (#99).
     click(*launcher);
-    auto*reopened=dynamic_cast<ChemistryDialog*>(juce::Component::getCurrentlyModalComponent(0));
-    ok&=expect(reopened!=nullptr&&reopened!=dialog,"the launcher opens a fresh dialog after the first was dismissed");
-    ok&=expect(reopened!=nullptr&&reopened->isOnDesktop()&&reopened->isShowing()&&!reopened->getScreenBounds().isEmpty(),"the reopened dialog is on the desktop and showing");
-    if(reopened)reopened->closeButtonPressed();
-    ok&=expect(juce::Component::getCurrentlyModalComponent(0)==nullptr,"the reopened dialog dismisses the same way");
+    auto*reopened=dynamic_cast<ChemistryOverlay*>(juce::Component::getCurrentlyModalComponent(0));
+    // The dismissed overlay must really be gone: a freshly allocated one can land on the same address, so identity is
+    // read through a SafePointer rather than by comparing raw pointers.
+    ok&=expect(first==nullptr,"the dismissed overlay is destroyed rather than revived");
+    ok&=expect(reopened!=nullptr,"the launcher opens a fresh overlay after the first was dismissed");
+    ok&=expect(reopened!=nullptr&&!reopened->isOnDesktop()&&!reopened->isAlwaysOnTop()&&reopened->isShowing(),"the reopened overlay is a showing editor child, not a desktop window");
+    if(reopened)reopened->dismiss();
+    ok&=expect(juce::Component::getCurrentlyModalComponent(0)==nullptr,"the reopened overlay dismisses the same way");
    }
   }
+  editor->removeFromDesktop();
  }
  // #97: a slow helper must not become a frozen editor. Apply hands the work to the
  // coordinator's worker and returns; the popup stays open, says which stage it is in,

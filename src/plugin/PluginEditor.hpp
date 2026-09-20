@@ -5,6 +5,9 @@
 #include "EditorControls.hpp"
 #include "EditorField.hpp"
 #include "EditorLanes.hpp"
+#if IUPAC_ENABLE_CHEMISTRY
+#include "ChemistryPopup.hpp"
+#endif
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <filesystem>
 #include <memory>
@@ -33,6 +36,6 @@ private:
  iupac::ui::ModuleField field_;std::array<iupac::ui::AdsrCurve,3>envelopes_;std::array<std::unique_ptr<iupac::ui::Knob>,2>lfoRates_;std::array<iupac::ui::LfoPreview,2>lfoPreviews_;std::array<std::unique_ptr<iupac::ui::SegmentToggle>,2>lfoWaveforms_;iupac::ui::LaneMatrix lanes_;juce::MidiKeyboardComponent keyboard_;
  std::unique_ptr<ValueBubble>bubble_;iupac::ui::PrecisionEntry entry_;std::function<void(juce::String)>entryCommit_;std::unique_ptr<juce::FileChooser>chooser_;std::vector<std::filesystem::path>presets_;std::uint64_t shownGeneration_{};
 #if IUPAC_ENABLE_CHEMISTRY
- juce::TextButton chemistryButton_{"chemistry"};juce::Component::SafePointer<juce::DialogWindow>chemistryDialog_;std::uint64_t shownChemistryGeneration_{};void openChemistry();
+ juce::TextButton chemistryButton_{"chemistry"};std::unique_ptr<ChemistryOverlay>chemistryOverlay_;std::uint64_t shownChemistryGeneration_{};void openChemistry();void layoutChemistryOverlay();
 #endif
 };
