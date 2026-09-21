@@ -291,49 +291,112 @@ int verifyPanel(const std::filesystem::path& panel, const std::filesystem::path&
     std::ofstream manifest(output / "manifest.json", std::ios::binary); manifest << report << '\n'; if (!manifest) { error = "cannot write panel manifest"; return 2; } return 0;
 }
 
+namespace
+{
+// V8's fixed harness: 16 sustained worst-case voices at 48 kHz / 128 frames with repeated bank
+// transitions, 5 s warmup, then `seconds` of measured blocks. Returns the wall time and the sorted
+// per-block times, so a caller can take a ratio, a p99 or a mean from the same run.
+struct BenchmarkRun { double elapsed{}; std::vector<double> blockTimes; std::uint64_t residentBefore{}, residentSteady{}, residentAfter{}; std::size_t transitions{}; };
+
+std::uint64_t residentBytes()
+{
+#if defined(__linux__)
+    long pages = 0, resident = 0; std::ifstream stat("/proc/self/statm"); stat >> pages >> resident;
+    return resident > 0 ? static_cast<std::uint64_t>(resident) * static_cast<std::uint64_t>(::sysconf(_SC_PAGESIZE)) : 0;
+#elif defined(__APPLE__)
+    mach_task_basic_info info{}; mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+    return ::task_info(mach_task_self(), MACH_TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&info), &count) == KERN_SUCCESS ? static_cast<std::uint64_t>(info.resident_size) : 0;
+#else
+    return std::uint64_t{};
+#endif
+}
+
+BenchmarkRun runBenchmark(const engine::CompiledPatch& primary, const engine::CompiledPatch& alternate, const domain::HostControls& controls, std::size_t seconds)
+{
+    constexpr double sampleRate = 48000; constexpr std::size_t blockSize = 128;
+    BenchmarkRun run; engine::PatchCoordinator coordinator; coordinator.prepare(sampleRate, blockSize); (void) coordinator.publish(primary, controls);
+    std::array<float, blockSize> left{}, right{}; run.blockTimes.reserve(seconds * 375);
+    coordinator.render(left, right); for (int block = 0; block < 8; ++block) coordinator.render(left, right);
+    std::vector<engine::MidiEvent> starts; for (int i = 0; i < 16; ++i) starts.push_back({0, engine::MidiEventType::noteOn, 1, static_cast<std::uint8_t>(36 + i * 3), 100, 8192}); coordinator.render(left, right, starts);
+    for (std::size_t warmup = 0; warmup < 5 * 375; ++warmup) { if (warmup % 32 == 0) (void) coordinator.publish((run.transitions++ % 2) ? primary : alternate, controls); coordinator.render(left, right); }
+    run.residentBefore = residentBytes(); run.residentSteady = run.residentBefore;
+    const auto begin = std::chrono::steady_clock::now();
+    for (std::size_t block = 0; block < seconds * 375; ++block)
+    {
+        if (block % 32 == 0) { (void) coordinator.publish((run.transitions++ % 2) ? primary : alternate, controls); }
+        const auto blockBegin = std::chrono::steady_clock::now(); coordinator.render(left, right); const auto blockEnd = std::chrono::steady_clock::now();
+        run.blockTimes.push_back(std::chrono::duration<double>(blockEnd - blockBegin).count());
+        if (block + 1 == seconds * 375 / 2) run.residentSteady = residentBytes();
+    }
+    run.elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - begin).count(); run.residentAfter = residentBytes();
+    std::ranges::sort(run.blockTimes); return run;
+}
+
+// The transition partner V8 publishes against: the same graph with its first node renamed, so every
+// publish is a structural change the coordinator has to rebuild.
+domain::Patch transitionPartner(const domain::Patch& source)
+{
+    auto partner = source; const auto oldId = partner.nodes.front().id; partner.nodes.front().id += "-transition";
+    for (auto& edge : partner.edges) { if (edge.source == oldId) edge.source = partner.nodes.front().id; if (edge.destination == oldId) edge.destination = partner.nodes.front().id; }
+    for (auto& row : partner.matrix) if (row.destinationNode == oldId) row.destinationNode = partner.nodes.front().id;
+    return partner;
+}
+
+// The same patch with the global effects tail removed. The tail runs once per block, never per
+// voice, so V8 wants its cost reported apart from the per-voice figure; the difference between the
+// two runs is that cost, measured through the production engine instead of by instrumenting the
+// per-sample audio path with a clock call.
+domain::Patch withoutEffectsTail(const domain::Patch& source)
+{
+    domain::Patch stripped = source; std::vector<std::string> removed;
+    std::erase_if(stripped.nodes, [&removed](const domain::Node& node) {
+        if (!domain::moduleCatalog()[static_cast<std::size_t>(node.type)].effects) return false;
+        removed.push_back(node.id); return true; });
+    const auto dropped = [&removed](const std::string& id) { return std::ranges::find(removed, id) != removed.end(); };
+    std::erase_if(stripped.edges, [&dropped](const domain::AudioEdge& edge) { return dropped(edge.source) || dropped(edge.destination); });
+    std::erase_if(stripped.matrix, [&dropped](const domain::MatrixRow& row) { return dropped(row.destinationNode); });
+    return stripped;
+}
+}
+
 std::string benchmark(const domain::State& state, std::size_t seconds, std::string& error)
 {
     constexpr double sampleRate = 48000; constexpr std::size_t blockSize = 128;
     if (seconds < 1 || seconds > 60) { error = "benchmark duration must be 1..60 seconds"; return {}; }
+    if (state.editedPatch.nodes.empty()) { error = "benchmark requires an audible authored patch"; return {}; }
     const auto compiled = engine::compilePatch(state.editedPatch); if (!compiled) { error = compiled.error; return {}; }
-    auto alternatePatch = state.editedPatch;
-    if (alternatePatch.nodes.empty()) { error = "benchmark requires an audible authored patch"; return {}; }
-    const auto oldId = alternatePatch.nodes.front().id;
-    alternatePatch.nodes.front().id += "-transition";
-    for (auto& edge : alternatePatch.edges) { if (edge.source == oldId) edge.source = alternatePatch.nodes.front().id; if (edge.destination == oldId) edge.destination = alternatePatch.nodes.front().id; }
-    for (auto& row : alternatePatch.matrix) if (row.destinationNode == oldId) row.destinationNode = alternatePatch.nodes.front().id;
-    const auto alternate = engine::compilePatch(alternatePatch); if (!alternate) { error = "cannot prepare transition benchmark: " + alternate.error; return {}; }
-    engine::PatchCoordinator engine; engine.prepare(sampleRate, blockSize); (void) engine.publish(compiled.patch, state.controls);
-    std::array<float, blockSize> left{}, right{}; std::vector<double> blockTimes; blockTimes.reserve(seconds * 375);
-    engine.render(left, right); for (int block = 0; block < 8; ++block) engine.render(left, right);
-    std::vector<engine::MidiEvent> starts; for (int i = 0; i < 16; ++i) starts.push_back({0, engine::MidiEventType::noteOn, 1, static_cast<std::uint8_t>(36 + i * 3), 100, 8192}); engine.render(left, right, starts);
-    std::size_t transitions = 0;
-    for (std::size_t warmup = 0; warmup < 5 * 375; ++warmup) { if (warmup % 32 == 0) (void) engine.publish((transitions++ % 2) ? compiled.patch : alternate.patch, state.controls); engine.render(left, right); }
-    const auto residentBytes = [] {
-#if defined(__linux__)
-        long pages = 0, resident = 0; std::ifstream stat("/proc/self/statm"); stat >> pages >> resident;
-        return resident > 0 ? static_cast<std::uint64_t>(resident) * static_cast<std::uint64_t>(::sysconf(_SC_PAGESIZE)) : 0;
-#elif defined(__APPLE__)
-        mach_task_basic_info info{}; mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
-        return ::task_info(mach_task_self(), MACH_TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&info), &count) == KERN_SUCCESS ? static_cast<std::uint64_t>(info.resident_size) : 0;
-#else
-        return std::uint64_t{};
-#endif
-    };
-    const auto rssBefore = residentBytes(); std::uint64_t rssSteady = rssBefore;
-    const auto begin = std::chrono::steady_clock::now();
-    for (std::size_t block = 0; block < seconds * 375; ++block)
+    const auto alternate = engine::compilePatch(transitionPartner(state.editedPatch)); if (!alternate) { error = "cannot prepare transition benchmark: " + alternate.error; return {}; }
+    const auto full = runBenchmark(compiled.patch, alternate.patch, state.controls, seconds);
+    const auto mean = [](const std::vector<double>& times) { return std::accumulate(times.begin(), times.end(), 0.0) / static_cast<double>(times.size()); };
+
+    // The tail-free arm. It is skipped when the patch has no effects region, which is also the only
+    // case where the tail cost is exactly zero by construction.
+    const auto tailless = withoutEffectsTail(state.editedPatch);
+    double tailBlockSeconds = 0, perVoiceBlockSeconds = mean(full.blockTimes) / 16;
+    bool tailMeasured = false;
+    if (tailless.nodes.size() != state.editedPatch.nodes.size() && !tailless.nodes.empty())
     {
-        if (block % 32 == 0) { (void) engine.publish((transitions++ % 2) ? compiled.patch : alternate.patch, state.controls); }
-        const auto blockBegin = std::chrono::steady_clock::now(); engine.render(left, right); const auto blockEnd = std::chrono::steady_clock::now();
-        blockTimes.push_back(std::chrono::duration<double>(blockEnd - blockBegin).count());
-        if (block + 1 == seconds * 375 / 2) rssSteady = residentBytes();
+        if (const auto strippedCompiled = engine::compilePatch(tailless))
+        {
+            if (const auto strippedAlternate = engine::compilePatch(transitionPartner(tailless)))
+            {
+                const auto voicesOnly = runBenchmark(strippedCompiled.patch, strippedAlternate.patch, state.controls, seconds);
+                tailBlockSeconds = std::max(0.0, mean(full.blockTimes) - mean(voicesOnly.blockTimes));
+                perVoiceBlockSeconds = mean(voicesOnly.blockTimes) / 16; tailMeasured = true;
+            }
+        }
     }
-    const auto elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - begin).count(); std::ranges::sort(blockTimes);
+
     auto root = object(); put(root, "productVersion", juce::String(domain::productVersion().data())); put(root, "architecture", juce::String(domain::architectureVersion().data())); put(root, "command", juce::String("iupac-cli benchmark --snapshot FILE --seconds N"));
     put(root, "sampleRate", sampleRate); put(root, "blockSize", static_cast<int>(blockSize)); put(root, "voices", 16); put(root, "warmupSeconds", 5); put(root, "seconds", static_cast<int>(seconds));
-    put(root, "renderRatio", elapsed / static_cast<double>(seconds)); put(root, "p99BlockSeconds", blockTimes[static_cast<std::size_t>(std::floor((blockTimes.size() - 1) * .99))]);
-    put(root, "structuralTransitions", static_cast<juce::int64>(transitions)); put(root, "activeBanksMaximum", 2); put(root, "residentBytesBefore", static_cast<juce::int64>(rssBefore)); put(root, "residentBytesSteady", static_cast<juce::int64>(rssSteady)); put(root, "residentBytesAfter", static_cast<juce::int64>(residentBytes()));
+    put(root, "renderRatio", full.elapsed / static_cast<double>(seconds)); put(root, "p99BlockSeconds", full.blockTimes[static_cast<std::size_t>(std::floor((full.blockTimes.size() - 1) * .99))]);
+    put(root, "meanBlockSeconds", mean(full.blockTimes));
+    // D8 phase-4 budget reporting (V8): the tail is a once-per-block cost, so it is subtracted
+    // before the per-voice figure and reported on its own line against the same block budget.
+    put(root, "effectsTailBlockSeconds", tailBlockSeconds); put(root, "effectsTailMeasured", tailMeasured);
+    put(root, "perVoiceBlockSeconds", perVoiceBlockSeconds); put(root, "perVoiceBudgetSeconds", (.5 * static_cast<double>(blockSize) / sampleRate) / 16);
+    put(root, "blockBudgetSeconds", static_cast<double>(blockSize) / sampleRate);
+    put(root, "structuralTransitions", static_cast<juce::int64>(full.transitions)); put(root, "activeBanksMaximum", 2); put(root, "residentBytesBefore", static_cast<juce::int64>(full.residentBefore)); put(root, "residentBytesSteady", static_cast<juce::int64>(full.residentSteady)); put(root, "residentBytesAfter", static_cast<juce::int64>(full.residentAfter));
     put(root, "graphSignature", juce::String(graphSignature(compiled.patch))); put(root, "valueSignature", juce::String(valueSignature(compiled.patch, state.controls))); return json(root);
 }
 }

@@ -148,6 +148,9 @@ if(BUILD_TESTING)
     add_executable(iupac-tests tests/ProductPathTests.cpp tests/PatchTests.cpp tests/ModuleTests.cpp tests/EngineTests.cpp tests/HeadlessTests.cpp tests/RealtimeAllocationTests.cpp)
     target_compile_features(iupac-tests PRIVATE cxx_std_20)
     target_link_libraries(iupac-tests PRIVATE iupac_synth_tools)
+    # The V8 worst-case benchmark snapshot lives in the tree; the test compares it against the
+    # patch the production catalog builds today (#129).
+    target_compile_definitions(iupac-tests PRIVATE IUPAC_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
     add_test(NAME product-path-smoke COMMAND iupac-tests)
     add_executable(iupac-layout-tests tests/LayoutTests.cpp)
     target_compile_features(iupac-layout-tests PRIVATE cxx_std_20)

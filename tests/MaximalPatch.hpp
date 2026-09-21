@@ -57,4 +57,30 @@ inline domain::Patch maximalPatch()
     patch.macros = {{{"Macro 1", 0.5}, {"Macro 2", 0.25}, {"Macro 3", 0.0}, {"Macro 4", 1.0}}};
     return patch;
 }
+
+// The fixed phase-4 worst-case benchmark patch (VERIFICATION V8, D8). It is `maximalPatch()` with
+// the three general source slots all unison-capable and held at `unisonVoices` 7, both typed
+// audio-rate depths open so the `modIn`/`exciteIn` branches actually run, and the whole
+// chorus -> delay -> reverb -> width tail driven away from its identity settings. Voice count is
+// still 16 everywhere: unison multiplies oscillator work, never polyphony (D3).
+inline domain::Patch worstCaseBenchmarkPatch()
+{
+    auto patch = maximalPatch();
+    // `noise` is the one general source type without a unison bank, so the worst case spends that
+    // slot on a second harmonic instead. Keeping the id keeps every edge and row pointing at it.
+    patch.nodes[2] = defaultNode("n1", "harmonic");
+    for (auto& row : patch.matrix)
+        if (row.destinationNode == "n1" && row.destinationParameter == "burstMs") row.destinationParameter = "detuneCents";
+    const auto set = [&patch](std::string_view id, std::string_view parameter, double value) {
+        for (auto& node : patch.nodes)
+            if (node.id == id)
+                for (auto& value_ : node.parameters)
+                    if (value_.id == parameter) value_.values[0] = value;
+    };
+    for (const auto* id : {"h1", "f1", "n1"}) { set(id, "unisonVoices", 7); set(id, "detuneCents", 24); set(id, "unisonSpread", 1.0); set(id, "drift", 0.5); }
+    set("f1", "index", 4.0); set("f1", "modInDepth", 1.0); set("r1", "exciteDepth", 1.0);
+    set("q1", "mode", 3); set("q1", "drive", 8.0); set("q2", "drive", 4.0); // ladder24 is the most expensive filter mode
+    set("x1", "mix", 0.5); set("x2", "mix", 0.5); set("x3", "mix", 0.5); set("x4", "width", 1.4);
+    return patch;
+}
 }

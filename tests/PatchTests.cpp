@@ -3,7 +3,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -217,5 +221,33 @@ bool runPatchTests()
         twoEnvelopes.getDynamicObject()->getProperty("envelopes").getArray()->removeLast();
         ok &= expect(!decodePatchValue(twoEnvelopes).value, "fewer than three envelopes is still rejected");
     }
+
+#ifdef IUPAC_SOURCE_DIR
+    {
+        // The fixed V8 worst-case benchmark patch is shipped as a snapshot so the arm64 container
+        // benchmarks exactly the graph VERIFICATION describes. Regenerate with
+        // IUPAC_WRITE_FIXTURES=1 when the catalog moves, and say so in the leaf that moves it.
+        const std::filesystem::path fixture = std::filesystem::path(IUPAC_SOURCE_DIR) / "tests" / "fixtures" / "phase4-worst-case.snapshot.json";
+        const auto worstCase = iupac::testing::worstCaseBenchmarkPatch();
+        ok &= expect(worstCase.nodes.size() == maximumNodes && worstCase.edges.size() == maximumEdges && worstCase.matrix.size() == maximumMatrixRows,
+                     "the worst-case benchmark patch is at every phase-4 bound");
+        std::size_t unisonSeven = 0;
+        for (const auto& node : worstCase.nodes)
+            for (const auto& parameter : node.parameters)
+                if (parameter.id == "unisonVoices" && parameter.values[0] == 7) ++unisonSeven;
+        ok &= expect(unisonSeven == generalSourceSlots, "the worst-case benchmark patch holds unisonVoices 7 on all three general source slots");
+        ok &= expect(std::ranges::any_of(worstCase.edges, [](const AudioEdge& e) { return e.port == AudioPort::modIn; })
+                         && std::ranges::any_of(worstCase.edges, [](const AudioEdge& e) { return e.port == AudioPort::exciteIn; }),
+                     "the worst-case benchmark patch cables both typed audio-rate inputs");
+        State state {worstCase, worstCase, {}};
+        const auto encoded = encodeStateJson(state, true) + "\n";
+        if (const auto* write = std::getenv("IUPAC_WRITE_FIXTURES"); write != nullptr && std::string_view(write) == "1")
+        {
+            std::ofstream output(fixture, std::ios::binary); output << encoded;
+        }
+        std::ifstream input(fixture, std::ios::binary); std::ostringstream stored; stored << input.rdbuf();
+        ok &= expect(stored.str() == encoded, "tests/fixtures/phase4-worst-case.snapshot.json still encodes the worst-case benchmark patch");
+    }
+#endif
     return ok;
 }
