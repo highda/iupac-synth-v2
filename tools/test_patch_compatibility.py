@@ -25,12 +25,15 @@ import unittest
 
 CLI, ROOT = sys.argv[1], pathlib.Path(sys.argv[2])
 MIDI = ROOT / "data" / "panels" / "authored-synth" / "held-note.midi.json"
+# C5, an octave above the `keytrack` reference note, so the control is not inert (#122).
+MIDI_C5 = ROOT / "data" / "panels" / "authored-synth" / "held-note-c5.midi.json"
 FIXTURE = ROOT / "tests" / "fixtures" / "pre-d8-patch.snapshot.json"
+SUB_SLOT = ROOT / "data" / "panels" / "authored-synth" / "sub-slot.snapshot.json"
 
 
-def render(snapshot, samples=144000):
+def render(snapshot, samples=144000, midi=MIDI):
     with tempfile.TemporaryDirectory() as directory:
-        out = subprocess.run([CLI, "render", "--snapshot", str(snapshot), "--midi", str(MIDI),
+        out = subprocess.run([CLI, "render", "--snapshot", str(snapshot), "--midi", str(midi),
                               "--output", str(pathlib.Path(directory) / "render.wav"),
                               "--sample-rate", "48000", "--block-size", "128", "--samples", str(samples)],
                              capture_output=True, text=True, check=True)
@@ -104,6 +107,62 @@ class CompatibilityTests(unittest.TestCase):
         self.assertEqual(node["parameters"]["partialRatios"], stored)
         self.assertEqual(node["parameters"]["partialAmplitudes"], amplitudes)
         self.assertEqual(node["parameters"]["harmonicityMorph"], 1.0)
+
+    def render_document(self, document, samples=144000, midi=MIDI):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot = pathlib.Path(directory) / "case.snapshot.json"
+            snapshot.write_text(json.dumps(document))
+            return render(snapshot, samples, midi)
+
+    def sub_only(self, **overrides):
+        """The authored sub-slot case with the harmonic source removed: the sub is the only voice."""
+        document = json.loads(SUB_SLOT.read_text())
+        patch = document["editedPatch"]
+        patch["nodes"] = [n for n in patch["nodes"] if n["id"] != "lead"]
+        patch["edges"] = [e for e in patch["edges"] if e["source"] != "lead"]
+        next(n for n in patch["nodes"] if n["id"] == "bass")["parameters"].update(overrides)
+        return document
+
+    def test_the_sub_slot_is_a_real_oscillator_on_the_production_path(self):
+        """#122: #109 registered `sub` as a silent skeleton; here it has to make sound.
+
+        The authored panel case drives the whole decode/compile/render path, so a sub that is
+        registered but never reaches the audio thread fails as loudly as a silent one.
+        """
+        sounding = self.render_document(self.sub_only())
+        self.assertGreater(sounding["rms"], 0.01, "the sub slot renders silence")
+        self.assertEqual(self.render_document(self.sub_only(outputLevel=0.0))["rms"], 0.0)
+        # The octave and the waveform are both real: each changes what the sub renders.
+        self.assertNotEqual(self.render_document(self.sub_only(octave=-1.0))["pcmSha256"], sounding["pcmSha256"])
+        self.assertNotEqual(self.render_document(self.sub_only(waveform=0.0))["pcmSha256"], sounding["pcmSha256"])
+
+    def test_the_pitch_block_transposes_a_general_source_on_the_production_path(self):
+        """#122: `octave`, `coarse`, `fine` and `keytrack` are one semitone offset.
+
+        One octave up and twelve coarse semitones up must be the same render, and the catalog
+        defaults must leave the source exactly where a pre-D8 patch put it.
+        """
+        def lead(midi=MIDI, **overrides):
+            document = json.loads(SUB_SLOT.read_text())
+            patch = document["editedPatch"]
+            patch["nodes"] = [n for n in patch["nodes"] if n["id"] != "bass"]
+            patch["edges"] = [e for e in patch["edges"] if e["source"] != "bass"]
+            next(n for n in patch["nodes"] if n["id"] == "lead")["parameters"].update(
+                dict({"octave": 0.0, "coarse": 0.0, "fine": 0.0, "keytrack": 1.0}, **overrides))
+            return self.render_document(document, midi=midi)
+
+        defaults = lead()
+        self.assertGreater(defaults["rms"], 0.01)
+        self.assertEqual(lead(octave=1.0)["pcmSha256"], lead(coarse=12.0)["pcmSha256"])
+        self.assertEqual(lead(fine=100.0)["pcmSha256"], lead(coarse=1.0)["pcmSha256"])
+        for transposed in (lead(octave=1.0), lead(coarse=7.0), lead(fine=-8.0)):
+            self.assertNotEqual(transposed["pcmSha256"], defaults["pcmSha256"])
+        # `keytrack` scales the note's distance from the C4 reference, so it is inert at C4 itself
+        # and an octave down at C5 — which is exactly `octave` -1 there.
+        self.assertEqual(lead(keytrack=0.0)["pcmSha256"], defaults["pcmSha256"])
+        at_c5 = lead(midi=MIDI_C5)
+        self.assertNotEqual(lead(midi=MIDI_C5, keytrack=0.0)["pcmSha256"], at_c5["pcmSha256"])
+        self.assertEqual(lead(midi=MIDI_C5, keytrack=0.0)["pcmSha256"], lead(midi=MIDI_C5, octave=-1.0)["pcmSha256"])
 
     def test_authored_maximal_panel_case_sits_at_the_d8_bounds(self):
         patch = json.loads((ROOT / "data" / "panels" / "authored-synth" / "maximal.snapshot.json").read_text())["editedPatch"]

@@ -17,6 +17,12 @@ constexpr float driftCentsRange = 14.0f;
 constexpr float driftLevelRange = 0.09f;
 float panGain(float pan, bool right) noexcept { const auto a=(std::clamp(pan,-1.0f,1.0f)+1.0f)*std::numbers::pi_v<float>*.25f; return right?std::sin(a):std::cos(a); }
 float fastSin(double phase) noexcept {while(phase>std::numbers::pi_v<double>)phase-=twoPi;while(phase<-std::numbers::pi_v<double>)phase+=twoPi;return juce::dsp::FastMathApproximations::sin(static_cast<float>(phase));}
+// Unit triangle over the same [-pi, pi] phase the sine uses: 0 at 0, +1 at pi/2, -1 at -pi/2.
+float triangleWave(double phase) noexcept {const auto scaled=static_cast<float>(2*phase/std::numbers::pi_v<double>);return phase>std::numbers::pi_v<double>*.5?2-scaled:phase<-std::numbers::pi_v<double>*.5?-2-scaled:scaled;}
+// D8 pitch block (#122): `keytrack` scales the note's distance from this reference note, so 0 pins
+// a source to one pitch and 1 is the ordinary keyboard. C4 is the reference the mapper already
+// treats as the instrument centre (`keyTracking` is (note - 60) / 36 in the matrix).
+constexpr int keytrackReferenceNote = 60;
 float fastTanh(float value)noexcept{if(value>=5)return 1;if(value<=-5)return-1;return juce::dsp::FastMathApproximations::tanh(value);}
 }
 float ModuleProcessor::clampFinite(float v,float lo,float hi,float fallback) noexcept { return std::isfinite(v)?std::clamp(v,lo,hi):fallback; }
@@ -31,7 +37,7 @@ void ModuleProcessor::reset() noexcept {phases_.fill(0);modPhases_.fill(0);for(a
     if(comb_)comb_->reset();filter_.reset();for(auto& m:modes_)m.reset();}
 void ModuleProcessor::noteOn(int note,int channel,std::uint32_t seed,std::uint32_t nodeHash) noexcept
 {
-    phases_.fill(0);modPhases_.fill(0);for(auto& c:harmonicSin_)c.fill(0);for(auto& c:harmonicCos_)c.fill(1);pink_.fill(0);gate_=true;randomState_=seed^(nodeHash*0x9e3779b9u)^(static_cast<std::uint32_t>(note)<<16u)^(static_cast<std::uint32_t>(channel)*0x85ebca6bu);if(!randomState_)randomState_=1;burstSamplesRemaining_=std::numeric_limits<std::size_t>::max();
+    phases_.fill(0);modPhases_.fill(0);for(auto& c:harmonicSin_)c.fill(0);for(auto& c:harmonicCos_)c.fill(1);pink_.fill(0);gate_=true;note_=note;randomState_=seed^(nodeHash*0x9e3779b9u)^(static_cast<std::uint32_t>(note)<<16u)^(static_cast<std::uint32_t>(channel)*0x85ebca6bu);if(!randomState_)randomState_=1;burstSamplesRemaining_=std::numeric_limits<std::size_t>::max();
     // D8: the unison start phases and the two drift wanders are drawn here, once, from the
     // patch-seeded stream this voice already owns — never from the wall clock, so V2 reproducibility
     // holds. Only the three unison/drift-capable source types draw, so the noise stream is untouched
@@ -67,17 +73,40 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
 {
     const auto count=std::min({inL.size(),inR.size(),outL.size(),outR.size(),maximumModuleBlockSize});fundamental=clampFinite(fundamental,1,static_cast<float>(sampleRate_*.45),440);auto output=clampFinite(p.outputLevel,0,1,0);
     const bool unisonSource=type_==domain::ModuleType::harmonic||type_==domain::ModuleType::fm;
+    const bool pitchedSource=unisonSource||type_==domain::ModuleType::sub;
     const auto copies=unisonSource?std::clamp(p.unisonVoices,1,static_cast<int>(maximumUnisonVoices)):1;
-    if(unisonSource||type_==domain::ModuleType::sub)
+    // D8 pitch block (#122). `octave`, `coarse` and `fine` transpose the source away from the voice
+    // fundamental and `keytrack` scales how much of the note it follows, all as one semitone offset.
+    // At the catalog defaults (0 / 0 / 0 / 1) that offset is literally 0 and the branch below does
+    // not run, so a pre-D8 patch keeps its exact samples. masterTune and bend are already inside
+    // `fundamental`, so a transposed or partly keytracked source still follows both — and so does
+    // the sub oscillator, whose own -1/-2 octave is just this same offset.
+    if(pitchedSource)
     {
+        if(p.octave!=cachedPitchOctave_||p.coarse!=cachedPitchCoarse_||p.fine!=cachedPitchFine_||p.keytrack!=cachedPitchKeytrack_||note_!=cachedPitchNote_)
+        {
+            cachedPitchOctave_=p.octave;cachedPitchCoarse_=p.coarse;cachedPitchFine_=p.fine;cachedPitchKeytrack_=p.keytrack;cachedPitchNote_=note_;
+            const auto semitones=12.0f*static_cast<float>(std::clamp(p.octave,-3,3))+static_cast<float>(std::clamp(p.coarse,-12,12))
+                                +clampFinite(p.fine,-100,100,0)*.01f
+                                +(clampFinite(p.keytrack,0,1,1)-1.0f)*static_cast<float>(note_-keytrackReferenceNote);
+            cachedPitchMultiplier_=semitones==0.0f?1.0f:std::exp2(semitones/12.0f);
+        }
+        if(cachedPitchMultiplier_!=1.0f)fundamental=clampFinite(fundamental*cachedPitchMultiplier_,1,static_cast<float>(sampleRate_*.45),440);
         updateUnison(copies,p.detuneCents,p.unisonSpread);
         // `drift` (D9: a pair of slow sines, rate and start phase drawn per note-on) wanders pitch
         // and level around the note. Both multipliers are literally 1 at drift 0 — exp2(0) and
         // 1 + 0 — so a pre-D8 patch multiplies by one and keeps its exact samples. The wanders step
         // once per block: at a fraction of a hertz that is inaudibly coarse and costs nothing.
+        // Both wanders are multiplied by `amount`, so at drift 0 the two sines are multiplied away
+        // and skipping them is bit for bit the same signal — exp2(0) is 1 and 1 + 0 is 1 exactly.
+        // The engine calls process() once per sample, so that is two transcendentals per sample per
+        // pitched node that a patch with drift off was paying for nothing (#120, measured in #122).
         const auto amount=clampFinite(p.drift,0,1,0);
-        fundamental*=std::exp2(amount*driftCentsRange*fastSin(driftPhase_)/1200.0f);
-        output*=1.0f+amount*driftLevelRange*fastSin(driftLevelPhase_);
+        if(amount>0.0f)
+        {
+            fundamental*=std::exp2(amount*driftCentsRange*fastSin(driftPhase_)/1200.0f);
+            output*=1.0f+amount*driftLevelRange*fastSin(driftLevelPhase_);
+        }
         const auto step=twoPi*static_cast<double>(count)/sampleRate_;
         driftPhase_+=step*driftRate_;driftLevelPhase_+=step*driftLevelRate_;
         if(driftPhase_>std::numbers::pi_v<double>)driftPhase_-=twoPi;if(driftLevelPhase_>std::numbers::pi_v<double>)driftLevelPhase_-=twoPi;
@@ -130,7 +159,10 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         else if(type_==domain::ModuleType::resonator){const auto hz=fundamental*clampFinite(p.tuneRatio,.5f,4,1);if(p.mode==0){comb_->setDelay(std::clamp(static_cast<float>(sampleRate_/hz),1.0f,static_cast<float>(comb_->getMaximumDelayInSamples())));const auto fb=clampFinite(p.combFeedback,0,.97f,.4f),dl=comb_->popSample(0),dr=comb_->popSample(1);comb_->pushSample(0,l+dl*fb);comb_->pushSample(1,r+dr*fb);l=dl;r=dr;}else{float sl=0,sr=0;const auto q=clampFinite(p.modalQ,.5f,12,3);for(std::size_t m=0;m<4;++m){const auto cutoff=std::min(hz*clampFinite(p.modeRatios[m],.5f,4,1),static_cast<float>(sampleRate_*.4));modes_[m].setType(juce::dsp::StateVariableTPTFilterType::bandpass);if(cutoff!=cachedModeCutoffs_[m]){modes_[m].setCutoffFrequency(cutoff);cachedModeCutoffs_[m]=cutoff;}if(q!=cachedModalQ_)modes_[m].setResonance(q);const auto g=clampFinite(p.modeLevels[m],0,1,0);sl+=modes_[m].processSample(0,l)*g;sr+=modes_[m].processSample(1,r)*g;}cachedModalQ_=q;l=sl;r=sr;}}
         else if(type_==domain::ModuleType::filter){l=filter_.processSample(0,l);r=filter_.processSample(1,r);}
         else if(type_==domain::ModuleType::shaper){const auto d=clampFinite(p.drive,1,16,1),w=clampFinite(p.wet,0,1,1);l=std::lerp(l,fastTanh(l*d),w);r=std::lerp(r,fastTanh(r*d),w);}
-        else if(type_==domain::ModuleType::sub){l=r=0;} // silent skeleton until issue #122 implements the sub oscillator
+        // D8 sub oscillator (#122): one directly evaluated sine or triangle — no wavetable — at the
+        // pitch the block above resolved, so MIDI, masterTune, bend, `fine`, `keytrack`, `octave`
+        // and `drift` all reach it exactly as they reach the other pitched sources.
+        else if(type_==domain::ModuleType::sub){const auto phase=phases_[0];l=r=p.waveform==1?triangleWave(phase):fastSin(phase);phases_[0]=phase+twoPi*fundamental/sampleRate_;if(phases_[0]>std::numbers::pi_v<double>)phases_[0]-=twoPi;}
         else if(type_==domain::ModuleType::chorus||type_==domain::ModuleType::delay||type_==domain::ModuleType::reverb||type_==domain::ModuleType::width){} // pass-through skeleton until issues #123/#124
         else{const auto g=clampFinite(p.level,0,1,1);l*=g*cachedPanLeft_;r*=g*cachedPanRight_;}outL[i]=std::isfinite(l)?l*output:0;outR[i]=std::isfinite(r)?r*output:0;}
 }

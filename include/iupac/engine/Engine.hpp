@@ -108,6 +108,16 @@ private:
     std::uint16_t harmonicRenormalizeCountdown_{4096};
     std::size_t burstSamplesRemaining_{};
     bool gate_{};
+    // The MIDI note the current voice is playing: `keytrack` needs the note itself, not the
+    // fundamental, because masterTune and bend are already folded into the frequency. It sits in
+    // the padding after `gate_` so adding it moves no other member and leaves the hot harmonic
+    // arrays above on the cache lines they already occupied.
+    int note_{60};
+    // D8 pitch block (#122). The engine calls process() once per sample, so the transposition is
+    // resolved to one frequency multiplier and recomputed only when one of its four controls or the
+    // note moves; `fine` is matrix-modulatable, so that can be per sample, but normally is not.
+    int cachedPitchOctave_{}, cachedPitchCoarse_{}, cachedPitchNote_{60};
+    float cachedPitchFine_{}, cachedPitchKeytrack_{1.0f}, cachedPitchMultiplier_{1.0f};
     CombDelay* comb_{};
     std::unique_ptr<CombDelay> ownedComb_;
     juce::dsp::StateVariableTPTFilter<float> filter_;

@@ -180,6 +180,35 @@ int main(int argc,char**argv)
   ok&=expect(values(processor.snapshot().editedPatch,"src1","partialRatios")==ratiosBefore&&values(processor.snapshot().editedPatch,"src1","partialAmplitudes")==amplitudesBefore,
              "spectral-shape edits never rewrite the stored spectrum");
  }
+ // D8 pitch block and the sub slot (#122). The four pitch controls are a strip on both general
+ // pitched sources, and the sub slot — fixed in the source column, never "added" to a list — carries
+ // its waveform toggle and its own pitch controls.
+ {
+  for(const auto*slotId:{"src1","src2"})
+  {
+   auto&slot=field.slot(std::string_view(slotId)=="src1"?0:1); // src1 is the harmonic slot, src2 the FM one
+   for(const auto*id:{"octave","coarse","fine","keytrack"})
+   {
+    auto*c=slot.control(id);
+    if(!expect(c!=nullptr,"pitched source slot exposes the pitch control")){ok=false;continue;}
+    ok&=expect(c->isVisible()&&!c->getBounds().isEmpty(),"pitch control is laid out on the slot");
+   }
+   ok&=expect(editor->setParameter(slotId,"coarse",0,7)&&values(processor.snapshot().editedPatch,slotId,"coarse")[0]==7.0,"coarse edit reaches the patch");
+   ok&=expect(editor->setParameter(slotId,"keytrack",0,.25)&&std::abs(values(processor.snapshot().editedPatch,slotId,"keytrack")[0]-.25)<1e-9,"keytrack edit reaches the patch");
+  }
+  auto&sub=field.slot(3);
+  ok&=expect(sub.active()&&ui::slotTable[3].kind==ui::SlotKind::sub,"the sub slot is active in place in the source column");
+  ok&=expect(sub.toggle("waveform")!=nullptr,"the sub slot exposes its waveform toggle");
+  for(const auto*id:{"octave","fine","keytrack","drift","outputLevel"})
+  {
+   auto*c=sub.control(id);
+   if(!expect(c!=nullptr,"the sub slot exposes its control")){ok=false;continue;}
+   ok&=expect(c->isVisible()&&!c->getBounds().isEmpty(),"sub control is laid out on the slot");
+  }
+  ok&=expect(editor->setParameter("sub1","octave",0,-2)&&values(processor.snapshot().editedPatch,"sub1","octave")[0]==-2.0,"sub octave edit reaches the patch");
+  ok&=expect(editor->deactivateSlot(3)&&!field.slot(3).active(),"the sub slot deactivates in place");
+  ok&=expect(editor->activateSlot("sub",3)&&field.slot(3).active()&&node(processor.snapshot().editedPatch,"sub1"),"the sub slot toggles active again at the same position");
+ }
  auto*mode=field.slot(4).toggle("mode");if(expect(mode!=nullptr,"resonator slot exposes the mode toggle")){mode->mouseDown(event(*mode,{(float)mode->getWidth()-2.0f,2.0f}));ok&=expect(values(processor.snapshot().editedPatch,"res1","mode")[0]==1.0,"segment toggle click stores the enum");}
  ok&=expect(editor->setEnvelope(0,{.05,.2,.5,.8})&&std::abs(processor.snapshot().editedPatch.envelopes[0].sustain-.5)<1e-9,"envelope curve edits store the ADSR");
  // Lanes.

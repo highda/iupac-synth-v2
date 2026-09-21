@@ -134,6 +134,74 @@ bool runModuleTests()
         auto wild=bell;wild.harmonicityMorph=9;wild.oddEvenBalance=-9;wild.symmetry=std::numeric_limits<float>::quiet_NaN();
         ok&=expect(std::ranges::all_of(renderSource(domain::ModuleType::harmonic,wild,60,123,4)[0],[](float x){return std::isfinite(x);}),"spectral shape clamps its controls");
     }
+    // --- D8 pitch block and the sub oscillator (#122) ------------------------------------------
+    {
+        // The engine hands every module the voice fundamental, so a pitch test has to move the note
+        // and the frequency together exactly as Engine::Impl does.
+        auto renderNote=[&](domain::ModuleType type,const engine::ModuleValues& values,int note,int blocks=1){
+            engine::ModuleProcessor m(type);m.prepare(96000,512);m.noteOn(note,1,123,456);
+            std::array<float,512> zl{},zr{},ol{},orr{};std::array<std::array<float,512>,2> last{};
+            for(int b=0;b<blocks;++b){m.process(values,440.0f*std::exp2(static_cast<float>(note-69)/12.0f),zl,zr,ol,orr);last={ol,orr};}
+            return last;};
+        for(auto type:{domain::ModuleType::harmonic,domain::ModuleType::fm})
+        {
+            engine::ModuleValues base;base.amplitudes[0]=1;for(std::size_t i=0;i<16;++i)base.ratios[i]=static_cast<float>(i+1);
+            const auto reference=renderNote(type,base,60,4);
+            // Catalog defaults are the literal identity: the offset is exactly zero semitones.
+            auto defaults=base;defaults.octave=0;defaults.coarse=0;defaults.fine=0;defaults.keytrack=1;
+            ok&=expect(renderNote(type,defaults,60,4)==reference,"pitch-block defaults render the pre-D8 source bit for bit");
+            // The three transpositions are the same offset expressed three ways: one octave up is
+            // twelve semitones up is what the note an octave higher renders.
+            auto up=base;up.octave=1;
+            auto twelve=base;twelve.coarse=12;
+            const auto octaveUp=renderNote(type,up,60,4);
+            ok&=expect(octaveUp==renderNote(type,twelve,60,4),"octave +1 and coarse +12 are the same transposition");
+            ok&=expect(octaveUp!=reference,"octave transposes the source away from the note");
+            auto hundredCents=base;hundredCents.fine=100;
+            auto oneSemitone=base;oneSemitone.coarse=1;
+            ok&=expect(renderNote(type,hundredCents,60,4)==renderNote(type,oneSemitone,60,4),"fine 100 cents is one coarse semitone");
+            // `keytrack` 0 pins the source to the C4 reference: the same samples at every note, which
+            // is exactly a source an octave down when the note itself is an octave up.
+            auto pinned=base;pinned.keytrack=0;
+            ok&=expect(renderNote(type,pinned,72,4)==renderNote(type,pinned,60,4),"keytrack 0 renders the same pitch whatever the note");
+            auto down=base;down.octave=-1;
+            ok&=expect(renderNote(type,pinned,72,4)==renderNote(type,down,72,4),"keytrack 0 at C5 is the C5 voice transposed an octave down");
+            ok&=expect(renderNote(type,base,72,4)!=renderNote(type,base,60,4),"keytrack 1 follows the keyboard");
+            // Out-of-range values are clamped, never propagated.
+            auto wild=base;wild.octave=99;wild.coarse=-99;wild.fine=std::numeric_limits<float>::quiet_NaN();wild.keytrack=-5;
+            ok&=expect(std::ranges::all_of(renderNote(type,wild,60,4)[0],[](float x){return std::isfinite(x);}),"the pitch block clamps its controls");
+        }
+        // The sub oscillator itself. A low internal rate makes a whole number of cycles fit one
+        // block, so the rendered frequency can be read off the zero crossings rather than assumed.
+        auto subCrossings=[&](int waveform,int octave,int note,float tuneRatio=1.0f){
+            engine::ModuleProcessor m(domain::ModuleType::sub);m.prepare(8000,512);m.noteOn(note,1,7,11);
+            engine::ModuleValues v;v.outputLevel=1;v.waveform=waveform;v.octave=octave;
+            std::array<float,512> zl{},zr{},ol{},orr{};m.process(v,440.0f*std::exp2(static_cast<float>(note-69)/12.0f)*tuneRatio,zl,zr,ol,orr);
+            int crossings=0;for(std::size_t i=1;i<ol.size();++i)if((ol[i-1]<0)!=(ol[i]<0))++crossings;
+            return std::pair{crossings,ol};};
+        // C5 is 523.25 Hz; 512 samples at 8 kHz is 64 ms, so one octave down is 33 zero crossings
+        // and two octaves down is 16. That is the contract "one or two octaves below the fundamental".
+        const auto [oneDown,sine]=subCrossings(0,-1,72);
+        const auto [twoDown,deeper]=subCrossings(0,-2,72);
+        ok&=expect(std::abs(oneDown-33)<=2,"the sub renders one octave below the voice fundamental");
+        ok&=expect(std::abs(twoDown-16)<=2,"octave -2 renders two octaves below the voice fundamental");
+        ok&=expect(finiteActive(sine)&&finiteActive(deeper),"the sub renders a finite signal");
+        // masterTune and bend arrive as the fundamental itself, so the sub follows them like every
+        // other pitched source: an octave of bend doubles the rendered frequency.
+        ok&=expect(std::abs(subCrossings(0,-1,72,2.0f).first-2*oneDown)<=2,"the sub follows a transposed fundamental");
+        // The triangle is a different shape at the same frequency, and neither is a wavetable read.
+        const auto [triangleCrossings,triangle]=subCrossings(1,-1,72);
+        ok&=expect(triangleCrossings==oneDown,"the triangle runs at the sine's frequency");
+        ok&=expect(triangle!=sine&&finiteActive(triangle),"the triangle waveform is a different shape");
+        // The sub takes the same pitch block: a note an octave up at octave -2 is the same pitch.
+        auto renderSub=[&](int octave,float fine,float keytrack,int note){
+            engine::ModuleProcessor m(domain::ModuleType::sub);m.prepare(96000,512);m.noteOn(note,1,7,11);
+            engine::ModuleValues v;v.outputLevel=1;v.octave=octave;v.fine=fine;v.keytrack=keytrack;
+            std::array<float,512> zl{},zr{},ol{},orr{};for(int b=0;b<4;++b)m.process(v,440.0f*std::exp2(static_cast<float>(note-69)/12.0f),zl,zr,ol,orr);return ol;};
+        ok&=expect(renderSub(-2,0,1,84)==renderSub(-1,0,1,72),"the sub octave is measured from the note it is playing");
+        ok&=expect(renderSub(-1,0,0,72)==renderSub(-1,0,0,84),"keytrack 0 pins the sub to one pitch");
+        ok&=expect(renderSub(-1,50,1,72)!=renderSub(-1,0,1,72),"fine detunes the sub");
+    }
     engine::ModulatorBank mods;mods.prepare(48000);std::array<domain::Envelope,domain::envelopeCount> es{};std::array<domain::Lfo,domain::lfoCount> ls{};ls[0].waveform=domain::LfoWaveform::triangle;mods.configure(es,ls);mods.noteOn();auto a=mods.next();ok&=expect(a[0]>=0&&a[3]>=-1&&a[3]<=1,"ADSR and LFO run");mods.noteOff();
     return ok;
 }
