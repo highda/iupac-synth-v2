@@ -221,7 +221,8 @@ RenderResult renderSnapshot(const domain::State& state, std::span<const engine::
 {
     if (!std::isfinite(settings.sampleRate) || settings.sampleRate < 8000 || settings.sampleRate > 192000 || settings.blockSize < 1 || settings.blockSize > engine::maximumModuleBlockSize || settings.samples < 1 || settings.samples > static_cast<std::size_t>(settings.sampleRate * 60.0)) return {{}, "render settings outside bounds"};
     const auto compiled = engine::compilePatch(state.editedPatch); if (!compiled) return {{}, compiled.error};
-    engine::Engine engine; engine.prepare(settings.sampleRate, settings.blockSize); engine.setPatch(compiled.patch); engine.setControls(state.controls);
+    if (!std::isfinite(settings.tempoBpm) || settings.tempoBpm < 20.0 || settings.tempoBpm > 999.0) return {{}, "render settings outside bounds"};
+    engine::Engine engine; engine.prepare(settings.sampleRate, settings.blockSize); engine.setTempo(settings.tempoBpm); engine.setPatch(compiled.patch); engine.setControls(state.controls);
     std::vector<float> left(settings.samples), right(settings.samples); engine.render(left, right, midi);
     juce::AudioBuffer<float> buffer(2, static_cast<int>(settings.samples)); buffer.copyFrom(0, 0, left.data(), static_cast<int>(settings.samples)); buffer.copyFrom(1, 0, right.data(), static_cast<int>(settings.samples));
     std::error_code ec; if (!wav.parent_path().empty()) std::filesystem::create_directories(wav.parent_path(), ec); if (ec) return {{}, "cannot create WAV directory"};
@@ -231,7 +232,7 @@ RenderResult renderSnapshot(const domain::State& state, std::span<const engine::
     double sum = 0, squared = 0, peak = 0; for (std::size_t i = 0; i < left.size(); ++i) { sum += left[i] + right[i]; squared += left[i]*left[i] + right[i]*right[i]; peak = std::max({peak, std::abs(static_cast<double>(left[i])), std::abs(static_cast<double>(right[i]))}); }
     auto root = object(); put(root, "productVersion", juce::String(domain::productVersion().data())); put(root, "architecture", juce::String(domain::architectureVersion().data())); put(root, "patchVersion", domain::patchVersion); put(root, "stateVersion", domain::stateVersion);
     put(root, "command", juce::String("iupac-cli render")); put(root, "sampleRate", settings.sampleRate); put(root, "blockSize", static_cast<int>(settings.blockSize)); put(root, "samples", static_cast<juce::int64>(settings.samples));
-    put(root, "latencySamples", engine.latencySamples()); put(root, "guardHits", static_cast<juce::int64>(engine.guardHits())); put(root, "peak", peak); put(root, "rms", std::sqrt(squared / (2 * left.size()))); put(root, "dc", sum / (2 * left.size())); put(root, "graphSignature", juce::String(graphSignature(compiled.patch)));
+    put(root, "tempoBpm", settings.tempoBpm); put(root, "tempoFromPlayhead", settings.tempoFromPlayhead); put(root, "latencySamples", engine.latencySamples()); put(root, "guardHits", static_cast<juce::int64>(engine.guardHits())); put(root, "peak", peak); put(root, "rms", std::sqrt(squared / (2 * left.size()))); put(root, "dc", sum / (2 * left.size())); put(root, "graphSignature", juce::String(graphSignature(compiled.patch)));
     std::string pcmBytes; pcmBytes.reserve((left.size() + right.size()) * sizeof(float));
     pcmBytes.append(reinterpret_cast<const char*>(left.data()), left.size() * sizeof(float)); pcmBytes.append(reinterpret_cast<const char*>(right.data()), right.size() * sizeof(float));
     put(root, "valueSignature", juce::String(valueSignature(compiled.patch, state.controls))); put(root, "pcmSha256", juce::String(hash(pcmBytes))); put(root, "wav", juce::String(wav.string()));

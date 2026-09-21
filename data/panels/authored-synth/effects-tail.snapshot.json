@@ -1,0 +1,419 @@
+{
+  "stateVersion": 1,
+  "basePatch": {
+    "patchVersion": 1,
+    "noiseSeed": 38177486,
+    "nodes": [
+      {
+        "id": "h1",
+        "type": "harmonic",
+        "parameters": {
+          "partialAmplitudes": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "partialRatios": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0,
+            12.0,
+            13.0,
+            14.0,
+            15.0,
+            16.0
+          ],
+          "partialPans": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "tilt": 0.0,
+          "inharmonicity": 0.0,
+          "outputLevel": 0.7,
+          "unisonVoices": 1.0,
+          "detuneCents": 12.0,
+          "unisonSpread": 0.5,
+          "phaseRandom": 0.0,
+          "drift": 0.0,
+          "harmonicityMorph": 0.0,
+          "oddEvenBalance": 0.0,
+          "symmetry": 0.5,
+          "octave": 0.0,
+          "coarse": 0.0,
+          "fine": 0.0,
+          "keytrack": 1.0
+        }
+      },
+      {
+        "id": "m1",
+        "type": "mixer",
+        "parameters": {
+          "level": 1.0,
+          "pan": 0.0,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "x1",
+        "type": "chorus",
+        "parameters": {
+          "rate": 1.5,
+          "depth": 0.6,
+          "voices": 4.0,
+          "feedback": 0.4,
+          "mix": 0.5,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "x2",
+        "type": "delay",
+        "parameters": {
+          "syncMode": 1.0,
+          "timeMs": 375.0,
+          "syncDivision": 4.0,
+          "spread": 0.5,
+          "feedback": 0.55,
+          "damping": 0.6,
+          "mix": 0.5,
+          "outputLevel": 1.0
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "h1",
+        "destination": "m1",
+        "gain": 1.0
+      },
+      {
+        "source": "m1",
+        "destination": "x1",
+        "gain": 1.0
+      },
+      {
+        "source": "x1",
+        "destination": "x2",
+        "gain": 1.0
+      },
+      {
+        "source": "x2",
+        "destination": "output",
+        "gain": 1.0
+      }
+    ],
+    "envelopes": [
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      }
+    ],
+    "lfos": [
+      {
+        "rate": 1.0,
+        "waveform": "sine"
+      },
+      {
+        "rate": 1.0,
+        "waveform": "sine"
+      }
+    ],
+    "matrix": [
+      {
+        "id": "row-0",
+        "enabled": true,
+        "source": "macro1",
+        "destinationNode": "x2",
+        "destinationParameter": "mix",
+        "depth": -0.4
+      }
+    ],
+    "macros": [
+      {
+        "label": "Macro 1",
+        "default": 0.5
+      },
+      {
+        "label": "Macro 2",
+        "default": 0.25
+      },
+      {
+        "label": "Macro 3",
+        "default": 0.0
+      },
+      {
+        "label": "Macro 4",
+        "default": 1.0
+      }
+    ]
+  },
+  "editedPatch": {
+    "patchVersion": 1,
+    "noiseSeed": 38177486,
+    "nodes": [
+      {
+        "id": "h1",
+        "type": "harmonic",
+        "parameters": {
+          "partialAmplitudes": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "partialRatios": [
+            1.0,
+            2.0,
+            3.0,
+            4.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            9.0,
+            10.0,
+            11.0,
+            12.0,
+            13.0,
+            14.0,
+            15.0,
+            16.0
+          ],
+          "partialPans": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "tilt": 0.0,
+          "inharmonicity": 0.0,
+          "outputLevel": 0.7,
+          "unisonVoices": 1.0,
+          "detuneCents": 12.0,
+          "unisonSpread": 0.5,
+          "phaseRandom": 0.0,
+          "drift": 0.0,
+          "harmonicityMorph": 0.0,
+          "oddEvenBalance": 0.0,
+          "symmetry": 0.5,
+          "octave": 0.0,
+          "coarse": 0.0,
+          "fine": 0.0,
+          "keytrack": 1.0
+        }
+      },
+      {
+        "id": "m1",
+        "type": "mixer",
+        "parameters": {
+          "level": 1.0,
+          "pan": 0.0,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "x1",
+        "type": "chorus",
+        "parameters": {
+          "rate": 1.5,
+          "depth": 0.6,
+          "voices": 4.0,
+          "feedback": 0.4,
+          "mix": 0.5,
+          "outputLevel": 1.0
+        }
+      },
+      {
+        "id": "x2",
+        "type": "delay",
+        "parameters": {
+          "syncMode": 1.0,
+          "timeMs": 375.0,
+          "syncDivision": 4.0,
+          "spread": 0.5,
+          "feedback": 0.55,
+          "damping": 0.6,
+          "mix": 0.5,
+          "outputLevel": 1.0
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "h1",
+        "destination": "m1",
+        "gain": 1.0
+      },
+      {
+        "source": "m1",
+        "destination": "x1",
+        "gain": 1.0
+      },
+      {
+        "source": "x1",
+        "destination": "x2",
+        "gain": 1.0
+      },
+      {
+        "source": "x2",
+        "destination": "output",
+        "gain": 1.0
+      }
+    ],
+    "envelopes": [
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1.0,
+        "release": 0.2
+      }
+    ],
+    "lfos": [
+      {
+        "rate": 1.0,
+        "waveform": "sine"
+      },
+      {
+        "rate": 1.0,
+        "waveform": "sine"
+      }
+    ],
+    "matrix": [
+      {
+        "id": "row-0",
+        "enabled": true,
+        "source": "macro1",
+        "destinationNode": "x2",
+        "destinationParameter": "mix",
+        "depth": -0.4
+      }
+    ],
+    "macros": [
+      {
+        "label": "Macro 1",
+        "default": 0.5
+      },
+      {
+        "label": "Macro 2",
+        "default": 0.25
+      },
+      {
+        "label": "Macro 3",
+        "default": 0.0
+      },
+      {
+        "label": "Macro 4",
+        "default": 1.0
+      }
+    ]
+  },
+  "controls": {
+    "macros": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "outputGain": -6.0,
+    "width": 0.5,
+    "masterTune": 0.0,
+    "bypass": false
+  }
+}

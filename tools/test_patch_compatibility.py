@@ -170,10 +170,15 @@ class CompatibilityTests(unittest.TestCase):
         self.assertEqual(sum(1 for e in patch["edges"] if e.get("port", "in") != "in"), 2)
 
     def test_the_authored_panel_rejections_hold(self):
+        panel_path = ROOT / "data" / "panels" / "authored-synth" / "panel.json"
+        authored = json.loads(panel_path.read_text())["rejections"]
         with tempfile.TemporaryDirectory() as directory:
-            out = subprocess.run([CLI, "verify-panel", "--panel", str(ROOT / "data" / "panels" / "authored-synth" / "panel.json"),
+            out = subprocess.run([CLI, "verify-panel", "--panel", str(panel_path),
                                   "--output-dir", directory], capture_output=True, text=True, check=True)
-        self.assertEqual(len(json.loads(out.stdout)["rejections"]), 7)
+        # Every authored rejection has to come back with its exact error: a relaxed bound or a
+        # relaxed router constraint would drop the case rather than fail it.
+        reported = json.loads(out.stdout)["rejections"]
+        self.assertEqual([(r["id"], r["error"]) for r in reported], [(r["id"], r["error"]) for r in authored])
 
 
 if __name__ == "__main__":

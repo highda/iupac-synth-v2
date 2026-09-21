@@ -18,9 +18,11 @@ PD scalar(std::string_view id, std::string_view unit, double lo, double hi, doub
 {
     return {id, unit, lo, hi, def, scale, PK::continuous, mod, 0, id == "outputLevel" || id == "level" ? 5.0 : 20.0, {}};
 }
-PD choice(std::string_view id, std::initializer_list<std::string_view> values)
+// `defaultIndex` names the entry the v3.2 parameter table declares as the default; it is zero for
+// every choice that existed before D8 and 4 (`1/8`) for the delay's `syncDivision` (#123).
+PD choice(std::string_view id, std::initializer_list<std::string_view> values, std::size_t defaultIndex = 0)
 {
-    return {id, "", 0, static_cast<double>(values.size() - 1), 0, PS::linear, PK::discrete, false, 0, 0, values};
+    return {id, "", 0, static_cast<double>(values.size() - 1), static_cast<double>(defaultIndex), PS::linear, PK::discrete, false, 0, 0, values};
 }
 PD array(std::string_view id, double lo, double hi, double def, std::size_t size)
 {
@@ -57,7 +59,7 @@ const std::array<ModuleDescriptor, moduleTypeCount> catalog {{
     {ModuleType::mixer, "mixer", false, 2, false, false, AudioPort::in, {scalar("level", "", 0, 1, 1), scalar("pan", "", -1, 1, 0), scalar("outputLevel", "", 0, 1, 1)}},
     {ModuleType::sub, "sub", true, 1, false, false, AudioPort::in, {added(choice("waveform", {"sine", "triangle"})), added(step("octave", "oct", -2, -1, -1)), added(scalar("drift", "", 0, 1, 0)), added(scalar("fine", "cents", -100, 100, 0)), added(scalar("keytrack", "", 0, 1, 1, PS::linear, false)), added(scalar("outputLevel", "", 0, 1, 0.5))}},
     {ModuleType::chorus, "chorus", false, 1, false, true, AudioPort::in, {added(scalar("rate", "Hz", 0.01, 8, 0.5, PS::logarithmic)), added(scalar("depth", "", 0, 1, 0.3)), added(step("voices", "count", 2, 4, 2)), added(scalar("feedback", "", 0, 0.9, 0)), added(scalar("mix", "", 0, 1, 0.3)), added(scalar("outputLevel", "", 0, 1, 1))}},
-    {ModuleType::delay, "delay", false, 1, false, true, AudioPort::in, {added(choice("syncMode", {"free", "sync"})), added(scalar("timeMs", "ms", 1, 2000, 375, PS::logarithmic)), added(choice("syncDivision", {"1/1", "1/2", "1/4", "1/4T", "1/8", "1/8T", "1/16"})), added(scalar("spread", "", -1, 1, 0)), added(scalar("feedback", "", 0, 0.95, 0.35)), added(scalar("damping", "", 0, 1, 0.4)), added(scalar("mix", "", 0, 1, 0.3)), added(scalar("outputLevel", "", 0, 1, 1))}},
+    {ModuleType::delay, "delay", false, 1, false, true, AudioPort::in, {added(choice("syncMode", {"free", "sync"})), added(scalar("timeMs", "ms", 1, 2000, 375, PS::logarithmic)), added(choice("syncDivision", {"1/1", "1/2", "1/4", "1/4T", "1/8", "1/8T", "1/16"}, 4)), added(scalar("spread", "", -1, 1, 0)), added(scalar("feedback", "", 0, 0.95, 0.35)), added(scalar("damping", "", 0, 1, 0.4)), added(scalar("mix", "", 0, 1, 0.3)), added(scalar("outputLevel", "", 0, 1, 1))}},
     {ModuleType::reverb, "reverb", false, 1, false, true, AudioPort::in, {added(scalar("size", "", 0, 1, 0.5)), added(scalar("decaySeconds", "s", 0.1, 20, 2.0, PS::logarithmic)), added(scalar("damping", "", 0, 1, 0.5)), added(scalar("preDelayMs", "ms", 0, 200, 20)), added(scalar("width", "", 0, 1, 1)), added(scalar("mix", "", 0, 1, 0.25)), added(scalar("outputLevel", "", 0, 1, 1))}},
     {ModuleType::width, "width", false, 1, false, true, AudioPort::in, {added(scalar("width", "", 0, 2, 1)), added(scalar("bassMonoHz", "Hz", 20, 500, 120, PS::logarithmic)), added(scalar("outputLevel", "", 0, 1, 1))}}
 }};

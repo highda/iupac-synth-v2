@@ -24,17 +24,41 @@ float triangleWave(double phase) noexcept {const auto scaled=static_cast<float>(
 // treats as the instrument centre (`keyTracking` is (note - 60) / 36 in the matrix).
 constexpr int keytrackReferenceNote = 60;
 float fastTanh(float value)noexcept{if(value>=5)return 1;if(value<=-5)return-1;return juce::dsp::FastMathApproximations::tanh(value);}
+// D9 delegates the chorus modulation shape and the delay's sync arithmetic (#123).
+// The chorus is `voices` taps on one prepared stereo line, each swept by the same sine at a phase
+// offset of a full turn divided by the tap count, so the taps never bunch; the sweep runs from
+// `chorusBaseMilliseconds` to `chorusBaseMilliseconds + chorusSweepMilliseconds` at `depth` 1, the
+// classic 6-12 ms chorus window rather than a flanger's sub-millisecond one.
+constexpr float chorusBaseMilliseconds = 6.0f, chorusSweepMilliseconds = 6.0f;
+// The delay's `spread` skews the two channels' times by up to this fraction in opposite directions,
+// which is a stereo offset rather than a ping-pong: no cross-channel feedback path is introduced.
+constexpr float delaySpreadRange = 0.35f;
+// `damping` is a one-pole lowpass inside the feedback path. The coefficient is exactly 1 at damping
+// 0 — the repeat is then the unfiltered delayed sample — and falls to 0.05 at damping 1.
+constexpr float delayDampingRange = 0.95f;
+// `syncDivision` in catalog order: 1/1, 1/2, 1/4, 1/4T, 1/8, 1/8T, 1/16, as a count of quarter-note
+// beats. A triplet is two thirds of the plain division above it.
+constexpr std::array<double, 7> syncDivisionBeats{4.0, 2.0, 1.0, 2.0 / 3.0, 0.5, 1.0 / 3.0, 0.25};
 }
 float ModuleProcessor::clampFinite(float v,float lo,float hi,float fallback) noexcept { return std::isfinite(v)?std::clamp(v,lo,hi):fallback; }
 void ModuleProcessor::prepare(double rate,std::size_t block)
 {
     sampleRate_=std::max(1.0,rate); juce::dsp::ProcessSpec spec{sampleRate_,static_cast<juce::uint32>(std::min(block,maximumModuleBlockSize)),2};
-    if(type_==domain::ModuleType::resonator&&!comb_){ownedComb_=std::make_unique<CombDelay>(110000);ownedComb_->prepare(spec);comb_=ownedComb_.get();}filter_.prepare(spec);for(auto& m:modes_)m.prepare(spec);reset();
+    if(type_==domain::ModuleType::resonator&&!comb_){ownedComb_=std::make_unique<CombDelay>(110000);ownedComb_->prepare(spec);comb_=ownedComb_.get();}
+    // The engine's global tail hands its two prepared lines in before a patch is published, so this
+    // branch only fires for a chorus/delay processor prepared on its own (the module unit tests).
+    if((type_==domain::ModuleType::chorus||type_==domain::ModuleType::delay)&&!effect_)
+    {
+        ownedEffect_=std::make_unique<CombDelay>(static_cast<int>((type_==domain::ModuleType::chorus?maximumChorusDelaySeconds:maximumDelaySeconds)*sampleRate_)+4);
+        ownedEffect_->prepare(spec);effect_=ownedEffect_.get();
+    }
+    filter_.prepare(spec);for(auto& m:modes_)m.prepare(spec);reset();
 }
 void ModuleProcessor::reset() noexcept {phases_.fill(0);modPhases_.fill(0);for(auto& c:harmonicSin_)c.fill(0);for(auto& c:harmonicCos_)c.fill(1);cachedRatios_.fill(-1);cachedHarmonicFundamental_=-1;harmonicRenormalizeCountdown_=4096;pink_.fill(0);burstSamplesRemaining_=0;gate_=false;filterControlCountdown_=0;cachedPan_=cachedFundamental_=cachedFilterCutoff_=cachedFilterQ_=cachedModalQ_=std::numeric_limits<float>::quiet_NaN();cachedModeCutoffs_.fill(-1);cachedPans_.fill(std::numeric_limits<float>::quiet_NaN());
     unisonPhase_.fill(0);unisonModPhase_.fill(0);cachedDetuneCents_=cachedUnisonSpread_=std::numeric_limits<float>::quiet_NaN();cachedUnisonVoices_=0;unisonDirty_=true;pendingPhaseOffset_=false;
     driftPhase_=driftLevelPhase_=0;driftRate_=.11;driftLevelRate_=.07;
-    if(comb_)comb_->reset();filter_.reset();for(auto& m:modes_)m.reset();}
+    effectDampLeft_=effectDampRight_=0;
+    if(comb_)comb_->reset();if(effect_)effect_->reset();filter_.reset();for(auto& m:modes_)m.reset();}
 void ModuleProcessor::noteOn(int note,int channel,std::uint32_t seed,std::uint32_t nodeHash) noexcept
 {
     phases_.fill(0);modPhases_.fill(0);for(auto& c:harmonicSin_)c.fill(0);for(auto& c:harmonicCos_)c.fill(1);pink_.fill(0);gate_=true;note_=note;randomState_=seed^(nodeHash*0x9e3779b9u)^(static_cast<std::uint32_t>(note)<<16u)^(static_cast<std::uint32_t>(channel)*0x85ebca6bu);if(!randomState_)randomState_=1;burstSamplesRemaining_=std::numeric_limits<std::size_t>::max();
@@ -163,7 +187,59 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         // pitch the block above resolved, so MIDI, masterTune, bend, `fine`, `keytrack`, `octave`
         // and `drift` all reach it exactly as they reach the other pitched sources.
         else if(type_==domain::ModuleType::sub){const auto phase=phases_[0];l=r=p.waveform==1?triangleWave(phase):fastSin(phase);phases_[0]=phase+twoPi*fundamental/sampleRate_;if(phases_[0]>std::numbers::pi_v<double>)phases_[0]-=twoPi;}
-        else if(type_==domain::ModuleType::chorus||type_==domain::ModuleType::delay||type_==domain::ModuleType::reverb||type_==domain::ModuleType::width){} // pass-through skeleton until issues #123/#124
+        // D8 chorus (#123). `voices` taps read one prepared stereo line at swept delays and are
+        // panned across the image with the same equal-power law unison uses, so a wider tap count
+        // does not grow the level. `feedback` returns the panned wet sum to the line and `mix` is
+        // the ordinary dry/wet. The whole effect lives in the global tail, so this state is one set
+        // per bank, not one per voice.
+        // One test covers the whole effects region and the branches inside it are only reached by a
+        // node that is actually in the tail: `process()` runs once per sample, so a mixer at the end
+        // of this chain must not pay a comparison per effect type (#122 measured what that costs).
+        else if(type_>=domain::ModuleType::chorus)
+        {
+        if(type_==domain::ModuleType::chorus&&effect_)
+        {
+            const auto taps=std::clamp(p.voices,2,4);
+            const auto depth=clampFinite(p.depth,0,1,.3f),feedback=clampFinite(p.feedback,0,.9f,0),mix=clampFinite(p.mix,0,1,.3f);
+            const auto gain=std::numbers::sqrt2_v<float>/std::sqrt(static_cast<float>(taps));
+            const auto ceiling=static_cast<float>(effect_->getMaximumDelayInSamples()-2);
+            float wetL=0,wetR=0;
+            for(int t=0;t<taps;++t)
+            {
+                const auto milliseconds=chorusBaseMilliseconds+depth*chorusSweepMilliseconds*(.5f+.5f*fastSin(phases_[0]+twoPi*t/taps));
+                const auto delaySamples=std::clamp(static_cast<float>(milliseconds*.001*sampleRate_),1.0f,ceiling);
+                const auto position=2.0f*static_cast<float>(t)/static_cast<float>(taps-1)-1.0f;
+                // The last tap advances the read pointer for the sample; the earlier ones only read.
+                const bool advance=t+1==taps;
+                wetL+=effect_->popSample(0,delaySamples,advance)*gain*panGain(position,false);
+                wetR+=effect_->popSample(1,delaySamples,advance)*gain*panGain(position,true);
+            }
+            phases_[0]+=twoPi*clampFinite(p.rate,.01f,8,.5f)/sampleRate_;if(phases_[0]>std::numbers::pi_v<double>)phases_[0]-=twoPi;
+            effect_->pushSample(0,l+wetL*feedback);effect_->pushSample(1,r+wetR*feedback);
+            l=std::lerp(l,wetL,mix);r=std::lerp(r,wetR,mix);
+        }
+        // D8 stereo delay (#123). `syncMode` picks between the free `timeMs` and `syncDivision`
+        // against the host tempo (`fallbackTempoBpm` when the host has no playhead); `spread` skews
+        // the two channels' times apart; `damping` is a one-pole inside the feedback path, so each
+        // repeat is darker than the one before it.
+        else if(type_==domain::ModuleType::delay&&effect_)
+        {
+            const auto mix=clampFinite(p.mix,0,1,.3f),feedback=clampFinite(p.feedback,0,.95f,.35f);
+            const auto damping=clampFinite(p.damping,0,1,.4f),spread=clampFinite(p.spread,-1,1,0);
+            const auto seconds=p.syncMode==1?syncDivisionBeats[static_cast<std::size_t>(std::clamp(p.syncDivision,0,6))]*60.0/tempo_
+                                            :clampFinite(p.timeMs,1,2000,375)*.001;
+            const auto ceiling=static_cast<float>(effect_->getMaximumDelayInSamples()-2);
+            const auto base=std::clamp(seconds,.001,2.0)*sampleRate_;
+            const auto leftSamples=std::clamp(static_cast<float>(base*(1.0-delaySpreadRange*spread)),1.0f,ceiling);
+            const auto rightSamples=std::clamp(static_cast<float>(base*(1.0+delaySpreadRange*spread)),1.0f,ceiling);
+            const auto wetL=effect_->popSample(0,leftSamples),wetR=effect_->popSample(1,rightSamples);
+            const auto coefficient=1.0f-delayDampingRange*damping;
+            effectDampLeft_+=coefficient*(wetL-effectDampLeft_);effectDampRight_+=coefficient*(wetR-effectDampRight_);
+            effect_->pushSample(0,l+effectDampLeft_*feedback);effect_->pushSample(1,r+effectDampRight_*feedback);
+            l=std::lerp(l,wetL,mix);r=std::lerp(r,wetR,mix);
+        }
+        // reverb and width stay pass-through until issue #124
+        }
         else{const auto g=clampFinite(p.level,0,1,1);l*=g*cachedPanLeft_;r*=g*cachedPanRight_;}outL[i]=std::isfinite(l)?l*output:0;outR[i]=std::isfinite(r)?r*output:0;}
 }
 void ModulatorBank::prepare(double rate) noexcept {sampleRate_=std::max(1.0,rate);smoothingLength_=static_cast<std::uint64_t>(std::max(1.0,sampleRate_*.020));for(auto& e:envelopes_)e.setSampleRate(sampleRate_);}

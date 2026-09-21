@@ -103,6 +103,13 @@ void SlotView::build(const domain::Node&n)
   // with the general pitched sources. Only two octave values exist, so the step is the whole range.
   case domain::ModuleType::sub:toggle("waveform",{"sine","tri"});fader("octave","oct",false,false);if(auto*v=control("octave"))v->setStep(1.0);
    fader("fine","fine",false,true);fader("keytrack","key",false,false);fader("drift","drift",false,false);break;
+  // D8 effects tail (#123). `voices` is discrete over three values, so its step is half the range;
+  // both `syncMode` and `syncDivision` are segment toggles and are drawn together, so the free time
+  // and the synced division stay readable without the slot changing shape when the mode flips.
+  case domain::ModuleType::chorus:knob("rate","rate");knob("depth","depth");fader("voices","taps",false,false);if(auto*v=control("voices"))v->setStep(0.5);
+   knob("feedback","fb");fader("mix","mix",false,false);break;
+  case domain::ModuleType::delay:toggle("syncMode",{"free","sync"});toggle("syncDivision",{"1/1","1/2","1/4","1/4T","1/8","1/8T","1/16"});
+   knob("timeMs","time");knob("feedback","fb");knob("damping","damp");fader("spread","sprd",false,true);fader("mix","mix",false,false);break;
  }
  fader("outputLevel","out",true,false);
  remove_=std::make_unique<GlyphButton>("remove");remove_->setName("Deactivate "+getName());remove_->onClick=[this]{if(field_.onDeactivate)field_.onDeactivate(slot_);};addAndMakeVisible(*remove_);
@@ -148,6 +155,11 @@ void SlotView::resized()
   case domain::ModuleType::sub:{place("waveform",body.removeFromTop(juce::jmin(px(13),body.getHeight()/4)).reduced(0,1));
    placeRow(std::array{"fine","keytrack","drift"},body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));
    place("octave",body.withSizeKeepingCentre(body.getWidth(),juce::jmin(px(22),body.getHeight())));break;}
+  case domain::ModuleType::chorus:{placeRow(std::array{"feedback","mix"},body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));
+   const int w=body.getWidth()/3;place("rate",body.removeFromLeft(w));place("depth",body.removeFromLeft(w));place("voices",body);break;}
+  case domain::ModuleType::delay:{const int h=juce::jmin(px(13),body.getHeight()/5);place("syncMode",body.removeFromTop(h).reduced(0,1));place("syncDivision",body.removeFromTop(h).reduced(0,1));
+   placeRow(std::array{"spread","mix"},body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));
+   const int w=body.getWidth()/3;place("timeMs",body.removeFromLeft(w));place("feedback",body.removeFromLeft(w));place("damping",body);break;}
  }
 }
 void SlotView::openTable()

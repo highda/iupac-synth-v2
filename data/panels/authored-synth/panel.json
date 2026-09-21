@@ -1,64 +1,75 @@
 {
- "panelVersion": 1,
- "license": "CC0-1.0 repository-authored",
- "originatingIssue": 9,
- "sampleRate": 48000,
- "blockSize": 128,
- "cases": [
-  {
-   "id": "all-modules-routes",
-   "snapshot": "all-modules.snapshot.json",
-   "midi": "held-note.midi.json",
-   "samples": 144000
-  },
-  {
-   "id": "maximal-bounds",
-   "snapshot": "maximal.snapshot.json",
-   "midi": "held-note.midi.json",
-   "samples": 144000
-  },
-  {
-   "id": "sub-slot-and-pitch-block",
-   "snapshot": "sub-slot.snapshot.json",
-   "midi": "held-note.midi.json",
-   "samples": 144000
-  }
- ],
- "rejections": [
-  {
-   "id": "tail-into-per-voice-node",
-   "patch": "rejections/tail-into-per-voice-node.patch.json",
-   "error": "effects tail edge enters a per-voice node"
-  },
-  {
-   "id": "tail-into-audio-rate-input",
-   "patch": "rejections/tail-into-audio-rate-input.patch.json",
-   "error": "effects tail edge enters a per-voice node"
-  },
-  {
-   "id": "undeclared-audio-rate-port",
-   "patch": "rejections/undeclared-audio-rate-port.patch.json",
-   "error": "audio edge targets an undeclared port"
-  },
-  {
-   "id": "seventeenth-node",
-   "patch": "rejections/seventeenth-node.patch.json",
-   "error": "nodes must be bounded array"
-  },
-  {
-   "id": "forty-ninth-edge",
-   "patch": "rejections/forty-ninth-edge.patch.json",
-   "error": "edges must be bounded array"
-  },
-  {
-   "id": "forty-first-row",
-   "patch": "rejections/forty-first-row.patch.json",
-   "error": "matrix must be bounded array"
-  },
-  {
-   "id": "fourth-general-source",
-   "patch": "rejections/fourth-general-source.patch.json",
-   "error": "module type cap exceeded"
-  }
- ]
+  "panelVersion": 1,
+  "license": "CC0-1.0 repository-authored",
+  "originatingIssue": 9,
+  "sampleRate": 48000,
+  "blockSize": 128,
+  "cases": [
+    {
+      "id": "all-modules-routes",
+      "snapshot": "all-modules.snapshot.json",
+      "midi": "held-note.midi.json",
+      "samples": 144000
+    },
+    {
+      "id": "maximal-bounds",
+      "snapshot": "maximal.snapshot.json",
+      "midi": "held-note.midi.json",
+      "samples": 144000
+    },
+    {
+      "id": "sub-slot-and-pitch-block",
+      "snapshot": "sub-slot.snapshot.json",
+      "midi": "held-note.midi.json",
+      "samples": 144000
+    },
+    {
+      "id": "effects-tail-chorus-delay",
+      "snapshot": "effects-tail.snapshot.json",
+      "midi": "held-note.midi.json",
+      "samples": 144000
+    }
+  ],
+  "rejections": [
+    {
+      "id": "tail-into-per-voice-node",
+      "patch": "rejections/tail-into-per-voice-node.patch.json",
+      "error": "effects tail edge enters a per-voice node"
+    },
+    {
+      "id": "tail-into-audio-rate-input",
+      "patch": "rejections/tail-into-audio-rate-input.patch.json",
+      "error": "effects tail edge enters a per-voice node"
+    },
+    {
+      "id": "undeclared-audio-rate-port",
+      "patch": "rejections/undeclared-audio-rate-port.patch.json",
+      "error": "audio edge targets an undeclared port"
+    },
+    {
+      "id": "seventeenth-node",
+      "patch": "rejections/seventeenth-node.patch.json",
+      "error": "nodes must be bounded array"
+    },
+    {
+      "id": "forty-ninth-edge",
+      "patch": "rejections/forty-ninth-edge.patch.json",
+      "error": "edges must be bounded array"
+    },
+    {
+      "id": "forty-first-row",
+      "patch": "rejections/forty-first-row.patch.json",
+      "error": "matrix must be bounded array"
+    },
+    {
+      "id": "fourth-general-source",
+      "patch": "rejections/fourth-general-source.patch.json",
+      "error": "module type cap exceeded"
+    },
+    {
+      "id": "effects-region-cycle",
+      "patch": "rejections/effects-region-cycle.patch.json",
+      "error": "audio graph contains cycle"
+    }
+  ]
 }

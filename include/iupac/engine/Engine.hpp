@@ -25,6 +25,15 @@ inline constexpr std::size_t maximumVoices = 16;
 // the per-copy oscillator banks below are fixed-size members, sized once at compile time.
 inline constexpr std::size_t maximumUnisonVoices = 7;
 inline constexpr std::size_t maximumMidiEventsPerBlock = 4096;
+// D8 effects tail (#123). The chorus and the delay are C3 — each is backed by one prepared stereo
+// delay line, allocated once for the whole global tail and never per voice. The chorus sweep never
+// reaches past `chorusBase + chorusSweep` milliseconds and the delay's declared range stops at
+// 2000 ms; both capacities carry a small margin so the interpolated read never runs off the end.
+inline constexpr double maximumChorusDelaySeconds = 0.025;
+inline constexpr double maximumDelaySeconds = 2.05;
+// Tempo sync with no host playhead. ARCHITECTURE "Tempo sync": Standalone and every CLI render fall
+// back to this, and the render manifest records it.
+inline constexpr double fallbackTempoBpm = 120.0;
 [[nodiscard]] constexpr double internalSampleRate(double outputSampleRate) noexcept { return outputSampleRate * internalOversamplingFactor; }
 [[nodiscard]] constexpr float filterCutoffCeiling(double outputSampleRate) noexcept { return static_cast<float>(outputSampleRate * 0.4); }
 
@@ -49,7 +58,7 @@ struct ModuleValues
     float rate{0.5f}, depth{0.3f}, feedback{}, mix{0.3f};
     float timeMs{375.0f}, spread{}, damping{0.4f};
     float size{0.5f}, decaySeconds{2.0f}, preDelayMs{20.0f}, width{1.0f}, bassMonoHz{120.0f};
-    int unisonVoices{1}, octave{}, coarse{}, waveform{}, curve{}, voices{2}, syncMode{}, syncDivision{};
+    int unisonVoices{1}, octave{}, coarse{}, waveform{}, curve{}, voices{2}, syncMode{}, syncDivision{4};
 };
 
 class ModuleProcessor final
@@ -59,6 +68,11 @@ public:
     explicit ModuleProcessor(domain::ModuleType type = domain::ModuleType::mixer) noexcept : type_(type) {}
     void setType(domain::ModuleType type) noexcept { type_ = type; reset(); }
     void setCombDelay(CombDelay* delay) noexcept { comb_ = delay; }
+    // The prepared delay line a chorus or delay node reads. The engine's global tail owns one of
+    // each and hands the pointer here at compile time, so publishing a patch allocates nothing.
+    void setEffectDelay(CombDelay* delay) noexcept { effect_ = delay; }
+    // Host tempo for `syncMode` = sync. Out-of-range or absent tempo is the documented 120 BPM.
+    void setTempo(double beatsPerMinute) noexcept { tempo_ = beatsPerMinute >= 20.0 && beatsPerMinute <= 999.0 ? beatsPerMinute : fallbackTempoBpm; }
     void prepare(double internalSampleRate, std::size_t maximumBlockSize);
     void reset() noexcept;
     void noteOn(int midiNote, int midiChannel, std::uint32_t patchSeed, std::uint32_t nodeHash) noexcept;
@@ -120,6 +134,13 @@ private:
     float cachedPitchFine_{}, cachedPitchKeytrack_{1.0f}, cachedPitchMultiplier_{1.0f};
     CombDelay* comb_{};
     std::unique_ptr<CombDelay> ownedComb_;
+    // D8 effects tail (#123). `effect_` is the chorus/delay line; the damping state is the one-pole
+    // in the delay's feedback path. A chorus tap's LFO rides on `phases_[0]`, which no effect type
+    // otherwise uses, so the effects add four floats and one pointer to a node's storage.
+    CombDelay* effect_{};
+    std::unique_ptr<CombDelay> ownedEffect_;
+    double tempo_{fallbackTempoBpm};
+    float effectDampLeft_{}, effectDampRight_{};
     juce::dsp::StateVariableTPTFilter<float> filter_;
     std::array<juce::dsp::StateVariableTPTFilter<float>, 4> modes_;
 };
@@ -171,6 +192,10 @@ struct CompiledPatch
     std::array<domain::Lfo, domain::lfoCount> lfos{};
     std::uint32_t noiseSeed{};
     std::uint8_t nodeCount{}, edgeCount{}, rowCount{}, targetCount{};
+    // Matrix targets are partitioned so the per-voice ones come first: [0, voiceTargetCount) is the
+    // pass each voice runs and [voiceTargetCount, targetCount) is the global tail's. Neither loop
+    // pays a test for the other's rows, which matters because the voice pass runs per sample.
+    std::uint8_t voiceTargetCount{};
     // Nodes [tailStart, nodeCount) are the effects region: prepared once in the global post-mixer
     // tail, never per voice. The compiler guarantees no per-voice node depends on them.
     std::uint8_t tailStart{};
@@ -203,6 +228,9 @@ public:
     Engine(const Engine&) = delete; Engine& operator=(const Engine&) = delete;
     void prepare(double sampleRate, std::size_t maximumBlockSize) noexcept;
     void reset() noexcept; void setPatch(const CompiledPatch&); void setControls(const domain::HostControls&) noexcept;
+    // Host tempo for the tail's tempo-synced delay. Safe from the audio thread: it stores one double
+    // per tail node and allocates nothing.
+    void setTempo(double beatsPerMinute) noexcept;
     void updatePatchPreservingVoices(const CompiledPatch&) noexcept;
     void render(std::span<float> left, std::span<float> right, std::span<const MidiEvent> events = {}) noexcept;
     void renderSilence(std::span<float> left, std::span<float> right) noexcept;

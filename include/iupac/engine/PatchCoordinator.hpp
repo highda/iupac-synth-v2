@@ -24,6 +24,9 @@ public:
     [[nodiscard]] std::uint64_t currentGeneration() const noexcept { return nextGeneration_.load(); }
     void render(std::span<float>, std::span<float>, std::span<const MidiEvent> = {}) noexcept;
     void setAudioControls(const domain::HostControls&) noexcept;
+    // Host tempo for the effects tail's synced delay, refreshed per block from the playhead. Both
+    // banks carry it so a structural transition does not change the repeat length mid-crossfade.
+    void setTempo(double beatsPerMinute) noexcept { for (auto& bank : banks_) bank.setTempo(beatsPerMinute); }
     [[nodiscard]] Status status() const noexcept;
     [[nodiscard]] std::size_t activeVoiceCount() const noexcept { return activeVoices_.load(std::memory_order_relaxed); }
     [[nodiscard]] std::size_t activeBanks() const noexcept { return transitioning_.load(std::memory_order_acquire) ? 2u : 1u; }

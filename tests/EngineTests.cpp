@@ -18,7 +18,15 @@ bool expect(bool v,const char*m){if(!v)std::cerr<<"engine test failed: "<<m<<'\n
 float energy(const std::vector<float>&v){return std::inner_product(v.begin(),v.end(),v.begin(),0.f);}
 float targetValue(const engine::ModuleValues&v,engine::ParameterTarget t){switch(t){case engine::ParameterTarget::carrierRatio:return v.carrierRatio;case engine::ParameterTarget::modulatorRatio:return v.modulatorRatio;case engine::ParameterTarget::index:return v.index;case engine::ParameterTarget::burstMilliseconds:return v.burstMilliseconds;case engine::ParameterTarget::tuneRatio:return v.tuneRatio;case engine::ParameterTarget::combFeedback:return v.combFeedback;case engine::ParameterTarget::modalQ:return v.modalQ;case engine::ParameterTarget::cutoff:return v.cutoff;case engine::ParameterTarget::q:return v.q;case engine::ParameterTarget::drive:return v.drive;case engine::ParameterTarget::wet:return v.wet;case engine::ParameterTarget::level:return v.level;case engine::ParameterTarget::pan:return v.pan;case engine::ParameterTarget::outputLevel:return v.outputLevel;}return 0;}
 void setTarget(engine::ModuleValues&v,engine::ParameterTarget t,float x){switch(t){case engine::ParameterTarget::carrierRatio:v.carrierRatio=x;break;case engine::ParameterTarget::modulatorRatio:v.modulatorRatio=x;break;case engine::ParameterTarget::index:v.index=x;break;case engine::ParameterTarget::burstMilliseconds:v.burstMilliseconds=x;break;case engine::ParameterTarget::tuneRatio:v.tuneRatio=x;break;case engine::ParameterTarget::combFeedback:v.combFeedback=x;break;case engine::ParameterTarget::modalQ:v.modalQ=x;break;case engine::ParameterTarget::cutoff:v.cutoff=x;break;case engine::ParameterTarget::q:v.q=x;break;case engine::ParameterTarget::drive:v.drive=x;break;case engine::ParameterTarget::wet:v.wet=x;break;case engine::ParameterTarget::level:v.level=x;break;case engine::ParameterTarget::pan:v.pan=x;break;case engine::ParameterTarget::outputLevel:v.outputLevel=x;break;}}
-std::vector<float> render(const engine::CompiledPatch&p,std::size_t block,domain::HostControls controls={}){engine::Engine e;e.prepare(48000,block);e.setPatch(p);e.setControls(controls);std::vector<float>l(2048),r(2048);std::array events{engine::MidiEvent{0,engine::MidiEventType::noteOn,1,60,100,8192},engine::MidiEvent{1500,engine::MidiEventType::noteOff,1,60,0,8192}};e.render(l,r,events);return l;}
+std::vector<float> render(const engine::CompiledPatch&p,std::size_t block,domain::HostControls controls={},double tempo=engine::fallbackTempoBpm,std::uint8_t velocity=100,std::size_t samples=2048){engine::Engine e;e.prepare(48000,block);e.setTempo(tempo);e.setPatch(p);e.setControls(controls);std::vector<float>l(samples),r(samples);std::array events{engine::MidiEvent{0,engine::MidiEventType::noteOn,1,60,velocity,8192},engine::MidiEvent{1500,engine::MidiEventType::noteOff,1,60,0,8192}};e.render(l,r,events);return l;}
+float distance(const std::vector<float>&a,const std::vector<float>&b){float d=0;for(std::size_t i=0;i<std::min(a.size(),b.size());++i)d+=std::abs(a[i]-b[i]);return d;}
+// D8 effects tail (#123). A source into a mixer, the mixer into the ordered effects nodes, the last
+// effect into OUT. `order` names the effects types in the order they should be chained.
+domain::Patch tailPatch(std::vector<std::string_view> order){domain::Patch p;p.noiseSeed=91;p.nodes={defaults("a","harmonic"),defaults("m","mixer")};p.edges={{"a","m",1}};
+ std::string previous="m";for(std::size_t i=0;i<order.size();++i){auto id="x"+std::to_string(i);p.nodes.push_back(defaults(id,order[i]));p.edges.push_back({previous,id,1});previous=id;}
+ p.edges.push_back({previous,"output",1});return p;}
+domain::Node*nodeNamed(domain::Patch&p,std::string_view id){for(auto&n:p.nodes)if(n.id==id)return &n;return nullptr;}
+void setParameter(domain::Patch&p,std::string_view id,std::string_view parameter,double value){if(auto*n=nodeNamed(p,id))for(auto&v:n->parameters)if(v.id==parameter)v.values[0]=value;}
 }
 
 bool runEngineTests(){bool ok=true;auto patch=graphPatch();auto compiled=engine::compilePatch(patch);ok&=expect(static_cast<bool>(compiled),"valid graph compiles");ok&=expect(compiled.patch.nodeCount==3,"disconnected node pruned");ok&=expect(compiled.patch.nodes[0].type==domain::ModuleType::harmonic&&compiled.patch.nodes[2].type==domain::ModuleType::mixer,"stable topological order");ok&=expect(compiled.patch.rowCount==3,"enabled live rows resolved");auto signal=render(compiled.patch,128);ok&=expect(energy(signal)>1e-4f,"compiled graph renders audio");ok&=expect(std::ranges::all_of(signal,[](float x){return std::isfinite(x)&&std::abs(x)<=.8912511f;}),"stereo safety guard bounds output");
@@ -46,4 +54,36 @@ bool runEngineTests(){bool ok=true;auto patch=graphPatch();auto compiled=engine:
   auto velocityPatch=graphPatch();velocityPatch.matrix={{"m1",true,domain::ModulationSource::velocity,"b","cutoff",.5},{"m2",true,domain::ModulationSource::keyTracking,"b","cutoff",-.25}};auto velocityCompiled=engine::compilePatch(velocityPatch);engine::PatchCoordinator held;held.prepare(48000,128);(void)held.publish(velocityCompiled.patch,{});for(int i=0;i<12;++i)held.render(eL,eR);std::array velocityNote{engine::MidiEvent{0,engine::MidiEventType::noteOn,1,72,100,8192}};held.render(eL,eR,velocityNote);held.render(eL,eR);engine::ModulationInputs inputs{};inputs[static_cast<std::size_t>(domain::ModulationSource::velocity)]=100/127.f;inputs[static_cast<std::size_t>(domain::ModulationSource::keyTracking)]=(72-60)/36.f;const auto expected=engine::applyModulation(velocityCompiled.patch,filterSlot,velocityCompiled.patch.nodes[filterSlot].values,inputs);const float expectedNormalized=static_cast<float>(cutoffDescriptor->normalize(expected.cutoff));const float published=held.effectiveValues().values[filterSlot][cutoffIndex];ok&=expect(std::abs(published-expectedNormalized)<1e-5f&&std::abs(published-baseCutoff)>.05f,"published cutoff matches the production matrix summation for a held voice");
   auto disabledPatch=velocityPatch;for(auto&row:disabledPatch.matrix)row.enabled=false;auto disabledCompiled=engine::compilePatch(disabledPatch);(void)held.publish(disabledCompiled.patch,{});for(int i=0;i<12;++i)held.render(eL,eR);ok&=expect(held.activeVoiceCount()==1&&std::abs(held.effectiveValues().values[filterSlot][cutoffIndex]-baseCutoff)<1e-6f,"disabled rows publish the base while the voice stays held");
   std::array releaseNote{engine::MidiEvent{0,engine::MidiEventType::controlChange,1,120,0,8192}};held.render(eL,eR,releaseNote);for(int i=0;i<8;++i)held.render(eL,eR);ok&=expect(held.activeVoiceCount()==0&&std::abs(held.effectiveValues().values[filterSlot][cutoffIndex]-baseCutoff)<1e-6f,"effective value returns to the base after the last voice retires");}
+ {// #123: the post-mixer global effects tail with the chorus and the tempo-synced stereo delay.
+  const auto dry=render(engine::compilePatch(tailPatch({})).patch,128);
+  // A wet-dry `mix` of 0 makes either effect a literal straight wire, which is the same signal a
+  // patch with no effects node at all renders: the tail is inside the graph, not an always-on stage.
+  auto bypassed=tailPatch({"chorus","delay"});setParameter(bypassed,"x0","mix",0);setParameter(bypassed,"x1","mix",0);
+  ok&=expect(distance(dry,render(engine::compilePatch(bypassed).patch,128))==0.f,"an effects tail at mix 0 renders the identical samples as a patch with no effects node");
+  auto wet=tailPatch({"chorus","delay"});setParameter(wet,"x0","mix",.6);setParameter(wet,"x1","mix",.6);setParameter(wet,"x1","timeMs",5);
+  const auto wetSignal=render(engine::compilePatch(wet).patch,128);
+  ok&=expect(distance(dry,wetSignal)>.5f&&std::ranges::all_of(wetSignal,[](float x){return std::isfinite(x)&&std::abs(x)<=.8912511f;}),"the chorus and delay are audible and stay inside the output guard");
+  // Ordering is the compiled tail partition, so swapping the two effects is a different render.
+  auto swapped=tailPatch({"delay","chorus"});setParameter(swapped,"x0","mix",.6);setParameter(swapped,"x0","timeMs",5);setParameter(swapped,"x1","mix",.6);
+  ok&=expect(distance(wetSignal,render(engine::compilePatch(swapped).patch,128))>.5f,"the tail runs the effects in the compiled order, so chorus-then-delay differs from delay-then-chorus");
+  // The tail input carries each voice's contribution after E1 and velocity, so a quieter note makes
+  // a quieter tail.
+  ok&=expect(distance(render(engine::compilePatch(wet).patch,128,{},engine::fallbackTempoBpm,40),wetSignal)>.1f,"velocity gates a voice's contribution to the tail");
+  // Tempo sync. `1/8` is half a quarter-note beat, which at the 120 BPM fallback is exactly 250 ms,
+  // and the same division at 60 BPM is exactly 500 ms — both identical to the free time that says so.
+  auto synced=tailPatch({"delay"});setParameter(synced,"x0","mix",.6);setParameter(synced,"x0","syncMode",1);setParameter(synced,"x0","syncDivision",4);
+  auto free250=tailPatch({"delay"});setParameter(free250,"x0","mix",.6);setParameter(free250,"x0","timeMs",250);
+  auto free500=tailPatch({"delay"});setParameter(free500,"x0","mix",.6);setParameter(free500,"x0","timeMs",500);
+  const auto syncedCompiled=engine::compilePatch(synced).patch;
+  // One second, so a 250 ms and a 500 ms repeat are both inside the window.
+  const auto second=[&](const engine::CompiledPatch&c,double tempo){return render(c,128,{},tempo,100,48000);};
+  ok&=expect(distance(second(syncedCompiled,engine::fallbackTempoBpm),second(engine::compilePatch(free250).patch,engine::fallbackTempoBpm))==0.f,"1/8 at the 120 BPM fallback is the 250 ms free delay exactly");
+  ok&=expect(distance(second(syncedCompiled,60.0),second(engine::compilePatch(free500).patch,engine::fallbackTempoBpm))==0.f,"1/8 at 60 BPM is the 500 ms free delay exactly");
+  ok&=expect(distance(second(syncedCompiled,engine::fallbackTempoBpm),second(syncedCompiled,60.0))>.1f,"the host tempo changes what a synced delay renders");
+  ok&=expect(distance(second(syncedCompiled,engine::fallbackTempoBpm),second(syncedCompiled,0.0))==0.f,"an absent or out-of-range tempo falls back to 120 BPM");
+  // A macro is the one modulation source a stage that runs once for the whole mix can read.
+  auto macroTail=tailPatch({"delay"});setParameter(macroTail,"x0","mix",.6);setParameter(macroTail,"x0","timeMs",5);macroTail.matrix={{"t1",true,domain::ModulationSource::macro1,"x0","mix",-.6}};
+  const auto macroCompiled=engine::compilePatch(macroTail).patch;domain::HostControls macroUp;macroUp.macros[0]=1;
+  ok&=expect(distance(render(macroCompiled,128),render(macroCompiled,128,macroUp))>.1f,"a macro row reaches an effects parameter in the global tail");
+ }
  return ok;}

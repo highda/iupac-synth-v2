@@ -16,7 +16,10 @@ inline constexpr std::size_t maximumInputBytes = 1024 * 1024;
 inline constexpr std::size_t maximumPanelCases = 128;
 struct ReadResult { std::optional<std::string> value; std::string error; explicit operator bool() const { return value.has_value(); } };
 struct MidiResult { std::vector<engine::MidiEvent> events; std::string error; explicit operator bool() const { return error.empty(); } };
-struct RenderSettings { double sampleRate{48000.0}; std::size_t blockSize{128}; std::size_t samples{}; };
+// `tempoBpm` is the tempo the tail's synced delay renders at. A CLI render has no host playhead, so
+// it is the documented fallback unless a panel case states one, and the manifest records both the
+// value and whether it came from a playhead (ARCHITECTURE "Tempo sync").
+struct RenderSettings { double sampleRate{48000.0}; std::size_t blockSize{128}; std::size_t samples{}; double tempoBpm{engine::fallbackTempoBpm}; bool tempoFromPlayhead{false}; };
 struct RenderResult { std::string manifestJson; std::string error; explicit operator bool() const { return error.empty(); } };
 
 [[nodiscard]] ReadResult readBoundedFile(const std::filesystem::path&);
