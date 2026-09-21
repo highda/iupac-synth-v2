@@ -2,6 +2,7 @@
 #include "MaximalPatch.hpp"
 
 #include <array>
+#include <cmath>
 #include <atomic>
 #include <cstdlib>
 #include <iostream>
@@ -139,6 +140,51 @@ bool runRealtimeAllocationTests()
         std::cerr << "realtime allocation test failed: unison raised the voice count to " << coordinator->activeVoiceCount() << '\n';
         return false;
     }
+
+    // D8 filter and shaper breadth (#126): every filter slot on `ladder24` at maximum q and drive
+    // with both panel shortcuts live, and every shaper slot walked through all five curves while
+    // sixteen voices sound. The ladder's four one-pole states and the curve branch are plain
+    // members of an already-prepared processor, so a mode or curve change is a compiled-patch value
+    // crossing the ordinary FIFO and nothing may allocate on either side of it.
+    auto breadth = compiled.patch;
+    for (std::uint8_t node = 0; node < breadth.nodeCount; ++node) {
+        if (breadth.nodes[node].type == domain::ModuleType::filter) {
+            breadth.nodes[node].values.mode = 3;
+            breadth.nodes[node].values.q = 8.0f;
+            breadth.nodes[node].values.drive = 16.0f;
+            breadth.nodes[node].values.keytrack = 1.0f;
+            breadth.nodes[node].values.envAmount = -1.0f;
+        }
+        if (breadth.nodes[node].type == domain::ModuleType::shaper) breadth.nodes[node].values.drive = 16.0f;
+    }
+    events.clear();
+    for (std::uint8_t note = 52; note < 52 + engine::maximumVoices; ++note) events.push_back({0, engine::MidiEventType::noteOn, 1, note, 100, 8192});
+    realtimeAllocations = realtimeFrees = 0;
+    auditRealtimeMemory = true;
+    (void) coordinator->publish(breadth, {});
+    for (int block = 0; block < 8; ++block) { coordinator->render(left, right); (void) coordinator->retryPending(); }
+    coordinator->render(left, right, events);
+    for (int curve = 0; curve < 5; ++curve) {
+        auto stepped = breadth;
+        for (std::uint8_t node = 0; node < stepped.nodeCount; ++node) {
+            if (stepped.nodes[node].type == domain::ModuleType::shaper) stepped.nodes[node].values.curve = curve;
+            if (stepped.nodes[node].type == domain::ModuleType::filter) stepped.nodes[node].values.mode = curve;
+        }
+        (void) coordinator->publish(stepped, {});
+        for (int block = 0; block < 8; ++block) { coordinator->render(left, right); (void) coordinator->retryPending(); }
+    }
+    auditRealtimeMemory = false;
+
+    if (realtimeAllocations != 0 || realtimeFrees != 0) {
+        std::cerr << "realtime allocation test failed while walking filter modes and shaper curves: "
+                  << realtimeAllocations << " allocations, " << realtimeFrees << " frees\n";
+        return false;
+    }
+    for (float sample : left)
+        if (!std::isfinite(sample) || std::abs(sample) > 0.8912511f) {
+            std::cerr << "realtime allocation test failed: filter/shaper breadth left the output guard\n";
+            return false;
+        }
     return true;
 }
 

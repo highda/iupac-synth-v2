@@ -96,8 +96,12 @@ void SlotView::build(const domain::Node&n)
   case domain::ModuleType::fm:knob("carrierRatio","carr");knob("modulatorRatio","mod");knob("index","index");unisonBand();pitchBand();break;
   case domain::ModuleType::noise:toggle("color",{"white","pink"});toggle("mode",{"cont","burst"});knob("burstMs","burst");break;
   case domain::ModuleType::resonator:toggle("mode",{"comb","modal"});knob("tuneRatio","tune");knob("combFeedback","feedback");knob("modalQ","modal q");forest("modeRatios","ratio",Forest::Mode::logDeviation,std::vector<double>(4,1.0));forest("modeLevels","level",Forest::Mode::unipolar);break;
-  case domain::ModuleType::filter:toggle("mode",{"lp","bp","hp"});knob("cutoff","cutoff");knob("q","q");break;
-  case domain::ModuleType::shaper:knob("drive","drive");fader("wet","wet",false,false);break;
+  // D8 filter block (#126). The two new modes append to the toggle, so a stored mode index still
+  // selects the segment it always did; `keytrack` and `envAmount` are bipolar and centre-detented
+  // because their zero is the transparent panel position, not one end of a range.
+  case domain::ModuleType::filter:toggle("mode",{"lp","bp","hp","24","notch"});knob("cutoff","cutoff");knob("q","q");knob("drive","drive");
+   fader("keytrack","key",false,true);fader("envAmount","env",false,true);break;
+  case domain::ModuleType::shaper:toggle("curve",{"tanh","clip","fold","sine","asym"});knob("drive","drive");fader("wet","wet",false,false);break;
   case domain::ModuleType::mixer:fader("level","level",false,false);fader("pan","pan",false,true);break;
   // The sub slot: a waveform toggle, its one-or-two-octave drop and the three controls it shares
   // with the general pitched sources. Only two octave values exist, so the step is the whole range.
@@ -155,8 +159,13 @@ void SlotView::resized()
   case domain::ModuleType::fm:{placePitch(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/4)));placeUnison(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));const int w=body.getWidth()/3;place("carrierRatio",body.removeFromLeft(w));place("modulatorRatio",body.removeFromLeft(w));place("index",body);break;}
   case domain::ModuleType::noise:{auto left=body.removeFromLeft(body.getWidth()*11/20);const int h=juce::jmin(px(14),left.getHeight()/2);place("color",left.removeFromTop(h).reduced(0,1));place("mode",left.removeFromTop(h).reduced(0,1));place("burstMs",body);break;}
   case domain::ModuleType::resonator:{place("mode",body.removeFromTop(juce::jmin(px(13),body.getHeight()/5)).reduced(0,1));if(mode_==0){hide("modalQ");hide("modeRatios");hide("modeLevels");const int w=body.getWidth()/2;place("tuneRatio",body.removeFromLeft(w));place("combFeedback",body);}else{hide("combFeedback");auto knobs=body.removeFromTop(body.getHeight()*2/5);const int w=knobs.getWidth()/2;place("tuneRatio",knobs.removeFromLeft(w));place("modalQ",knobs);const int h=body.getHeight()/2;place("modeRatios",body.removeFromTop(h));place("modeLevels",body);}break;}
-  case domain::ModuleType::filter:{place("mode",body.removeFromTop(juce::jmin(px(13),body.getHeight()/5)).reduced(0,1));const int w=body.getWidth()/2;place("cutoff",body.removeFromLeft(w));place("q",body);break;}
-  case domain::ModuleType::shaper:{place("drive",body.removeFromLeft(body.getWidth()/2));place("wet",body.withSizeKeepingCentre(body.getWidth(),juce::jmin(px(24),body.getHeight())));break;}
+  // The filter's two panel shortcuts take the bottom band the other D8 bands use, so the slot keeps
+  // its geometry and the three knobs above it stay the same size they were.
+  case domain::ModuleType::filter:{place("mode",body.removeFromTop(juce::jmin(px(13),body.getHeight()/5)).reduced(0,1));
+   placeRow(std::array{"keytrack","envAmount"},body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));
+   const int w=body.getWidth()/3;place("cutoff",body.removeFromLeft(w));place("q",body.removeFromLeft(w));place("drive",body);break;}
+  case domain::ModuleType::shaper:{place("curve",body.removeFromTop(juce::jmin(px(13),body.getHeight()/5)).reduced(0,1));
+   place("drive",body.removeFromLeft(body.getWidth()/2));place("wet",body.withSizeKeepingCentre(body.getWidth(),juce::jmin(px(24),body.getHeight())));break;}
   case domain::ModuleType::mixer:{const int h=body.getHeight()/2;place("level",body.removeFromTop(h).withSizeKeepingCentre(body.getWidth(),juce::jmin(px(22),h)));place("pan",body.withSizeKeepingCentre(body.getWidth(),juce::jmin(px(22),h)));break;}
   case domain::ModuleType::sub:{place("waveform",body.removeFromTop(juce::jmin(px(13),body.getHeight()/4)).reduced(0,1));
    placeRow(std::array{"fine","keytrack","drift"},body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));

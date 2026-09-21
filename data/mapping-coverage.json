@@ -66,11 +66,11 @@
 
     {"module": "resonator", "parameter": "exciteDepth", "status": "provisional", "ruleId": "M10-audio-rate", "drivers": ["rigidity", "roughness"], "note": "phase 4 parameter, reachable and declared; issue #127 implements it and issue #128 calibrates its coefficient."},
 
-    {"module": "filter", "parameter": "drive", "status": "provisional", "ruleId": "M9-filter-depth", "drivers": ["roughness"], "note": "phase 4 parameter, reachable and declared; issue #126 implements it and issue #128 calibrates its coefficient."},
-    {"module": "filter", "parameter": "keytrack", "status": "provisional", "ruleId": "M9-filter-depth", "drivers": ["brightness"], "note": "phase 4 parameter, reachable and declared; issue #126 implements it and issue #128 calibrates its coefficient."},
-    {"module": "filter", "parameter": "envAmount", "status": "provisional", "ruleId": "M9-filter-depth", "drivers": ["decay", "motion"], "note": "phase 4 parameter, reachable and declared; issue #126 implements it and issue #128 calibrates its coefficient."},
+    {"module": "filter", "parameter": "drive", "status": "provisional", "ruleId": "M9-filter-depth", "drivers": ["roughness"], "note": "phase 4 parameter, reachable and declared; issue #126 implemented it as real DSP and issue #128 calibrates its coefficient."},
+    {"module": "filter", "parameter": "keytrack", "status": "provisional", "ruleId": "M9-filter-depth", "drivers": ["brightness"], "note": "phase 4 parameter, reachable and declared; issue #126 implemented it as real DSP and issue #128 calibrates its coefficient."},
+    {"module": "filter", "parameter": "envAmount", "status": "provisional", "ruleId": "M9-filter-depth", "drivers": ["decay", "motion"], "note": "phase 4 parameter, reachable and declared; issue #126 implemented it as real DSP and issue #128 calibrates its coefficient."},
 
-    {"module": "shaper", "parameter": "curve", "status": "provisional", "ruleId": "M9-shaper-curve", "drivers": ["roughness", "bondOrderSpread"], "note": "phase 4 parameter, reachable and declared; issue #126 implements it and issue #128 calibrates its coefficient."},
+    {"module": "shaper", "parameter": "curve", "status": "provisional", "ruleId": "M9-shaper-curve", "drivers": ["roughness", "bondOrderSpread"], "note": "phase 4 parameter, reachable and declared; issue #126 implemented it as real DSP and issue #128 calibrates its coefficient."},
 
     {"module": "sub", "parameter": "waveform", "status": "provisional", "ruleId": "M7-sub", "drivers": ["brightness"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as the sub oscillator's own control and issue #128 calibrates its coefficient."},
     {"module": "sub", "parameter": "octave", "status": "provisional", "ruleId": "M7-sub", "drivers": ["density"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as the sub oscillator's own control and issue #128 calibrates its coefficient."},

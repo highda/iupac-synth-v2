@@ -39,6 +39,32 @@ constexpr float delayDampingRange = 0.95f;
 // `syncDivision` in catalog order: 1/1, 1/2, 1/4, 1/4T, 1/8, 1/8T, 1/16, as a count of quarter-note
 // beats. A triplet is two thirds of the plain division above it.
 constexpr std::array<double, 7> syncDivisionBeats{4.0, 2.0, 1.0, 2.0 / 3.0, 0.5, 1.0 / 3.0, 0.25};
+// D9 delegates the shaper curve equations (#126). Every one of the five is bounded by construction
+// on [-1, 1] whatever `drive` does to its input, which is what keeps the output finite at drive 16:
+// tanh and the asymmetric variant saturate, the hard clip clamps, and the fold and sine wrap.
+// Curve 0 is the pre-D8 `fastTanh` expression character for character, so `tanh` stays bit-unchanged.
+// The asymmetric curve runs the negative half at a lower drive, so it is continuous through zero
+// (both halves are 0 there) but has a different slope on each side, which is what makes even
+// harmonics; 0.5 is a clearly audible bias without turning into a half-wave rectifier.
+constexpr float asymmetricNegativeDrive = 0.5f;
+// Triangle wavefolder over a period of 4: 0 at 0, +1 at 1, back through 0 at 2, -1 at 3.
+float foldWave(float t) noexcept
+{
+    const auto p=std::fmod(std::fabs(t)+1.0f,4.0f);
+    return std::copysign(p<2.0f?p-1.0f:3.0f-p,t);
+}
+float shapeSample(int curve,float x,float drive) noexcept
+{
+    const auto t=x*drive;
+    switch(curve)
+    {
+        case 1: return std::clamp(t,-1.0f,1.0f);
+        case 2: return foldWave(t);
+        case 3: return fastSin(static_cast<double>(t)*std::numbers::pi_v<double>*.5);
+        case 4: return fastTanh(t>=0?t:t*asymmetricNegativeDrive);
+        default: return fastTanh(t);
+    }
+}
 }
 float ModuleProcessor::clampFinite(float v,float lo,float hi,float fallback) noexcept { return std::isfinite(v)?std::clamp(v,lo,hi):fallback; }
 // D8 reverb (#124). One sample of the fixed network: pre-delay, two Schroeder allpass diffusers,
@@ -123,6 +149,20 @@ void ReverbNetwork::process(float inL,float inR,float size,float decaySeconds,fl
     const auto mid=(sumL+sumR)*.5f,side=(sumL-sumR)*.5f*width;
     wetLeft=mid+side;wetRight=mid-side;
 }
+// D9 delegates the ladder formulation (#126). Four TPT one-poles in series give the 24 dB slope and
+// the feedback around them gives the resonance; the loop is closed through fastTanh, so the stage
+// input is in [-1, 1] by construction and each one-pole is a unit-DC-gain contraction — the output
+// therefore cannot leave [-1, 1] at any reachable `q`, `cutoff` or `drive`, and maximum resonance
+// self-oscillates rather than blowing up. The drive term also compensates the bass a ladder loses
+// as its feedback rises, inside the same tanh, so it buys no extra headroom.
+float ModuleProcessor::ladderSample(std::size_t channel,float input) noexcept
+{
+    auto* s=&ladderState_[channel*4];
+    float v=fastTanh(input*(1.0f+ladderFeedback_*.5f)-ladderFeedback_*ladderLast_[channel]);
+    for(std::size_t k=0;k<4;++k){const auto d=(v-s[k])*ladderG_;const auto y=d+s[k];s[k]=y+d;v=y;}
+    ladderLast_[channel]=v;
+    return v;
+}
 void ModuleProcessor::prepare(double rate,std::size_t block)
 {
     sampleRate_=std::max(1.0,rate); juce::dsp::ProcessSpec spec{sampleRate_,static_cast<juce::uint32>(std::min(block,maximumModuleBlockSize)),2};
@@ -142,6 +182,7 @@ void ModuleProcessor::reset() noexcept {phases_.fill(0);modPhases_.fill(0);for(a
     unisonPhase_.fill(0);unisonModPhase_.fill(0);cachedDetuneCents_=cachedUnisonSpread_=std::numeric_limits<float>::quiet_NaN();cachedUnisonVoices_=0;unisonDirty_=true;pendingPhaseOffset_=false;
     driftPhase_=driftLevelPhase_=0;driftRate_=.11;driftLevelRate_=.07;
     effectDampLeft_=effectDampRight_=0;if(ownedReverb_)ownedReverb_->reset();
+    ladderState_.fill(0);ladderLast_.fill(0);cachedFilterDrive_=std::numeric_limits<float>::quiet_NaN();
     if(comb_)comb_->reset();if(effect_)effect_->reset();filter_.reset();for(auto& m:modes_)m.reset();}
 void ModuleProcessor::noteOn(int note,int channel,std::uint32_t seed,std::uint32_t nodeHash) noexcept
 {
@@ -232,7 +273,23 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
             else {phases_[c]=std::remainder(phase,twoPi);modPhases_[c]=std::remainder(twoPi*random*unisonModPhase_[c],twoPi);}
         }
     }
-    if(type_==domain::ModuleType::filter&&filterControlCountdown_--==0){filterControlCountdown_=15;const auto cutoff=std::min(clampFinite(p.cutoff,30,18000,1000),static_cast<float>(sampleRate_*.2)),q=clampFinite(p.q,.5f,8,.707f);if(cutoff!=cachedFilterCutoff_){filter_.setCutoffFrequency(cutoff);cachedFilterCutoff_=cutoff;}if(q!=cachedFilterQ_){filter_.setResonance(q);cachedFilterQ_=q;}filter_.setType(p.mode==1?juce::dsp::StateVariableTPTFilterType::bandpass:p.mode==2?juce::dsp::StateVariableTPTFilterType::highpass:juce::dsp::StateVariableTPTFilterType::lowpass);}
+    // The cutoff cap is min(18000 Hz, 0.4 x output rate) in every mode: `sampleRate_` here is the 2x
+    // internal rate, so 0.2 of it is 0.4 of the output rate the contract names. `ladder24` reads the
+    // same capped value through its own coefficient and `notch` reads it through the TPT bandpass,
+    // so no mode can push a pole past that ceiling however hard `drive` is pushed.
+    if(type_==domain::ModuleType::filter&&filterControlCountdown_--==0){filterControlCountdown_=15;const auto cutoff=std::min(clampFinite(p.cutoff,30,18000,1000),static_cast<float>(sampleRate_*.2)),q=clampFinite(p.q,.5f,8,.707f);if(cutoff!=cachedFilterCutoff_){filter_.setCutoffFrequency(cutoff);cachedFilterCutoff_=cutoff;}if(q!=cachedFilterQ_){filter_.setResonance(q);cachedFilterQ_=q;}filter_.setType(p.mode==1||p.mode==4?juce::dsp::StateVariableTPTFilterType::bandpass:p.mode==2?juce::dsp::StateVariableTPTFilterType::highpass:juce::dsp::StateVariableTPTFilterType::lowpass);
+        // The notch is the SVF identity x = highpass + R2 * bandpass + lowpass rearranged: the two
+        // outer bands are x - R2 * bandpass, so one prepared filter serves it with no extra state.
+        filterR2_=1.0f/q;
+        // `ladder24` coefficients, resolved here rather than per sample: the TPT one-pole gain and a
+        // feedback amount that reaches self-oscillation at the top of the declared `q` range.
+        const auto g=static_cast<float>(std::tan(std::numbers::pi_v<double>*cutoff/sampleRate_));
+        ladderG_=g/(1.0f+g);ladderFeedback_=(q-.5f)/7.5f*4.0f;
+        // D8 in-filter `drive` (#126). Exactly 1 is the untouched signal — the branch below is
+        // skipped outright — and above it the input is saturated and renormalized so a full-scale
+        // input still leaves the saturator at full scale rather than simply getting louder.
+        const auto drive=clampFinite(p.drive,1,16,1);
+        if(drive!=cachedFilterDrive_){cachedFilterDrive_=drive;driveNormalizer_=drive>1.0f?1.0f/fastTanh(drive):1.0f;}}
     // The width module's crossover is the same prepared TPT filter the filter module uses: a node
     // has exactly one type, so reusing it is the whole storage cost of the C1 class the catalog
     // declares for `bassMonoHz`. setCutoffFrequency() is a tangent, so it is throttled exactly as
@@ -270,8 +327,16 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         else if(type_==domain::ModuleType::fm){const auto cr=clampFinite(p.carrierRatio,.5f,4,1),mr=clampFinite(p.modulatorRatio,.25f,8,1);const auto index=clampFinite(p.index,0,6,0)*cachedFmRolloff_;l=r=0;for(std::size_t c=0;c<static_cast<std::size_t>(copies);++c){const auto detune=detuneMultiplier_[c];const auto s=fastSin(phases_[c]+index*fastSin(modPhases_[c]));l+=s*unisonPanLeft_[c];r+=s*unisonPanRight_[c];phases_[c]+=twoPi*fundamental*cr*detune/sampleRate_;modPhases_[c]+=twoPi*fundamental*mr*detune/sampleRate_;if(phases_[c]>std::numbers::pi_v<double>)phases_[c]-=twoPi;if(modPhases_[c]>std::numbers::pi_v<double>)modPhases_[c]-=twoPi;}}
         else if(type_==domain::ModuleType::noise){const auto burst=static_cast<std::size_t>(sampleRate_*clampFinite(p.burstMilliseconds,1,500,80)*.001);if(p.mode==1&&burstSamplesRemaining_==std::numeric_limits<std::size_t>::max())burstSamplesRemaining_=burst;auto s=(gate_&&(p.mode==0||burstSamplesRemaining_>0))?nextNoise():0.0f;if(p.mode==1&&burstSamplesRemaining_>0)--burstSamplesRemaining_;if(p.color==1){pink_[0]=.99765f*pink_[0]+.099046f*s;pink_[1]=.963f*pink_[1]+.2965164f*s;s=.35f*(pink_[0]+pink_[1]+s*.1848f);}l=r=s;}
         else if(type_==domain::ModuleType::resonator){const auto hz=fundamental*clampFinite(p.tuneRatio,.5f,4,1);if(p.mode==0){comb_->setDelay(std::clamp(static_cast<float>(sampleRate_/hz),1.0f,static_cast<float>(comb_->getMaximumDelayInSamples())));const auto fb=clampFinite(p.combFeedback,0,.97f,.4f),dl=comb_->popSample(0),dr=comb_->popSample(1);comb_->pushSample(0,l+dl*fb);comb_->pushSample(1,r+dr*fb);l=dl;r=dr;}else{float sl=0,sr=0;const auto q=clampFinite(p.modalQ,.5f,12,3);for(std::size_t m=0;m<4;++m){const auto cutoff=std::min(hz*clampFinite(p.modeRatios[m],.5f,4,1),static_cast<float>(sampleRate_*.4));modes_[m].setType(juce::dsp::StateVariableTPTFilterType::bandpass);if(cutoff!=cachedModeCutoffs_[m]){modes_[m].setCutoffFrequency(cutoff);cachedModeCutoffs_[m]=cutoff;}if(q!=cachedModalQ_)modes_[m].setResonance(q);const auto g=clampFinite(p.modeLevels[m],0,1,0);sl+=modes_[m].processSample(0,l)*g;sr+=modes_[m].processSample(1,r)*g;}cachedModalQ_=q;l=sl;r=sr;}}
-        else if(type_==domain::ModuleType::filter){l=filter_.processSample(0,l);r=filter_.processSample(1,r);}
-        else if(type_==domain::ModuleType::shaper){const auto d=clampFinite(p.drive,1,16,1),w=clampFinite(p.wet,0,1,1);l=std::lerp(l,fastTanh(l*d),w);r=std::lerp(r,fastTanh(r*d),w);}
+        else if(type_==domain::ModuleType::filter){
+            if(cachedFilterDrive_>1.0f){l=fastTanh(l*cachedFilterDrive_)*driveNormalizer_;r=fastTanh(r*cachedFilterDrive_)*driveNormalizer_;}
+            if(p.mode==3){l=ladderSample(0,l);r=ladderSample(1,r);}
+            else if(p.mode==4){const auto bl=filter_.processSample(0,l),br=filter_.processSample(1,r);l-=filterR2_*bl;r-=filterR2_*br;}
+            else {l=filter_.processSample(0,l);r=filter_.processSample(1,r);}}
+        // D8 shaper curves (#126). Curve 0 is the expression this line always carried, so `tanh`
+        // renders the pre-D8 samples exactly; the other four are the bounded alternatives above.
+        else if(type_==domain::ModuleType::shaper){const auto d=clampFinite(p.drive,1,16,1),w=clampFinite(p.wet,0,1,1);
+            if(p.curve==0){l=std::lerp(l,fastTanh(l*d),w);r=std::lerp(r,fastTanh(r*d),w);}
+            else {l=std::lerp(l,shapeSample(p.curve,l,d),w);r=std::lerp(r,shapeSample(p.curve,r,d),w);}}
         // D8 sub oscillator (#122): one directly evaluated sine or triangle — no wavetable — at the
         // pitch the block above resolved, so MIDI, masterTune, bend, `fine`, `keytrack`, `octave`
         // and `drift` all reach it exactly as they reach the other pitched sources.

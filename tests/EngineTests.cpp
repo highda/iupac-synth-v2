@@ -38,6 +38,50 @@ bool runEngineTests(){bool ok=true;auto patch=graphPatch();auto compiled=engine:
  for(std::size_t sourceIndex=0;sourceIndex<engine::ModulationInputs{}.size();++sourceIndex)for(std::size_t targetIndex=0;targetIndex<=static_cast<std::size_t>(engine::ParameterTarget::outputLevel);++targetIndex){const auto target=static_cast<engine::ParameterTarget>(targetIndex);engine::CompiledPatch sum;sum.rowCount=2;sum.rows[0]={static_cast<domain::ModulationSource>(sourceIndex),0,target,.5f,0,1,domain::ParameterScale::linear};sum.rows[1]={static_cast<domain::ModulationSource>(sourceIndex),0,target,-.5f,0,1,domain::ParameterScale::linear};engine::ModuleValues values;setTarget(values,target,.9f);engine::ModulationInputs inputs{};inputs[sourceIndex]=1;auto forward=engine::applyModulation(sum,0,values,inputs);std::swap(sum.rows[0],sum.rows[1]);auto reverse=engine::applyModulation(sum,0,values,inputs);ok&=expect(std::abs(targetValue(forward,target)-.9f)<1e-6f&&std::abs(targetValue(reverse,target)-.9f)<1e-6f,"matrix sums once independent of row order for every source and destination");}
  auto reference=render(compiled.patch,1);float maximumDifference=0;for(auto block:{64U,127U,512U,4096U}){auto candidate=render(compiled.patch,block);for(std::size_t i=0;i<reference.size();++i)maximumDifference=std::max(maximumDifference,std::abs(reference[i]-candidate[i]));}ok&=expect(maximumDifference<=1e-6f,"static render is block invariant at gate sizes");ok&=expect(reference==render(compiled.patch,1),"fresh engine render is deterministic");
  ok&=expect(std::abs(engine::filterCutoffCeiling(44100)-17640.f)<1e-6f,"filter cutoff inspection uses the output-rate ceiling");
+ // --- D8 filter panel shortcuts (#126) -------------------------------------------------------
+ // `keytrack` and `envAmount` are compiled into the same row array the explicit matrix fills, so
+ // there is no second modulation path to test against: these assertions read the compiled rows the
+ // production compiler emitted and then run the production summation over them.
+ {
+  auto shortcutPatch=graphPatch();shortcutPatch.matrix.clear();
+  auto explicitRows=engine::compilePatch(shortcutPatch);
+  ok&=expect(static_cast<bool>(explicitRows)&&explicitRows.patch.rowCount==0,"a filter at the transparent defaults compiles no implicit row");
+  setParameter(shortcutPatch,"b","keytrack",.5);setParameter(shortcutPatch,"b","envAmount",-.25);
+  auto withShortcuts=engine::compilePatch(shortcutPatch);
+  std::size_t filterSlot=0;for(std::size_t n=0;n<withShortcuts.patch.nodeCount;++n)if(withShortcuts.patch.nodes[n].type==domain::ModuleType::filter)filterSlot=n;
+  bool keyRow=false,envRow=false;
+  for(std::size_t i=0;i<withShortcuts.patch.rowCount;++i){const auto&row=withShortcuts.patch.rows[i];
+   if(row.node!=filterSlot||row.target!=engine::ParameterTarget::cutoff)continue;
+   keyRow|=row.source==domain::ModulationSource::keyTracking&&std::abs(row.depth-.5f)<1e-6f;
+   envRow|=row.source==domain::ModulationSource::e2&&std::abs(row.depth+.25f)<1e-6f;}
+  ok&=expect(static_cast<bool>(withShortcuts)&&withShortcuts.patch.rowCount==2&&keyRow&&envRow,
+             "keytrack and envAmount compile to implicit keyTracking->cutoff and E2->cutoff rows at their declared depth");
+  // One clamp, not two. An explicit row of +0.9 and a shortcut of -0.6 sum to +0.3 before the
+  // single normalize/denormalize; clamping each in turn would instead saturate at 1 and then fall
+  // back to 0.4, so these two results are only equal if the summation clamps exactly once.
+  auto summed=graphPatch();summed.matrix={{"m1",true,domain::ModulationSource::keyTracking,"b","cutoff",.9}};
+  setParameter(summed,"b","keytrack",-.6);setParameter(summed,"b","cutoff",1000);
+  auto summedCompiled=engine::compilePatch(summed);
+  std::size_t slot=0;for(std::size_t n=0;n<summedCompiled.patch.nodeCount;++n)if(summedCompiled.patch.nodes[n].type==domain::ModuleType::filter)slot=n;
+  engine::ModulationInputs keyOnly{};keyOnly[static_cast<std::size_t>(domain::ModulationSource::keyTracking)]=1;
+  const auto bothRows=engine::applyModulation(summedCompiled.patch,slot,summedCompiled.patch.nodes[slot].values,keyOnly);
+  auto single=graphPatch();single.matrix={{"m1",true,domain::ModulationSource::keyTracking,"b","cutoff",.3}};
+  setParameter(single,"b","cutoff",1000);
+  auto singleCompiled=engine::compilePatch(single);
+  const auto oneRow=engine::applyModulation(singleCompiled.patch,slot,singleCompiled.patch.nodes[slot].values,keyOnly);
+  const auto*cutoffPd=domain::findParameter(domain::moduleCatalog()[static_cast<std::size_t>(domain::ModuleType::filter)],"cutoff");
+  const auto afterFirstClamp=cutoffPd->denormalize(std::clamp(cutoffPd->normalize(1000.)+.9,0.,1.));
+  const auto twiceClamped=static_cast<float>(cutoffPd->denormalize(std::clamp(cutoffPd->normalize(afterFirstClamp)-.6,0.,1.)));
+  ok&=expect(summedCompiled.patch.rowCount==2&&std::abs(bothRows.cutoff-oneRow.cutoff)<1.f&&std::abs(bothRows.cutoff-twiceClamped)>100.f,
+             "an explicit row and the shortcut sum into one clamp, not two");
+  // The shortcuts never overflow the compiled row array: both filter slots can carry both of them
+  // on top of a full 40-row matrix.
+  auto full=iupac::testing::maximalPatch();
+  for(auto&n:full.nodes)if(n.type==domain::ModuleType::filter)for(auto&value:n.parameters){if(value.id=="keytrack")value.values[0]=.4;if(value.id=="envAmount")value.values[0]=.7;}
+  auto fullCompiled=engine::compilePatch(full);
+  ok&=expect(static_cast<bool>(fullCompiled)&&fullCompiled.patch.rowCount==domain::maximumMatrixRows+engine::implicitFilterRows,
+             "both filter slots add both shortcuts on top of a full matrix without overflowing the compiled rows");
+ }
  domain::Patch onsetPatch;onsetPatch.nodes={defaults("noise","noise")};onsetPatch.edges={{"noise","output",1}};auto onsetCompiled=engine::compilePatch(onsetPatch);engine::Engine onsetEngine;onsetEngine.prepare(48000,512);onsetEngine.setPatch(onsetCompiled.patch);std::array<float,512>onsetL{},onsetR{};std::array onsetNote{engine::MidiEvent{0,engine::MidiEventType::noteOn,1,60,127,8192}};onsetEngine.render(onsetL,onsetR,onsetNote);auto onset=std::ranges::find_if(onsetL,[](float x){return std::abs(x)>1e-12f;});ok&=expect(onset!=onsetL.end()&&onsetEngine.latencySamples()==4,"integer-compensated oversampling reports the realized production configuration");
  engine::Engine voices;voices.prepare(48000,64);voices.setPatch(compiled.patch);std::vector<engine::MidiEvent> many;for(int i=0;i<20;++i)many.push_back({0,engine::MidiEventType::noteOn,static_cast<std::uint8_t>(i%2+1),static_cast<std::uint8_t>(40+i),100,8192});std::array<float,64>l{},r{};voices.render(l,r,many);ok&=expect(voices.activeVoiceCount()==16,"voice scheduling remains bounded");std::array controllerEvents{engine::MidiEvent{0,engine::MidiEventType::pitchBend,1,0,0,16383},engine::MidiEvent{0,engine::MidiEventType::controlChange,1,1,127,8192},engine::MidiEvent{0,engine::MidiEventType::controlChange,1,64,127,8192},engine::MidiEvent{1,engine::MidiEventType::noteOff,1,40,0,8192},engine::MidiEvent{2,engine::MidiEventType::controlChange,1,64,0,8192},engine::MidiEvent{3,engine::MidiEventType::controlChange,1,120,0,8192}};voices.render(l,r,controllerEvents);for(int i=0;i<8;++i)voices.render(l,r);ok&=expect(voices.activeVoiceCount()<16,"controllers and bounded channel all-sound-off fade are handled");ok&=expect(voices.latencySamples()>0,"integer oversampling latency reported");
  std::vector<engine::MidiEvent> overflow(engine::maximumMidiEventsPerBlock+1,{0,engine::MidiEventType::controlChange,1,1,64,8192});voices.render(l,r,overflow);for(int i=0;i<8;++i)voices.render(l,r);ok&=expect(voices.midiOverflowCount()==1&&voices.activeVoiceCount()==0,"MIDI overflow is counted and silenced with a bounded fade");auto overflowBefore=voices.midiOverflowCount();std::span<float> empty;std::array zeroEvent{engine::MidiEvent{0,engine::MidiEventType::noteOn,1,60,100,8192}};voices.render(empty,empty,zeroEvent);ok&=expect(voices.midiOverflowCount()==overflowBefore&&voices.activeVoiceCount()==0,"zero host blocks do not consume MIDI or alter voices");
@@ -142,6 +186,29 @@ bool runEngineTests(){bool ok=true;auto patch=graphPatch();auto compiled=engine:
   float previous=beforeSwitch,largestStep=0,last=beforeSwitch;for(int i=0;i<12;++i){shapes.render(sL,sR);const float v=shapes.effectiveValues().values[filterSlot][cutoffIndex];largestStep=std::max(largestStep,std::abs(v-previous));previous=v;last=v;}
   ok&=expect(shapes.activeVoiceCount()==1&&last>beforeSwitch+.2f,"the waveform change reaches the held voice");
   ok&=expect(largestStep<std::abs(last-beforeSwitch)*.75f,"a discrete waveform change crossfades instead of stepping");
+ }
+ {// #126: a filter `mode` or shaper `curve` change is a crossfaded transition under the same rules.
+  // Neither is a matrix destination, so the evidence is the rendered audio itself: swapping a 12 dB
+  // lowpass for the 24 dB ladder under a held note changes the signal, and an uncrossfaded swap
+  // would show up as one sample-to-sample step far larger than the waveform's own slope.
+  domain::Patch switchPatch;switchPatch.noiseSeed=31;
+  switchPatch.nodes={defaults("a","harmonic"),defaults("s","shaper"),defaults("b","filter"),defaults("c","mixer")};
+  switchPatch.edges={{"a","s",1},{"s","b",1},{"b","c",1},{"c","output",1}};
+  setParameter(switchPatch,"b","cutoff",700);setParameter(switchPatch,"b","q",4);setParameter(switchPatch,"s","drive",6);setParameter(switchPatch,"s","wet",.8);
+  engine::PatchCoordinator modes;modes.prepare(48000,128);(void)modes.publish(engine::compilePatch(switchPatch).patch,{});
+  std::array<float,128>mL{},mR{};for(int i=0;i<12;++i)modes.render(mL,mR);
+  std::array modeNote{engine::MidiEvent{0,engine::MidiEventType::noteOn,1,60,100,8192}};modes.render(mL,mR,modeNote);
+  auto largestSlope=[&](int blocks){float step=0,previous=0;for(int b=0;b<blocks;++b){modes.render(mL,mR);for(float x:mL){step=std::max(step,std::abs(x-previous));previous=x;}}return step;};
+  const float steadySlope=largestSlope(16);
+  float before=0;for(float x:mL)before=std::max(before,std::abs(x));
+  // Both discrete controls move at once: the filter to `ladder24` and the shaper from `tanh` to
+  // `fold`, which is the largest transfer-function jump the catalog offers.
+  auto ladderPatch=switchPatch;setParameter(ladderPatch,"b","mode",3);setParameter(ladderPatch,"b","drive",8);setParameter(ladderPatch,"s","curve",2);
+  (void)modes.publish(engine::compilePatch(ladderPatch).patch,{});
+  const float switchSlope=largestSlope(16);
+  float after=0;for(float x:mL)after=std::max(after,std::abs(x));
+  ok&=expect(modes.activeVoiceCount()==1&&std::abs(after-before)>1e-4f,"the mode and curve change reaches the held voice");
+  ok&=expect(switchSlope<steadySlope*3.f,"a discrete filter mode and shaper curve change crossfades instead of clicking");
  }
 
  return ok;}

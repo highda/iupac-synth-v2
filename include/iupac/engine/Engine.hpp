@@ -195,6 +195,18 @@ private:
     float effectDampLeft_{}, effectDampRight_{};
     juce::dsp::StateVariableTPTFilter<float> filter_;
     std::array<juce::dsp::StateVariableTPTFilter<float>, 4> modes_;
+    // D8/D9 filter additions (#126). `ladder24` is a four-pole TPT cascade with a saturated global
+    // feedback path, so it needs four one-pole states per channel and nothing else; the JUCE TPT
+    // filter above still serves the three 12 dB modes and the notch. The two cached coefficients and
+    // the drive normalizer are resolved in the same throttled control block the cutoff uses, because
+    // process() runs once per sample.
+    std::array<float, 8> ladderState_{};
+    std::array<float, 2> ladderLast_{};
+    float ladderG_{}, ladderFeedback_{}, filterR2_{1.414f}, driveNormalizer_{1.0f};
+    float cachedFilterDrive_{std::numeric_limits<float>::quiet_NaN()};
+    // One sample of the 24 dB ladder for one channel: input saturation folds the resonant feedback
+    // in, so the output can never leave [-1, 1] however high `q` and `drive` are driven.
+    float ladderSample(std::size_t channel, float input) noexcept;
 };
 
 // Per-voice modulator sources. D8 (#125) adds the stage curves, the four new LFO shapes, the LFO
@@ -264,14 +276,20 @@ struct CompiledRange { float minimum{}, maximum{1}; domain::ParameterScale scale
 struct CompiledNode { domain::ModuleType type{}; ModuleValues values{}; std::uint32_t idHash{}; std::array<CompiledRange, parameterTargetCount> ranges{}; };
 struct CompiledEdge { std::uint8_t source{}, destination{}; float gain{}; bool toOutput{}; domain::AudioPort port{}; };
 struct CompiledRow { domain::ModulationSource source{}; std::uint8_t node{}; ParameterTarget target{}; float depth{}, minimum{}, maximum{}; domain::ParameterScale scale{}; };
-struct CompiledTarget { std::uint8_t node{}; ParameterTarget target{}; float minimum{}, maximum{}; domain::ParameterScale scale{}; std::array<std::uint8_t, domain::maximumMatrixRows> rows{}; std::uint8_t rowCount{}; };
+// Compiled rows are the patch's 40 explicit matrix rows plus the implicit filter panel shortcuts
+// (#126): `keytrack` and `envAmount` on each of the two filter slots compile into this same array as
+// ordinary keyTracking->cutoff and E2->cutoff rows, so they are summed and clamped by the one
+// existing pass rather than by a second modulation path. The Patch cap itself is unchanged at 40.
+inline constexpr std::size_t implicitFilterRows = 4;
+inline constexpr std::size_t compiledRowCapacity = domain::maximumMatrixRows + implicitFilterRows;
+struct CompiledTarget { std::uint8_t node{}; ParameterTarget target{}; float minimum{}, maximum{}; domain::ParameterScale scale{}; std::array<std::uint8_t, compiledRowCapacity> rows{}; std::uint8_t rowCount{}; };
 struct CompiledEdgeList { std::array<std::uint8_t, domain::maximumEdges> edges{}; std::uint8_t count{}; };
 struct CompiledPatch
 {
     std::array<CompiledNode, domain::maximumNodes> nodes{};
     std::array<CompiledEdge, domain::maximumEdges> edges{};
-    std::array<CompiledRow, domain::maximumMatrixRows> rows{};
-    std::array<CompiledTarget, domain::maximumMatrixRows> targets{};
+    std::array<CompiledRow, compiledRowCapacity> rows{};
+    std::array<CompiledTarget, compiledRowCapacity> targets{};
     std::array<CompiledEdgeList, domain::maximumNodes> incomingEdges{};
     // Edges into the OUT bus split by region: the per-voice ones are gated by E1 and velocity inside
     // each voice, the tail ones are summed once per sample after the global effects tail has run.

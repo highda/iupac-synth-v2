@@ -72,7 +72,30 @@ CompileResult compilePatch(const domain::Patch& source){CompileResult result;if(
  // depend on one (the validator rejects a tail edge into a per-voice node), so a stable partition of a
  // valid topological order is still a valid topological order.
  std::stable_partition(order.begin(),order.end(),[&](const std::string& id){return !domain::moduleCatalog()[static_cast<std::size_t>(source.nodes[original.at(id)].type)].effects;});
- result.patch.tailStart=static_cast<std::uint8_t>(std::ranges::count_if(order,[&](const std::string& id){return !domain::moduleCatalog()[static_cast<std::size_t>(source.nodes[original.at(id)].type)].effects;}));std::map<std::string,std::uint8_t,std::less<>> slots;for(std::size_t i=0;i<order.size();++i){slots.emplace(order[i],static_cast<std::uint8_t>(i));auto&n=source.nodes[original.at(order[i])];result.patch.nodes[i]={n.type,moduleValues(n),hashId(n.id)};auto&md=domain::moduleCatalog()[static_cast<std::size_t>(n.type)];for(auto&pd:md.parameters)if(pd.modulatable)if(auto target=targetFor(pd.id))result.patch.nodes[i].ranges[static_cast<std::size_t>(*target)]={static_cast<float>(pd.minimum),static_cast<float>(pd.maximum),pd.scale,true};}result.patch.nodeCount=static_cast<std::uint8_t>(order.size());for(auto&e:source.edges)if(live.contains(e.source)&&(e.destination=="output"||live.contains(e.destination))){auto&o=result.patch.edges[result.patch.edgeCount++];o.source=slots.at(e.source);o.gain=static_cast<float>(e.gain);o.toOutput=e.destination=="output";o.destination=o.toOutput?0:slots.at(e.destination);o.port=e.port;}for(auto&r:source.matrix)if(r.enabled&&live.contains(r.destinationNode)){auto slot=slots.at(r.destinationNode);auto&n=source.nodes[original.at(r.destinationNode)];auto&md=domain::moduleCatalog()[static_cast<std::size_t>(n.type)];auto*pd=domain::findParameter(md,r.destinationParameter);auto target=targetFor(r.destinationParameter);if(!pd||!target){result.error="unsupported matrix destination";return result;}result.patch.rows[result.patch.rowCount++]={r.source,slot,*target,static_cast<float>(r.depth),static_cast<float>(pd->minimum),static_cast<float>(pd->maximum),pd->scale};}result.patch.envelopes=source.envelopes;result.patch.lfos=source.lfos;result.patch.noiseSeed=source.noiseSeed;return result;}
+ result.patch.tailStart=static_cast<std::uint8_t>(std::ranges::count_if(order,[&](const std::string& id){return !domain::moduleCatalog()[static_cast<std::size_t>(source.nodes[original.at(id)].type)].effects;}));std::map<std::string,std::uint8_t,std::less<>> slots;for(std::size_t i=0;i<order.size();++i){slots.emplace(order[i],static_cast<std::uint8_t>(i));auto&n=source.nodes[original.at(order[i])];result.patch.nodes[i]={n.type,moduleValues(n),hashId(n.id)};auto&md=domain::moduleCatalog()[static_cast<std::size_t>(n.type)];for(auto&pd:md.parameters)if(pd.modulatable)if(auto target=targetFor(pd.id))result.patch.nodes[i].ranges[static_cast<std::size_t>(*target)]={static_cast<float>(pd.minimum),static_cast<float>(pd.maximum),pd.scale,true};}result.patch.nodeCount=static_cast<std::uint8_t>(order.size());for(auto&e:source.edges)if(live.contains(e.source)&&(e.destination=="output"||live.contains(e.destination))){auto&o=result.patch.edges[result.patch.edgeCount++];o.source=slots.at(e.source);o.gain=static_cast<float>(e.gain);o.toOutput=e.destination=="output";o.destination=o.toOutput?0:slots.at(e.destination);o.port=e.port;}for(auto&r:source.matrix)if(r.enabled&&live.contains(r.destinationNode)){auto slot=slots.at(r.destinationNode);auto&n=source.nodes[original.at(r.destinationNode)];auto&md=domain::moduleCatalog()[static_cast<std::size_t>(n.type)];auto*pd=domain::findParameter(md,r.destinationParameter);auto target=targetFor(r.destinationParameter);if(!pd||!target){result.error="unsupported matrix destination";return result;}result.patch.rows[result.patch.rowCount++]={r.source,slot,*target,static_cast<float>(r.depth),static_cast<float>(pd->minimum),static_cast<float>(pd->maximum),pd->scale};}
+ // D8 filter panel shortcuts (#126). `keytrack` and `envAmount` are not a second modulation path:
+ // they are compiled here into the same row array the explicit matrix fills, as keyTracking->cutoff
+ // and E2->cutoff at their declared depth. buildTargets() then groups every row aimed at that
+ // node's cutoff into one CompiledTarget, so an explicit cutoff row and a shortcut are summed and
+ // passed through a single normalize/denormalize clamp rather than clamped twice. Both are 0 by
+ // default, and a zero-depth row would be a no-op contribution anyway, so a patch that does not use
+ // them compiles exactly the rows it did before.
+ {
+  const auto&filterDescriptor=domain::moduleCatalog()[static_cast<std::size_t>(domain::ModuleType::filter)];
+  const auto* cutoffDescriptor=domain::findParameter(filterDescriptor,"cutoff");
+  for(std::size_t i=0;i<order.size()&&cutoffDescriptor;++i)
+  {
+   const auto&n=source.nodes[original.at(order[i])];
+   if(n.type!=domain::ModuleType::filter)continue;
+   const std::array<std::pair<domain::ModulationSource,float>,2> shortcuts{{
+    {domain::ModulationSource::keyTracking,scalar(n,"keytrack",0)},{domain::ModulationSource::e2,scalar(n,"envAmount",0)}}};
+   for(auto [modulationSource,depth]:shortcuts)
+    if(depth!=0.0f&&result.patch.rowCount<compiledRowCapacity)
+     result.patch.rows[result.patch.rowCount++]={modulationSource,static_cast<std::uint8_t>(i),ParameterTarget::cutoff,depth,
+                                                 static_cast<float>(cutoffDescriptor->minimum),static_cast<float>(cutoffDescriptor->maximum),cutoffDescriptor->scale};
+  }
+ }
+ result.patch.envelopes=source.envelopes;result.patch.lfos=source.lfos;result.patch.noiseSeed=source.noiseSeed;return result;}
 
 class Engine::Impl {public:
  struct Voice{std::array<ModuleProcessor,domain::maximumNodes> modules;std::array<std::unique_ptr<ModuleProcessor::CombDelay>,2> combs;ModulatorBank modulators;VoiceValues modulatedValues{},transitionValues{};ModulationInputs previousInputs{};std::array<float,domain::maximumNodes> left{},right{};int note{},channel{1},cachedNote{-1};float velocity{},lastL{},lastR{},tailL{},tailR{},level{},cachedTune{std::numeric_limits<float>::quiet_NaN()},cachedHz{440};std::uint32_t fade{};std::uint64_t age{};bool held{},sustained{},active{},forcedStop{},modulationReady{},usingTransition{};};

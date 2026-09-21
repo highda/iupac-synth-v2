@@ -1,0 +1,301 @@
+{
+ "stateVersion": 1,
+ "basePatch": {
+  "patchVersion": 1,
+  "noiseSeed": 0,
+  "nodes": [],
+  "edges": [],
+  "envelopes": [
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 1.0,
+    "waveform": "sine"
+   },
+   {
+    "rate": 1.0,
+    "waveform": "sine"
+   }
+  ],
+  "matrix": [],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "editedPatch": {
+  "patchVersion": 1,
+  "noiseSeed": 9127,
+  "nodes": [
+   {
+    "id": "src",
+    "type": "harmonic",
+    "parameters": {
+     "partialAmplitudes": [
+      1.0,
+      0.5,
+      0.3333,
+      0.25,
+      0.2,
+      0.1667,
+      0.1429,
+      0.125,
+      0.1111,
+      0.1,
+      0.0909,
+      0.0833,
+      0.0769,
+      0.0714,
+      0.0667,
+      0.0625
+     ],
+     "partialRatios": [
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      14.0,
+      15.0,
+      16.0
+     ],
+     "partialPans": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tilt": 0.0,
+     "inharmonicity": 0.0,
+     "outputLevel": 0.5
+    }
+   },
+   {
+    "id": "s1",
+    "type": "shaper",
+    "parameters": {
+     "curve": 2.0,
+     "drive": 5.0,
+     "wet": 0.7,
+     "outputLevel": 0.5
+    }
+   },
+   {
+    "id": "s2",
+    "type": "shaper",
+    "parameters": {
+     "curve": 3.0,
+     "drive": 6.0,
+     "wet": 0.7,
+     "outputLevel": 0.5
+    }
+   },
+   {
+    "id": "f1",
+    "type": "filter",
+    "parameters": {
+     "mode": 2.0,
+     "cutoff": 600.0,
+     "q": 3.0,
+     "drive": 2.0,
+     "keytrack": 0.0,
+     "envAmount": 0.0,
+     "outputLevel": 0.8
+    }
+   },
+   {
+    "id": "f2",
+    "type": "filter",
+    "parameters": {
+     "mode": 3.0,
+     "cutoff": 1200.0,
+     "q": 5.0,
+     "drive": 6.0,
+     "keytrack": 0.3,
+     "envAmount": 0.6,
+     "outputLevel": 0.8
+    }
+   },
+   {
+    "id": "mix",
+    "type": "mixer",
+    "parameters": {
+     "level": 0.7,
+     "pan": 0.0,
+     "outputLevel": 0.8
+    }
+   }
+  ],
+  "edges": [
+   {
+    "source": "src",
+    "destination": "s1",
+    "gain": 0.8
+   },
+   {
+    "source": "src",
+    "destination": "s2",
+    "gain": 0.6
+   },
+   {
+    "source": "s1",
+    "destination": "f1",
+    "gain": 0.9
+   },
+   {
+    "source": "s2",
+    "destination": "f2",
+    "gain": 0.7
+   },
+   {
+    "source": "f1",
+    "destination": "mix",
+    "gain": 0.7
+   },
+   {
+    "source": "f2",
+    "destination": "mix",
+    "gain": 0.6
+   },
+   {
+    "source": "mix",
+    "destination": "output",
+    "gain": 0.8
+   }
+  ],
+  "envelopes": [
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 1.0,
+    "waveform": "sine"
+   },
+   {
+    "rate": 1.0,
+    "waveform": "sine"
+   }
+  ],
+  "matrix": [
+   {
+    "id": "r1",
+    "enabled": true,
+    "source": "l1",
+    "destinationNode": "f2",
+    "destinationParameter": "cutoff",
+    "depth": 0.25
+   }
+  ],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "controls": {
+  "macros": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "outputGain": -6.0,
+  "width": 0.5,
+  "masterTune": 0.0,
+  "bypass": false
+ }
+}

@@ -58,6 +58,24 @@
             "snapshot": "modulation-sync.snapshot.json",
             "midi": "held-note.midi.json",
             "samples": 144000
+        },
+        {
+            "id": "filter-modes-lowpass-bandpass",
+            "snapshot": "filter-modes-lowpass-bandpass.snapshot.json",
+            "midi": "held-note.midi.json",
+            "samples": 144000
+        },
+        {
+            "id": "filter-modes-highpass-ladder24",
+            "snapshot": "filter-modes-highpass-ladder24.snapshot.json",
+            "midi": "held-note.midi.json",
+            "samples": 144000
+        },
+        {
+            "id": "filter-notch-and-ladder-extremes",
+            "snapshot": "filter-notch-and-ladder-extremes.snapshot.json",
+            "midi": "held-note.midi.json",
+            "samples": 144000
         }
     ],
     "rejections": [

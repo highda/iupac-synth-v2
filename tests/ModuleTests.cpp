@@ -27,6 +27,68 @@ bool runModuleTests()
     v.mode=1;v.modeLevels={1,.5f,.25f,.125f};resonator.process(v,440,impulse,impulse,left,right);ok&=expect(finiteActive(left),"modal resonator renders");
     engine::ModuleProcessor filter(domain::ModuleType::filter);filter.prepare(88200,512);v.cutoff=999999;v.q=999;filter.process(v,440,impulse,impulse,left,right);ok&=expect(std::ranges::all_of(left,[](float x){return std::isfinite(x);}),"filter clamps controls");
     engine::ModuleProcessor shaper(domain::ModuleType::shaper);shaper.prepare(96000,512);v.drive=16;v.wet=1;shaper.process(v,440,impulse,impulse,left,right);ok&=expect(std::abs(left[0])<=1,"shaper bounded");
+    // --- D8 filter modes, in-filter drive and shaper curves (#126) ------------------------------
+    // Everything below drives the production ModuleProcessor at its real control values. The
+    // transparency of the new defaults is proved on the production render path instead: the authored
+    // `all-modules-routes` case still hashes to the pre-D8 digest with these controls at 1/0/tanh.
+    {
+        // A loud sustained chord into the filter, so a mode that ran away would be visible at once.
+        std::array<float,512> tone{};
+        for(std::size_t i=0;i<tone.size();++i)tone[i]=.9f*(std::sin(static_cast<float>(i)*.05f)+std::sin(static_cast<float>(i)*.31f))*.5f;
+        auto runFilter=[&](int mode,float cutoff,float q,float drive,int blocks){
+            engine::ModuleValues f;f.cutoff=cutoff;f.q=q;f.drive=drive;f.mode=mode;f.outputLevel=1;
+            engine::ModuleProcessor m(domain::ModuleType::filter);m.prepare(96000,512);m.noteOn(60,1,5,9);
+            std::array<float,512> ol{},orr{},last{};
+            for(int b=0;b<blocks;++b){m.process(f,440,tone,tone,ol,orr);last=ol;}
+            return last;};
+        for(int mode=0;mode<5;++mode)
+        {
+            const auto settled=runFilter(mode,1200,8,16,64);
+            ok&=expect(std::ranges::all_of(settled,[](float x){return std::isfinite(x)&&std::abs(x)<8.f;}),"filter mode stays bounded at maximum q and drive");
+            // The cutoff cap is min(18000 Hz, 0.4 x output rate); asking for far more must not move a
+            // pole past it, in any mode, with the resonance and the drive at their maxima.
+            const auto capped=runFilter(mode,999999,8,16,64);
+            ok&=expect(std::ranges::all_of(capped,[](float x){return std::isfinite(x)&&std::abs(x)<8.f;}),"capped cutoff stays bounded in every filter mode");
+        }
+        // Self-oscillation: at maximum q and drive the ladder keeps ringing after the input stops,
+        // and that ring must stay inside the saturator rather than growing without bound.
+        engine::ModuleValues ladder;ladder.cutoff=1200;ladder.q=8;ladder.drive=16;ladder.mode=3;ladder.outputLevel=1;
+        engine::ModuleProcessor ringing(domain::ModuleType::filter);ringing.prepare(96000,512);ringing.noteOn(60,1,5,9);
+        std::array<float,512> rl{},rr{};float ringPeak=0;
+        for(int b=0;b<32;++b)ringing.process(ladder,440,tone,tone,rl,rr);
+        for(int b=0;b<400;++b){ringing.process(ladder,440,zero,zero,rl,rr);for(float x:rl)ringPeak=std::max(ringPeak,std::abs(x));}
+        ok&=expect(std::isfinite(ringPeak)&&ringPeak<=1.f,"self-oscillating ladder at maximum q and drive never blows up");
+        // A steady 1500 Hz probe: exactly eight cycles fill the 512-sample block, so replaying the
+        // block is one continuous sine rather than a click train no filter could be measured on.
+        std::array<float,512> probe{};
+        for(std::size_t i=0;i<probe.size();++i)probe[i]=std::sin(static_cast<float>(i)*2.f*3.14159265f*8.f/512.f);
+        auto settledEnergy=[&](int mode,float cutoff,float q){engine::ModuleValues f;f.cutoff=cutoff;f.q=q;f.drive=1;f.mode=mode;f.outputLevel=1;
+            engine::ModuleProcessor m(domain::ModuleType::filter);m.prepare(96000,512);m.noteOn(60,1,5,9);
+            std::array<float,512> ol{},orr{};float e=0;for(int b=0;b<40;++b){m.process(f,440,probe,probe,ol,orr);e=0;for(float x:ol)e+=x*x;}return e;};
+        // The 24 dB slope is steeper than the 12 dB one: two octaves above the cutoff the same probe
+        // comes out far quieter from `ladder24` than from `lowpass`.
+        ok&=expect(settledEnergy(3,375,.707f)<settledEnergy(0,375,.707f)*.35f,"ladder24 rolls off two octaves above cutoff far harder than the 12 dB lowpass");
+        // `notch` rejects its own centre frequency, which is what separates it from the bandpass.
+        ok&=expect(settledEnergy(4,1500,2)<settledEnergy(1,1500,2)*.05f,"notch rejects the centre the bandpass passes");
+        // In-filter `drive`: 1 is the transparent value, above it the filter saturates its input, so
+        // a loud input comes out measurably different rather than merely louder.
+        const auto clean=runFilter(0,1200,.707f,1,8),driven=runFilter(0,1200,.707f,12,8);
+        float difference=0;for(std::size_t i=0;i<clean.size();++i)difference+=std::abs(clean[i]-driven[i]);
+        ok&=expect(difference>1.f,"in-filter drive changes the production render");
+        // Every shaper curve stays inside [-1, 1] at drive 16 and wet 1, and none of them is another.
+        std::array<std::array<float,512>,5> curves{};
+        for(int curve=0;curve<5;++curve)
+        {
+            engine::ModuleValues sv;sv.drive=16;sv.wet=1;sv.curve=curve;sv.outputLevel=1;
+            engine::ModuleProcessor m(domain::ModuleType::shaper);m.prepare(96000,512);
+            std::array<float,512> ol{},orr{};m.process(sv,440,tone,tone,ol,orr);curves[static_cast<std::size_t>(curve)]=ol;
+            ok&=expect(std::ranges::all_of(ol,[](float x){return std::isfinite(x)&&std::abs(x)<=1.f;}),"every shaper curve is bounded at drive 16");
+        }
+        bool distinct=true;
+        for(std::size_t a=0;a<curves.size();++a)for(std::size_t b=a+1;b<curves.size();++b)
+        {float d=0;for(std::size_t i=0;i<curves[a].size();++i)d+=std::abs(curves[a][i]-curves[b][i]);distinct&=d>1.f;}
+        ok&=expect(distinct,"the five shaper curves are five different transfer functions");
+    }
     engine::ModuleProcessor mixer(domain::ModuleType::mixer);mixer.prepare(96000,512);v.level=.5f;v.pan=0;mixer.process(v,440,impulse,impulse,left,right);ok&=expect(left[0]>0&&right[0]>0,"mixer stereo output");
     // --- D8 unison, phase randomization and drift (#120) ---------------------------------------
     // Everything here goes through the production ModuleProcessor at its real control values.
