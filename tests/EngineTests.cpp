@@ -8,6 +8,8 @@
 #include <iostream>
 #include <numeric>
 #include <span>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -85,5 +87,46 @@ bool runEngineTests(){bool ok=true;auto patch=graphPatch();auto compiled=engine:
   auto macroTail=tailPatch({"delay"});setParameter(macroTail,"x0","mix",.6);setParameter(macroTail,"x0","timeMs",5);macroTail.matrix={{"t1",true,domain::ModulationSource::macro1,"x0","mix",-.6}};
   const auto macroCompiled=engine::compilePatch(macroTail).patch;domain::HostControls macroUp;macroUp.macros[0]=1;
   ok&=expect(distance(render(macroCompiled,128),render(macroCompiled,128,macroUp))>.1f,"a macro row reaches an effects parameter in the global tail");
+ }
+ {// #124: the algorithmic reverb and the width module complete the four-slot effects region.
+  const auto dry=render(engine::compilePatch(tailPatch({})).patch,128);
+  // Both are the literal straight wire at the settings that say so: the reverb at `mix` 0 and the
+  // width module at its default `width` 1, which is what "transparent at the defaults" means.
+  auto bypassed=tailPatch({"reverb","width"});setParameter(bypassed,"x0","mix",0);
+  ok&=expect(distance(dry,render(engine::compilePatch(bypassed).patch,128))==0.f,"a reverb at mix 0 and a width module at width 1 render the identical samples as a patch with no effects node");
+  auto wetReverb=tailPatch({"reverb"});setParameter(wetReverb,"x0","mix",.6);
+  const auto reverbSignal=render(engine::compilePatch(wetReverb).patch,128);
+  ok&=expect(distance(dry,reverbSignal)>.5f&&std::ranges::all_of(reverbSignal,[](float x){return std::isfinite(x)&&std::abs(x)<=.8912511f;}),"the reverb is audible and stays inside the output guard");
+  // Every reverb control has to move the render, or it is a knob wired to nothing. These are read
+  // over a second of audio: decay and damping only separate once there is a tail to hear.
+  const auto reverbSecond=render(engine::compilePatch(wetReverb).patch,128,{},engine::fallbackTempoBpm,100,48000);
+  for(const auto&[id,value]:std::vector<std::pair<std::string_view,double>>{{"size",1.0},{"decaySeconds",12.0},{"damping",1.0},{"preDelayMs",150.0},{"width",0.0}})
+  {auto moved=wetReverb;setParameter(moved,"x0",id,value);
+   const auto shifted=render(engine::compilePatch(moved).patch,128,{},engine::fallbackTempoBpm,100,48000);
+   if(!expect(distance(reverbSecond,shifted)>1e-3f,"a reverb control moves the render"))std::cerr<<"  inert reverb control: "<<id<<'\n';}
+  // `width` is a whole-signal transform: it needs stereo content to act on, so the source is panned
+  // across the image and the two channels are compared rather than the left one alone.
+  auto stereo=tailPatch({"width"});for(std::size_t i=0;i<16;++i)if(auto*n=nodeNamed(stereo,"a"))for(auto&v:n->parameters)if(v.id=="partialPans")v.values[i]=i%2==0?-1.0:1.0;
+  const auto narrow=[&](double amount,double bassMono){auto q=stereo;setParameter(q,"x0","width",amount);setParameter(q,"x0","bassMonoHz",bassMono);return engine::compilePatch(q).patch;};
+  const auto transparent=render(narrow(1.0,120.0),128);
+  ok&=expect(distance(render(narrow(1.0,500.0),128),transparent)==0.f,"at width 1 the module is transparent whatever bassMonoHz says");
+  ok&=expect(distance(render(narrow(0.0,120.0),128),transparent)>.1f&&distance(render(narrow(2.0,120.0),128),transparent)>.1f,"width 0 and width 2 both change the render");
+  ok&=expect(distance(render(narrow(2.0,20.0),128),render(narrow(2.0,500.0),128))>1e-3f,"bassMonoHz decides how much of the side signal the widening reaches");
+  // The whole four-unit region in one patch, in the contract's order, is a single compiled tail.
+  auto full=tailPatch({"chorus","delay","reverb","width"});
+  setParameter(full,"x0","mix",.4);setParameter(full,"x1","mix",.4);setParameter(full,"x1","timeMs",7);setParameter(full,"x2","mix",.4);setParameter(full,"x3","width",1.6);
+  const auto fullCompiled=engine::compilePatch(full);
+  ok&=expect(static_cast<bool>(fullCompiled)&&fullCompiled.patch.nodeCount==6&&fullCompiled.patch.tailStart==2,"the full chorus -> delay -> reverb -> width tail compiles as one four-node region");
+  const auto fullSignal=render(fullCompiled.patch,128);
+  ok&=expect(energy(fullSignal)>1e-6f&&std::ranges::all_of(fullSignal,[](float x){return std::isfinite(x)&&std::abs(x)<=.8912511f;}),"the full four-unit tail renders bounded audio");
+  // Bounded tail. The longest decay at a fully wet mix, rendered well past the note: the network is
+  // a contraction (orthonormal mixing, every line gain strictly below 1), so the tail has to be
+  // decaying by the end, and no denormal-stalled or runaway sample may appear anywhere in it.
+  auto runaway=tailPatch({"reverb"});setParameter(runaway,"x0","mix",1);setParameter(runaway,"x0","decaySeconds",20);
+  setParameter(runaway,"x0","size",1);setParameter(runaway,"x0","damping",0);setParameter(runaway,"x0","preDelayMs",200);
+  const auto tail=render(engine::compilePatch(runaway).patch,128,{},engine::fallbackTempoBpm,100,96000);
+  ok&=expect(std::ranges::all_of(tail,[](float x){return std::isfinite(x)&&std::abs(x)<=.8912511f;}),"decaySeconds 20 at mix 1 stays finite and inside the output guard");
+  const auto window=[&](std::size_t from,std::size_t to){return energy(std::vector<float>(tail.begin()+static_cast<long>(from),tail.begin()+static_cast<long>(to)));};
+  ok&=expect(window(40000,56000)>0.f&&window(80000,96000)<window(40000,56000),"the longest reverb tail decays instead of running away");
  }
  return ok;}

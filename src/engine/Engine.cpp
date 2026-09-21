@@ -83,6 +83,9 @@ class Engine::Impl {public:
  // so two lines cover any patch; both are allocated in prepare() and merely pointed at when a patch
  // is published, which is what keeps setPatch() allocation-free on the audio thread.
  std::unique_ptr<ModuleProcessor::CombDelay> tailChorusLine,tailDelayLine;
+ // The reverb's prepared network (#124). One of it, for the same reason: the fixed slot set holds
+ // exactly one reverb, and C4 state that multiplied by voice count would not fit the 128 MiB bound.
+ std::unique_ptr<ReverbNetwork> tailReverb;
  // Tail modulation. A global stage has no voice, so the only modulation sources with a single
  // well-defined value here are the four macros; the rest read zero. This is the same cached pass
  // the voices run, restricted to [tailStart, nodeCount).
@@ -91,15 +94,20 @@ class Engine::Impl {public:
  std::array<Voice,maximumVoices> voices;std::array<float,16>bend{},cc1{};std::array<bool,16>sustain{};CompiledPatch patch{},previousPatch{};domain::HostControls controls{},previousControls{};std::uint64_t age{},guardHits{},midiOverflow{},smoothSample{},smoothLength{1};std::unique_ptr<juce::dsp::Oversampling<float>> oversampling;juce::dsp::Limiter<float> limiter;juce::AudioBuffer<float> output;double outputRate{48000};std::size_t maxBlock{};float dcXL{},dcYL{},dcXR{},dcYR{};
  void prepare(double rate,std::size_t block){outputRate=rate;maxBlock=std::max<std::size_t>(1,block);smoothLength=static_cast<std::uint64_t>(std::max(1.0,internalSampleRate(rate)*.020));output.setSize(2,static_cast<int>(maxBlock),false,false,true);oversampling=std::make_unique<juce::dsp::Oversampling<float>>(2,1,juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR,true,true);oversampling->initProcessing(maxBlock);limiter.prepare({rate,static_cast<juce::uint32>(maxBlock),2});limiter.setThreshold(-1.f);limiter.setRelease(20.f);juce::dsp::ProcessSpec spec{internalSampleRate(rate),static_cast<juce::uint32>(maxBlock*2),2};for(auto&v:voices){v.modulators.prepare(internalSampleRate(rate));for(auto&c:v.combs){c=std::make_unique<ModuleProcessor::CombDelay>(110000);c->prepare(spec);}for(auto&m:v.modules)m.prepare(internalSampleRate(rate),maxBlock*2);}tailChorusLine=std::make_unique<ModuleProcessor::CombDelay>(static_cast<int>(maximumChorusDelaySeconds*internalSampleRate(rate))+4);tailChorusLine->prepare(spec);
   tailDelayLine=std::make_unique<ModuleProcessor::CombDelay>(static_cast<int>(maximumDelaySeconds*internalSampleRate(rate))+4);tailDelayLine->prepare(spec);
-  for(auto&m:tailModules){m.prepare(internalSampleRate(rate),maxBlock*2);m.setTempo(tempo);}reset();}
+  tailReverb=std::make_unique<ReverbNetwork>();tailReverb->prepare(spec);
+  for(auto&m:tailModules){m.prepare(internalSampleRate(rate),maxBlock*2);m.setTempo(tempo);}
+  // prepare() replaces the tail's lines and network, so re-bind the processors' pointers to the new
+  // ones before anything can render: a prepare() between two setPatch() calls must not leave a live
+  // effects node pointing at the storage this call just freed.
+  configureTail();reset();}
  void reset()noexcept{bend.fill(0);cc1.fill(0);sustain.fill(false);age=guardHits=midiOverflow=0;dcXL=dcYL=dcXR=dcYR=0;if(oversampling)oversampling->reset();limiter.reset();
   // The tail owns delay lines and reverb state, so a prepare or a structural bank switch clears it.
-  if(tailChorusLine)tailChorusLine->reset();if(tailDelayLine)tailDelayLine->reset();for(auto&m:tailModules)m.reset();tailModulationReady=false;tailOutL.fill(0);tailOutR.fill(0);tailBusL.fill(0);tailBusR.fill(0);for(auto&v:voices){v.active=v.held=v.sustained=v.forcedStop=v.modulationReady=v.usingTransition=false;v.cachedTune=std::numeric_limits<float>::quiet_NaN();v.fade=0;v.lastL=v.lastR=v.tailL=v.tailR=v.level=0;v.modulators.reset();for(auto&m:v.modules)m.reset();}}
+  if(tailChorusLine)tailChorusLine->reset();if(tailDelayLine)tailDelayLine->reset();if(tailReverb)tailReverb->reset();for(auto&m:tailModules)m.reset();tailModulationReady=false;tailOutL.fill(0);tailOutR.fill(0);tailBusL.fill(0);tailBusR.fill(0);for(auto&v:voices){v.active=v.held=v.sustained=v.forcedStop=v.modulationReady=v.usingTransition=false;v.cachedTune=std::numeric_limits<float>::quiet_NaN();v.fade=0;v.lastL=v.lastR=v.tailL=v.tailR=v.level=0;v.modulators.reset();for(auto&m:v.modules)m.reset();}}
  // Tail types come from the compiled patch, not from a voice; setType clears the effect's state.
  void configureTail()noexcept{for(std::size_t i=0;i<domain::maximumNodes;++i){const auto type=i>=patch.tailStart&&i<patch.nodeCount?patch.nodes[i].type:domain::ModuleType::mixer;
   // The pointer is handed in before setType, because setType resets the processor and the reset
   // clears the line it is about to own.
-  tailModules[i].setEffectDelay(type==domain::ModuleType::chorus?tailChorusLine.get():type==domain::ModuleType::delay?tailDelayLine.get():nullptr);tailModules[i].setType(type);tailModules[i].setTempo(tempo);}
+  tailModules[i].setEffectDelay(type==domain::ModuleType::chorus?tailChorusLine.get():type==domain::ModuleType::delay?tailDelayLine.get():nullptr);tailModules[i].setReverbNetwork(type==domain::ModuleType::reverb?tailReverb.get():nullptr);tailModules[i].setType(type);tailModules[i].setTempo(tempo);}
   tailModulationReady=false;tailOutL.fill(0);tailOutR.fill(0);tailBusL.fill(0);tailBusR.fill(0);}
  void configure(Voice&v)noexcept{v.modulators.configure(patch.envelopes,patch.lfos);std::size_t comb=0;for(std::size_t i=0;i<patch.nodeCount;++i){v.modules[i].setCombDelay(patch.nodes[i].type==domain::ModuleType::resonator?v.combs[comb++].get():nullptr);v.modules[i].setType(patch.nodes[i].type);}}
  void noteOn(int ch,int note,float velocity){Voice*pick=nullptr;for(auto&v:voices)if(!v.active){pick=&v;break;}if(!pick)for(auto&v:voices)if(!v.held&&(!pick||v.level<pick->level||(v.level==pick->level&&v.age<pick->age)))pick=&v;if(!pick)pick=&*std::ranges::min_element(voices,{},&Voice::age);if(pick->active){pick->tailL=pick->lastL;pick->tailR=pick->lastR;pick->fade=static_cast<std::uint32_t>(std::max(1.,internalSampleRate(outputRate)*.005));}else{pick->tailL=pick->tailR=0;pick->fade=0;}for(auto&m:pick->modules)m.reset();pick->modulators.configure(patch.envelopes,patch.lfos);pick->modulators.reset();pick->note=note;pick->channel=ch;pick->velocity=velocity;pick->level=0;pick->age=++age;pick->active=pick->held=true;pick->sustained=pick->forcedStop=false;pick->modulators.noteOn();for(std::size_t i=0;i<patch.nodeCount;++i)pick->modules[i].noteOn(note,ch,patch.noiseSeed,patch.nodes[i].idHash);}

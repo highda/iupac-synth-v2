@@ -41,6 +41,88 @@ constexpr float delayDampingRange = 0.95f;
 constexpr std::array<double, 7> syncDivisionBeats{4.0, 2.0, 1.0, 2.0 / 3.0, 0.5, 1.0 / 3.0, 0.25};
 }
 float ModuleProcessor::clampFinite(float v,float lo,float hi,float fallback) noexcept { return std::isfinite(v)?std::clamp(v,lo,hi):fallback; }
+// D8 reverb (#124). One sample of the fixed network: pre-delay, two Schroeder allpass diffusers,
+// then a four-line FDN whose read-back is damped, gain-staged for the requested RT60 and mixed by a
+// normalized Hadamard matrix before being written back. The matrix is orthonormal and every line
+// gain is strictly below 1, so the loop is a contraction for every reachable control setting —
+// which is what makes `decaySeconds` 20 at `mix` 1 a long tail rather than a runaway one.
+void ReverbNetwork::prepare(const juce::dsp::ProcessSpec&spec)
+{
+    sampleRate_=std::max(1.0,spec.sampleRate);
+    preDelay_.setMaximumDelayInSamples(static_cast<int>(maximumReverbPreDelaySeconds*sampleRate_)+4);preDelay_.prepare(spec);
+    preDelayCeiling_=static_cast<float>(preDelay_.getMaximumDelayInSamples()-2);
+    for(std::size_t i=0;i<diffusers_.size();++i){diffusers_[i].setMaximumDelayInSamples(static_cast<int>(reverbDiffuserSeconds[i]*sampleRate_)+4);diffusers_[i].prepare(spec);diffuserSamples_[i]=std::max(1.0f,static_cast<float>(reverbDiffuserSeconds[i]*sampleRate_));}
+    for(std::size_t i=0;i<reverbLineCount;++i){lines_[i].setMaximumDelayInSamples(static_cast<int>(reverbLineSeconds[i]*sampleRate_)+4);lines_[i].prepare(spec);}
+    reset();
+}
+void ReverbNetwork::reset() noexcept
+{
+    preDelay_.reset();for(auto&d:diffusers_)d.reset();for(auto&l:lines_)l.reset();
+    damperLeft_.fill(0);damperRight_.fill(0);
+    cachedSize_=cachedDecay_=std::numeric_limits<float>::quiet_NaN();
+}
+// `size` scales every line length together, so the network keeps its ratios and only changes scale;
+// each line's feedback gain is then the RT60 gain for *its own* length, which is what keeps the
+// decay time the control says it is at any size.
+void ReverbNetwork::updateGeometry(float size,float decaySeconds) noexcept
+{
+    cachedSize_=size;cachedDecay_=decaySeconds;
+    const auto scale=std::lerp(reverbSmallestSizeScale,1.0f,size);
+    for(std::size_t i=0;i<reverbLineCount;++i)
+    {
+        const auto seconds=static_cast<float>(reverbLineSeconds[i])*scale;
+        lineSamples_[i]=std::max(1.0f,seconds*static_cast<float>(sampleRate_));
+        lineGain_[i]=std::pow(10.0f,-3.0f*seconds/decaySeconds);
+    }
+}
+void ReverbNetwork::process(float inL,float inR,float size,float decaySeconds,float damping,float preDelayMilliseconds,float width,float&wetLeft,float&wetRight) noexcept
+{
+    if(size!=cachedSize_||decaySeconds!=cachedDecay_)updateGeometry(size,decaySeconds);
+    preDelay_.pushSample(0,inL);preDelay_.pushSample(1,inR);
+    const auto preSamples=std::clamp(static_cast<float>(preDelayMilliseconds*.001*sampleRate_),1.0f,preDelayCeiling_);
+    float dl=preDelay_.popSample(0,preSamples),dr=preDelay_.popSample(1,preSamples);
+    for(std::size_t k=0;k<diffusers_.size();++k)
+    {
+        const auto delayedL=diffusers_[k].popSample(0,diffuserSamples_[k]),delayedR=diffusers_[k].popSample(1,diffuserSamples_[k]);
+        const auto vl=dl+reverbDiffusion*delayedL,vr=dr+reverbDiffusion*delayedR;
+        diffusers_[k].pushSample(0,vl);diffusers_[k].pushSample(1,vr);
+        dl=delayedL-reverbDiffusion*vl;dr=delayedR-reverbDiffusion*vr;
+    }
+    std::array<float,reverbLineCount> readL{},readR{};
+    for(std::size_t i=0;i<reverbLineCount;++i)
+    {
+        readL[i]=lines_[i].popSample(0,lineSamples_[i]);
+        readR[i]=lines_[i].popSample(1,std::max(1.0f,lineSamples_[i]*reverbRightSkew));
+    }
+    // Damp inside the loop, so each pass through the network is darker than the one before it.
+    const auto coefficient=1.0f-reverbDampingRange*damping;
+    std::array<float,reverbLineCount> fbL{},fbR{};
+    for(std::size_t i=0;i<reverbLineCount;++i)
+    {
+        damperLeft_[i]+=coefficient*(readL[i]*lineGain_[i]-damperLeft_[i]);
+        damperRight_[i]+=coefficient*(readR[i]*lineGain_[i]-damperRight_[i]);
+        if(std::abs(damperLeft_[i])<denormalFloor)damperLeft_[i]=0;
+        if(std::abs(damperRight_[i])<denormalFloor)damperRight_[i]=0;
+        fbL[i]=damperLeft_[i];fbR[i]=damperRight_[i];
+    }
+    // Normalized 4x4 Hadamard: orthonormal, so it redistributes energy between the lines without
+    // adding any. The 0.5 is 1/sqrt(4).
+    const auto mix4=[](const std::array<float,reverbLineCount>&v,std::array<float,reverbLineCount>&out){
+        out[0]=.5f*(v[0]+v[1]+v[2]+v[3]);out[1]=.5f*(v[0]-v[1]+v[2]-v[3]);
+        out[2]=.5f*(v[0]+v[1]-v[2]-v[3]);out[3]=.5f*(v[0]-v[1]-v[2]+v[3]);};
+    std::array<float,reverbLineCount> mixedL{},mixedR{};mix4(fbL,mixedL);mix4(fbR,mixedR);
+    float sumL=0,sumR=0;
+    for(std::size_t i=0;i<reverbLineCount;++i)
+    {
+        lines_[i].pushSample(0,std::isfinite(mixedL[i])?dl+mixedL[i]:dl);
+        lines_[i].pushSample(1,std::isfinite(mixedR[i])?dr+mixedR[i]:dr);
+        sumL+=readL[i];sumR+=readR[i];
+    }
+    sumL*=.5f;sumR*=.5f;
+    // `width` collapses the wet image to mono at 0 and leaves it untouched at its default 1.
+    const auto mid=(sumL+sumR)*.5f,side=(sumL-sumR)*.5f*width;
+    wetLeft=mid+side;wetRight=mid-side;
+}
 void ModuleProcessor::prepare(double rate,std::size_t block)
 {
     sampleRate_=std::max(1.0,rate); juce::dsp::ProcessSpec spec{sampleRate_,static_cast<juce::uint32>(std::min(block,maximumModuleBlockSize)),2};
@@ -52,12 +134,14 @@ void ModuleProcessor::prepare(double rate,std::size_t block)
         ownedEffect_=std::make_unique<CombDelay>(static_cast<int>((type_==domain::ModuleType::chorus?maximumChorusDelaySeconds:maximumDelaySeconds)*sampleRate_)+4);
         ownedEffect_->prepare(spec);effect_=ownedEffect_.get();
     }
+    // Same story for the reverb network: the tail hands its own in, so this only fires standalone.
+    if(type_==domain::ModuleType::reverb&&!reverb_){ownedReverb_=std::make_unique<ReverbNetwork>();ownedReverb_->prepare(spec);reverb_=ownedReverb_.get();}
     filter_.prepare(spec);for(auto& m:modes_)m.prepare(spec);reset();
 }
 void ModuleProcessor::reset() noexcept {phases_.fill(0);modPhases_.fill(0);for(auto& c:harmonicSin_)c.fill(0);for(auto& c:harmonicCos_)c.fill(1);cachedRatios_.fill(-1);cachedHarmonicFundamental_=-1;harmonicRenormalizeCountdown_=4096;pink_.fill(0);burstSamplesRemaining_=0;gate_=false;filterControlCountdown_=0;cachedPan_=cachedFundamental_=cachedFilterCutoff_=cachedFilterQ_=cachedModalQ_=std::numeric_limits<float>::quiet_NaN();cachedModeCutoffs_.fill(-1);cachedPans_.fill(std::numeric_limits<float>::quiet_NaN());
     unisonPhase_.fill(0);unisonModPhase_.fill(0);cachedDetuneCents_=cachedUnisonSpread_=std::numeric_limits<float>::quiet_NaN();cachedUnisonVoices_=0;unisonDirty_=true;pendingPhaseOffset_=false;
     driftPhase_=driftLevelPhase_=0;driftRate_=.11;driftLevelRate_=.07;
-    effectDampLeft_=effectDampRight_=0;
+    effectDampLeft_=effectDampRight_=0;if(ownedReverb_)ownedReverb_->reset();
     if(comb_)comb_->reset();if(effect_)effect_->reset();filter_.reset();for(auto& m:modes_)m.reset();}
 void ModuleProcessor::noteOn(int note,int channel,std::uint32_t seed,std::uint32_t nodeHash) noexcept
 {
@@ -149,6 +233,11 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         }
     }
     if(type_==domain::ModuleType::filter&&filterControlCountdown_--==0){filterControlCountdown_=15;const auto cutoff=std::min(clampFinite(p.cutoff,30,18000,1000),static_cast<float>(sampleRate_*.2)),q=clampFinite(p.q,.5f,8,.707f);if(cutoff!=cachedFilterCutoff_){filter_.setCutoffFrequency(cutoff);cachedFilterCutoff_=cutoff;}if(q!=cachedFilterQ_){filter_.setResonance(q);cachedFilterQ_=q;}filter_.setType(p.mode==1?juce::dsp::StateVariableTPTFilterType::bandpass:p.mode==2?juce::dsp::StateVariableTPTFilterType::highpass:juce::dsp::StateVariableTPTFilterType::lowpass);}
+    // The width module's crossover is the same prepared TPT filter the filter module uses: a node
+    // has exactly one type, so reusing it is the whole storage cost of the C1 class the catalog
+    // declares for `bassMonoHz`. setCutoffFrequency() is a tangent, so it is throttled exactly as
+    // the filter module's is rather than run on every one of the tail's per-sample calls.
+    if(type_==domain::ModuleType::width&&filterControlCountdown_--==0){filterControlCountdown_=15;const auto hz=std::min(clampFinite(p.bassMonoHz,20,500,120),static_cast<float>(sampleRate_*.45));if(hz!=cachedFilterCutoff_){filter_.setType(juce::dsp::StateVariableTPTFilterType::lowpass);filter_.setResonance(.707f);filter_.setCutoffFrequency(hz);cachedFilterCutoff_=hz;}}
     if(type_==domain::ModuleType::harmonic)for(std::size_t n=0;n<16;++n)if(p.pans[n]!=cachedPans_[n]){cachedPans_[n]=p.pans[n];panLeft_[n]=panGain(p.pans[n],false);panRight_[n]=panGain(p.pans[n],true);}
     // D8 spectral shape (#121). All three controls reshape what is *rendered* and never touch the
     // stored arrays, so a saved spectrum survives a load/save round trip and every one of them stays
@@ -238,7 +327,37 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
             effect_->pushSample(0,l+effectDampLeft_*feedback);effect_->pushSample(1,r+effectDampRight_*feedback);
             l=std::lerp(l,wetL,mix);r=std::lerp(r,wetR,mix);
         }
-        // reverb and width stay pass-through until issue #124
+        // D8 reverb (#124). The network is prepared once for the whole tail; here it is one sample
+        // in and a dry/wet. `mix` 0 is std::lerp(l, ., 0) — the literal dry sample, so a reverb
+        // node parked at mix 0 is a straight wire exactly as the chorus and the delay are.
+        else if(type_==domain::ModuleType::reverb&&reverb_)
+        {
+            const auto mix=clampFinite(p.mix,0,1,.25f);
+            float wetL=0,wetR=0;
+            reverb_->process(l,r,clampFinite(p.size,0,1,.5f),clampFinite(p.decaySeconds,.1f,20,2),
+                             clampFinite(p.damping,0,1,.5f),clampFinite(p.preDelayMs,0,200,20),
+                             clampFinite(p.width,0,1,1),wetL,wetR);
+            l=std::lerp(l,wetL,mix);r=std::lerp(r,wetR,mix);
+        }
+        // D8 stereo width (#124). Mid/side arithmetic around one TPT crossover, and the whole
+        // signal — there is no `mix`, because a partly applied width transform is just a different
+        // width. The crossover splits the side signal into a low band and its exact complement
+        // (`side - low`, so the two sum back to `side` with no filter-bank error): narrowing scales
+        // all of the side, widening adds only the band above `bassMonoHz`, which is what keeps the
+        // bass mono as the image opens. `width` at its default 1 is the literal identity — the
+        // branch leaves `l` and `r` untouched — while the crossover still runs, so its state never
+        // goes stale under a macro sweeping the control.
+        else if(type_==domain::ModuleType::width)
+        {
+            const auto amount=clampFinite(p.width,0,2,1);
+            const auto mid=(l+r)*.5f,side=(l-r)*.5f;
+            const auto low=filter_.processSample(0,side);
+            if(amount!=1.0f)
+            {
+                const auto shaped=side*std::min(amount,1.0f)+(side-low)*std::max(amount-1.0f,0.0f);
+                l=mid+shaped;r=mid-shaped;
+            }
+        }
         }
         else{const auto g=clampFinite(p.level,0,1,1);l*=g*cachedPanLeft_;r*=g*cachedPanRight_;}outL[i]=std::isfinite(l)?l*output:0;outR[i]=std::isfinite(r)?r*output:0;}
 }

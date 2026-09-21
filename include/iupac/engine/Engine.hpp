@@ -31,6 +31,27 @@ inline constexpr std::size_t maximumMidiEventsPerBlock = 4096;
 // 2000 ms; both capacities carry a small margin so the interpolated read never runs off the end.
 inline constexpr double maximumChorusDelaySeconds = 0.025;
 inline constexpr double maximumDelaySeconds = 2.05;
+// D8 reverb (#124). D9 delegates the network topology; this one is a fixed Schroeder/FDN hybrid
+// built entirely from the pinned `juce::dsp::DelayLine`: one stereo pre-delay, two diffusion
+// allpasses and a four-line feedback delay network mixed by a normalized Hadamard matrix, with a
+// one-pole damper inside each line's feedback path. It is C4 — one prepared network for the whole
+// global tail, never per voice. The line lengths below are the longest each line ever reads, at
+// `size` 1; `size` scales them down to `reverbSmallestSizeScale` and nothing ever reads past the
+// capacity allocated from these constants, so render allocates nothing.
+inline constexpr std::size_t reverbLineCount = 4;
+inline constexpr double maximumReverbPreDelaySeconds = 0.205;
+inline constexpr std::array<double, reverbLineCount> reverbLineSeconds{0.0297, 0.0371, 0.0411, 0.0437};
+inline constexpr std::array<double, 2> reverbDiffuserSeconds{0.0051, 0.0077};
+inline constexpr float reverbSmallestSizeScale = 0.3f;
+inline constexpr float reverbDiffusion = 0.6f;
+// The right channel reads each line slightly short of the left one, which is what decorrelates the
+// two sides of the network. Strictly below 1, so it can never read past the allocated capacity.
+inline constexpr float reverbRightSkew = 0.971f;
+// `damping` 0 leaves the one-pole coefficient at exactly 1 — the damper is then a straight wire.
+inline constexpr float reverbDampingRange = 0.92f;
+// Anything smaller than this in a feedback state is flushed to zero, so a decayed tail cannot leave
+// the network grinding on denormals for minutes after the last note.
+inline constexpr float denormalFloor = 1e-20f;
 // Tempo sync with no host playhead. ARCHITECTURE "Tempo sync": Standalone and every CLI render fall
 // back to this, and the render manifest records it.
 inline constexpr double fallbackTempoBpm = 120.0;
@@ -61,6 +82,32 @@ struct ModuleValues
     int unisonVoices{1}, octave{}, coarse{}, waveform{}, curve{}, voices{2}, syncMode{}, syncDivision{4};
 };
 
+// The prepared reverb network. It is a plain value type owned by whoever prepares the tail (the
+// engine for a real patch, the processor itself for a standalone module test); `process()` runs one
+// sample and touches nothing but its own members.
+class ReverbNetwork final
+{
+public:
+    using Line = juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>;
+    void prepare(const juce::dsp::ProcessSpec& spec);
+    void reset() noexcept;
+    // Controls arrive in catalog units and are assumed already clamped to their declared ranges.
+    void process(float inputLeft, float inputRight, float size, float decaySeconds, float damping,
+                 float preDelayMilliseconds, float width, float& wetLeft, float& wetRight) noexcept;
+
+private:
+    void updateGeometry(float size, float decaySeconds) noexcept;
+    double sampleRate_{96000.0};
+    Line preDelay_;
+    std::array<Line, 2> diffusers_;
+    std::array<Line, reverbLineCount> lines_;
+    std::array<float, reverbLineCount> damperLeft_{}, damperRight_{};
+    std::array<float, reverbLineCount> lineSamples_{}, lineGain_{};
+    std::array<float, 2> diffuserSamples_{};
+    float preDelayCeiling_{1.0f};
+    float cachedSize_{std::numeric_limits<float>::quiet_NaN()}, cachedDecay_{std::numeric_limits<float>::quiet_NaN()};
+};
+
 class ModuleProcessor final
 {
 public:
@@ -71,6 +118,9 @@ public:
     // The prepared delay line a chorus or delay node reads. The engine's global tail owns one of
     // each and hands the pointer here at compile time, so publishing a patch allocates nothing.
     void setEffectDelay(CombDelay* delay) noexcept { effect_ = delay; }
+    // The prepared reverb network a reverb node reads, handed in by the tail exactly like the line
+    // above. Null for every other type.
+    void setReverbNetwork(ReverbNetwork* network) noexcept { reverb_ = network; }
     // Host tempo for `syncMode` = sync. Out-of-range or absent tempo is the documented 120 BPM.
     void setTempo(double beatsPerMinute) noexcept { tempo_ = beatsPerMinute >= 20.0 && beatsPerMinute <= 999.0 ? beatsPerMinute : fallbackTempoBpm; }
     void prepare(double internalSampleRate, std::size_t maximumBlockSize);
@@ -139,6 +189,8 @@ private:
     // otherwise uses, so the effects add four floats and one pointer to a node's storage.
     CombDelay* effect_{};
     std::unique_ptr<CombDelay> ownedEffect_;
+    ReverbNetwork* reverb_{};
+    std::unique_ptr<ReverbNetwork> ownedReverb_;
     double tempo_{fallbackTempoBpm};
     float effectDampLeft_{}, effectDampRight_{};
     juce::dsp::StateVariableTPTFilter<float> filter_;

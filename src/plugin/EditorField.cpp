@@ -110,6 +110,12 @@ void SlotView::build(const domain::Node&n)
    knob("feedback","fb");fader("mix","mix",false,false);break;
   case domain::ModuleType::delay:toggle("syncMode",{"free","sync"});toggle("syncDivision",{"1/1","1/2","1/4","1/4T","1/8","1/8T","1/16"});
    knob("timeMs","time");knob("feedback","fb");knob("damping","damp");fader("spread","sprd",false,true);fader("mix","mix",false,false);break;
+  // #124 completes the region. The reverb's six controls are three knobs over a three-fader strip;
+  // the width module has only two, and no `mix` at all — it is a whole-signal transform, so a
+  // dry/wet would be meaningless and none is drawn.
+  case domain::ModuleType::reverb:knob("size","size");knob("decaySeconds","decay");knob("preDelayMs","pre");
+   fader("damping","damp",false,false);fader("width","width",false,false);fader("mix","mix",false,false);break;
+  case domain::ModuleType::width:knob("bassMonoHz","bass mono");fader("width","width",false,false);break;
  }
  fader("outputLevel","out",true,false);
  remove_=std::make_unique<GlyphButton>("remove");remove_->setName("Deactivate "+getName());remove_->onClick=[this]{if(field_.onDeactivate)field_.onDeactivate(slot_);};addAndMakeVisible(*remove_);
@@ -160,6 +166,9 @@ void SlotView::resized()
   case domain::ModuleType::delay:{const int h=juce::jmin(px(13),body.getHeight()/5);place("syncMode",body.removeFromTop(h).reduced(0,1));place("syncDivision",body.removeFromTop(h).reduced(0,1));
    placeRow(std::array{"spread","mix"},body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));
    const int w=body.getWidth()/3;place("timeMs",body.removeFromLeft(w));place("feedback",body.removeFromLeft(w));place("damping",body);break;}
+  case domain::ModuleType::reverb:{placeRow(std::array{"damping","width","mix"},body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));
+   const int w=body.getWidth()/3;place("size",body.removeFromLeft(w));place("decaySeconds",body.removeFromLeft(w));place("preDelayMs",body);break;}
+  case domain::ModuleType::width:{place("bassMonoHz",body.removeFromLeft(body.getWidth()/2));place("width",body.withSizeKeepingCentre(body.getWidth(),juce::jmin(px(24),body.getHeight())));break;}
  }
 }
 void SlotView::openTable()
