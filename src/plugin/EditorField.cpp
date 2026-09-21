@@ -29,19 +29,22 @@ SlotMap assignSlots(const domain::Patch&p)
  for(std::size_t i=0;i<p.nodes.size()&&i<domain::maximumNodes;++i)if(m.slot[i]<0)for(std::size_t s=0;s<moduleSlotCount;++s)if(m.node[s]<0&&slotTable[s].kind==kindOf(p.nodes[i].type)){place(i,s);break;}
  return m;
 }
-PortView::PortView(ModuleField&f,std::size_t slot,bool input):field_(f),slot_(slot),input_(input){setRepaintsOnMouseActivity(true);setName(juce::String(input?"IN ":"OUT ")+juce::String(slotKindName(slotTable[slot].kind).data())+juce::String(slotTable[slot].instance+1));}
+PortView::PortView(ModuleField&f,std::size_t slot,bool input,bool modulation):field_(f),slot_(slot),input_(input),modulation_(modulation){setRepaintsOnMouseActivity(true);setName(juce::String(modulation?"MOD IN ":input?"IN ":"OUT ")+juce::String(slotKindName(slotTable[slot].kind).data())+juce::String(slotTable[slot].instance+1));}
 void PortView::paint(juce::Graphics&g)
 {
  const auto c=getLocalBounds().toFloat().getCentre();const bool active=slot_==outputSlot||field_.slot(slot_).active();const juce::Colour colour=state_==State::inert?ink.withAlpha(0.2f):state_==State::idle?ink.withAlpha(active?1.0f:0.3f):accent;
- g.setColour(colour);if(input_){g.drawEllipse(c.x-portRadius,c.y-portRadius,2*portRadius,2*portRadius,state_==State::legal?2.0f:hairline);}else g.fillEllipse(c.x-portRadius,c.y-portRadius,2*portRadius,2*portRadius);
- if(state_==State::legal){g.drawEllipse(c.x-portRadius-3.0f,c.y-portRadius-3.0f,2*portRadius+6.0f,2*portRadius+6.0f,hairline);}
+ // The typed audio-rate anchor (#127) is drawn as a smaller ring than the ordinary IN one, so the
+ // two anchors on one slot border are told apart without a label.
+ const float radius=modulation_?portRadius-1.5f:portRadius;
+ g.setColour(colour);if(input_){g.drawEllipse(c.x-radius,c.y-radius,2*radius,2*radius,state_==State::legal?2.0f:hairline);}else g.fillEllipse(c.x-radius,c.y-radius,2*radius,2*radius);
+ if(state_==State::legal){g.drawEllipse(c.x-radius-3.0f,c.y-radius-3.0f,2*radius+6.0f,2*radius+6.0f,hairline);}
 }
 void PortView::mouseEnter(const juce::MouseEvent&){if(field_.dragKind()==ModuleField::DragKind::none&&state_==State::idle)setState(State::highlighted);}
 void PortView::mouseExit(const juce::MouseEvent&){if(field_.dragKind()==ModuleField::DragKind::none&&state_==State::highlighted)setState(State::idle);}
 void PortView::mouseDown(const juce::MouseEvent&e)
 {
  if(e.mods.isPopupMenu())return;if(!input_){if(field_.slot(slot_).active())field_.beginConnect(slot_);return;}
- const auto destination=field_.destinationId(slot_);const auto&cables=field_.cables().cables();for(std::size_t i=cables.size();i-->0;)if(cables[i].edge.destination==destination){field_.beginDetach(i,true);return;}
+ const auto destination=field_.destinationId(slot_);const auto port=field_.slotPort(slot_,modulation_);const auto&cables=field_.cables().cables();for(std::size_t i=cables.size();i-->0;)if(cables[i].edge.destination==destination&&cables[i].edge.port==port){field_.beginDetach(i,true);return;}
 }
 void PortView::mouseDrag(const juce::MouseEvent&e){field_.updateDrag(e.getEventRelativeTo(&field_).position);}
 void PortView::mouseUp(const juce::MouseEvent&e){field_.endDrag(e.getEventRelativeTo(&field_).position);}
@@ -187,7 +190,7 @@ void SlotView::openTable()
 }
 CableLayer::CableLayer(ModuleField&f):field_(f){setName("Cables");}
 bool CableLayer::hitTest(int x,int y){for(const auto&[key,k]:knobs_)if(k->getBounds().contains(x,y))return true;return cableAt({(float)x,(float)y},6.0f)>=0;}
-Knob*CableLayer::gainKnob(std::string_view s,std::string_view d)const{const auto i=knobs_.find(EdgeKey{std::string(s),std::string(d)});return i==knobs_.end()?nullptr:i->second.get();}
+Knob*CableLayer::gainKnob(std::string_view s,std::string_view d,domain::AudioPort port)const{const auto i=knobs_.find(EdgeKey{std::string(s),std::string(d),(int)port});return i==knobs_.end()?nullptr:i->second.get();}
 int CableLayer::cableAt(juce::Point<float>p,float tol)const noexcept{int best=-1;float bestDistance=tol;for(std::size_t i=0;i<cables_.size();++i){const auto&pts=cables_[i].points;for(std::size_t s=0;s+1<pts.size();++s){const float d=segmentDistance(p,pts[s],pts[s+1]);if(d<bestDistance){bestDistance=d;best=(int)i;}}}return best;}
 void CableLayer::setCables(std::vector<Drawn>c)
 {
@@ -197,13 +200,13 @@ void CableLayer::setCables(std::vector<Drawn>c)
  std::map<EdgeKey,std::unique_ptr<Knob>>kept;
  for(const auto&d:cables_)
  {
-  EdgeKey key{d.edge.source,d.edge.destination};std::unique_ptr<Knob>k;
+  EdgeKey key{d.edge.source,d.edge.destination,(int)d.edge.port};std::unique_ptr<Knob>k;
   if(const auto existing=knobs_.find(key);existing!=knobs_.end()){k=std::move(existing->second);knobs_.erase(existing);}
   else
   {
    k=std::make_unique<Knob>(domain::ParameterDescriptor{"gain","",0,1,d.edge.gain,domain::ParameterScale::linear,domain::ParameterKind::continuous,false,0,20.0,{}});
-   k->setStep(0.02);k->setCaption("gain");k->setName("Cable gain "+juce::String(d.edge.source)+" to "+juce::String(d.edge.destination));
-   k->onChange=[this,e=key](double v){if(field_.onGain)field_.onGain(e.first,e.second,v);};
+   k->setStep(0.02);k->setCaption("gain");k->setName("Cable gain "+juce::String(d.edge.source)+" to "+juce::String(d.edge.destination)+(d.edge.port==domain::AudioPort::in?juce::String():" "+juce::String(domain::audioPortId(d.edge.port).data())));
+   k->onChange=[this,e=key](double v){if(field_.onGain)field_.onGain(std::get<0>(e),std::get<1>(e),v,(domain::AudioPort)std::get<2>(e));};
    addAndMakeVisible(*k);
   }
   // A knob in mid-gesture owns its own value until mouse-up; the drag already tracks the pointer from its own
@@ -225,17 +228,17 @@ void CableLayer::paint(juce::Graphics&g)
 void CableLayer::mouseMove(const juce::MouseEvent&e)
 {
  const int h=cableAt(e.position,6.0f);if(h==hovered_)return;
- auto ports=[&](int index,PortView::State s){if(index<0||(std::size_t)index>=cables_.size())return;const auto&d=cables_[(std::size_t)index];if(auto*p=field_.outputPort(d.sourceSlot))p->setState(s);if(auto*p=field_.inputPort(d.destinationSlot))p->setState(s);};
+ auto ports=[&](int index,PortView::State s){if(index<0||(std::size_t)index>=cables_.size())return;const auto&d=cables_[(std::size_t)index];if(auto*p=field_.outputPort(d.sourceSlot))p->setState(s);const bool modulation=d.edge.port!=domain::AudioPort::in;if(auto*p=modulation?field_.modulationPort(d.destinationSlot):field_.inputPort(d.destinationSlot))p->setState(s);};
  if(field_.dragKind()==ModuleField::DragKind::none){ports(hovered_,PortView::State::idle);ports(h,PortView::State::highlighted);}hovered_=h;repaint();
 }
 void CableLayer::mouseExit(const juce::MouseEvent&)
 {
- if(hovered_<0)return;if(field_.dragKind()==ModuleField::DragKind::none){const auto&d=cables_[(std::size_t)hovered_];if(auto*p=field_.outputPort(d.sourceSlot))p->setState(PortView::State::idle);if(auto*p=field_.inputPort(d.destinationSlot))p->setState(PortView::State::idle);}hovered_=-1;repaint();
+ if(hovered_<0)return;if(field_.dragKind()==ModuleField::DragKind::none){const auto&d=cables_[(std::size_t)hovered_];if(auto*p=field_.outputPort(d.sourceSlot))p->setState(PortView::State::idle);const bool modulation=d.edge.port!=domain::AudioPort::in;if(auto*p=modulation?field_.modulationPort(d.destinationSlot):field_.inputPort(d.destinationSlot))p->setState(PortView::State::idle);}hovered_=-1;repaint();
 }
 void CableLayer::mouseDown(const juce::MouseEvent&e)
 {
  const int i=cableAt(e.position,6.0f);if(i<0)return;const auto edge=cables_[(std::size_t)i].edge;
- if(e.mods.isPopupMenu()){juce::PopupMenu m;m.addItem(1,"remove");juce::Component::SafePointer<CableLayer>self(this);m.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(this).withTargetScreenArea(juce::Rectangle<int>(e.getScreenX(),e.getScreenY(),1,1)),[self,edge](int r){if(self&&r==1&&self->field_.onDisconnect)self->field_.onDisconnect(edge.source,edge.destination);});return;}
+ if(e.mods.isPopupMenu()){juce::PopupMenu m;m.addItem(1,"remove");juce::Component::SafePointer<CableLayer>self(this);m.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(this).withTargetScreenArea(juce::Rectangle<int>(e.getScreenX(),e.getScreenY(),1,1)),[self,edge](int r){if(self&&r==1&&self->field_.onDisconnect)self->field_.onDisconnect(edge.source,edge.destination,edge.port);});return;}
  const auto&pts=cables_[(std::size_t)i].points;const float toOut=e.position.getDistanceFrom(pts.front()),toIn=e.position.getDistanceFrom(pts.back());if(juce::jmin(toOut,toIn)<=18.0f)field_.beginDetach((std::size_t)i,toIn<=toOut);
 }
 void CableLayer::mouseDrag(const juce::MouseEvent&e){field_.updateDrag(e.position);}
@@ -244,18 +247,22 @@ ModuleField::ModuleField()
 {
  setName("Module field");for(std::size_t i=0;i<slotCount;++i){slots_.push_back(std::make_unique<SlotView>(*this,i));addAndMakeVisible(*slots_.back());}
  cables_=std::make_unique<CableLayer>(*this);addAndMakeVisible(*cables_);
- for(std::size_t i=0;i<slotCount;++i){if(slotTable[i].hasInput()){ports_.push_back(std::make_unique<PortView>(*this,i,true));addAndMakeVisible(*ports_.back());}if(slotTable[i].hasOutput()){ports_.push_back(std::make_unique<PortView>(*this,i,false));addAndMakeVisible(*ports_.back());}}
+ // Ports are preallocated per anchor, the typed audio-rate one included (#127): a source slot and a
+ // resonator slot always carry theirs, and it is simply inert while the slot's type has no such port.
+ for(std::size_t i=0;i<slotCount;++i){if(slotTable[i].hasInput()){ports_.push_back(std::make_unique<PortView>(*this,i,true));addAndMakeVisible(*ports_.back());}if(slotTable[i].hasModulationInput()){ports_.push_back(std::make_unique<PortView>(*this,i,true,true));addAndMakeVisible(*ports_.back());}if(slotTable[i].hasOutput()){ports_.push_back(std::make_unique<PortView>(*this,i,false));addAndMakeVisible(*ports_.back());}}
 }
 ModuleField::~ModuleField()=default;
 juce::Point<float>ModuleField::toWindow(Point p)const{const auto s=scaleToWindow(p,(double)getWidth(),(double)getHeight());return{(float)s.x,(float)s.y};}
 juce::Rectangle<float>ModuleField::slotBounds(std::size_t i)const{const auto r=scaleToWindow(slotTable[i].frame,(double)getWidth(),(double)getHeight());return{(float)r.x,(float)r.y,(float)r.width,(float)r.height};}
-PortView*ModuleField::inputPort(std::size_t slot)const{for(auto&p:ports_)if(p->isInput()&&p->slot()==slot)return p.get();return nullptr;}
+PortView*ModuleField::inputPort(std::size_t slot)const{for(auto&p:ports_)if(p->isInput()&&!p->isModulation()&&p->slot()==slot)return p.get();return nullptr;}
+PortView*ModuleField::modulationPort(std::size_t slot)const{for(auto&p:ports_)if(p->isModulation()&&p->slot()==slot)return p.get();return nullptr;}
+domain::AudioPort ModuleField::slotPort(std::size_t slot,bool modulation)const{if(!modulation||slot>=moduleSlotCount)return domain::AudioPort::in;const int n=map_.node[slot];if(n<0)return domain::AudioPort::in;return domain::moduleCatalog()[(std::size_t)patch_.nodes[(std::size_t)n].type].audioRateInput;}
 PortView*ModuleField::outputPort(std::size_t slot)const{for(auto&p:ports_)if(!p->isInput()&&p->slot()==slot)return p.get();return nullptr;}
 std::string ModuleField::destinationId(std::size_t slot)const{if(slot==outputSlot)return"output";const int n=map_.node[slot];return n<0?std::string{}:patch_.nodes[(std::size_t)n].id;}
 void ModuleField::resized()
 {
  for(std::size_t i=0;i<slotCount;++i)slots_[i]->setBounds(slotBounds(i).toNearestInt());cables_->setBounds(getLocalBounds());
- for(auto&p:ports_){const auto a=toWindow(p->isInput()?slotTable[p->slot()].inputAnchor():slotTable[p->slot()].outputAnchor());p->setBounds(juce::Rectangle<int>(14,14).withCentre(a.toInt()));}
+ for(auto&p:ports_){const auto&s=slotTable[p->slot()];const auto a=toWindow(p->isModulation()?s.modulationInputAnchor():p->isInput()?s.inputAnchor():s.outputAnchor());p->setBounds(juce::Rectangle<int>(p->isModulation()?11:14,p->isModulation()?11:14).withCentre(a.toInt()));}
  routeCables();
 }
 void ModuleField::paint(juce::Graphics&g){g.fillAll(ground);}
@@ -272,7 +279,7 @@ void ModuleField::setPatch(const domain::Patch&p)
 void ModuleField::routeCables()
 {
  std::vector<CableEdge>edges;std::vector<domain::AudioEdge>routed;
- for(const auto&e:patch_.edges){const int s=nodeIndex(patch_,e.source);const int d=e.destination=="output"?(int)outputSlot:nodeIndex(patch_,e.destination);if(s<0||d<0||map_.slot[(std::size_t)s]<0||(e.destination!="output"&&map_.slot[(std::size_t)d]<0))continue;edges.push_back({(std::size_t)map_.slot[(std::size_t)s],e.destination=="output"?outputSlot:(std::size_t)map_.slot[(std::size_t)d],e.gain,e.source,e.destination});routed.push_back(e);}
+ for(const auto&e:patch_.edges){const int s=nodeIndex(patch_,e.source);const int d=e.destination=="output"?(int)outputSlot:nodeIndex(patch_,e.destination);if(s<0||d<0||map_.slot[(std::size_t)s]<0||(e.destination!="output"&&map_.slot[(std::size_t)d]<0))continue;edges.push_back({(std::size_t)map_.slot[(std::size_t)s],e.destination=="output"?outputSlot:(std::size_t)map_.slot[(std::size_t)d],e.gain,e.source,e.destination,e.port!=domain::AudioPort::in});routed.push_back(e);}
  const auto cables=iupac::ui::routeCables(edges);std::vector<CableLayer::Drawn>drawn;const float radiusScale=(float)juce::jmin(getWidth()/referenceWidth,getHeight()/referenceHeight);
  for(const auto&c:cables){CableLayer::Drawn d;d.cable=c;d.edge=routed[c.edge];d.sourceSlot=edges[c.edge].source;d.destinationSlot=edges[c.edge].destination;d.colour=cableColour(c.colourIndex);for(const auto&pt:c.points)d.points.push_back(toWindow(pt));d.path=roundedPolyline(d.points,(float)c.cornerRadius*radiusScale);drawn.push_back(std::move(d));}
  cables_->setCables(std::move(drawn));
@@ -283,32 +290,36 @@ void ModuleField::setEffective(const engine::EffectiveValues&v)
   const std::uint32_t hash=engine::hashNodeId(s.nodeId());const std::array<float,engine::parameterTargetCount>*values=nullptr;for(std::size_t n=0;n<v.nodeCount&&n<domain::maximumNodes;++n)if(v.nodeIds[n]==hash){values=&v.values[n];break;}s.setEffective(values,targeted);}
 }
 void ModuleField::setHighlightedParameter(std::string_view nodeId,std::string_view p){for(std::size_t i=0;i<moduleSlotCount;++i)slots_[i]->setHighlightedParameter(slots_[i]->nodeId()==nodeId?p:std::string_view{});}
-bool ModuleField::edgeLegal(std::string_view s,std::string_view d)const{if(s.empty()||d.empty())return false;auto p=patch_;p.edges.push_back({std::string(s),std::string(d),defaultCableGain});return domain::validate(p).empty();}
+bool ModuleField::edgeLegal(std::string_view s,std::string_view d,domain::AudioPort port)const{if(s.empty()||d.empty())return false;auto p=patch_;p.edges.push_back({std::string(s),std::string(d),defaultCableGain,port});return domain::validate(p).empty();}
 PortView*ModuleField::portAt(juce::Point<float>p)const{for(auto&port:ports_)if(port->getBounds().toFloat().expanded(4.0f).contains(p))return port.get();return nullptr;}
 void ModuleField::beginConnect(std::size_t source)
 {
- drag_=DragKind::connect;dragSource_=source;dragTarget_=nullptr;legal_.fill(false);const auto src=destinationId(source);
- for(auto&port:ports_){if(!port->isInput())continue;legal_[port->slot()]=edgeLegal(src,destinationId(port->slot()));port->setState(legal_[port->slot()]?PortView::State::legal:PortView::State::inert);}
+ drag_=DragKind::connect;dragSource_=source;dragTarget_=nullptr;legal_.fill({false,false});const auto src=destinationId(source);
+ // Every anchor is offered to the same drag gesture and is legal exactly when the whole patch with
+ // that edge added still validates, so a cycle, the 48-edge cap and a tail source into a typed
+ // per-voice input all leave the anchor inert (#127).
+ for(auto&port:ports_){if(!port->isInput())continue;legalFor(*port)=edgeLegal(src,destinationId(port->slot()),slotPort(port->slot(),port->isModulation()));port->setState(legalFor(*port)?PortView::State::legal:PortView::State::inert);}
  if(auto*o=outputPort(source))o->setState(PortView::State::highlighted);dragPoint_=toWindow(slotTable[source].outputAnchor());repaint();
 }
 void ModuleField::beginDetach(std::size_t cable,bool inputEnd)
 {
- if(cable>=cables_->cables().size())return;drag_=inputEnd?DragKind::detachInput:DragKind::detachOutput;dragCable_=cable;dragTarget_=nullptr;legal_.fill(false);const auto&d=cables_->cables()[cable];
- if(inputEnd){auto p=patch_;std::erase_if(p.edges,[&](const auto&e){return e.source==d.edge.source&&e.destination==d.edge.destination;});for(auto&port:ports_){if(!port->isInput())continue;auto trial=p;trial.edges.push_back({d.edge.source,destinationId(port->slot()),d.edge.gain});legal_[port->slot()]=!destinationId(port->slot()).empty()&&domain::validate(trial).empty();port->setState(legal_[port->slot()]?PortView::State::legal:PortView::State::inert);}}
+ if(cable>=cables_->cables().size())return;drag_=inputEnd?DragKind::detachInput:DragKind::detachOutput;dragCable_=cable;dragTarget_=nullptr;legal_.fill({false,false});const auto&d=cables_->cables()[cable];
+ if(inputEnd){auto p=patch_;std::erase_if(p.edges,[&](const auto&e){return e.source==d.edge.source&&e.destination==d.edge.destination&&e.port==d.edge.port;});for(auto&port:ports_){if(!port->isInput())continue;auto trial=p;trial.edges.push_back({d.edge.source,destinationId(port->slot()),d.edge.gain,slotPort(port->slot(),port->isModulation())});legalFor(*port)=!destinationId(port->slot()).empty()&&domain::validate(trial).empty();port->setState(legalFor(*port)?PortView::State::legal:PortView::State::inert);}}
  dragPoint_=inputEnd?d.points.back():d.points.front();repaint();
 }
 void ModuleField::updateDrag(juce::Point<float>p)
 {
- if(drag_==DragKind::none)return;dragPoint_=p;auto*target=portAt(p);if(target&&(!target->isInput()||!legal_[target->slot()]))target=nullptr;
+ if(drag_==DragKind::none)return;dragPoint_=p;auto*target=portAt(p);if(target&&(!target->isInput()||!legalFor(*target)))target=nullptr;
  if(target!=dragTarget_){if(dragTarget_)dragTarget_->setState(PortView::State::legal);dragTarget_=target;if(dragTarget_)dragTarget_->setState(PortView::State::highlighted);}repaint();
 }
 void ModuleField::endDrag(juce::Point<float>p)
 {
- if(drag_==DragKind::none)return;const auto kind=drag_;drag_=DragKind::none;auto*target=portAt(p);const bool legal=target&&target->isInput()&&legal_[target->slot()];
+ if(drag_==DragKind::none)return;const auto kind=drag_;drag_=DragKind::none;auto*target=portAt(p);const bool legal=target&&target->isInput()&&legalFor(*target);
  for(auto&port:ports_)port->setState(PortView::State::idle);repaint();
- if(kind==DragKind::connect){if(legal&&onConnect)onConnect(destinationId(dragSource_),destinationId(target->slot()),defaultCableGain);return;}
+ const auto targetPort=target?slotPort(target->slot(),target->isModulation()):domain::AudioPort::in;
+ if(kind==DragKind::connect){if(legal&&onConnect)onConnect(destinationId(dragSource_),destinationId(target->slot()),defaultCableGain,targetPort);return;}
  if(dragCable_>=cables_->cables().size())return;const auto edge=cables_->cables()[dragCable_].edge;
- if(target){if(kind==DragKind::detachInput&&legal&&destinationId(target->slot())!=edge.destination){if(onDisconnect)onDisconnect(edge.source,edge.destination);if(onConnect)onConnect(edge.source,destinationId(target->slot()),edge.gain);}return;}
- if(onDisconnect)onDisconnect(edge.source,edge.destination);
+ if(target){if(kind==DragKind::detachInput&&legal&&(destinationId(target->slot())!=edge.destination||targetPort!=edge.port)){if(onDisconnect)onDisconnect(edge.source,edge.destination,edge.port);if(onConnect)onConnect(edge.source,destinationId(target->slot()),edge.gain,targetPort);}return;}
+ if(onDisconnect)onDisconnect(edge.source,edge.destination,edge.port);
 }
 }

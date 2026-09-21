@@ -21,6 +21,11 @@ struct CableEdge
     double gain{};
     std::string_view sourceId;      // stable patch node IDs: colour identity only
     std::string_view destinationId; // "output" for the OUT bus
+    // D8 audio-rate modulation inputs (#127): true when the edge lands on the destination slot's
+    // typed second anchor (`fm.modIn` / `resonator.exciteIn`) rather than its ordinary IN port.
+    // The router treats it as an ordinary edge in every other respect — same channels, same
+    // corridors, same lane ordering — it only enters the slot at the second anchor's height.
+    bool modulationInput{};
 };
 
 struct ChannelLane

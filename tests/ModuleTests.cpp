@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <limits>
+#include <span>
 #include <utility>
 
 namespace
@@ -263,6 +264,39 @@ bool runModuleTests()
         ok&=expect(renderSub(-2,0,1,84)==renderSub(-1,0,1,72),"the sub octave is measured from the note it is playing");
         ok&=expect(renderSub(-1,0,0,72)==renderSub(-1,0,0,84),"keytrack 0 pins the sub to one pitch");
         ok&=expect(renderSub(-1,50,1,72)!=renderSub(-1,0,1,72),"fine detunes the sub");
+    }
+    // --- D8 audio-rate modulation inputs (#127) -------------------------------------------------
+    // The typed IN port at the processor level: an uncabled port is an empty span, a cabled one at
+    // depth 0 must be the same samples, and depth above 0 must be audible and bounded.
+    {
+        std::array<float,512> carrier{},modulator{};
+        for(std::size_t i=0;i<modulator.size();++i)modulator[i]=.9f*std::sin(static_cast<float>(i)*.037f);
+        auto renderFm=[&](float depth,bool cabled,const std::array<float,512>&signal){
+            engine::ModuleValues f;f.carrierRatio=1;f.modulatorRatio=2;f.index=3;f.outputLevel=1;f.modInDepth=depth;
+            engine::ModuleProcessor m(domain::ModuleType::fm);m.prepare(96000,512);m.noteOn(60,1,17,23);
+            std::array<float,512> ol{},orr{};
+            for(int b=0;b<4;++b)m.process(f,261.6256f,carrier,carrier,ol,orr,cabled?std::span<const float>(signal):std::span<const float>{},cabled?std::span<const float>(signal):std::span<const float>{});
+            return ol;};
+        const auto uncabled=renderFm(0,false,modulator);
+        ok&=expect(renderFm(0,true,modulator)==uncabled,"a cabled modIn at depth 0 renders the uncabled FM bit for bit");
+        ok&=expect(renderFm(.6f,true,modulator)!=uncabled,"modInDepth above 0 moves the FM modulator phase");
+        ok&=expect(renderFm(.6f,false,modulator)==uncabled,"depth alone with nothing cabled changes nothing");
+        // A full-depth, over-range modulator must stay finite: the phase offset is clamped before it
+        // reaches the sine, so the wrap loop inside it terminates.
+        std::array<float,512> loud{};for(auto&x:loud)x=1e6f;
+        ok&=expect(std::ranges::all_of(renderFm(1,true,loud),[](float x){return std::isfinite(x)&&std::abs(x)<=1.f;}),"an over-range modIn signal at full depth stays finite and bounded");
+        auto renderResonator=[&](float depth,bool cabled,const std::array<float,512>&signal){
+            engine::ModuleValues r;r.mode=0;r.tuneRatio=1;r.combFeedback=.8f;r.outputLevel=1;r.exciteDepth=depth;
+            engine::ModuleProcessor m(domain::ModuleType::resonator);m.prepare(96000,512);m.noteOn(60,1,17,23);
+            std::array<float,512> ol{},orr{};
+            for(int b=0;b<4;++b)m.process(r,261.6256f,carrier,carrier,ol,orr,cabled?std::span<const float>(signal):std::span<const float>{},cabled?std::span<const float>(signal):std::span<const float>{});
+            return ol;};
+        const auto silent=renderResonator(0,false,modulator);
+        ok&=expect(renderResonator(0,true,modulator)==silent,"a cabled exciteIn at depth 0 renders the uncabled resonator bit for bit");
+        const auto excited=renderResonator(.6f,true,modulator);
+        ok&=expect(excited!=silent&&finiteActive(excited),"exciteDepth above 0 excites the resonator");
+        std::array<float,512> loudExcite{};for(auto&x:loudExcite)x=1e6f;
+        ok&=expect(std::ranges::all_of(renderResonator(1,true,loudExcite),[](float x){return std::isfinite(x);}),"an over-range exciteIn signal at full depth stays finite");
     }
     engine::ModulatorBank mods;mods.prepare(48000);std::array<domain::Envelope,domain::envelopeCount> es{};std::array<domain::Lfo,domain::lfoCount> ls{};ls[0].waveform=domain::LfoWaveform::triangle;mods.configure(es,ls);mods.noteOn();auto a=mods.next();ok&=expect(a[0]>=0&&a[3]>=-1&&a[3]<=1,"ADSR and LFO run");mods.noteOff();
     return ok;

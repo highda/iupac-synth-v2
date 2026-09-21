@@ -45,7 +45,12 @@ std::vector<CableEdge> eligibleEdges()
     std::vector<CableEdge> edges;
     for (std::size_t s = 0; s < slotCount; ++s)
         for (std::size_t d = 0; d < slotCount; ++d)
-            if (s != d && slotTable[s].hasOutput() && slotTable[d].hasInput()) edges.push_back({s, d, 0.5, "src", "dst"});
+        {
+            if (s == d || !slotTable[s].hasOutput()) continue;
+            if (slotTable[d].hasInput()) edges.push_back({s, d, 0.5, "src", "dst"});
+            // The D8 typed audio-rate anchor is an eligible destination of its own (#127).
+            if (slotTable[d].hasModulationInput()) edges.push_back({s, d, 0.5, "src", "dst", true});
+        }
     return edges;
 }
 
@@ -81,10 +86,11 @@ std::vector<CableEdge> edgesOf(const iupac::domain::Patch& patch)
         slotOf[node.id] = slot.value_or(0);
     }
     std::vector<CableEdge> edges;
-    // Only the ordinary IN port is cabled by the router today; the two audio-rate anchors are issue #127.
+    // Both IN anchors are cabled: an audio-rate edge is routed exactly like an ordinary one and
+    // only lands at the slot's second anchor (#127).
     for (const auto& edge : patch.edges)
-        if (edge.port == iupac::domain::AudioPort::in)
-            edges.push_back({slotOf.at(edge.source), slotOf.at(edge.destination), edge.gain, edge.source, edge.destination});
+        edges.push_back({slotOf.at(edge.source), slotOf.at(edge.destination), edge.gain, edge.source, edge.destination,
+                         edge.port != iupac::domain::AudioPort::in});
     return edges;
 }
 
@@ -103,6 +109,12 @@ void checkCableGeometry(const Cable& cable, const CableEdge& edge)
     expect(near(cable.points.front().x, slotTable[edge.source].outputAnchor().x), "cable starts at the OUT port side");
     expect(onBorder(slotTable[edge.destination], cable.points.back()), "cable ends on the destination slot border");
     expect(near(cable.points.back().x, slotTable[edge.destination].inputAnchor().x), "cable ends at the IN port side");
+    // Both IN anchors sit on the same border at the same x, so the destination column is entered
+    // the same way; only the height differs, and the spread never crosses the other anchor's band.
+    const auto& destination = slotTable[edge.destination];
+    const double anchor = edge.modulationInput ? destination.modulationInputAnchor().y : destination.inputAnchor().y;
+    expect(std::abs(cable.points.back().y - anchor) <= maximumStubSpread * static_cast<double>(slotCount),
+           "cable ends at the anchor its port declares");
     expect(cable.cornerRadius >= 0.0 && cable.cornerRadius <= maximumCornerRadius && (cable.points.size() == 2 || cable.cornerRadius > 0.0), "corner radius bounded");
     const auto& k0 = cable.points[cable.knobSegment];
     const auto& k1 = cable.points[cable.knobSegment + 1];
@@ -130,7 +142,9 @@ void checkCableGeometry(const Cable& cable, const CableEdge& edge)
         if (cable.points[i].x == cable.points[i + 1].x)
         {
             bool inChannel = false;
-            for (int c = 0; c + 1 < columnCount; ++c)
+            // Channel -1 is the left margin before column 0, the band a backward cable entering a
+            // source slot's typed anchor comes up through (#127).
+            for (int c = -1; c + 1 < columnCount; ++c)
             {
                 const auto extent = channelExtent(c);
                 inChannel |= cable.points[i].x > extent.left && cable.points[i].x < extent.right;
@@ -183,7 +197,7 @@ int main()
            "SRC(3)+SUB | RES(2) | FILT(2) | SHAPE(2) | MIX(2) | FX(4) | OUT");
     expect(slotTable[outputSlot].kind == SlotKind::output && slotTable[outputSlot].column == columnCount - 1, "OUT bus is the last column");
     expect(fieldTop() > 0.0 && fieldBottom() < referenceHeight, "corridors exist above and below the field");
-    for (int c = 0; c + 1 < columnCount; ++c) expect(channelExtent(c).right - channelExtent(c).left > 2.0 * channelInset, "channel wide enough for lanes");
+    for (int c = -1; c + 1 < columnCount; ++c) expect(channelExtent(c).right - channelExtent(c).left > 2.0 * channelInset, "channel wide enough for lanes");
     expect(fieldTop() > 2.0 * corridorInset && referenceHeight - fieldBottom() > 2.0 * corridorInset, "both corridors leave a lane band after reserving the knob's half extent");
 
     // scaling is a pure function of window size
@@ -208,7 +222,10 @@ int main()
     const auto eligible = eligibleEdges();
     // Geometry only: four source slots have an OUT but no IN, the twelve processor and effects slots have both,
     // and thirteen slots (eight processors, four effects and the OUT bus) have an IN.
-    expect(eligible.size() == 4 * 13 + 12 * 13 - 12, "eligible edge count");
+    // Geometry only: thirteen slots have an ordinary IN, and five more anchors (three source slots
+    // and two resonator slots) are the D8 audio-rate destinations, reachable from every other slot
+    // that has an OUT.
+    expect(eligible.size() == 4 * 13 + 12 * 13 - 12 + 5 * 15, "eligible edge count");
     for (const auto& edge : eligible)
     {
         const auto cables = routeCables(std::span<const CableEdge>(&edge, 1));
@@ -231,7 +248,7 @@ int main()
     // maximal authored patch (#67): routes, unique lanes, recorded crossing baseline and timing
     const auto patch = iupac::testing::maximalPatch();
     const auto edges = edgesOf(patch);
-    expect(edges.size() == iupac::domain::maximumEdges - 2, "maximal patch fills the edge cap, two of them on the audio-rate ports");
+    expect(edges.size() == iupac::domain::maximumEdges, "maximal patch fills the edge cap, two of them on the audio-rate ports");
     auto cables = routeCables(edges);
     expect(cables.size() == edges.size(), "maximal patch routes every edge");
     for (const auto& cable : cables) checkCableGeometry(cable, edges[cable.edge]);

@@ -25,16 +25,24 @@ void drag(juce::Component&from,juce::Component&to,juce::Point<float>toPosition)
 {
  const auto start=centreOf(from);const auto target=from.getLocalPoint(&to,toPosition);from.mouseDown(event(from,start));from.mouseDrag(event(from,start+(target-start)*0.5f,juce::ModifierKeys::leftButtonModifier,start,1,true));from.mouseDrag(event(from,target,juce::ModifierKeys::leftButtonModifier,start,1,true));from.mouseUp(event(from,target,juce::ModifierKeys::leftButtonModifier,start,1,true));
 }
-const domain::AudioEdge*edge(const domain::Patch&p,std::string_view s,std::string_view d){for(const auto&e:p.edges)if(e.source==s&&e.destination==d)return&e;return nullptr;}
+const domain::AudioEdge*edge(const domain::Patch&p,std::string_view s,std::string_view d,domain::AudioPort port=domain::AudioPort::in){for(const auto&e:p.edges)if(e.source==s&&e.destination==d&&e.port==port)return&e;return nullptr;}
 const domain::Node*node(const domain::Patch&p,std::string_view id){for(const auto&n:p.nodes)if(n.id==id)return&n;return nullptr;}
 const std::vector<double>&values(const domain::Patch&p,std::string_view id,std::string_view parameter){static const std::vector<double>none;const auto*n=node(p,id);if(!n)return none;for(const auto&x:n->parameters)if(x.id==parameter)return x.values;return none;}
 // Runs due message-thread timers (editor ≤30 Hz refresh, processor publish retry) without a dispatch loop; JUCE's timer
 // thread re-arms at most every 300 ms while its message stays unhandled, so wait longer than that before calling.
 void tick(){juce::Thread::sleep(350);juce::Timer::callPendingTimersSynchronously();}
 bool anyNoteOn(juce::MidiKeyboardState&k){for(int n=0;n<128;++n)if(k.isNoteOnForChannels(0xffff,n))return true;return false;}
+// Slot indices come from the generated table, never from a literal: `Layout.hpp` is regenerated
+// whenever the eligible-edge graph widens (#127 moved SUB to the head of the source column), and a
+// literal would silently retarget a case at the next regeneration instead of failing.
+constexpr std::size_t slotOf(ui::SlotKind kind,int instance=0){return ui::findSlot(kind,instance).value();}
+constexpr std::size_t src1=slotOf(ui::SlotKind::source,0),src2=slotOf(ui::SlotKind::source,1),src3=slotOf(ui::SlotKind::source,2);
+constexpr std::size_t subSlot=slotOf(ui::SlotKind::sub),res1=slotOf(ui::SlotKind::resonator,0),res2=slotOf(ui::SlotKind::resonator,1);
+constexpr std::size_t filt1=slotOf(ui::SlotKind::filter,0),shape1=slotOf(ui::SlotKind::shaper,0),mix1=slotOf(ui::SlotKind::mixer,0);
+constexpr std::size_t chorusSlot=slotOf(ui::SlotKind::chorus),delaySlot=slotOf(ui::SlotKind::delay),reverbSlot=slotOf(ui::SlotKind::reverb),widthSlot=slotOf(ui::SlotKind::width);
 void buildDemo(IupacSynthEditor&e)
 {
- e.activateSlot("harmonic",0);e.activateSlot("fm",1);e.activateSlot("noise",2);e.activateSlot("resonator",3);e.activateSlot("filter",5);e.activateSlot("shaper",7);e.activateSlot("mixer",9);
+ e.activateSlot("harmonic",src1);e.activateSlot("fm",src2);e.activateSlot("noise",src3);e.activateSlot("resonator",res1);e.activateSlot("filter",filt1);e.activateSlot("shaper",shape1);e.activateSlot("mixer",mix1);
  e.connect("src1","filt1",.8);e.connect("src2","res1",.7);e.connect("res1","mix1",.9);e.connect("filt1","shape1",.6);e.connect("shape1","mix1",.5);e.connect("src3","mix1",.3);e.connect("mix1","output",.8);e.connect("src1","res1",.4);
  e.addLane();e.setLane(0,{"route1",true,domain::ModulationSource::l1,"filt1","cutoff",.6});e.addLane();e.setLane(1,{"route2",true,domain::ModulationSource::e2,"src2","index",-.4});e.addLane();e.setLane(2,{"route3",true,domain::ModulationSource::macro1,"mix1","pan",.8});
  e.setParameter("res1","mode",0,1);e.setParameter("src1","tilt",0,-.6);
@@ -105,19 +113,51 @@ int main(int argc,char**argv)
  }
  ok&=expect(editor->textFieldCount()==0,"default screen contains no text-entry field");
  // Slot activation in place: each catalog type lands in a typed slot and keeps its canonical id.
- ok&=expect(editor->activateSlot("harmonic",0)&&editor->activateSlot("fm",1)&&editor->activateSlot("noise",2)&&editor->activateSlot("sub",3)&&editor->activateSlot("resonator",4)&&editor->activateSlot("filter",6)&&editor->activateSlot("shaper",8)&&editor->activateSlot("mixer",10)&&editor->activateSlot("chorus",12)&&editor->activateSlot("delay",13)&&editor->activateSlot("reverb",14)&&editor->activateSlot("width",15),"every catalog module can be activated in its slot");
- ok&=expect(!editor->activateSlot("filter",0)&&!editor->activateSlot("harmonic",0)&&!editor->activateSlot("reverb",12),"wrong-kind and occupied slots reject activation");
+ ok&=expect(editor->activateSlot("harmonic",src1)&&editor->activateSlot("fm",src2)&&editor->activateSlot("noise",src3)&&editor->activateSlot("sub",subSlot)&&editor->activateSlot("resonator",res1)&&editor->activateSlot("filter",filt1)&&editor->activateSlot("shaper",shape1)&&editor->activateSlot("mixer",mix1)&&editor->activateSlot("chorus",chorusSlot)&&editor->activateSlot("delay",delaySlot)&&editor->activateSlot("reverb",reverbSlot)&&editor->activateSlot("width",widthSlot),"every catalog module can be activated in its slot");
+ ok&=expect(!editor->activateSlot("filter",src1)&&!editor->activateSlot("harmonic",src1)&&!editor->activateSlot("reverb",chorusSlot),"wrong-kind and occupied slots reject activation");
  auto patch=processor.snapshot().editedPatch;ok&=expect(patch.nodes.size()==domain::moduleTypeCount&&node(patch,"src1")&&node(patch,"src3")&&node(patch,"sub1")&&node(patch,"res1")&&node(patch,"filt1")&&node(patch,"shape1")&&node(patch,"mix1")&&node(patch,"chorus1")&&node(patch,"delay1")&&node(patch,"reverb1")&&node(patch,"width1"),"all twelve module types are present with slot ids");
  const auto&map=editor->field().slotMap();ok&=expect(map.node[0]>=0&&map.node[1]>=0&&map.node[2]>=0&&map.node[3]>=0&&map.node[4]>=0&&map.node[5]<0&&map.node[6]>=0&&map.node[7]<0&&map.node[10]>=0&&map.node[11]<0&&map.node[12]>=0&&map.node[15]>=0,"slot map mirrors the patch");
  // Gesture: drag OUT→IN creates an edge through the production editPatch path.
- auto&field=editor->field();drag(*field.outputPort(0),*field.inputPort(6),centreOf(*field.inputPort(6)));patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"src1","filt1")!=nullptr,"synthesized OUT→IN drag creates an audio edge");
- drag(*field.outputPort(6),*field.inputPort(ui::outputSlot),centreOf(*field.inputPort(ui::outputSlot)));patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"filt1","output")!=nullptr,"drag into the OUT bus creates the output edge");
+ auto&field=editor->field();drag(*field.outputPort(src1),*field.inputPort(filt1),centreOf(*field.inputPort(filt1)));patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"src1","filt1")!=nullptr,"synthesized OUT→IN drag creates an audio edge");
+ drag(*field.outputPort(filt1),*field.inputPort(ui::outputSlot),centreOf(*field.inputPort(ui::outputSlot)));patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"filt1","output")!=nullptr,"drag into the OUT bus creates the output edge");
  ok&=expect(field.cables().cables().size()==2,"one cable is routed per edge");
+ // D8 audio-rate modulation inputs (#127): the second anchor takes the same drag gesture, produces
+ // an ordinary audio edge on the typed port, and stays inert wherever that edge would be illegal.
+ {
+  auto*fmMod=field.modulationPort(src2);auto*resExcite=field.modulationPort(res1);auto*harmonicMod=field.modulationPort(src1);
+  if(expect(fmMod!=nullptr&&resExcite!=nullptr&&harmonicMod!=nullptr,"source and resonator slots carry a second IN anchor"))
+  {
+   drag(*field.outputPort(src1),*fmMod,centreOf(*fmMod));patch=processor.snapshot().editedPatch;
+   ok&=expect(edge(patch,"src1","src2",domain::AudioPort::modIn)!=nullptr&&edge(patch,"src1","src2")==nullptr,
+              "the same drag gesture onto the second anchor cables fm.modIn, not the ordinary input");
+   drag(*field.outputPort(src2),*resExcite,centreOf(*resExcite));patch=processor.snapshot().editedPatch;
+   ok&=expect(edge(patch,"src2","res1",domain::AudioPort::exciteIn)!=nullptr,"the second anchor on a resonator cables exciteIn");
+   ok&=expect(field.cables().cables().size()==4,"each typed edge routes its own cable");
+   // Illegal targets stay inert during the drag: a harmonic declares no typed port, the effects
+   // tail may not drive a per-voice input, and a typed edge may not close a cycle.
+   field.beginConnect(src1);
+   ok&=expect(!field.edgeLegal("src1","src1",domain::AudioPort::modIn)&&!field.edgeLegal("src1","src3",domain::AudioPort::modIn),
+              "a slot whose type declares no typed port is not a legal audio-rate target");
+   field.endDrag({-50.0f,-50.0f});
+   ok&=expect(!field.edgeLegal("chorus1","src2",domain::AudioPort::modIn)&&!field.edgeLegal("chorus1","res1",domain::AudioPort::exciteIn),
+              "an effects-tail node into a typed per-voice input is rejected as a global-tail violation");
+   ok&=expect(!field.edgeLegal("res1","src2",domain::AudioPort::modIn),"a typed edge that would close a cycle is illegal");
+   const auto typed=domain::encodeStateJson(processor.snapshot());
+   drag(*field.outputPort(res1),*harmonicMod,centreOf(*harmonicMod));
+   ok&=expect(domain::encodeStateJson(processor.snapshot())==typed,"dropping on an inert second anchor changes nothing");
+   // Dragging the typed cable off its anchor removes exactly that edge and leaves the rest.
+   drag(*resExcite,field,{4.0f,4.0f});patch=processor.snapshot().editedPatch;
+   ok&=expect(edge(patch,"src2","res1",domain::AudioPort::exciteIn)==nullptr&&edge(patch,"src1","src2",domain::AudioPort::modIn)!=nullptr,
+              "drag-off from the second anchor removes exactly that typed edge");
+   drag(*fmMod,field,{4.0f,4.0f});patch=processor.snapshot().editedPatch;
+   ok&=expect(edge(patch,"src1","src2",domain::AudioPort::modIn)==nullptr&&field.cables().cables().size()==2,"the field returns to its two ordinary cables");
+  }
+ }
  // Illegal targets are inert: dropping on a source IN (none exists) or creating a cycle changes nothing.
- const auto before=domain::encodeStateJson(processor.snapshot());drag(*field.outputPort(6),*field.inputPort(6),centreOf(*field.inputPort(6)));ok&=expect(domain::encodeStateJson(processor.snapshot())==before,"self-loop drop is inert");
- field.beginConnect(6);ok&=expect(field.inputPort(6)->isVisible()&&!field.edgeLegal("filt1","filt1")&&!field.edgeLegal("filt1","src1"),"would-cycle and source targets are illegal during a drag");field.endDrag({-50.0f,-50.0f});ok&=expect(domain::encodeStateJson(processor.snapshot())==before,"dropping nowhere during a connect drag changes nothing");
+ const auto before=domain::encodeStateJson(processor.snapshot());drag(*field.outputPort(filt1),*field.inputPort(filt1),centreOf(*field.inputPort(filt1)));ok&=expect(domain::encodeStateJson(processor.snapshot())==before,"self-loop drop is inert");
+ field.beginConnect(filt1);ok&=expect(field.inputPort(filt1)->isVisible()&&!field.edgeLegal("filt1","filt1")&&!field.edgeLegal("filt1","src1"),"would-cycle and source targets are illegal during a drag");field.endDrag({-50.0f,-50.0f});ok&=expect(domain::encodeStateJson(processor.snapshot())==before,"dropping nowhere during a connect drag changes nothing");
  // Gesture: dragging the IN end off the port removes the edge.
- drag(*field.inputPort(6),field,{4.0f,4.0f});patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"src1","filt1")==nullptr&&edge(patch,"filt1","output")!=nullptr,"drag-off from the IN port removes exactly that edge");
+ drag(*field.inputPort(filt1),field,{4.0f,4.0f});patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"src1","filt1")==nullptr&&edge(patch,"filt1","output")!=nullptr,"drag-off from the IN port removes exactly that edge");
  ok&=expect(editor->connect("src1","filt1",.8),"programmatic connect restores the edge");ok&=expect(!editor->connect("filt1","src1",1),"edge entering a source is rejected");
  ok&=expect(editor->setEdgeGain("src1","filt1",.25)&&std::abs(edge(processor.snapshot().editedPatch,"src1","filt1")->gain-.25)<1e-9,"cable gain edits the edge");
  // Regression (#87): the gain knob is reconciled in place, so a whole drag gesture runs on one component instead of
@@ -159,9 +199,9 @@ int main(int argc,char**argv)
   ok&=expect(editor->disconnect("shape1","res1")&&editor->disconnect("src2","shape1")&&editor->disconnect("res1","mix1")&&editor->disconnect("src3","mix1"),"corridor cables can be removed again");
  }
  // Control kit gestures on production controls.
- auto*cutoff=field.slot(6).control("cutoff");ok&=expect(cutoff!=nullptr,"filter slot exposes a cutoff knob");
+ auto*cutoff=field.slot(filt1).control("cutoff");ok&=expect(cutoff!=nullptr,"filter slot exposes a cutoff knob");
  if(cutoff){const double was=cutoff->value();const auto c=centreOf(*cutoff);cutoff->mouseDown(event(*cutoff,c));cutoff->mouseDrag(event(*cutoff,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));cutoff->mouseUp(event(*cutoff,c.translated(0,-60),juce::ModifierKeys::leftButtonModifier,c,1,true));const auto now=values(processor.snapshot().editedPatch,"filt1","cutoff")[0];ok&=expect(now>was,"vertical knob drag raises the stored cutoff");}
- auto*amplitudes=field.slot(0).forest("partialAmplitudes");ok&=expect(amplitudes!=nullptr,"harmonic slot exposes the amplitude forest");
+ auto*amplitudes=field.slot(src1).forest("partialAmplitudes");ok&=expect(amplitudes!=nullptr,"harmonic slot exposes the amplitude forest");
  if(amplitudes){const float w=(float)amplitudes->getWidth(),h=(float)amplitudes->getHeight();amplitudes->mouseDown(event(*amplitudes,{1.0f,2.0f}));amplitudes->mouseDrag(event(*amplitudes,{w-1.0f,h-2.0f},juce::ModifierKeys::leftButtonModifier,{1.0f,2.0f},1,true));amplitudes->mouseUp(event(*amplitudes,{w-1.0f,h-2.0f},juce::ModifierKeys::leftButtonModifier,{1.0f,2.0f},1,true));
   const auto v=values(processor.snapshot().editedPatch,"src1","partialAmplitudes");bool monotone=v.size()==16;for(std::size_t i=1;i<v.size()&&monotone;++i)monotone=v[i]<=v[i-1]+1e-9;ok&=expect(monotone&&v[0]>.9&&v[15]<.1,"one press-drag paints every crossed partial with interpolated values");}
  const auto oldRatio=values(processor.snapshot().editedPatch,"src1","partialRatios")[15];ok&=expect(editor->setParameter("src1","inharmonicity",0,.01),"harmonic convenience control is editable");ok&=expect(std::abs(values(processor.snapshot().editedPatch,"src1","partialRatios")[15]-oldRatio)>1e-6,"convenience edit stores the regenerated explicit array");
@@ -171,7 +211,7 @@ int main(int argc,char**argv)
   const auto ratiosBefore=values(processor.snapshot().editedPatch,"src1","partialRatios"),amplitudesBefore=values(processor.snapshot().editedPatch,"src1","partialAmplitudes");
   for(const auto*id:{"harmonicityMorph","oddEvenBalance","symmetry"})
   {
-   auto*c=field.slot(0).control(id);
+   auto*c=field.slot(src1).control(id);
    if(!expect(c!=nullptr,"harmonic slot exposes the spectral-shape control")){ok=false;continue;}
    ok&=expect(c->isVisible()&&!c->getBounds().isEmpty(),"spectral-shape control is laid out on the slot");
    ok&=expect(editor->setParameter("src1",id,0,.25),"spectral-shape control is editable");
@@ -186,7 +226,7 @@ int main(int argc,char**argv)
  {
   for(const auto*slotId:{"src1","src2"})
   {
-   auto&slot=field.slot(std::string_view(slotId)=="src1"?0:1); // src1 is the harmonic slot, src2 the FM one
+   auto&slot=field.slot(std::string_view(slotId)=="src1"?src1:src2); // src1 is the harmonic slot, src2 the FM one
    for(const auto*id:{"octave","coarse","fine","keytrack"})
    {
     auto*c=slot.control(id);
@@ -196,8 +236,8 @@ int main(int argc,char**argv)
    ok&=expect(editor->setParameter(slotId,"coarse",0,7)&&values(processor.snapshot().editedPatch,slotId,"coarse")[0]==7.0,"coarse edit reaches the patch");
    ok&=expect(editor->setParameter(slotId,"keytrack",0,.25)&&std::abs(values(processor.snapshot().editedPatch,slotId,"keytrack")[0]-.25)<1e-9,"keytrack edit reaches the patch");
   }
-  auto&sub=field.slot(3);
-  ok&=expect(sub.active()&&ui::slotTable[3].kind==ui::SlotKind::sub,"the sub slot is active in place in the source column");
+  auto&sub=field.slot(subSlot);
+  ok&=expect(sub.active()&&ui::slotTable[subSlot].kind==ui::SlotKind::sub,"the sub slot is active in place in the source column");
   ok&=expect(sub.toggle("waveform")!=nullptr,"the sub slot exposes its waveform toggle");
   for(const auto*id:{"octave","fine","keytrack","drift","outputLevel"})
   {
@@ -206,10 +246,10 @@ int main(int argc,char**argv)
    ok&=expect(c->isVisible()&&!c->getBounds().isEmpty(),"sub control is laid out on the slot");
   }
   ok&=expect(editor->setParameter("sub1","octave",0,-2)&&values(processor.snapshot().editedPatch,"sub1","octave")[0]==-2.0,"sub octave edit reaches the patch");
-  ok&=expect(editor->deactivateSlot(3)&&!field.slot(3).active(),"the sub slot deactivates in place");
-  ok&=expect(editor->activateSlot("sub",3)&&field.slot(3).active()&&node(processor.snapshot().editedPatch,"sub1"),"the sub slot toggles active again at the same position");
+  ok&=expect(editor->deactivateSlot(subSlot)&&!field.slot(subSlot).active(),"the sub slot deactivates in place");
+  ok&=expect(editor->activateSlot("sub",subSlot)&&field.slot(subSlot).active()&&node(processor.snapshot().editedPatch,"sub1"),"the sub slot toggles active again at the same position");
  }
- auto*mode=field.slot(4).toggle("mode");if(expect(mode!=nullptr,"resonator slot exposes the mode toggle")){mode->mouseDown(event(*mode,{(float)mode->getWidth()-2.0f,2.0f}));ok&=expect(values(processor.snapshot().editedPatch,"res1","mode")[0]==1.0,"segment toggle click stores the enum");}
+ auto*mode=field.slot(res1).toggle("mode");if(expect(mode!=nullptr,"resonator slot exposes the mode toggle")){mode->mouseDown(event(*mode,{(float)mode->getWidth()-2.0f,2.0f}));ok&=expect(values(processor.snapshot().editedPatch,"res1","mode")[0]==1.0,"segment toggle click stores the enum");}
  ok&=expect(editor->setEnvelope(0,{.05,.2,.5,.8})&&std::abs(processor.snapshot().editedPatch.envelopes[0].sustain-.5)<1e-9,"envelope curve edits store the ADSR");
  // D8 modulator settings (#125): the fourth envelope has a panel of its own, a stage curve is a
  // grip on that panel, and the LFO panels carry the appended shapes, the fade and the sync pair.
@@ -242,7 +282,7 @@ int main(int argc,char**argv)
  patch=processor.snapshot().editedPatch;ok&=expect(patch.matrix.size()==1&&patch.matrix[0].source==domain::ModulationSource::l1&&patch.matrix[0].destinationParameter=="cutoff","lane edits reach the matrix");ok&=expect(editor->lanes().lane(0).sourcePicker().getSelectedId()==4&&editor->lanes().lane(0).depthBar().value()==1.0,"lane view mirrors the row");
  // Effective rings: with an L1→cutoff lane the knob carries an accent value from the engine snapshot; without, none.
  juce::AudioBuffer<float>audio(2,128);juce::MidiBuffer midi;auto block=[&]{midi.clear();processor.processBlock(audio,midi);};for(int i=0;i<8;++i)block();tick();for(int i=0;i<16;++i)block();processor.keyboardState().noteOn(1,60,.8f);for(int i=0;i<16;++i)block();ok&=expect(processor.activeVoiceCount()>0,"audition keyboard reaches production MIDI path");
-field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effective().has_value(),"targeted knob shows the effective value");ok&=expect(field.slot(6).control("q")&&!field.slot(6).control("q")->effective().has_value(),"untargeted knob shows no ring");
+field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effective().has_value(),"targeted knob shows the effective value");ok&=expect(field.slot(filt1).control("q")&&!field.slot(filt1).control("q")->effective().has_value(),"untargeted knob shows no ring");
  ok&=expect(editor->setLane(0,{"",false,domain::ModulationSource::l1,"filt1","cutoff",1.0}),"lane can be disabled");for(int i=0;i<8;++i)block();tick();for(int i=0;i<16;++i)block();field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&!cutoff->effective().has_value(),"disabled lane removes the ring");
  block();ok&=expect(processor.activeVoiceCount()>0,"lane edit preserves held audition note");
  // Precision entry never sends audition MIDI.
@@ -251,14 +291,14 @@ field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effec
   ok&=expect(!anyNoteOn(processor.keyboardState()),"typing in precision entry sends no audition MIDI");entry.keyPressed(juce::KeyPress(juce::KeyPress::returnKey));ok&=expect(!editor->entryOpen()&&std::abs(values(processor.snapshot().editedPatch,"filt1","cutoff")[0]-600.0)<1e-6,"Enter commits the typed cutoff");
   cutoff->mouseDoubleClick(event(*cutoff,centreOf(*cutoff),juce::ModifierKeys::leftButtonModifier,{},2));editor->precisionEntry().keyPressed(juce::KeyPress(juce::KeyPress::escapeKey));ok&=expect(!editor->entryOpen()&&std::abs(values(processor.snapshot().editedPatch,"filt1","cutoff")[0]-600.0)<1e-6,"Escape cancels precision entry");}
  // Deactivating a connected slot removes its node, cables and lanes in one transaction.
- ok&=expect(editor->deactivateSlot(6),"connected slot can be deactivated");patch=processor.snapshot().editedPatch;ok&=expect(!node(patch,"filt1")&&patch.edges.empty()&&patch.matrix.empty()&&!field.slot(6).active(),"deactivation removes node, edges and rows");
- ok&=expect(editor->activateSlot("filter",6)&&editor->connect("src1","filt1",.8)&&editor->connect("filt1","output",.7),"slot reactivates in place");
+ ok&=expect(editor->deactivateSlot(filt1),"connected slot can be deactivated");patch=processor.snapshot().editedPatch;ok&=expect(!node(patch,"filt1")&&patch.edges.empty()&&patch.matrix.empty()&&!field.slot(filt1).active(),"deactivation removes node, edges and rows");
+ ok&=expect(editor->activateSlot("filter",filt1)&&editor->connect("src1","filt1",.8)&&editor->connect("filt1","output",.7),"slot reactivates in place");
  // Exact round trip through the shared codec.
  const auto valid=domain::encodeStateJson(processor.snapshot());const auto path=std::filesystem::temp_directory_path()/"iupac-editor-roundtrip.iupacpatch";ok&=expect(processor.saveStateFile(path).empty(),"editor state saves through shared codec");ok&=expect(processor.newDocument().empty()&&processor.loadStateFile(path).empty(),"file state loads through shared codec");ok&=expect(domain::encodeStateJson(processor.snapshot())==valid,"file round trip is exact");std::error_code ec;std::filesystem::remove(path,ec);
- editor->refresh();ok&=expect(field.slot(0).active()&&field.slot(6).active()&&field.cables().cables().size()==2,"loaded document re-populates slots and cables");
+ editor->refresh();ok&=expect(field.slot(src1).active()&&field.slot(filt1).active()&&field.cables().cables().size()==2,"loaded document re-populates slots and cables");
  // Open/close while notes are held.
  processor.keyboardState().noteOn(1,64,.9f);block();ok&=expect(processor.activeVoiceCount()>0,"note is held before closing the editor");editor->setVisible(false);editor.reset();block();ok&=expect(processor.activeVoiceCount()>0,"closing the editor keeps the held note");
- editor=std::make_unique<IupacSynthEditor>(processor);editor->setVisible(true);block();ok&=expect(processor.activeVoiceCount()>0&&editor->field().slot(0).active(),"reopened editor shows the document and keeps the note");processor.keyboardState().allNotesOff(1);
+ editor=std::make_unique<IupacSynthEditor>(processor);editor->setVisible(true);block();ok&=expect(processor.activeVoiceCount()>0&&editor->field().slot(src1).active(),"reopened editor shows the document and keeps the note");processor.keyboardState().allNotesOff(1);
 #if IUPAC_ENABLE_CHEMISTRY
  {ChemistryPopup popup(processor);popup.setVisible(true);ok&=expect(popup.getWidth()>0,"chemistry popup constructs in the extension build");}
  // #99/#101: the launcher must produce a popup the user can see and dismiss, and it must be an in-editor overlay —

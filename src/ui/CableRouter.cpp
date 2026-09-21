@@ -13,10 +13,16 @@ struct Plan
     std::size_t edge{};
     const Slot* from{};
     const Slot* to{};
+    bool modulationInput{};
     bool backward{};
     bool spanning{};      // forward cable across more than one column: goes through the top corridor
     int channelA{};       // vertical run leaving the source column
-    int channelB{-1};     // vertical run entering the destination column (spanning/backward)
+    // Vertical run entering the destination column, used only when `usesChannelB` is set. Channel
+    // -1 is the left margin, which is the channel a cable entering column 0 arrives through: the D8
+    // typed inputs (#127) put eligible destinations in the source column for the first time, so a
+    // backward cable can now end there. `channelExtent(-1)` already describes that band.
+    int channelB{};
+    bool usesChannelB{};
     double yOut{};        // stub height at the OUT port
     double yIn{};         // stub height at the IN port
     double xA{}, xB{};    // lane x in channels A/B
@@ -71,39 +77,53 @@ std::vector<Cable> routeCables(std::span<const CableEdge> edges, const std::arra
         if (edge.source >= slots.size() || edge.destination >= slots.size()) continue;
         const Slot& from = slots[edge.source];
         const Slot& to = slots[edge.destination];
-        if (!from.hasOutput() || !to.hasInput() || edge.source == edge.destination) continue;
-        Plan plan {i, &from, &to};
+        if (!from.hasOutput() || edge.source == edge.destination) continue;
+        if (!(edge.modulationInput ? to.hasModulationInput() : to.hasInput())) continue;
+        Plan plan {i, &from, &to, edge.modulationInput};
         plan.backward = to.column <= from.column;
         plan.spanning = !plan.backward && to.column > from.column + 1;
         plan.channelA = from.column;
-        plan.channelB = (plan.backward || plan.spanning) ? to.column - 1 : -1;
+        plan.channelB = to.column - 1;
+        plan.usesChannelB = plan.backward || plan.spanning;
         plans.push_back(plan);
     }
 
     // Fan-out / fan-in stubs: spread cables at each port ordered by the far end's height so stubs never coincide.
     for (std::size_t slot = 0; slot < slots.size(); ++slot)
     {
-        std::vector<Plan*> outgoing, incoming;
+        std::vector<Plan*> outgoing, incoming, modulationIncoming;
         for (auto& plan : plans)
         {
             if (plan.from == &slots[slot]) outgoing.push_back(&plan);
-            if (plan.to == &slots[slot]) incoming.push_back(&plan);
+            // The two IN anchors spread independently: a cable on the typed port never shifts the
+            // stubs of the ordinary port, so adding one does not move an existing cable.
+            if (plan.to == &slots[slot]) (plan.modulationInput ? modulationIncoming : incoming).push_back(&plan);
         }
         const auto byFarEnd = [](const Plan* a, const Plan* b, bool out)
         {
             const Slot* farA = out ? a->to : a->from;
             const Slot* farB = out ? b->to : b->from;
-            const double ya = out ? farA->inputAnchor().y : farA->outputAnchor().y;
-            const double yb = out ? farB->inputAnchor().y : farB->outputAnchor().y;
+            const double ya = out ? (a->modulationInput ? farA->modulationInputAnchor().y : farA->inputAnchor().y) : farA->outputAnchor().y;
+            const double yb = out ? (b->modulationInput ? farB->modulationInputAnchor().y : farB->inputAnchor().y) : farB->outputAnchor().y;
             if (ya != yb) return ya < yb;
             return a->edge < b->edge;
         };
         std::stable_sort(outgoing.begin(), outgoing.end(), [&](auto* a, auto* b) { return byFarEnd(a, b, true); });
         std::stable_sort(incoming.begin(), incoming.end(), [&](auto* a, auto* b) { return byFarEnd(a, b, false); });
+        std::stable_sort(modulationIncoming.begin(), modulationIncoming.end(), [&](auto* a, auto* b) { return byFarEnd(a, b, false); });
         for (std::size_t i = 0; i < outgoing.size(); ++i)
             outgoing[i]->yOut = slots[slot].outputAnchor().y + spreadOffset(i, outgoing.size(), slots[slot].frame.height);
+        // A slot with two IN anchors splits its left border between them: each anchor keeps the
+        // symmetric band that reaches halfway to the other, so however wide a fan-in is on one port
+        // its stubs can never coincide with the other port's (#127). A slot with only the ordinary
+        // anchor keeps the full-height band it always had, so no pre-D8 cable moves.
+        const double inputBand = slots[slot].hasModulationInput()
+                                     ? slots[slot].modulationInputAnchor().y - slots[slot].inputAnchor().y
+                                     : slots[slot].frame.height;
         for (std::size_t i = 0; i < incoming.size(); ++i)
-            incoming[i]->yIn = slots[slot].inputAnchor().y + spreadOffset(i, incoming.size(), slots[slot].frame.height);
+            incoming[i]->yIn = slots[slot].inputAnchor().y + spreadOffset(i, incoming.size(), inputBand);
+        for (std::size_t i = 0; i < modulationIncoming.size(); ++i)
+            modulationIncoming[i]->yIn = slots[slot].modulationInputAnchor().y + spreadOffset(i, modulationIncoming.size(), inputBand);
     }
 
     // Corridor lanes: forward spanning cables above the field, backward cables in the return channel below it.
@@ -111,7 +131,7 @@ std::vector<Cable> routeCables(std::span<const CableEdge> edges, const std::arra
     {
         std::vector<Plan*> users;
         for (auto& plan : plans)
-            if (plan.backward == backward && plan.channelB >= 0) users.push_back(&plan);
+            if (plan.backward == backward && plan.usesChannelB) users.push_back(&plan);
         std::stable_sort(users.begin(), users.end(), [](const Plan* a, const Plan* b)
         {
             if (a->channelB != b->channelB) return a->channelB < b->channelB;
@@ -125,14 +145,15 @@ std::vector<Cable> routeCables(std::span<const CableEdge> edges, const std::arra
     assignCorridor(true, fieldBottom(), referenceHeight);
 
     // Channel lanes: every vertical run in a channel gets a distinct x; runs are ordered by exit then entry height.
-    for (int channel = 0; channel + 1 < columnCount; ++channel)
+    // Channel -1 is the left margin before column 0; every other channel sits between two columns.
+    for (int channel = -1; channel + 1 < columnCount; ++channel)
     {
         std::vector<Run> runs;
         for (auto& plan : plans)
         {
             if (plan.channelA == channel)
-                runs.push_back({&plan, true, plan.yOut, plan.channelB >= 0 ? plan.corridorY : plan.yIn});
-            if (plan.channelB == channel)
+                runs.push_back({&plan, true, plan.yOut, plan.usesChannelB ? plan.corridorY : plan.yIn});
+            if (plan.usesChannelB && plan.channelB == channel)
                 runs.push_back({&plan, false, plan.corridorY, plan.yIn});
         }
         std::stable_sort(runs.begin(), runs.end(), [](const Run& a, const Run& b)
@@ -160,9 +181,11 @@ std::vector<Cable> routeCables(std::span<const CableEdge> edges, const std::arra
         cable.backward = plan.backward;
         cable.colourIndex = cableColourIndex(edges[plan.edge].sourceId, edges[plan.edge].destinationId);
         cable.firstChannel = {plan.channelA, plan.laneA};
-        cable.secondChannel = {plan.channelB, plan.laneB};
+        cable.secondChannel = {plan.usesChannelB ? plan.channelB : -1, plan.laneB};
+        // Both anchors sit on the same left border, so the destination column is entered at the
+        // same x either way and the corridor/channel rules are literally unchanged.
         const double xOut = plan.from->outputAnchor().x, xIn = plan.to->inputAnchor().x;
-        if (plan.channelB < 0)
+        if (!plan.usesChannelB)
             cable.points = {{xOut, plan.yOut}, {plan.xA, plan.yOut}, {plan.xA, plan.yIn}, {xIn, plan.yIn}};
         else
             cable.points = {{xOut, plan.yOut}, {plan.xA, plan.yOut}, {plan.xA, plan.corridorY}, {plan.xB, plan.corridorY}, {plan.xB, plan.yIn}, {xIn, plan.yIn}};

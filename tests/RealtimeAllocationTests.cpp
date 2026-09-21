@@ -121,7 +121,13 @@ bool runRealtimeAllocationTests()
             worstCase.nodes[node].values.unisonSpread = 1.0f;
             worstCase.nodes[node].values.phaseRandom = 1.0f;
             worstCase.nodes[node].values.drift = 1.0f;
+            // D8 audio-rate modulation (#127): the maximal patch cables both typed inputs, so the
+            // worst case also drives them at full depth. They add no state and no allocation — the
+            // signal is summed into a stack pair in the voice loop — and this render proves it.
+            worstCase.nodes[node].values.modInDepth = 1.0f;
         }
+    for (std::uint8_t node = 0; node < worstCase.nodeCount; ++node)
+        if (worstCase.nodes[node].type == domain::ModuleType::resonator) worstCase.nodes[node].values.exciteDepth = 1.0f;
     events.clear();
     for (std::uint8_t note = 60; note < 60 + engine::maximumVoices; ++note) events.push_back({0, engine::MidiEventType::noteOn, 1, note, 100, 8192});
     realtimeAllocations = realtimeFrees = 0;

@@ -82,6 +82,64 @@ bool runEngineTests(){bool ok=true;auto patch=graphPatch();auto compiled=engine:
   ok&=expect(static_cast<bool>(fullCompiled)&&fullCompiled.patch.rowCount==domain::maximumMatrixRows+engine::implicitFilterRows,
              "both filter slots add both shortcuts on top of a full matrix without overflowing the compiled rows");
  }
+ // --- D8 audio-rate modulation inputs (#127) -------------------------------------------------
+ // Authored patches on the production path: a harmonic drives `fm.modIn`, the FM drives
+ // `resonator.exciteIn`, and both typed edges are ordinary audio edges in the same DAG.
+ {
+  domain::Patch audioRate;audioRate.noiseSeed=31;
+  audioRate.nodes={defaults("g1","harmonic"),defaults("f1","fm"),defaults("r1","resonator")};
+  // The two typed edges sit alongside ordinary ones, so the render is audible at depth 0 and the
+  // identity below is a real comparison rather than two silences.
+  audioRate.edges={{"g1","f1",.8,domain::AudioPort::modIn},{"g1","r1",.8},{"f1","r1",.8,domain::AudioPort::exciteIn},{"f1","output",.5},{"r1","output",1}};
+  setParameter(audioRate,"f1","index",3);setParameter(audioRate,"r1","combFeedback",.6);
+  auto zeroDepth=engine::compilePatch(audioRate);
+  ok&=expect(static_cast<bool>(zeroDepth)&&zeroDepth.patch.nodeCount==3&&zeroDepth.patch.edgeCount==5,
+             "a patch cabled on both typed inputs compiles with every node and edge live");
+  bool typedEdges=false;for(std::size_t i=0;i<zeroDepth.patch.edgeCount;++i)typedEdges|=zeroDepth.patch.edges[i].port!=domain::AudioPort::in;
+  ok&=expect(typedEdges&&zeroDepth.patch.rowCount==0,"the typed inputs are audio edges in the DAG, not matrix rows");
+  // A modulator that only reaches the OUT bus through a typed port is still live: the compiler's
+  // reachability walk follows `modIn`/`exciteIn` exactly like the ordinary input.
+  const auto cabledAtZeroDepth=render(zeroDepth.patch,128);
+  // Depth 0 is the catalog default, so the same patch with the typed edges removed must render the
+  // identical samples: an uncabled port and a cabled one at depth 0 are the same signal.
+  ok&=expect(energy(cabledAtZeroDepth)>1e-4f,"the authored audio-rate patch is audible at depth 0");
+  auto uncabled=audioRate;std::erase_if(uncabled.edges,[](const domain::AudioEdge&e){return e.port!=domain::AudioPort::in;});
+  auto uncabledCompiled=engine::compilePatch(uncabled);
+  const auto uncabledRender=render(uncabledCompiled.patch,128);
+  ok&=expect(cabledAtZeroDepth==uncabledRender,"depth 0 on both typed inputs renders exactly the pre-D8 patch");
+  // Depth above 0 is audible, on each input independently.
+  auto modDepth=audioRate;setParameter(modDepth,"f1","modInDepth",.7);
+  auto modCompiled=engine::compilePatch(modDepth);const auto modRender=render(modCompiled.patch,128);
+  ok&=expect(distance(modRender,cabledAtZeroDepth)>1.f,"modInDepth above 0 changes the production render");
+  auto exciteDepth=audioRate;setParameter(exciteDepth,"r1","exciteDepth",.7);
+  auto exciteCompiled=engine::compilePatch(exciteDepth);const auto exciteRender=render(exciteCompiled.patch,128);
+  ok&=expect(distance(exciteRender,cabledAtZeroDepth)>1.f,"exciteDepth above 0 changes the production render");
+  ok&=expect(std::ranges::all_of(modRender,[](float x){return std::isfinite(x)&&std::abs(x)<=.8912511f;})
+             &&std::ranges::all_of(exciteRender,[](float x){return std::isfinite(x)&&std::abs(x)<=.8912511f;}),
+             "audio-rate modulation stays inside the output safety guard");
+  // Both depths at maximum, on the worst-case chain, still terminate and stay bounded.
+  auto worst=audioRate;setParameter(worst,"f1","modInDepth",1);setParameter(worst,"r1","exciteDepth",1);
+  setParameter(worst,"f1","outputLevel",1);setParameter(worst,"g1","outputLevel",1);setParameter(worst,"r1","combFeedback",.97);
+  auto worstCompiled=engine::compilePatch(worst);const auto worstRender=render(worstCompiled.patch,128,{},engine::fallbackTempoBpm,127,8192);
+  ok&=expect(std::ranges::all_of(worstRender,[](float x){return std::isfinite(x)&&std::abs(x)<=.8912511f;}),"both typed inputs at full depth stay bounded");
+  // The typed edge is not the ordinary input: an `exciteIn` edge alone leaves the resonator's own
+  // `in` port empty, so at depth 0 the resonator has nothing to ring and the patch is silent.
+  domain::Patch typedOnly;typedOnly.noiseSeed=31;typedOnly.nodes={defaults("g1","harmonic"),defaults("r1","resonator")};
+  typedOnly.edges={{"g1","r1",1,domain::AudioPort::exciteIn},{"r1","output",1}};
+  auto typedOnlyCompiled=engine::compilePatch(typedOnly);
+  ok&=expect(energy(render(typedOnlyCompiled.patch,128))<1e-9f,"an exciteIn edge does not feed the ordinary IN port");
+  auto typedOnlyOpen=typedOnly;setParameter(typedOnlyOpen,"r1","exciteDepth",1);
+  ok&=expect(energy(render(engine::compilePatch(typedOnlyOpen).patch,128))>1e-6f,"the same edge is audible once exciteDepth opens it");
+  // The maximal patch already cables both typed inputs at its 48th edge, so the worst case the
+  // budget is measured on carries them.
+  auto maximalTyped=iupac::testing::maximalPatch();
+  setParameter(maximalTyped,"f1","modInDepth",1);setParameter(maximalTyped,"r2","exciteDepth",1);
+  auto maximalTypedCompiled=engine::compilePatch(maximalTyped);
+  const auto maximalTypedRender=render(maximalTypedCompiled.patch,128);
+  ok&=expect(static_cast<bool>(maximalTypedCompiled)&&maximalTypedCompiled.patch.edgeCount==domain::maximumEdges
+             &&std::ranges::all_of(maximalTypedRender,[](float x){return std::isfinite(x)&&std::abs(x)<=.8912511f;}),
+             "the 48-edge maximal patch renders bounded audio with both typed inputs at full depth");
+ }
  domain::Patch onsetPatch;onsetPatch.nodes={defaults("noise","noise")};onsetPatch.edges={{"noise","output",1}};auto onsetCompiled=engine::compilePatch(onsetPatch);engine::Engine onsetEngine;onsetEngine.prepare(48000,512);onsetEngine.setPatch(onsetCompiled.patch);std::array<float,512>onsetL{},onsetR{};std::array onsetNote{engine::MidiEvent{0,engine::MidiEventType::noteOn,1,60,127,8192}};onsetEngine.render(onsetL,onsetR,onsetNote);auto onset=std::ranges::find_if(onsetL,[](float x){return std::abs(x)>1e-12f;});ok&=expect(onset!=onsetL.end()&&onsetEngine.latencySamples()==4,"integer-compensated oversampling reports the realized production configuration");
  engine::Engine voices;voices.prepare(48000,64);voices.setPatch(compiled.patch);std::vector<engine::MidiEvent> many;for(int i=0;i<20;++i)many.push_back({0,engine::MidiEventType::noteOn,static_cast<std::uint8_t>(i%2+1),static_cast<std::uint8_t>(40+i),100,8192});std::array<float,64>l{},r{};voices.render(l,r,many);ok&=expect(voices.activeVoiceCount()==16,"voice scheduling remains bounded");std::array controllerEvents{engine::MidiEvent{0,engine::MidiEventType::pitchBend,1,0,0,16383},engine::MidiEvent{0,engine::MidiEventType::controlChange,1,1,127,8192},engine::MidiEvent{0,engine::MidiEventType::controlChange,1,64,127,8192},engine::MidiEvent{1,engine::MidiEventType::noteOff,1,40,0,8192},engine::MidiEvent{2,engine::MidiEventType::controlChange,1,64,0,8192},engine::MidiEvent{3,engine::MidiEventType::controlChange,1,120,0,8192}};voices.render(l,r,controllerEvents);for(int i=0;i<8;++i)voices.render(l,r);ok&=expect(voices.activeVoiceCount()<16,"controllers and bounded channel all-sound-off fade are handled");ok&=expect(voices.latencySamples()>0,"integer oversampling latency reported");
  std::vector<engine::MidiEvent> overflow(engine::maximumMidiEventsPerBlock+1,{0,engine::MidiEventType::controlChange,1,1,64,8192});voices.render(l,r,overflow);for(int i=0;i<8;++i)voices.render(l,r);ok&=expect(voices.midiOverflowCount()==1&&voices.activeVoiceCount()==0,"MIDI overflow is counted and silenced with a bounded fade");auto overflowBefore=voices.midiOverflowCount();std::span<float> empty;std::array zeroEvent{engine::MidiEvent{0,engine::MidiEventType::noteOn,1,60,100,8192}};voices.render(empty,empty,zeroEvent);ok&=expect(voices.midiOverflowCount()==overflowBefore&&voices.activeVoiceCount()==0,"zero host blocks do not consume MIDI or alter voices");

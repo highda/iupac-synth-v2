@@ -127,9 +127,13 @@ public:
     void reset() noexcept;
     void noteOn(int midiNote, int midiChannel, std::uint32_t patchSeed, std::uint32_t nodeHash) noexcept;
     void noteOff() noexcept {}
+    // `audioRate*` is the D8 typed IN port (#127): the signal cabled into `fm.modIn` or
+    // `resonator.exciteIn`. Empty spans are the uncabled port and cost nothing — no branch inside
+    // the per-sample loop runs and the node renders exactly as it did before D8.
     void process(const ModuleValues&, float fundamentalHz, std::span<const float> inputLeft,
                  std::span<const float> inputRight, std::span<float> outputLeft,
-                 std::span<float> outputRight) noexcept;
+                 std::span<float> outputRight, std::span<const float> audioRateLeft = {},
+                 std::span<const float> audioRateRight = {}) noexcept;
 
 private:
     static float clampFinite(float value, float lo, float hi, float fallback) noexcept;
@@ -274,6 +278,9 @@ inline constexpr std::size_t parameterTargetCount = static_cast<std::size_t>(Par
 // Catalog range of one matrix-eligible scalar, resolved at compile time so the audio thread can normalize without catalog lookups.
 struct CompiledRange { float minimum{}, maximum{1}; domain::ParameterScale scale{}; bool eligible{}; };
 struct CompiledNode { domain::ModuleType type{}; ModuleValues values{}; std::uint32_t idHash{}; std::array<CompiledRange, parameterTargetCount> ranges{}; };
+// `port` is the destination's IN port: `in` for the ordinary summed input, `modIn`/`exciteIn` for
+// the D8 typed audio-rate inputs (#127). It is an ordinary audio edge either way — it counts
+// against the 48-edge cap, takes part in the same cycle check and carries no enable flag.
 struct CompiledEdge { std::uint8_t source{}, destination{}; float gain{}; bool toOutput{}; domain::AudioPort port{}; };
 struct CompiledRow { domain::ModulationSource source{}; std::uint8_t node{}; ParameterTarget target{}; float depth{}, minimum{}, maximum{}; domain::ParameterScale scale{}; };
 // Compiled rows are the patch's 40 explicit matrix rows plus the implicit filter panel shortcuts

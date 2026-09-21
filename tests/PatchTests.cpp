@@ -167,6 +167,23 @@ bool runPatchTests()
                      && encodePatchJson(inOnly).find("port") == std::string::npos, "a non-default port is encoded and the default one is left out");
         auto portsDecoded = decodePatchJson(encodePatchJson(ports));
         ok &= expect(static_cast<bool>(portsDecoded) && portsDecoded.value->edges[2].port == AudioPort::modIn, "ports round-trip through the codec");
+        // Only per-voice nodes may drive a typed input: the effects tail runs once for the whole
+        // mix and has no voice to feed back into, so both targets are global-tail violations (#127).
+        auto tailIntoModIn = ports; tailIntoModIn.nodes.push_back(defaults("x1", "chorus"));
+        tailIntoModIn.edges.push_back({"r1", "x1", 0.5});
+        auto tailIntoExcite = tailIntoModIn;
+        tailIntoModIn.edges.push_back({"x1", "f1", 0.5, AudioPort::modIn});
+        ok &= expect(validate(tailIntoModIn) == "effects tail edge enters a per-voice node", "an effects node into fm.modIn is rejected as a global-tail violation");
+        tailIntoExcite.edges.push_back({"x1", "r1", 0.5, AudioPort::exciteIn});
+        ok &= expect(validate(tailIntoExcite) == "effects tail edge enters a per-voice node", "an effects node into resonator.exciteIn is rejected as a global-tail violation");
+        // A typed edge is an ordinary edge for the 48-edge cap: it is counted, never exempt. The
+        // maximal patch spends its 47th and 48th edges on exactly these two ports.
+        auto capped = iupac::testing::maximalPatch();
+        ok &= expect(capped.edges.size() == maximumEdges && validate(capped).empty(), "the maximal patch sits at the edge cap with both typed inputs cabled");
+        auto underCap = capped; underCap.edges.pop_back();
+        ok &= expect(underCap.edges.size() == maximumEdges - 1 && validate(underCap).empty(), "removing the exciteIn edge leaves the patch one edge under the cap");
+        auto overCap = capped; overCap.edges.push_back({"n1", "f1", 0.5, AudioPort::modIn});
+        ok &= expect(validate(overCap) == "patch exceeds structural cap", "a further modIn edge past the cap is rejected like any other edge");
     }
 
     // --- D8 decoder default-fill ---

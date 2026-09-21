@@ -40,4 +40,20 @@ digraph slots {
     FX2 -> {FX1 FX3 FX4 OUT};
     FX3 -> {FX1 FX2 FX4 OUT};
     FX4 -> {FX1 FX2 FX3 OUT};
+
+    // D8 audio-rate modulation inputs (#127): the typed `modIn` anchor on a source slot and the
+    // typed `exciteIn` anchor on a resonator slot are eligible edge destinations too. Every
+    // per-voice slot may drive them; the effects region may not, so no FX edge appears here. The
+    // `exciteIn` destinations are already covered by the resonator runs above, so only the
+    // backward runs into the source column are new.
+    RES1 -> SRC1; RES1 -> SRC2; RES1 -> SRC3;
+    RES2 -> SRC1; RES2 -> SRC2; RES2 -> SRC3;
+    FILT1 -> SRC1; FILT1 -> SRC2; FILT1 -> SRC3;
+    FILT2 -> SRC1; FILT2 -> SRC2; FILT2 -> SRC3;
+    SHAPE1 -> SRC1; SHAPE1 -> SRC2; SHAPE1 -> SRC3;
+    SHAPE2 -> SRC1; SHAPE2 -> SRC2; SHAPE2 -> SRC3;
+    MIX1 -> SRC1; MIX1 -> SRC2; MIX1 -> SRC3;
+    MIX2 -> SRC1; MIX2 -> SRC2; MIX2 -> SRC3;
+    SUB -> SRC1; SUB -> SRC2; SUB -> SRC3;
+    SRC1 -> {SRC2 SRC3}; SRC2 -> {SRC1 SRC3}; SRC3 -> {SRC1 SRC2};
 }
