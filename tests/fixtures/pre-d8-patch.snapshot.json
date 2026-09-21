@@ -1,0 +1,446 @@
+{
+  "stateVersion": 1,
+  "basePatch": {
+    "patchVersion": 1,
+    "noiseSeed": 0,
+    "nodes": [],
+    "edges": [],
+    "envelopes": [
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1,
+        "release": 0.2
+      },
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 1,
+        "release": 0.2
+      }
+    ],
+    "lfos": [
+      {
+        "rate": 1,
+        "waveform": "sine"
+      },
+      {
+        "rate": 1,
+        "waveform": "sine"
+      }
+    ],
+    "matrix": [],
+    "macros": [
+      {
+        "label": "",
+        "default": 0
+      },
+      {
+        "label": "",
+        "default": 0
+      },
+      {
+        "label": "",
+        "default": 0
+      },
+      {
+        "label": "",
+        "default": 0
+      }
+    ]
+  },
+  "editedPatch": {
+    "patchVersion": 1,
+    "noiseSeed": 424242,
+    "nodes": [
+      {
+        "id": "harm",
+        "type": "harmonic",
+        "parameters": {
+          "partialAmplitudes": [
+            1,
+            0.5,
+            0.333,
+            0.25,
+            0.2,
+            0.166,
+            0.142,
+            0.125,
+            0.111,
+            0.1,
+            0.09,
+            0.083,
+            0.077,
+            0.071,
+            0.067,
+            0.0625
+          ],
+          "partialRatios": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "partialPans": [
+            -1,
+            -0.8,
+            -0.6,
+            -0.4,
+            -0.2,
+            0,
+            0.2,
+            0.4,
+            0.6,
+            0.8,
+            1,
+            0.8,
+            0.6,
+            0.4,
+            0.2,
+            0
+          ],
+          "tilt": 0,
+          "inharmonicity": 0,
+          "outputLevel": 0.4
+        }
+      },
+      {
+        "id": "fm",
+        "type": "fm",
+        "parameters": {
+          "carrierRatio": 1,
+          "modulatorRatio": 2,
+          "index": 2,
+          "outputLevel": 0.35
+        }
+      },
+      {
+        "id": "noise",
+        "type": "noise",
+        "parameters": {
+          "color": 1,
+          "mode": 1,
+          "burstMs": 80,
+          "outputLevel": 0.15
+        }
+      },
+      {
+        "id": "comb",
+        "type": "resonator",
+        "parameters": {
+          "mode": 0,
+          "tuneRatio": 1,
+          "combFeedback": 0.4,
+          "modalQ": 3,
+          "modeRatios": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "modeLevels": [
+            1,
+            0.5,
+            0.25,
+            0.125
+          ],
+          "outputLevel": 0.7
+        }
+      },
+      {
+        "id": "modal",
+        "type": "resonator",
+        "parameters": {
+          "mode": 1,
+          "tuneRatio": 1.5,
+          "combFeedback": 0.3,
+          "modalQ": 5,
+          "modeRatios": [
+            1,
+            1.5,
+            2.25,
+            3
+          ],
+          "modeLevels": [
+            1,
+            0.6,
+            0.3,
+            0.15
+          ],
+          "outputLevel": 0.7
+        }
+      },
+      {
+        "id": "filter",
+        "type": "filter",
+        "parameters": {
+          "mode": 0,
+          "cutoff": 4000,
+          "q": 1,
+          "outputLevel": 0.8
+        }
+      },
+      {
+        "id": "shape",
+        "type": "shaper",
+        "parameters": {
+          "drive": 2,
+          "wet": 0.5,
+          "outputLevel": 0.7
+        }
+      },
+      {
+        "id": "mix",
+        "type": "mixer",
+        "parameters": {
+          "level": 0.6,
+          "pan": 0,
+          "outputLevel": 0.8
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "harm",
+        "destination": "comb",
+        "gain": 0.6
+      },
+      {
+        "source": "fm",
+        "destination": "modal",
+        "gain": 0.6
+      },
+      {
+        "source": "noise",
+        "destination": "filter",
+        "gain": 0.5
+      },
+      {
+        "source": "comb",
+        "destination": "shape",
+        "gain": 0.5
+      },
+      {
+        "source": "modal",
+        "destination": "shape",
+        "gain": 0.5
+      },
+      {
+        "source": "filter",
+        "destination": "mix",
+        "gain": 0.4
+      },
+      {
+        "source": "shape",
+        "destination": "mix",
+        "gain": 0.6
+      },
+      {
+        "source": "harm",
+        "destination": "mix",
+        "gain": 0.2
+      },
+      {
+        "source": "mix",
+        "destination": "output",
+        "gain": 1
+      }
+    ],
+    "envelopes": [
+      {
+        "attack": 0.01,
+        "decay": 0.1,
+        "sustain": 0.8,
+        "release": 0.4
+      },
+      {
+        "attack": 0.02,
+        "decay": 0.2,
+        "sustain": 0.5,
+        "release": 0.5
+      },
+      {
+        "attack": 0.03,
+        "decay": 0.3,
+        "sustain": 0.3,
+        "release": 0.6
+      }
+    ],
+    "lfos": [
+      {
+        "rate": 2,
+        "waveform": "sine"
+      },
+      {
+        "rate": 3,
+        "waveform": "triangle"
+      }
+    ],
+    "matrix": [
+      {
+        "id": "r01",
+        "enabled": true,
+        "source": "e1",
+        "destinationNode": "mix",
+        "destinationParameter": "level",
+        "depth": 0.1
+      },
+      {
+        "id": "r02",
+        "enabled": true,
+        "source": "e2",
+        "destinationNode": "mix",
+        "destinationParameter": "pan",
+        "depth": 0.1
+      },
+      {
+        "id": "r03",
+        "enabled": true,
+        "source": "e3",
+        "destinationNode": "filter",
+        "destinationParameter": "cutoff",
+        "depth": 0.1
+      },
+      {
+        "id": "r04",
+        "enabled": true,
+        "source": "l1",
+        "destinationNode": "filter",
+        "destinationParameter": "q",
+        "depth": 0.1
+      },
+      {
+        "id": "r05",
+        "enabled": true,
+        "source": "l2",
+        "destinationNode": "shape",
+        "destinationParameter": "drive",
+        "depth": 0.1
+      },
+      {
+        "id": "r06",
+        "enabled": true,
+        "source": "velocity",
+        "destinationNode": "shape",
+        "destinationParameter": "wet",
+        "depth": 0.1
+      },
+      {
+        "id": "r07",
+        "enabled": true,
+        "source": "keyTracking",
+        "destinationNode": "comb",
+        "destinationParameter": "tuneRatio",
+        "depth": 0.1
+      },
+      {
+        "id": "r08",
+        "enabled": true,
+        "source": "pitchBend",
+        "destinationNode": "comb",
+        "destinationParameter": "combFeedback",
+        "depth": 0.1
+      },
+      {
+        "id": "r09",
+        "enabled": true,
+        "source": "cc1",
+        "destinationNode": "modal",
+        "destinationParameter": "modalQ",
+        "depth": 0.1
+      },
+      {
+        "id": "r10",
+        "enabled": true,
+        "source": "macro1",
+        "destinationNode": "fm",
+        "destinationParameter": "carrierRatio",
+        "depth": 0.1
+      },
+      {
+        "id": "r11",
+        "enabled": true,
+        "source": "macro2",
+        "destinationNode": "fm",
+        "destinationParameter": "modulatorRatio",
+        "depth": 0.1
+      },
+      {
+        "id": "r12",
+        "enabled": true,
+        "source": "macro3",
+        "destinationNode": "fm",
+        "destinationParameter": "index",
+        "depth": 0.1
+      },
+      {
+        "id": "r13",
+        "enabled": true,
+        "source": "macro4",
+        "destinationNode": "harm",
+        "destinationParameter": "outputLevel",
+        "depth": 0.1
+      },
+      {
+        "id": "disabled",
+        "enabled": false,
+        "source": "l1",
+        "destinationNode": "mix",
+        "destinationParameter": "outputLevel",
+        "depth": 1
+      }
+    ],
+    "macros": [
+      {
+        "label": "Tone",
+        "default": 0.2
+      },
+      {
+        "label": "Motion",
+        "default": 0.3
+      },
+      {
+        "label": "Edge",
+        "default": 0.4
+      },
+      {
+        "label": "Air",
+        "default": 0.5
+      }
+    ]
+  },
+  "controls": {
+    "macros": [
+      0.2,
+      0.3,
+      0.4,
+      0.5
+    ],
+    "outputGain": -12,
+    "width": 0.5,
+    "masterTune": 0,
+    "bypass": false
+  },
+  "provenance": {
+    "kind": "authored-synth-panel",
+    "issue": 9
+  }
+}

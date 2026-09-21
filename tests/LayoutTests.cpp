@@ -60,6 +60,11 @@ SlotKind kindOf(iupac::domain::ModuleType type)
         case T::filter: return SlotKind::filter;
         case T::shaper: return SlotKind::shaper;
         case T::mixer: return SlotKind::mixer;
+        case T::sub: return SlotKind::sub;
+        case T::chorus: return SlotKind::chorus;
+        case T::delay: return SlotKind::delay;
+        case T::reverb: return SlotKind::reverb;
+        case T::width: return SlotKind::width;
     }
     return SlotKind::source;
 }
@@ -76,7 +81,10 @@ std::vector<CableEdge> edgesOf(const iupac::domain::Patch& patch)
         slotOf[node.id] = slot.value_or(0);
     }
     std::vector<CableEdge> edges;
-    for (const auto& edge : patch.edges) edges.push_back({slotOf.at(edge.source), slotOf.at(edge.destination), edge.gain, edge.source, edge.destination});
+    // Only the ordinary IN port is cabled by the router today; the two audio-rate anchors are issue #127.
+    for (const auto& edge : patch.edges)
+        if (edge.port == iupac::domain::AudioPort::in)
+            edges.push_back({slotOf.at(edge.source), slotOf.at(edge.destination), edge.gain, edge.source, edge.destination});
     return edges;
 }
 
@@ -170,7 +178,9 @@ int main()
             if (slot.column < other.column) expect(slot.frame.right() < other.frame.x, "columns are separated by a channel");
         }
     }
-    expect(counts[SlotKind::source] == 3 && counts[SlotKind::resonator] == 2 && counts[SlotKind::filter] == 2 && counts[SlotKind::shaper] == 2 && counts[SlotKind::mixer] == 2 && counts[SlotKind::output] == 1, "SRC(3) | RES(2) | FILT(2) | SHAPE(2) | MIX(2) | OUT");
+    expect(counts[SlotKind::source] == 3 && counts[SlotKind::sub] == 1 && counts[SlotKind::resonator] == 2 && counts[SlotKind::filter] == 2 && counts[SlotKind::shaper] == 2 && counts[SlotKind::mixer] == 2
+           && counts[SlotKind::chorus] == 1 && counts[SlotKind::delay] == 1 && counts[SlotKind::reverb] == 1 && counts[SlotKind::width] == 1 && counts[SlotKind::output] == 1,
+           "SRC(3)+SUB | RES(2) | FILT(2) | SHAPE(2) | MIX(2) | FX(4) | OUT");
     expect(slotTable[outputSlot].kind == SlotKind::output && slotTable[outputSlot].column == columnCount - 1, "OUT bus is the last column");
     expect(fieldTop() > 0.0 && fieldBottom() < referenceHeight, "corridors exist above and below the field");
     for (int c = 0; c + 1 < columnCount; ++c) expect(channelExtent(c).right - channelExtent(c).left > 2.0 * channelInset, "channel wide enough for lanes");
@@ -196,7 +206,9 @@ int main()
 
     // every eligible edge routes, alone and all together
     const auto eligible = eligibleEdges();
-    expect(eligible.size() == 3 * 9 + 8 * 8, "eligible edge count");
+    // Geometry only: four source slots have an OUT but no IN, the twelve processor and effects slots have both,
+    // and thirteen slots (eight processors, four effects and the OUT bus) have an IN.
+    expect(eligible.size() == 4 * 13 + 12 * 13 - 12, "eligible edge count");
     for (const auto& edge : eligible)
     {
         const auto cables = routeCables(std::span<const CableEdge>(&edge, 1));
@@ -219,7 +231,7 @@ int main()
     // maximal authored patch (#67): routes, unique lanes, recorded crossing baseline and timing
     const auto patch = iupac::testing::maximalPatch();
     const auto edges = edgesOf(patch);
-    expect(edges.size() == iupac::domain::maximumEdges, "maximal patch has the edge cap");
+    expect(edges.size() == iupac::domain::maximumEdges - 2, "maximal patch fills the edge cap, two of them on the audio-rate ports");
     auto cables = routeCables(edges);
     expect(cables.size() == edges.size(), "maximal patch routes every edge");
     for (const auto& cable : cables) checkCableGeometry(cable, edges[cable.edge]);

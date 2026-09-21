@@ -159,6 +159,8 @@ if(BUILD_TESTING)
     # Reads the live catalog through the production CLI, so it guards chemistry-OFF builds too.
     add_test(NAME mapping-coverage COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_mapping_coverage.py
         $<TARGET_FILE:iupac-cli> ${CMAKE_SOURCE_DIR}/data/mapping-coverage.json)
+    add_test(NAME patch-compatibility COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_patch_compatibility.py
+        $<TARGET_FILE:iupac-cli> ${CMAKE_SOURCE_DIR})
     if(IUPAC_ENABLE_CHEMISTRY)
         add_executable(iupac-analysis-tests tests/AnalysisTests.cpp)
         target_compile_features(iupac-analysis-tests PRIVATE cxx_std_20)

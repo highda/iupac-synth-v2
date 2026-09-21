@@ -4,8 +4,8 @@ namespace iupac::ui
 {
 namespace
 {
-SlotKind kindOf(domain::ModuleType t){switch(t){case domain::ModuleType::harmonic:case domain::ModuleType::fm:case domain::ModuleType::noise:return SlotKind::source;case domain::ModuleType::resonator:return SlotKind::resonator;case domain::ModuleType::filter:return SlotKind::filter;case domain::ModuleType::shaper:return SlotKind::shaper;case domain::ModuleType::mixer:return SlotKind::mixer;}return SlotKind::source;}
-std::string_view idPrefix(SlotKind k){switch(k){case SlotKind::source:return"src";case SlotKind::resonator:return"res";case SlotKind::filter:return"filt";case SlotKind::shaper:return"shape";case SlotKind::mixer:return"mix";case SlotKind::output:return"out";}return"";}
+SlotKind kindOf(domain::ModuleType t){switch(t){case domain::ModuleType::harmonic:case domain::ModuleType::fm:case domain::ModuleType::noise:return SlotKind::source;case domain::ModuleType::resonator:return SlotKind::resonator;case domain::ModuleType::filter:return SlotKind::filter;case domain::ModuleType::shaper:return SlotKind::shaper;case domain::ModuleType::mixer:return SlotKind::mixer;case domain::ModuleType::sub:return SlotKind::sub;case domain::ModuleType::chorus:return SlotKind::chorus;case domain::ModuleType::delay:return SlotKind::delay;case domain::ModuleType::reverb:return SlotKind::reverb;case domain::ModuleType::width:return SlotKind::width;}return SlotKind::source;}
+std::string_view idPrefix(SlotKind k){switch(k){case SlotKind::source:return"src";case SlotKind::resonator:return"res";case SlotKind::filter:return"filt";case SlotKind::shaper:return"shape";case SlotKind::mixer:return"mix";case SlotKind::sub:return"sub";case SlotKind::chorus:return"chorus";case SlotKind::delay:return"delay";case SlotKind::reverb:return"reverb";case SlotKind::width:return"width";case SlotKind::output:return"out";}return"";}
 int nodeIndex(const domain::Patch&p,std::string_view id){for(std::size_t i=0;i<p.nodes.size();++i)if(p.nodes[i].id==id)return(int)i;return-1;}
 domain::ParameterDescriptor describe(const domain::ModuleDescriptor&m,std::string_view id){const auto*d=domain::findParameter(m,id);return d?*d:domain::ParameterDescriptor{id,"",0,1,0,domain::ParameterScale::linear,domain::ParameterKind::continuous,false,0,20.0,{}};}
 constexpr double defaultCableGain=0.8;constexpr float portRadius=4.5f;
@@ -59,7 +59,7 @@ void SlotView::mouseDown(const juce::MouseEvent&e){pressed_=!active()&&slot_!=ou
 void SlotView::mouseUp(const juce::MouseEvent&e)
 {
  if(!pressed_||!getLocalBounds().contains(e.getPosition())){pressed_=false;return;}pressed_=false;const auto&s=slotTable[slot_];
- if(s.kind!=SlotKind::source){static constexpr std::array types{"","resonator","filter","shaper","mixer",""};if(field_.onActivate)field_.onActivate(types[(std::size_t)s.kind],slot_);return;}
+ if(s.kind!=SlotKind::source){static constexpr std::array types{"","sub","resonator","filter","shaper","mixer","chorus","delay","reverb","width",""};if(field_.onActivate)field_.onActivate(types[(std::size_t)s.kind],slot_);return;}
  juce::PopupMenu m;m.addItem(1,"harmonic");m.addItem(2,"fm");m.addItem(3,"noise");juce::Component::SafePointer<SlotView>self(this);
  m.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(this).withMinimumWidth(80),[self](int r){if(!self||r==0||!self->field_.onActivate)return;self->field_.onActivate(r==1?"harmonic":r==2?"fm":"noise",self->slot_);});
 }

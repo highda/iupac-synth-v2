@@ -80,13 +80,13 @@ bool PatchCoordinator::enqueuePending() noexcept
 
 bool PatchCoordinator::structural(const CompiledPatch& a, const CompiledPatch& b) const noexcept
 {
-    if (a.nodeCount != b.nodeCount || a.edgeCount != b.edgeCount) return true;
+    if (a.nodeCount != b.nodeCount || a.edgeCount != b.edgeCount || a.tailStart != b.tailStart) return true;
     for (std::size_t i = 0; i < a.nodeCount; ++i)
         if (a.nodes[i].type != b.nodes[i].type || a.nodes[i].idHash != b.nodes[i].idHash
             || a.nodes[i].values.mode != b.nodes[i].values.mode || a.nodes[i].values.color != b.nodes[i].values.color) return true;
     for (std::size_t i = 0; i < a.edgeCount; ++i) {
         const auto& x = a.edges[i]; const auto& y = b.edges[i];
-        if (x.source != y.source || x.destination != y.destination || x.toOutput != y.toOutput) return true;
+        if (x.source != y.source || x.destination != y.destination || x.toOutput != y.toOutput || x.port != y.port) return true;
     }
     return false;
 }

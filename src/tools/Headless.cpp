@@ -34,7 +34,11 @@ std::string sourceName(domain::ModulationSource source)
 }
 std::string targetName(engine::ParameterTarget target)
 {
-    constexpr std::array names {"carrierRatio", "modulatorRatio", "index", "burstMs", "tuneRatio", "combFeedback", "modalQ", "cutoff", "q", "drive", "wet", "level", "pan", "outputLevel"};
+    // Catalog ids of engine::ParameterTarget, in enum order.
+    constexpr std::array names {"carrierRatio", "modulatorRatio", "index", "burstMs", "tuneRatio", "combFeedback", "modalQ", "cutoff", "q", "drive", "wet", "level", "pan", "outputLevel",
+                                "detuneCents", "unisonSpread", "drift", "harmonicityMorph", "oddEvenBalance", "symmetry", "fine", "keytrack", "modInDepth", "exciteDepth", "envAmount",
+                                "rate", "depth", "feedback", "mix", "timeMs", "spread", "damping", "size", "decaySeconds", "preDelayMs", "width", "bassMonoHz"};
+    static_assert(names.size() == engine::parameterTargetCount);
     return names.at(static_cast<std::size_t>(target));
 }
 std::string kindName(domain::ParameterKind kind)
@@ -256,8 +260,28 @@ int verifyPanel(const std::filesystem::path& panel, const std::filesystem::path&
         const auto rendered = renderSnapshot(*state.value, midi.events, settings, output / (id + ".wav")); if (!rendered) { error = id + ": " + rendered.error; return 2; }
         auto entry = juce::JSON::parse(rendered.manifestJson); entry.getDynamicObject()->setProperty("id", juce::String(id)); results.add(entry);
     }
+    // Authored rejections: a patch the validator must refuse, with its exact error. The panel is the
+    // production decode path, so a widened bound or a relaxed router constraint fails here (#109).
+    juce::Array<juce::var> rejections;
+    if (const auto* authored = panelObject->getProperty("rejections").getArray())
+    {
+        if (authored->size() > static_cast<int>(maximumPanelCases)) { error = "invalid authored panel"; return 2; }
+        for (const auto& item : *authored)
+        {
+            const auto* caseObject = item.getDynamicObject();
+            if (!caseObject || !caseObject->getProperty("id").isString() || !caseObject->getProperty("patch").isString() || !caseObject->getProperty("error").isString()) { error = "invalid panel rejection"; return 2; }
+            const auto id = caseObject->getProperty("id").toString().toStdString();
+            const auto patchText = readBoundedFile(panel.parent_path() / caseObject->getProperty("patch").toString().toStdString());
+            if (!patchText) { error = id + ": " + patchText.error; return 2; }
+            const auto decoded = domain::decodePatchJson(*patchText.value);
+            const auto expected = caseObject->getProperty("error").toString().toStdString();
+            if (decoded) { error = id + ": patch was accepted but must be rejected with \"" + expected + "\""; return 1; }
+            if (decoded.error != expected) { error = id + ": rejected with \"" + decoded.error + "\" instead of \"" + expected + "\""; return 1; }
+            auto entry = object(); put(entry, "id", juce::String(id)); put(entry, "error", juce::String(decoded.error)); rejections.add(entry);
+        }
+    }
     auto result = object(); put(result, "panelVersion", 1); put(result, "productVersion", juce::String(domain::productVersion().data())); put(result, "architecture", juce::String(domain::architectureVersion().data())); put(result, "patchVersion", domain::patchVersion);
-    put(result, "command", juce::String("iupac-cli verify-panel")); put(result, "panelSha256", juce::String(hash(*input.value))); put(result, "results", results); report = json(result);
+    put(result, "command", juce::String("iupac-cli verify-panel")); put(result, "panelSha256", juce::String(hash(*input.value))); put(result, "results", results); put(result, "rejections", rejections); report = json(result);
     std::ofstream manifest(output / "manifest.json", std::ios::binary); manifest << report << '\n'; if (!manifest) { error = "cannot write panel manifest"; return 2; } return 0;
 }
 

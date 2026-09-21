@@ -36,6 +36,16 @@ struct ModuleValues
     float cutoff{1000.0f}, q{0.707f}, drive{1.0f}, wet{1.0f};
     float level{1.0f}, pan{}, outputLevel{1.0f};
     int mode{}, color{};
+    // D8 additions. Names are shared where two types declare the same id (filter/shaper `drive`,
+    // chorus/delay `feedback`, delay/reverb `damping`, reverb/width `width`): a node has one type,
+    // so one field per id is the whole storage that node ever needs.
+    float detuneCents{12.0f}, unisonSpread{0.5f}, phaseRandom{}, drift{};
+    float harmonicityMorph{}, oddEvenBalance{}, symmetry{0.5f};
+    float fine{}, keytrack{1.0f}, modInDepth{}, exciteDepth{}, envAmount{};
+    float rate{0.5f}, depth{0.3f}, feedback{}, mix{0.3f};
+    float timeMs{375.0f}, spread{}, damping{0.4f};
+    float size{0.5f}, decaySeconds{2.0f}, preDelayMs{20.0f}, width{1.0f}, bassMonoHz{120.0f};
+    int unisonVoices{1}, octave{}, coarse{}, waveform{}, curve{}, voices{2}, syncMode{}, syncDivision{};
 };
 
 class ModuleProcessor final
@@ -85,26 +95,32 @@ class ModulatorBank final
 {
 public:
     void prepare(double sampleRate) noexcept;
-    void configure(const std::array<domain::Envelope, 3>&, const std::array<domain::Lfo, 2>&) noexcept;
+    void configure(const std::array<domain::Envelope, domain::envelopeCount>&, const std::array<domain::Lfo, domain::lfoCount>&) noexcept;
     void reset() noexcept;
     void noteOn() noexcept;
     void noteOff() noexcept;
+    // E1..E3 then L1..L2, the leading block of ModulationSource. E4 is stored and reset with the
+    // bank but is not yet a matrix source (issue #125 appends `e4` to the persisted source list).
     [[nodiscard]] std::array<float, 5> next() noexcept;
     [[nodiscard]] bool finalEnvelopeActive() const noexcept { return envelopes_[0].isActive(); }
 private:
-    std::array<juce::ADSR, 3> envelopes_;
-    std::array<domain::Lfo, 2> lfoSettings_{}, previousLfoSettings_{};
-    std::array<double, 2> lfoPhases_{};
+    std::array<juce::ADSR, domain::envelopeCount> envelopes_;
+    std::array<domain::Lfo, domain::lfoCount> lfoSettings_{}, previousLfoSettings_{};
+    std::array<double, domain::lfoCount> lfoPhases_{};
     double sampleRate_{48000.0};
     std::uint64_t smoothingSample_{}, smoothingLength_{1};
 };
 
-enum class ParameterTarget : std::uint8_t { carrierRatio, modulatorRatio, index, burstMilliseconds, tuneRatio, combFeedback, modalQ, cutoff, q, drive, wet, level, pan, outputLevel };
-inline constexpr std::size_t parameterTargetCount = static_cast<std::size_t>(ParameterTarget::outputLevel) + 1;
+// Every matrix-eligible (continuous, modulatable) catalog parameter, in catalog order. The original
+// fourteen keep their positions so a stored effective-value column never moves.
+enum class ParameterTarget : std::uint8_t { carrierRatio, modulatorRatio, index, burstMilliseconds, tuneRatio, combFeedback, modalQ, cutoff, q, drive, wet, level, pan, outputLevel,
+                                            detuneCents, unisonSpread, drift, harmonicityMorph, oddEvenBalance, symmetry, fine, keytrack, modInDepth, exciteDepth, envAmount,
+                                            rate, depth, feedback, mix, timeMs, spread, damping, size, decaySeconds, preDelayMs, width, bassMonoHz };
+inline constexpr std::size_t parameterTargetCount = static_cast<std::size_t>(ParameterTarget::bassMonoHz) + 1;
 // Catalog range of one matrix-eligible scalar, resolved at compile time so the audio thread can normalize without catalog lookups.
 struct CompiledRange { float minimum{}, maximum{1}; domain::ParameterScale scale{}; bool eligible{}; };
 struct CompiledNode { domain::ModuleType type{}; ModuleValues values{}; std::uint32_t idHash{}; std::array<CompiledRange, parameterTargetCount> ranges{}; };
-struct CompiledEdge { std::uint8_t source{}, destination{}; float gain{}; bool toOutput{}; };
+struct CompiledEdge { std::uint8_t source{}, destination{}; float gain{}; bool toOutput{}; domain::AudioPort port{}; };
 struct CompiledRow { domain::ModulationSource source{}; std::uint8_t node{}; ParameterTarget target{}; float depth{}, minimum{}, maximum{}; domain::ParameterScale scale{}; };
 struct CompiledTarget { std::uint8_t node{}; ParameterTarget target{}; float minimum{}, maximum{}; domain::ParameterScale scale{}; std::array<std::uint8_t, domain::maximumMatrixRows> rows{}; std::uint8_t rowCount{}; };
 struct CompiledEdgeList { std::array<std::uint8_t, domain::maximumEdges> edges{}; std::uint8_t count{}; };
@@ -115,11 +131,16 @@ struct CompiledPatch
     std::array<CompiledRow, domain::maximumMatrixRows> rows{};
     std::array<CompiledTarget, domain::maximumMatrixRows> targets{};
     std::array<CompiledEdgeList, domain::maximumNodes> incomingEdges{};
-    CompiledEdgeList outputEdges{};
-    std::array<domain::Envelope, 3> envelopes{};
-    std::array<domain::Lfo, 2> lfos{};
+    // Edges into the OUT bus split by region: the per-voice ones are gated by E1 and velocity inside
+    // each voice, the tail ones are summed once per sample after the global effects tail has run.
+    CompiledEdgeList outputEdges{}, tailOutputEdges{};
+    std::array<domain::Envelope, domain::envelopeCount> envelopes{};
+    std::array<domain::Lfo, domain::lfoCount> lfos{};
     std::uint32_t noiseSeed{};
     std::uint8_t nodeCount{}, edgeCount{}, rowCount{}, targetCount{};
+    // Nodes [tailStart, nodeCount) are the effects region: prepared once in the global post-mixer
+    // tail, never per voice. The compiler guarantees no per-voice node depends on them.
+    std::uint8_t tailStart{};
 };
 // Node identity as published in EffectiveValues::nodeIds and the matrix target of a catalog parameter id (display lookups).
 [[nodiscard]] std::uint32_t hashNodeId(std::string_view) noexcept;

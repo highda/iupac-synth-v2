@@ -11,7 +11,7 @@
 #include <utility>
 namespace iupac::ui
 {
-inline constexpr std::size_t moduleSlotCount=outputSlot;// the eleven typed slots precede the OUT bus row
+inline constexpr std::size_t moduleSlotCount=outputSlot;// the sixteen typed slots precede the OUT bus row
 struct SlotMap{std::array<int,slotCount>node{};std::array<int,domain::maximumNodes>slot{};SlotMap(){node.fill(-1);slot.fill(-1);}};
 [[nodiscard]]SlotMap assignSlots(const domain::Patch&);
 [[nodiscard]]std::string slotNodeId(std::size_t slot);// canonical id for a node authored into `slot`

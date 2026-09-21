@@ -4,8 +4,11 @@
 The committed numbers in include/iupac/ui/Layout.hpp come from this script; rerunning it must
 reproduce them exactly. Layout engine: the `dot` binary when present, otherwise the identical
 Graphviz build compiled to WebAssembly (@viz-js/viz, pinned) run through node. The DOT input pins
-the six columns, so dot decides only the in-column order/spacing; the result is rescaled into the
-1000x700 reference frame leaving a cable corridor above and a return corridor below the field.
+the seven columns, so dot decides the column an eligible-edge slot belongs to and its order inside
+that column; the result is rescaled into the 1000x700 reference frame leaving a cable corridor above
+and a return corridor below the field. Column x comes straight from dot. Rows are then spaced evenly
+inside the field from the densest column's slot count, because under the D8 graph dot's own vertical
+slack scales with fan-in and would shrink every slot below the height its controls need (#109).
 
 Usage: scripts/layout-slots.py [--check include/iupac/ui/Layout.hpp]
 """
@@ -25,8 +28,14 @@ VIZ_PACKAGE = "@viz-js/viz@3.30.0"
 FRAME_WIDTH, FRAME_HEIGHT = 1000.0, 700.0
 TOP_CORRIDOR, BOTTOM_CORRIDOR = 70.0, 90.0  # forward spanning corridor / backward return channel
 SIDE_MARGIN = 20.0
-COLUMNS = ["SRC", "RES", "FILT", "SHAPE", "MIX", "OUT"]
-KINDS = {"SRC": "source", "RES": "resonator", "FILT": "filter", "SHAPE": "shaper", "MIX": "mixer", "OUT": "output"}
+ROW_GAP = 14.0  # vertical gap between two slots of one column, in reference units
+COLUMNS = ["SRC", "RES", "FILT", "SHAPE", "MIX", "FX", "OUT"]
+# DOT node prefixes that share a column, in the order they are laid out.
+COLUMN_MEMBERS = {0: ["SRC", "SUB"], 1: ["RES"], 2: ["FILT"], 3: ["SHAPE"], 4: ["MIX"], 5: ["FX"], 6: ["OUT"]}
+KINDS = {"SRC": "source", "SUB": "sub", "RES": "resonator", "FILT": "filter", "SHAPE": "shaper", "MIX": "mixer", "OUT": "output"}
+# The four effects slots are interchangeable in the eligible-edge graph, so dot decides only their
+# vertical order; the types are then pinned top to bottom in the catalog's order.
+FX_KINDS = ["chorus", "delay", "reverb", "width"]
 
 
 def run_dot_plain(dot_source: str) -> str:
@@ -67,26 +76,33 @@ def layout():
     # field between the two corridors, flipping y so the reference frame is y-down.
     min_x = min(x - w / 2 for x, y, w, h in nodes.values())
     max_x = max(x + w / 2 for x, y, w, h in nodes.values())
-    min_y = min(y - h / 2 for x, y, w, h in nodes.values())
-    max_y = max(y + h / 2 for x, y, w, h in nodes.values())
     sx = (FRAME_WIDTH - 2 * SIDE_MARGIN) / (max_x - min_x)
-    sy = (FRAME_HEIGHT - TOP_CORRIDOR - BOTTOM_CORRIDOR) / (max_y - min_y)
+    field = FRAME_HEIGHT - TOP_CORRIDOR - BOTTOM_CORRIDOR
     slots = []
-    for column, prefix in enumerate(COLUMNS):
-        names = sorted(n for n in nodes if re.fullmatch(prefix + r"\d*", n))
-        for name in names:
-            x, y, w, h = nodes[name]
-            left = SIDE_MARGIN + (x - w / 2 - min_x) * sx
-            top = TOP_CORRIDOR + (max_y - (y + h / 2)) * sy
-            slots.append({"name": name, "kind": KINDS[prefix], "column": column,
-                          "x": round(left, 1), "y": round(top, 1), "width": round(w * sx, 1), "height": round(h * sy, 1)})
-    # The DOT nodes of one column are interchangeable (identical eligible edges), so the instance
-    # index is assigned top to bottom from dot's y and the table is ordered column-major.
-    slots.sort(key=lambda s: (s["column"], s["y"]))
-    for column in range(len(COLUMNS)):
-        for instance, slot in enumerate(s for s in slots if s["column"] == column):
-            slot["instance"] = instance
-            slot["name"] = COLUMNS[column] + (str(instance + 1) if COLUMNS[column] != "OUT" else "")
+    for column, prefixes in COLUMN_MEMBERS.items():
+        for prefix in prefixes:
+            for name in sorted(n for n in nodes if re.fullmatch(prefix + r"\d*", n)):
+                x, y, w, h = nodes[name]
+                slots.append({"name": name, "prefix": prefix, "kind": KINDS.get(prefix), "column": column,
+                              "x": round(SIDE_MARGIN + (x - w / 2 - min_x) * sx, 1), "order": -y,
+                              "width": round(w * sx, 1)})
+    # dot orders each column top to bottom; the rows are then spaced evenly so a slot keeps the same
+    # height in every column and the densest column fills the field exactly.
+    slots.sort(key=lambda s: (s["column"], s["order"]))
+    rows = max(sum(1 for s in slots if s["column"] == c) for c in COLUMN_MEMBERS)
+    height = (field - (rows - 1) * ROW_GAP) / rows
+    for column in COLUMN_MEMBERS:
+        members = [s for s in slots if s["column"] == column]
+        total = len(members) * height + (len(members) - 1) * ROW_GAP
+        for index, slot in enumerate(members):
+            slot["y"] = round(TOP_CORRIDOR + (field - total) / 2 + index * (height + ROW_GAP), 1)
+            slot["height"] = round(height, 1)
+    for index, slot in enumerate(s for s in slots if s["prefix"] == "FX"):
+        slot["kind"] = FX_KINDS[index]
+    for prefix in {s["prefix"] for s in slots}:
+        for instance, slot in enumerate(s for s in slots if s["prefix"] == prefix):
+            slot["instance"] = 0 if prefix in ("OUT", "SUB", "FX") else instance
+            slot["name"] = prefix + (str(instance + 1) if prefix not in ("OUT", "SUB") else "")
     return slots
 
 

@@ -1,8 +1,9 @@
 #pragma once
 
-// Authored maximal patch shared by the Patch, engine and realtime tests: every fixed editor
-// slot active (3 sources, 2 resonators, 2 filters, 2 shapers, 2 mixers), exactly maximumEdges
-// audio edges and maximumMatrixRows enabled rows, all through the production catalog.
+// Authored maximal patch shared by the Patch, engine and realtime tests: every fixed editor slot
+// active (3 general sources, 1 sub, 2 resonators, 2 filters, 2 shapers, 2 mixers and the four-slot
+// effects tail), exactly maximumEdges audio edges — including one edge into each of the two declared
+// audio-rate ports — and maximumMatrixRows enabled rows, all through the production catalog.
 #include "iupac/domain/Patch.hpp"
 
 #include <string>
@@ -29,17 +30,25 @@ inline domain::Patch maximalPatch()
 {
     domain::Patch patch;
     patch.noiseSeed = 0x2468aceu;
-    patch.nodes = {defaultNode("h1", "harmonic"), defaultNode("f1", "fm"), defaultNode("n1", "noise"),
+    patch.nodes = {defaultNode("h1", "harmonic"), defaultNode("f1", "fm"), defaultNode("n1", "noise"), defaultNode("b1", "sub"),
                    defaultNode("r1", "resonator"), defaultNode("r2", "resonator"), defaultNode("q1", "filter"), defaultNode("q2", "filter"),
-                   defaultNode("s1", "shaper"), defaultNode("s2", "shaper"), defaultNode("m1", "mixer"), defaultNode("m2", "mixer")};
-    patch.nodes[4].parameters[0].values[0] = 1.0; // second resonator in modal mode
-    const std::vector<std::string> sources {"h1", "f1", "n1"}, processors {"r1", "r2", "q1", "q2", "s1", "s2", "m1", "m2"};
+                   defaultNode("s1", "shaper"), defaultNode("s2", "shaper"), defaultNode("m1", "mixer"), defaultNode("m2", "mixer"),
+                   defaultNode("x1", "chorus"), defaultNode("x2", "delay"), defaultNode("x3", "reverb"), defaultNode("x4", "width")};
+    patch.nodes[5].parameters[0].values[0] = 1.0; // second resonator in modal mode
+    const std::vector<std::string> sources {"h1", "f1", "n1", "b1"}, processors {"r1", "r2", "q1", "q2", "s1", "s2", "m1", "m2"};
     for (const auto& source : sources)
-        for (const auto& processor : processors) patch.edges.push_back({source, processor, 0.1});
-    for (auto [from, to] : std::vector<std::pair<std::string, std::string>> {{"r1", "q1"}, {"r2", "q2"}, {"q1", "s1"}, {"q2", "s2"}, {"s1", "m1"}, {"s2", "m2"}, {"m1", "output"}, {"m2", "output"}})
-        patch.edges.push_back({from, to, from[0] == 'm' ? 1.0 : 0.5});
+        for (const auto& processor : processors) patch.edges.push_back({source, processor, 0.1}); // 32
+    for (auto [from, to] : std::vector<std::pair<std::string, std::string>> {{"r1", "q1"}, {"r2", "q2"}, {"q1", "s1"}, {"q2", "s2"}, {"s1", "m1"}, {"s2", "m2"},
+                                                                            {"m1", "x1"}, {"m2", "x1"}, {"x1", "x2"}, {"x2", "x3"}, {"x3", "x4"},
+                                                                            {"x4", "output"}, {"m1", "output"}, {"m2", "output"}})
+        patch.edges.push_back({from, to, from[0] == 'm' || from[0] == 'x' ? 1.0 : 0.5}); // 46
+    // The two typed audio-rate inputs: ordinary edges in the DAG, distinct from the `in` edges above.
+    patch.edges.push_back({"h1", "f1", 0.5, domain::AudioPort::modIn});
+    patch.edges.push_back({"n1", "r1", 0.5, domain::AudioPort::exciteIn}); // 48
     const std::vector<std::pair<std::string, std::string>> destinations {{"r1", "tuneRatio"}, {"r2", "modalQ"}, {"q1", "cutoff"}, {"q2", "q"}, {"s1", "drive"}, {"s2", "wet"},
-                                                                          {"m1", "level"}, {"m2", "pan"}, {"h1", "outputLevel"}, {"f1", "index"}, {"n1", "burstMs"}, {"r1", "combFeedback"}};
+                                                                          {"m1", "level"}, {"m2", "pan"}, {"h1", "outputLevel"}, {"f1", "index"}, {"n1", "burstMs"}, {"r1", "combFeedback"},
+                                                                          {"b1", "outputLevel"}, {"h1", "harmonicityMorph"}, {"f1", "modInDepth"}, {"r2", "exciteDepth"}, {"q1", "drive"}, {"q2", "envAmount"},
+                                                                          {"x1", "mix"}, {"x2", "feedback"}, {"x3", "size"}, {"x4", "width"}};
     for (std::size_t i = 0; i < domain::maximumMatrixRows; ++i)
     {
         const auto& [node, parameter] = destinations[i % destinations.size()];

@@ -30,15 +30,36 @@ PD convenience(std::string_view id, double lo, double hi, double def)
 {
     return {id, "", lo, hi, def, PS::linear, PK::convenience, false, 0, 0, {}};
 }
+// A numeric discrete control (octave, coarse, unison copies): integral values only, never a matrix destination.
+PD step(std::string_view id, std::string_view unit, double lo, double hi, double def)
+{
+    return {id, unit, lo, hi, def, PS::linear, PK::discrete, false, 0, 0, {}};
+}
+// D8 marks every parameter introduced after the original v1 catalog: the decoder may fill it from
+// this default when a stored node omits it, which is what keeps every pre-D8 patch valid.
+PD added(PD descriptor) { descriptor.postV1 = true; return descriptor; }
 
-const std::array<ModuleDescriptor, 7> catalog {{
-    {ModuleType::harmonic, "harmonic", true, 3, {array("partialAmplitudes", 0, 1, 0, 16), array("partialRatios", 0.5, 32, 1, 16), array("partialPans", -1, 1, 0, 16), convenience("tilt", -2, 2, 0), convenience("inharmonicity", 0, 0.02, 0), scalar("outputLevel", "", 0, 1, 0.7)}},
-    {ModuleType::fm, "fm", true, 3, {scalar("carrierRatio", "ratio", 0.5, 4, 1, PS::logarithmic), scalar("modulatorRatio", "ratio", 0.25, 8, 1, PS::logarithmic), scalar("index", "", 0, 6, 0), scalar("outputLevel", "", 0, 1, 0.7)}},
-    {ModuleType::noise, "noise", true, 3, {choice("color", {"white", "pink"}), choice("mode", {"continuous", "burst"}), scalar("burstMs", "ms", 1, 500, 80, PS::logarithmic), scalar("outputLevel", "", 0, 1, 0.3)}},
-    {ModuleType::resonator, "resonator", false, 2, {choice("mode", {"comb", "modal"}), scalar("tuneRatio", "ratio", 0.5, 4, 1, PS::logarithmic), scalar("combFeedback", "", 0, 0.97, 0.4), scalar("modalQ", "", 0.5, 12, 3), array("modeRatios", 0.5, 4, 1, 4), array("modeLevels", 0, 1, 0, 4), scalar("outputLevel", "", 0, 1, 0.8)}},
-    {ModuleType::filter, "filter", false, 2, {choice("mode", {"lowpass", "bandpass", "highpass"}), scalar("cutoff", "Hz", 30, 18000, 1000, PS::logarithmic), scalar("q", "", 0.5, 8, 0.707), scalar("outputLevel", "", 0, 1, 1)}},
-    {ModuleType::shaper, "shaper", false, 2, {scalar("drive", "", 1, 16, 1), scalar("wet", "", 0, 1, 1), scalar("outputLevel", "", 0, 1, 1)}},
-    {ModuleType::mixer, "mixer", false, 2, {scalar("level", "", 0, 1, 1), scalar("pan", "", -1, 1, 0), scalar("outputLevel", "", 0, 1, 1)}}
+const std::array<ModuleDescriptor, moduleTypeCount> catalog {{
+    {ModuleType::harmonic, "harmonic", true, 3, true, false, AudioPort::in, {array("partialAmplitudes", 0, 1, 0, 16), array("partialRatios", 0.5, 32, 1, 16), array("partialPans", -1, 1, 0, 16), convenience("tilt", -2, 2, 0), convenience("inharmonicity", 0, 0.02, 0), scalar("outputLevel", "", 0, 1, 0.7),
+        added(step("unisonVoices", "count", 1, 7, 1)), added(scalar("detuneCents", "cents", 0, 50, 12)), added(scalar("unisonSpread", "", 0, 1, 0.5)), added(scalar("phaseRandom", "", 0, 1, 0, PS::linear, false)), added(scalar("drift", "", 0, 1, 0)),
+        added(scalar("harmonicityMorph", "", 0, 1, 0)), added(scalar("oddEvenBalance", "", -1, 1, 0)), added(scalar("symmetry", "", 0, 1, 0.5)),
+        added(step("octave", "oct", -3, 3, 0)), added(step("coarse", "semitones", -12, 12, 0)), added(scalar("fine", "cents", -100, 100, 0)), added(scalar("keytrack", "", 0, 1, 1, PS::linear, false))}},
+    {ModuleType::fm, "fm", true, 3, true, false, AudioPort::modIn, {scalar("carrierRatio", "ratio", 0.5, 4, 1, PS::logarithmic), scalar("modulatorRatio", "ratio", 0.25, 8, 1, PS::logarithmic), scalar("index", "", 0, 6, 0), scalar("outputLevel", "", 0, 1, 0.7),
+        added(step("unisonVoices", "count", 1, 7, 1)), added(scalar("detuneCents", "cents", 0, 50, 12)), added(scalar("unisonSpread", "", 0, 1, 0.5)), added(scalar("phaseRandom", "", 0, 1, 0, PS::linear, false)), added(scalar("drift", "", 0, 1, 0)),
+        added(step("octave", "oct", -3, 3, 0)), added(step("coarse", "semitones", -12, 12, 0)), added(scalar("fine", "cents", -100, 100, 0)), added(scalar("keytrack", "", 0, 1, 1, PS::linear, false)), added(scalar("modInDepth", "", 0, 1, 0))}},
+    {ModuleType::noise, "noise", true, 3, true, false, AudioPort::in, {choice("color", {"white", "pink"}), choice("mode", {"continuous", "burst"}), scalar("burstMs", "ms", 1, 500, 80, PS::logarithmic), scalar("outputLevel", "", 0, 1, 0.3)}},
+    {ModuleType::resonator, "resonator", false, 2, false, false, AudioPort::exciteIn, {choice("mode", {"comb", "modal"}), scalar("tuneRatio", "ratio", 0.5, 4, 1, PS::logarithmic), scalar("combFeedback", "", 0, 0.97, 0.4), scalar("modalQ", "", 0.5, 12, 3), array("modeRatios", 0.5, 4, 1, 4), array("modeLevels", 0, 1, 0, 4), scalar("outputLevel", "", 0, 1, 0.8),
+        added(scalar("exciteDepth", "", 0, 1, 0))}},
+    {ModuleType::filter, "filter", false, 2, false, false, AudioPort::in, {choice("mode", {"lowpass", "bandpass", "highpass", "ladder24", "notch"}), scalar("cutoff", "Hz", 30, 18000, 1000, PS::logarithmic), scalar("q", "", 0.5, 8, 0.707), scalar("outputLevel", "", 0, 1, 1),
+        added(scalar("drive", "", 1, 16, 1)), added(scalar("keytrack", "", -1, 1, 0)), added(scalar("envAmount", "", -1, 1, 0))}},
+    {ModuleType::shaper, "shaper", false, 2, false, false, AudioPort::in, {scalar("drive", "", 1, 16, 1), scalar("wet", "", 0, 1, 1), scalar("outputLevel", "", 0, 1, 1),
+        added(choice("curve", {"tanh", "hardClip", "fold", "sine", "asymmetric"}))}},
+    {ModuleType::mixer, "mixer", false, 2, false, false, AudioPort::in, {scalar("level", "", 0, 1, 1), scalar("pan", "", -1, 1, 0), scalar("outputLevel", "", 0, 1, 1)}},
+    {ModuleType::sub, "sub", true, 1, false, false, AudioPort::in, {added(choice("waveform", {"sine", "triangle"})), added(step("octave", "oct", -2, -1, -1)), added(scalar("drift", "", 0, 1, 0)), added(scalar("fine", "cents", -100, 100, 0)), added(scalar("keytrack", "", 0, 1, 1, PS::linear, false)), added(scalar("outputLevel", "", 0, 1, 0.5))}},
+    {ModuleType::chorus, "chorus", false, 1, false, true, AudioPort::in, {added(scalar("rate", "Hz", 0.01, 8, 0.5, PS::logarithmic)), added(scalar("depth", "", 0, 1, 0.3)), added(step("voices", "count", 2, 4, 2)), added(scalar("feedback", "", 0, 0.9, 0)), added(scalar("mix", "", 0, 1, 0.3)), added(scalar("outputLevel", "", 0, 1, 1))}},
+    {ModuleType::delay, "delay", false, 1, false, true, AudioPort::in, {added(choice("syncMode", {"free", "sync"})), added(scalar("timeMs", "ms", 1, 2000, 375, PS::logarithmic)), added(choice("syncDivision", {"1/1", "1/2", "1/4", "1/4T", "1/8", "1/8T", "1/16"})), added(scalar("spread", "", -1, 1, 0)), added(scalar("feedback", "", 0, 0.95, 0.35)), added(scalar("damping", "", 0, 1, 0.4)), added(scalar("mix", "", 0, 1, 0.3)), added(scalar("outputLevel", "", 0, 1, 1))}},
+    {ModuleType::reverb, "reverb", false, 1, false, true, AudioPort::in, {added(scalar("size", "", 0, 1, 0.5)), added(scalar("decaySeconds", "s", 0.1, 20, 2.0, PS::logarithmic)), added(scalar("damping", "", 0, 1, 0.5)), added(scalar("preDelayMs", "ms", 0, 200, 20)), added(scalar("width", "", 0, 1, 1)), added(scalar("mix", "", 0, 1, 0.25)), added(scalar("outputLevel", "", 0, 1, 1))}},
+    {ModuleType::width, "width", false, 1, false, true, AudioPort::in, {added(scalar("width", "", 0, 2, 1)), added(scalar("bassMonoHz", "Hz", 20, 500, 120, PS::logarithmic)), added(scalar("outputLevel", "", 0, 1, 1))}}
 }};
 
 std::string_view typeId(ModuleType type) { return catalog.at(static_cast<std::size_t>(type)).id; }
@@ -124,7 +145,9 @@ double ParameterDescriptor::denormalize(double value) const noexcept
     if (scale == ParameterScale::logarithmic) return minimum * std::pow(maximum / minimum, value);
     return minimum + value * (maximum - minimum);
 }
-const std::array<ModuleDescriptor, 7>& moduleCatalog() { return catalog; }
+const std::array<ModuleDescriptor, moduleTypeCount>& moduleCatalog() { return catalog; }
+std::string_view audioPortId(AudioPort port) noexcept { return port == AudioPort::modIn ? "modIn" : port == AudioPort::exciteIn ? "exciteIn" : "in"; }
+bool declaresPort(const ModuleDescriptor& m, AudioPort port) noexcept { return port == AudioPort::in ? !m.source : m.audioRateInput == port; }
 const ModuleDescriptor* findModule(std::string_view id) noexcept { auto i = std::ranges::find(catalog, id, &ModuleDescriptor::id); return i == catalog.end() ? nullptr : &*i; }
 const ParameterDescriptor* findParameter(const ModuleDescriptor& m, std::string_view id) noexcept { auto i = std::ranges::find(m.parameters, id, &ParameterDescriptor::id); return i == m.parameters.end() ? nullptr : &*i; }
 
@@ -143,13 +166,13 @@ std::string validate(const Patch& p)
 {
     if (p.nodes.size() > maximumNodes || p.edges.size() > maximumEdges || p.matrix.size() > maximumMatrixRows) return "patch exceeds structural cap";
     std::unordered_map<std::string, const Node*> nodes;
-    std::array<std::size_t, 7> counts{}; std::size_t sources = 0;
+    std::array<std::size_t, moduleTypeCount> counts{}; std::size_t sources = 0;
     for (const auto& n : p.nodes)
     {
         if (static_cast<std::size_t>(n.type) >= catalog.size()) return "unknown module type";
         if (n.id.empty() || n.id == "output" || !nodes.emplace(n.id, &n).second) return "invalid or duplicate node id";
         const auto& d = catalog.at(static_cast<std::size_t>(n.type));
-        if (++counts[static_cast<std::size_t>(n.type)] > d.typeCap || (d.source && ++sources > 3)) return "module type cap exceeded";
+        if (++counts[static_cast<std::size_t>(n.type)] > d.typeCap || (d.sharedSourceSlot && ++sources > generalSourceSlots)) return "module type cap exceeded";
         if (n.parameters.size() != d.parameters.size()) return "node parameters are not complete";
         std::set<std::string> seen;
         for (const auto& pv : n.parameters)
@@ -161,13 +184,23 @@ std::string validate(const Patch& p)
             for (double v : pv.values) if (!std::isfinite(v) || v < pd->minimum || v > pd->maximum || (pd->kind == ParameterKind::discrete && std::floor(v) != v)) return "parameter outside descriptor";
         }
     }
-    std::set<std::pair<std::string, std::string>> pairs;
+    std::set<std::tuple<std::string, std::string, AudioPort>> pairs;
     std::unordered_map<std::string, std::vector<std::string>> next;
     for (const auto& e : p.edges)
     {
         if (!std::isfinite(e.gain) || e.gain < 0 || e.gain > 1 || !nodes.contains(e.source) || (e.destination != "output" && !nodes.contains(e.destination))) return "invalid audio edge";
-        if (e.source == e.destination || !pairs.emplace(e.source, e.destination).second) return "self or duplicate audio edge";
-        if (e.destination != "output" && catalog.at(static_cast<std::size_t>(nodes.at(e.destination)->type)).source) return "audio edge enters source";
+        if (e.source == e.destination || !pairs.emplace(e.source, e.destination, e.port).second) return "self or duplicate audio edge";
+        // The OUT bus has only the ordinary summed input; every other target must declare the port.
+        if (e.destination == "output") { if (e.port != AudioPort::in) return "audio edge targets an undeclared port"; }
+        else
+        {
+            const auto& destination = catalog.at(static_cast<std::size_t>(nodes.at(e.destination)->type));
+            if (e.port == AudioPort::in && destination.source) return "audio edge enters source";
+            if (!declaresPort(destination, e.port)) return "audio edge targets an undeclared port";
+        }
+        // Effects region router constraint: the global tail may only feed itself or the OUT bus.
+        if (catalog.at(static_cast<std::size_t>(nodes.at(e.source)->type)).effects && e.destination != "output"
+            && !catalog.at(static_cast<std::size_t>(nodes.at(e.destination)->type)).effects) return "effects tail edge enters a per-voice node";
         if (e.destination != "output") next[e.source].push_back(e.destination);
     }
     std::unordered_map<std::string, int> color;
@@ -192,7 +225,7 @@ juce::var encodePatchValue(const Patch& p)
     auto root = obj(); put(root, "patchVersion", patchVersion); put(root, "noiseSeed", static_cast<juce::int64>(p.noiseSeed));
     juce::Array<juce::var> nodes;
     for (const auto& n : p.nodes) { auto v=obj(); put(v,"id",n.id); put(v,"type",std::string(typeId(n.type))); auto ps=obj(); for(const auto& x:n.parameters) put(ps,x.id.c_str(),x.values.size()==1?juce::var(x.values[0]):doubles(x.values)); put(v,"parameters",ps); nodes.add(v); } put(root,"nodes",nodes);
-    juce::Array<juce::var> edges; for(const auto& e:p.edges){auto v=obj();put(v,"source",e.source);put(v,"destination",e.destination);put(v,"gain",e.gain);edges.add(v);} put(root,"edges",edges);
+    juce::Array<juce::var> edges; for(const auto& e:p.edges){auto v=obj();put(v,"source",e.source);put(v,"destination",e.destination);put(v,"gain",e.gain);if(e.port!=AudioPort::in)put(v,"port",audioPortId(e.port));edges.add(v);} put(root,"edges",edges);
     juce::Array<juce::var> envs; for(const auto& e:p.envelopes){auto v=obj();put(v,"attack",e.attack);put(v,"decay",e.decay);put(v,"sustain",e.sustain);put(v,"release",e.release);envs.add(v);} put(root,"envelopes",envs);
     juce::Array<juce::var> lfos; for(const auto& l:p.lfos){auto v=obj();put(v,"rate",l.rate);put(v,"waveform",std::string_view(l.waveform==LfoWaveform::sine?"sine":"triangle"));lfos.add(v);} put(root,"lfos",lfos);
     juce::Array<juce::var> rows; for(const auto& r:p.matrix){auto v=obj();put(v,"id",r.id);put(v,"enabled",r.enabled);put(v,"source",std::string(sourceId(r.source)));put(v,"destinationNode",r.destinationNode);put(v,"destinationParameter",r.destinationParameter);put(v,"depth",r.depth);rows.add(v);} put(root,"matrix",rows);
@@ -207,9 +240,9 @@ DecodeResult decodePatchValue(const juce::var& root)
     std::int64_t version=0, seed=0; if(!integer(o->getProperty("patchVersion"),version)||version!=patchVersion||!integer(o->getProperty("noiseSeed"),seed)||seed<0||seed>UINT32_MAX) return fail("unsupported version or invalid seed");
     Patch p; p.noiseSeed=static_cast<std::uint32_t>(seed);
     const auto* ns=arrayValue(o->getProperty("nodes")); if(!ns || static_cast<std::size_t>(ns->size()) > maximumNodes) return fail("nodes must be bounded array");
-    for(const auto& nv:*ns){const auto* no=object(nv);if(!no||!exactKeys(*no,{"id","type","parameters"})||!no->getProperty("id").isString()||!no->getProperty("type").isString())return fail("invalid node");const auto* md=findModule(no->getProperty("type").toString().toStdString());const auto* po=object(no->getProperty("parameters"));if(!md||!po)return fail("invalid node type or parameters");Node n{no->getProperty("id").toString().toStdString(),md->type,{}};for(const auto& pd:md->parameters){if(!po->hasProperty(pd.id.data()))return fail("missing parameter");ParameterValue pv{std::string(pd.id),{}};auto value=po->getProperty(pd.id.data());if(pd.arraySize){const auto* a=arrayValue(value);if(!a)return fail("coefficient must be array");for(const auto& x:*a){double d;if(!number(x,d))return fail("nonfinite coefficient");pv.values.push_back(d);}}else{double d;if(!number(value,d))return fail("parameter must be finite number");pv.values.push_back(d);}n.parameters.push_back(std::move(pv));}if(static_cast<std::size_t>(po->getProperties().size())!=md->parameters.size())return fail("unknown parameter");p.nodes.push_back(std::move(n));}
-    const auto* es=arrayValue(o->getProperty("edges"));if(!es||static_cast<std::size_t>(es->size())>maximumEdges)return fail("edges must be bounded array");for(const auto& ev:*es){const auto* eo=object(ev);double gain;if(!eo||!exactKeys(*eo,{"source","destination","gain"})||!eo->getProperty("source").isString()||!eo->getProperty("destination").isString()||!number(eo->getProperty("gain"),gain))return fail("invalid edge");p.edges.push_back({eo->getProperty("source").toString().toStdString(),eo->getProperty("destination").toString().toStdString(),gain});}
-    const auto* envs=arrayValue(o->getProperty("envelopes"));if(!envs||envs->size()!=3)return fail("three envelopes required");for(int i=0;i<3;++i){const auto* x=object((*envs)[i]);auto& e=p.envelopes[i];if(!x||!exactKeys(*x,{"attack","decay","sustain","release"})||!number(x->getProperty("attack"),e.attack)||!number(x->getProperty("decay"),e.decay)||!number(x->getProperty("sustain"),e.sustain)||!number(x->getProperty("release"),e.release))return fail("invalid envelope");}
+    for(const auto& nv:*ns){const auto* no=object(nv);if(!no||!exactKeys(*no,{"id","type","parameters"})||!no->getProperty("id").isString()||!no->getProperty("type").isString())return fail("invalid node");const auto* md=findModule(no->getProperty("type").toString().toStdString());const auto* po=object(no->getProperty("parameters"));if(!md||!po)return fail("invalid node type or parameters");Node n{no->getProperty("id").toString().toStdString(),md->type,{}};for(const auto& pd:md->parameters){ParameterValue pv{std::string(pd.id),{}};if(!po->hasProperty(pd.id.data())){if(!pd.postV1)return fail("missing parameter");pv.values.assign(pd.arraySize==0?1:pd.arraySize,pd.defaultValue);n.parameters.push_back(std::move(pv));continue;}auto value=po->getProperty(pd.id.data());if(pd.arraySize){const auto* a=arrayValue(value);if(!a)return fail("coefficient must be array");for(const auto& x:*a){double d;if(!number(x,d))return fail("nonfinite coefficient");pv.values.push_back(d);}}else{double d;if(!number(value,d))return fail("parameter must be finite number");pv.values.push_back(d);}n.parameters.push_back(std::move(pv));}for(const auto& property:po->getProperties())if(findParameter(*md,property.name.toString().toStdString())==nullptr)return fail("unknown parameter");p.nodes.push_back(std::move(n));}
+    const auto* es=arrayValue(o->getProperty("edges"));if(!es||static_cast<std::size_t>(es->size())>maximumEdges)return fail("edges must be bounded array");for(const auto& ev:*es){const auto* eo=object(ev);double gain;if(!eo||!exactKeys(*eo,{"source","destination","gain"},{"port"})||!eo->getProperty("source").isString()||!eo->getProperty("destination").isString()||!number(eo->getProperty("gain"),gain))return fail("invalid edge");auto port=AudioPort::in;if(eo->hasProperty("port")){const auto name=eo->getProperty("port").toString();if(name=="in")port=AudioPort::in;else if(name=="modIn")port=AudioPort::modIn;else if(name=="exciteIn")port=AudioPort::exciteIn;else return fail("unknown audio port");}p.edges.push_back({eo->getProperty("source").toString().toStdString(),eo->getProperty("destination").toString().toStdString(),gain,port});}
+    const auto* envs=arrayValue(o->getProperty("envelopes"));if(!envs||(envs->size()!=static_cast<int>(envelopeCount)&&envs->size()!=static_cast<int>(envelopeCount)-1))return fail("three or four envelopes required");for(int i=0;i<envs->size();++i){const auto* x=object((*envs)[i]);auto& e=p.envelopes[i];if(!x||!exactKeys(*x,{"attack","decay","sustain","release"})||!number(x->getProperty("attack"),e.attack)||!number(x->getProperty("decay"),e.decay)||!number(x->getProperty("sustain"),e.sustain)||!number(x->getProperty("release"),e.release))return fail("invalid envelope");}
     const auto* ls=arrayValue(o->getProperty("lfos"));if(!ls||ls->size()!=2)return fail("two lfos required");for(int i=0;i<2;++i){const auto* x=object((*ls)[i]);auto& l=p.lfos[i];if(!x||!exactKeys(*x,{"rate","waveform"})||!number(x->getProperty("rate"),l.rate)||!x->getProperty("waveform").isString())return fail("invalid lfo");auto w=x->getProperty("waveform").toString();if(w=="sine")l.waveform=LfoWaveform::sine;else if(w=="triangle")l.waveform=LfoWaveform::triangle;else return fail("unknown lfo waveform");}
     const auto* rs=arrayValue(o->getProperty("matrix"));if(!rs||static_cast<std::size_t>(rs->size())>maximumMatrixRows)return fail("matrix must be bounded array");for(const auto& rv:*rs){const auto* ro=object(rv);double depth;if(!ro||!exactKeys(*ro,{"id","enabled","source","destinationNode","destinationParameter","depth"})||!ro->getProperty("id").isString()||!ro->getProperty("enabled").isBool()||!ro->getProperty("source").isString()||!ro->getProperty("destinationNode").isString()||!ro->getProperty("destinationParameter").isString()||!number(ro->getProperty("depth"),depth))return fail("invalid matrix row");auto src=sourceFrom(ro->getProperty("source").toString().toStdString());if(!src)return fail("unknown modulation source");p.matrix.push_back({ro->getProperty("id").toString().toStdString(),static_cast<bool>(ro->getProperty("enabled")),*src,ro->getProperty("destinationNode").toString().toStdString(),ro->getProperty("destinationParameter").toString().toStdString(),depth});}
     const auto* ms=arrayValue(o->getProperty("macros"));if(!ms||ms->size()!=4)return fail("four macros required");for(int i=0;i<4;++i){const auto* x=object((*ms)[i]);double d;if(!x||!exactKeys(*x,{"label","default"})||!x->getProperty("label").isString()||!number(x->getProperty("default"),d))return fail("invalid macro");p.macros[i]={x->getProperty("label").toString().toStdString(),d};}

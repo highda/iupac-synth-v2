@@ -13,13 +13,21 @@ namespace iupac::domain
 {
 inline constexpr int patchVersion = 1;
 inline constexpr int stateVersion = 1;
-inline constexpr std::size_t maximumNodes = 11;
-inline constexpr std::size_t maximumEdges = 32;
-inline constexpr std::size_t maximumMatrixRows = 24;
+inline constexpr std::size_t maximumNodes = 16;
+inline constexpr std::size_t maximumEdges = 48;
+inline constexpr std::size_t maximumMatrixRows = 40;
+inline constexpr std::size_t envelopeCount = 4;
+inline constexpr std::size_t lfoCount = 2;
+inline constexpr std::size_t generalSourceSlots = 3;
 inline constexpr std::size_t maximumDocumentBytes = 1024 * 1024;
 inline constexpr std::size_t maximumJsonDepth = 32;
 
-enum class ModuleType { harmonic, fm, noise, resonator, filter, shaper, mixer };
+// D8 appends five types; the original seven keep their order so a stored type id never moves.
+enum class ModuleType { harmonic, fm, noise, resonator, filter, shaper, mixer, sub, chorus, delay, reverb, width };
+inline constexpr std::size_t moduleTypeCount = 12;
+// The IN ports a node declares. `in` is the ordinary summed stereo input every processor,
+// effect and the OUT bus has; the two audio-rate inputs are the only typed extras (D8).
+enum class AudioPort { in, modIn, exciteIn };
 enum class ParameterScale { linear, logarithmic };
 enum class ParameterKind { continuous, discrete, coefficientArray, convenience };
 
@@ -36,6 +44,9 @@ struct ParameterDescriptor
     std::size_t arraySize{};
     double smoothingMilliseconds{20.0};
     std::vector<std::string_view> choices;
+    // True for a parameter introduced after the original v1 catalog: a decoded node may omit it
+    // and the decoder fills this default (ARCHITECTURE "Decoder compatibility for added parameters").
+    bool postV1{};
 
     [[nodiscard]] double normalize(double value) const noexcept;
     [[nodiscard]] double denormalize(double normalized) const noexcept;
@@ -45,18 +56,23 @@ struct ModuleDescriptor
 {
     ModuleType type;
     std::string_view id;
-    bool source;
+    bool source;             // no audio input on its `in` port
     std::size_t typeCap;
+    bool sharedSourceSlot;   // counts against the three general source slots
+    bool effects;            // compiled into the global post-mixer tail
+    AudioPort audioRateInput; // the extra typed IN port this type declares, `in` when it has none
     std::vector<ParameterDescriptor> parameters;
 };
 
-[[nodiscard]] const std::array<ModuleDescriptor, 7>& moduleCatalog();
+[[nodiscard]] const std::array<ModuleDescriptor, moduleTypeCount>& moduleCatalog();
+[[nodiscard]] std::string_view audioPortId(AudioPort) noexcept;
+[[nodiscard]] bool declaresPort(const ModuleDescriptor&, AudioPort) noexcept;
 [[nodiscard]] const ModuleDescriptor* findModule(std::string_view id) noexcept;
 [[nodiscard]] const ParameterDescriptor* findParameter(const ModuleDescriptor&, std::string_view id) noexcept;
 
 struct ParameterValue { std::string id; std::vector<double> values; };
 struct Node { std::string id; ModuleType type{}; std::vector<ParameterValue> parameters; };
-struct AudioEdge { std::string source; std::string destination; double gain{}; }; // destination "output" is the final bus
+struct AudioEdge { std::string source; std::string destination; double gain{}; AudioPort port{AudioPort::in}; }; // destination "output" is the final bus
 enum class ModulationSource { e1, e2, e3, l1, l2, velocity, keyTracking, pitchBend, cc1, macro1, macro2, macro3, macro4 };
 struct MatrixRow { std::string id; bool enabled{}; ModulationSource source{}; std::string destinationNode; std::string destinationParameter; double depth{}; };
 struct Envelope { double attack{0.01}, decay{0.1}, sustain{1.0}, release{0.2}; };
@@ -69,8 +85,8 @@ struct Patch
     std::uint32_t noiseSeed{};
     std::vector<Node> nodes;
     std::vector<AudioEdge> edges;
-    std::array<Envelope, 3> envelopes{};
-    std::array<Lfo, 2> lfos{};
+    std::array<Envelope, envelopeCount> envelopes{};
+    std::array<Lfo, lfoCount> lfos{};
     std::vector<MatrixRow> matrix;
     std::array<Macro, 4> macros{};
 };
