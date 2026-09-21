@@ -1,4 +1,5 @@
 #include "EditorField.hpp"
+#include <array>
 #include <cmath>
 namespace iupac::ui
 {
@@ -76,10 +77,14 @@ void SlotView::build(const domain::Node&n)
  auto forest=[&](std::string_view id,juce::String caption,Forest::Mode mode,std::vector<double>defaults={}){auto f=std::make_unique<Forest>(describe(d,id),mode,std::move(defaults));f->setCaption(std::move(caption));f->onChange=[this,p=std::string(id)](const std::vector<double>&v){commit(p,v);};addAndMakeVisible(*f);controls_.emplace_back(std::string(id),std::move(f));};
  auto toggle=[&](std::string_view id,std::vector<juce::String>segments){auto t=std::make_unique<SegmentToggle>(std::move(segments));t->onChange=[this,p=std::string(id)](int v){commit(p,{(double)v});};addAndMakeVisible(*t);controls_.emplace_back(std::string(id),std::move(t));};
  std::vector<double>harmonicDefaults(16);for(std::size_t i=0;i<16;++i)harmonicDefaults[i]=(double)(i+1);
+ // D8 unison band, shared by the two unison-capable source types. `unisonVoices` is discrete over
+ // seven values, so its wheel/drag step is one copy rather than the continuous 2%.
+ auto unisonBand=[&]{fader("unisonVoices","uni",false,false);if(auto*v=control("unisonVoices"))v->setStep(1.0/6.0);
+                     fader("detuneCents","det",false,false);fader("unisonSpread","sprd",false,true);fader("phaseRandom","phase",false,false);fader("drift","drift",false,false);};
  switch(n.type)
  {
-  case domain::ModuleType::harmonic:forest("partialAmplitudes","amp",Forest::Mode::unipolar);forest("partialRatios","ratio",Forest::Mode::logDeviation,harmonicDefaults);forest("partialPans","pan",Forest::Mode::bipolar);fader("tilt","tilt",false,true);fader("inharmonicity","inharm",false,false);break;
-  case domain::ModuleType::fm:knob("carrierRatio","carr");knob("modulatorRatio","mod");knob("index","index");break;
+  case domain::ModuleType::harmonic:forest("partialAmplitudes","amp",Forest::Mode::unipolar);forest("partialRatios","ratio",Forest::Mode::logDeviation,harmonicDefaults);forest("partialPans","pan",Forest::Mode::bipolar);fader("tilt","tilt",false,true);fader("inharmonicity","inharm",false,false);unisonBand();break;
+  case domain::ModuleType::fm:knob("carrierRatio","carr");knob("modulatorRatio","mod");knob("index","index");unisonBand();break;
   case domain::ModuleType::noise:toggle("color",{"white","pink"});toggle("mode",{"cont","burst"});knob("burstMs","burst");break;
   case domain::ModuleType::resonator:toggle("mode",{"comb","modal"});knob("tuneRatio","tune");knob("combFeedback","feedback");knob("modalQ","modal q");forest("modeRatios","ratio",Forest::Mode::logDeviation,std::vector<double>(4,1.0));forest("modeLevels","level",Forest::Mode::unipolar);break;
   case domain::ModuleType::filter:toggle("mode",{"lp","bp","hp"});knob("cutoff","cutoff");knob("q","q");break;
@@ -113,10 +118,13 @@ void SlotView::resized()
  const float s=editorScale(*this);auto px=[s](int reference){return juce::roundToInt((float)reference*s);};
  auto body=r.reduced(px(3),px(2));if(auto*out=control("outputLevel"))out->setBounds(body.removeFromRight(px(10)));body.removeFromRight(px(2));
  auto place=[&](std::string_view id,juce::Rectangle<int>b){for(auto&[cid,c]:controls_)if(cid==id){c->setBounds(b);c->setVisible(true);}};auto hide=[&](std::string_view id){for(auto&[cid,c]:controls_)if(cid==id)c->setVisible(false);};
+ // The five D8 unison controls share one strip along the bottom of the slot: no new slot geometry,
+ // the existing body simply gives up its last band.
+ auto placeUnison=[&](juce::Rectangle<int>band){static constexpr std::array ids{"unisonVoices","detuneCents","unisonSpread","phaseRandom","drift"};const int w=band.getWidth()/(int)ids.size();for(std::size_t i=0;i<ids.size();++i)place(ids[i],(i+1==ids.size()?band:band.removeFromLeft(w)).reduced(1,0));};
  switch(type_)
  {
-  case domain::ModuleType::harmonic:{auto faders=body.removeFromBottom(juce::jmin(px(14),body.getHeight()/4));const int h=body.getHeight()/3;place("partialAmplitudes",body.removeFromTop(h));place("partialRatios",body.removeFromTop(h));place("partialPans",body);place("tilt",faders.removeFromLeft(faders.getWidth()/2).reduced(1,0));place("inharmonicity",faders.reduced(1,0));break;}
-  case domain::ModuleType::fm:{const int w=body.getWidth()/3;place("carrierRatio",body.removeFromLeft(w));place("modulatorRatio",body.removeFromLeft(w));place("index",body);break;}
+  case domain::ModuleType::harmonic:{placeUnison(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/5)));auto faders=body.removeFromBottom(juce::jmin(px(14),body.getHeight()/4));const int h=body.getHeight()/3;place("partialAmplitudes",body.removeFromTop(h));place("partialRatios",body.removeFromTop(h));place("partialPans",body);place("tilt",faders.removeFromLeft(faders.getWidth()/2).reduced(1,0));place("inharmonicity",faders.reduced(1,0));break;}
+  case domain::ModuleType::fm:{placeUnison(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));const int w=body.getWidth()/3;place("carrierRatio",body.removeFromLeft(w));place("modulatorRatio",body.removeFromLeft(w));place("index",body);break;}
   case domain::ModuleType::noise:{auto left=body.removeFromLeft(body.getWidth()*11/20);const int h=juce::jmin(px(14),left.getHeight()/2);place("color",left.removeFromTop(h).reduced(0,1));place("mode",left.removeFromTop(h).reduced(0,1));place("burstMs",body);break;}
   case domain::ModuleType::resonator:{place("mode",body.removeFromTop(juce::jmin(px(13),body.getHeight()/5)).reduced(0,1));if(mode_==0){hide("modalQ");hide("modeRatios");hide("modeLevels");const int w=body.getWidth()/2;place("tuneRatio",body.removeFromLeft(w));place("combFeedback",body);}else{hide("combFeedback");auto knobs=body.removeFromTop(body.getHeight()*2/5);const int w=knobs.getWidth()/2;place("tuneRatio",knobs.removeFromLeft(w));place("modalQ",knobs);const int h=body.getHeight()/2;place("modeRatios",body.removeFromTop(h));place("modeLevels",body);}break;}
   case domain::ModuleType::filter:{place("mode",body.removeFromTop(juce::jmin(px(13),body.getHeight()/5)).reduced(0,1));const int w=body.getWidth()/2;place("cutoff",body.removeFromLeft(w));place("q",body);break;}

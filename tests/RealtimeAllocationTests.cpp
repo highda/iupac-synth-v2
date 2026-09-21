@@ -74,10 +74,14 @@ bool runRealtimeAllocationTests()
         return false;
     }
 
-    // Working storage for sixteen voices x two banks plus the command FIFO: the coordinator
-    // object itself plus the net heap growth while preparing it.
-    auto coordinator = std::make_unique<engine::PatchCoordinator>();
+    // Working storage for sixteen voices x two banks plus the command FIFO: the coordinator object
+    // itself plus every byte the heap gains while it is constructed *and* prepared. Construction is
+    // inside the window because each bank's Engine::Impl — which owns the sixteen voices and all
+    // their per-module state, including the D8 seven-copy unison oscillator banks (#120) — is
+    // allocated there, not in prepare(). Measuring from after construction, as this gate did before
+    // #120, silently omitted the per-voice module storage the unison work grows.
     const auto heapBefore = heapBytesInUse();
+    auto coordinator = std::make_unique<engine::PatchCoordinator>();
     coordinator->prepare(48000.0, 128);
     const auto heapAfter = heapBytesInUse();
     const auto workingStorage = sizeof(engine::PatchCoordinator) + (heapAfter > heapBefore ? heapAfter - heapBefore : 0);
@@ -101,6 +105,38 @@ bool runRealtimeAllocationTests()
 
     if (realtimeAllocations != 0 || realtimeFrees != 0) {
         std::cerr << "realtime allocation test failed: " << realtimeAllocations << " allocations, " << realtimeFrees << " frees\n";
+        return false;
+    }
+
+    // The D8 worst case the architecture names: sixteen voices with `unisonVoices` 7 and drift on
+    // every unison-capable source slot, published while the voices are sounding. The copy count is
+    // a compiled patch value, so it crosses to the audio thread through the ordinary FIFO and the
+    // per-copy banks are already sized; nothing may allocate, and polyphony stays sixteen.
+    auto worstCase = compiled.patch;
+    for (std::uint8_t node = 0; node < worstCase.nodeCount; ++node)
+        if (worstCase.nodes[node].type == domain::ModuleType::harmonic || worstCase.nodes[node].type == domain::ModuleType::fm) {
+            worstCase.nodes[node].values.unisonVoices = static_cast<int>(engine::maximumUnisonVoices);
+            worstCase.nodes[node].values.detuneCents = 50.0f;
+            worstCase.nodes[node].values.unisonSpread = 1.0f;
+            worstCase.nodes[node].values.phaseRandom = 1.0f;
+            worstCase.nodes[node].values.drift = 1.0f;
+        }
+    events.clear();
+    for (std::uint8_t note = 60; note < 60 + engine::maximumVoices; ++note) events.push_back({0, engine::MidiEventType::noteOn, 1, note, 100, 8192});
+    realtimeAllocations = realtimeFrees = 0;
+    auditRealtimeMemory = true;
+    (void) coordinator->publish(worstCase, {});
+    for (int block = 0; block < 8; ++block) { coordinator->render(left, right); (void) coordinator->retryPending(); }
+    coordinator->render(left, right, events);
+    for (int block = 0; block < 12; ++block) coordinator->render(left, right);
+    auditRealtimeMemory = false;
+
+    if (realtimeAllocations != 0 || realtimeFrees != 0) {
+        std::cerr << "realtime allocation test failed under worst-case unison: " << realtimeAllocations << " allocations, " << realtimeFrees << " frees\n";
+        return false;
+    }
+    if (coordinator->activeVoiceCount() > engine::maximumVoices) {
+        std::cerr << "realtime allocation test failed: unison raised the voice count to " << coordinator->activeVoiceCount() << '\n';
         return false;
     }
     return true;

@@ -20,6 +20,10 @@ namespace iupac::engine
 inline constexpr std::size_t maximumModuleBlockSize = 4096;
 inline constexpr unsigned internalOversamplingFactor = 2;
 inline constexpr std::size_t maximumVoices = 16;
+// D8 unison: a unison-capable source renders up to this many detuned copies of itself. Polyphony
+// stays `maximumVoices` — unison multiplies oscillator work per voice, never the voice count — so
+// the per-copy oscillator banks below are fixed-size members, sized once at compile time.
+inline constexpr std::size_t maximumUnisonVoices = 7;
 inline constexpr std::size_t maximumMidiEventsPerBlock = 4096;
 [[nodiscard]] constexpr double internalSampleRate(double outputSampleRate) noexcept { return outputSampleRate * internalOversamplingFactor; }
 [[nodiscard]] constexpr float filterCutoffCeiling(double outputSampleRate) noexcept { return static_cast<float>(outputSampleRate * 0.4); }
@@ -66,13 +70,29 @@ public:
 private:
     static float clampFinite(float value, float lo, float hi, float fallback) noexcept;
     float nextNoise() noexcept;
+    // Recomputes the per-copy detune ratios and pan/level gains when `unisonVoices`, `detuneCents`
+    // or `unisonSpread` move. D9 delegates the curve: copies sit at evenly spaced positions across
+    // [-1, 1], detuned by `position * detuneCents` and panned to `position * unisonSpread`, with a
+    // 1/sqrt(voices) level compensation. One voice is the exact identity — multiplier and gains are
+    // literal 1, so the pre-D8 signal reproduces bit for bit.
+    void updateUnison(int voices, float detuneCents, float spread) noexcept;
     domain::ModuleType type_;
     double sampleRate_{96000.0};
-    std::array<double, 16> phases_{};
-    std::array<float, 16> harmonicSin_{}, harmonicCos_{{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}}, harmonicDeltaSin_{}, harmonicDeltaCos_{};
+    using UnisonBank = std::array<std::array<float, 16>, maximumUnisonVoices>;
+    static constexpr UnisonBank unitCosine() noexcept { UnisonBank b{}; for (auto& copy : b) copy.fill(1.0f); return b; }
+    std::array<double, maximumUnisonVoices> phases_{}, modPhases_{};
+    UnisonBank harmonicSin_{}, harmonicCos_{unitCosine()}, harmonicDeltaSin_{}, harmonicDeltaCos_{};
+    // Per-copy unison state. `detuneMultiplier_` is a frequency ratio, the pan gains already carry
+    // the 1/sqrt(voices) compensation, and the phase draws are taken once per note-on from the
+    // patch-seeded stream below so `phaseRandom` never reaches for wall-clock entropy.
+    std::array<float, maximumUnisonVoices> detuneMultiplier_{}, unisonPanLeft_{}, unisonPanRight_{}, unisonPhase_{}, unisonModPhase_{};
+    float cachedDetuneCents_{std::numeric_limits<float>::quiet_NaN()}, cachedUnisonSpread_{std::numeric_limits<float>::quiet_NaN()};
+    std::uint8_t cachedUnisonVoices_{};
+    bool unisonDirty_{true}, pendingPhaseOffset_{};
+    // `drift`: two slow deterministic wanders per voice (pitch and level), seeded per note-on.
+    double driftPhase_{}, driftLevelPhase_{}, driftRate_{0.11}, driftLevelRate_{0.07};
     std::array<float, 16> cachedRatios_{{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}};
     float cachedHarmonicFundamental_{-1.0f};
-    double modPhase_{};
     std::uint32_t randomState_{1};
     std::array<float, 2> pink_{};
     std::array<float, 16> panLeft_{}, panRight_{}, cachedPans_{};
