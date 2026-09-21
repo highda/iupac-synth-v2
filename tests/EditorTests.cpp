@@ -211,8 +211,34 @@ int main(int argc,char**argv)
  }
  auto*mode=field.slot(4).toggle("mode");if(expect(mode!=nullptr,"resonator slot exposes the mode toggle")){mode->mouseDown(event(*mode,{(float)mode->getWidth()-2.0f,2.0f}));ok&=expect(values(processor.snapshot().editedPatch,"res1","mode")[0]==1.0,"segment toggle click stores the enum");}
  ok&=expect(editor->setEnvelope(0,{.05,.2,.5,.8})&&std::abs(processor.snapshot().editedPatch.envelopes[0].sustain-.5)<1e-9,"envelope curve edits store the ADSR");
+ // D8 modulator settings (#125): the fourth envelope has a panel of its own, a stage curve is a
+ // grip on that panel, and the LFO panels carry the appended shapes, the fade and the sync pair.
+ ok&=expect(editor->setEnvelope(3,{.05,.2,.5,.8,.6,-.4,.9})&&std::abs(processor.snapshot().editedPatch.envelopes[3].attackCurve-.6)<1e-9&&std::abs(processor.snapshot().editedPatch.envelopes[3].releaseCurve-.9)<1e-9,"E4 and the stage curves reach the patch");
+ {
+  auto&fourth=editor->envelopeCurve(3);ok&=expect(fourth.isVisible()&&!fourth.getBounds().isEmpty(),"E4 has a laid-out panel");
+  // Dragging the attack-curve grip bends only that stage: the attack time and the sustain stay put.
+  const auto before=processor.snapshot().editedPatch.envelopes[3];
+  fourth.setEnvelope({before.attack,before.decay,before.sustain,before.release,0,0,0},true);
+  auto*grip=&fourth;const auto height=(float)grip->getHeight();
+  grip->mouseDown(event(*grip,{(float)grip->getWidth()*.14f,height*.5f}));grip->mouseDrag(event(*grip,{(float)grip->getWidth()*.14f,height*.9f}));grip->mouseUp(event(*grip,{(float)grip->getWidth()*.14f,height*.9f}));
+  const auto after=processor.snapshot().editedPatch.envelopes[3];
+  ok&=expect(after.attackCurve!=0.0&&after.attack==before.attack&&after.sustain==before.sustain&&after.release==before.release,"a curve grip bends the stage without moving its endpoints");
+ }
+ {
+  auto lfo=processor.snapshot().editedPatch.lfos[0];lfo.waveform=domain::LfoWaveform::sampleHold;lfo.fadeMs=750;lfo.syncMode=domain::LfoSyncMode::sync;lfo.syncDivision=domain::LfoSyncDivision::eighth;
+  ok&=expect(editor->setLfo(0,lfo),"LFO settings can be edited");
+  const auto stored=processor.snapshot().editedPatch.lfos[0];
+  ok&=expect(stored.waveform==domain::LfoWaveform::sampleHold&&stored.fadeMs==750&&stored.syncMode==domain::LfoSyncMode::sync&&stored.syncDivision==domain::LfoSyncDivision::eighth,"the appended LFO settings reach the patch");
+ }
+ ok&=expect(ui::modulationSourceName(domain::ModulationSource::e4)=="E4","the editor names the fourth envelope source");
  // Lanes.
- ok&=expect(editor->addLane()&&editor->lanes().laneCount()==1,"lane can be added");ok&=expect(editor->setLane(0,{"",true,domain::ModulationSource::l1,"filt1","cutoff",1.0}),"lane can be edited");
+ ok&=expect(editor->addLane()&&editor->lanes().laneCount()==1,"lane can be added");
+ // Every source the domain declares is offered, so `e4`, `velocity` and `keyTracking` are all selectable.
+ ok&=expect(editor->lanes().lane(0).sourcePicker().getNumItems()==(int)domain::modulationSourceCount,"the lane offers every modulation source");
+ ok&=expect(editor->setLane(0,{"",true,domain::ModulationSource::e4,"filt1","cutoff",0.5})&&processor.snapshot().editedPatch.matrix[0].source==domain::ModulationSource::e4,"E4 is selectable as a matrix source");
+ ok&=expect(editor->setLane(0,{"",true,domain::ModulationSource::keyTracking,"filt1","cutoff",0.5})&&processor.snapshot().editedPatch.matrix[0].source==domain::ModulationSource::keyTracking,"key tracking is selectable as a matrix source");
+ ok&=expect(editor->setLane(0,{"",true,domain::ModulationSource::velocity,"filt1","cutoff",0.5})&&processor.snapshot().editedPatch.matrix[0].source==domain::ModulationSource::velocity,"velocity is selectable as a matrix source");
+ ok&=expect(editor->setLane(0,{"",true,domain::ModulationSource::l1,"filt1","cutoff",1.0}),"lane can be edited");
  patch=processor.snapshot().editedPatch;ok&=expect(patch.matrix.size()==1&&patch.matrix[0].source==domain::ModulationSource::l1&&patch.matrix[0].destinationParameter=="cutoff","lane edits reach the matrix");ok&=expect(editor->lanes().lane(0).sourcePicker().getSelectedId()==4&&editor->lanes().lane(0).depthBar().value()==1.0,"lane view mirrors the row");
  // Effective rings: with an L1→cutoff lane the knob carries an accent value from the engine snapshot; without, none.
  juce::AudioBuffer<float>audio(2,128);juce::MidiBuffer midi;auto block=[&]{midi.clear();processor.processBlock(audio,midi);};for(int i=0;i<8;++i)block();tick();for(int i=0;i<16;++i)block();processor.keyboardState().noteOn(1,60,.8f);for(int i=0;i<16;++i)block();ok&=expect(processor.activeVoiceCount()>0,"audition keyboard reaches production MIDI path");

@@ -164,6 +164,123 @@ class CompatibilityTests(unittest.TestCase):
         self.assertNotEqual(lead(midi=MIDI_C5, keytrack=0.0)["pcmSha256"], at_c5["pcmSha256"])
         self.assertEqual(lead(midi=MIDI_C5, keytrack=0.0)["pcmSha256"], lead(midi=MIDI_C5, octave=-1.0)["pcmSha256"])
 
+    # ---- D8 modulator settings (#125) -----------------------------------------------------------
+
+    def modulated(self, lfos=None, envelopes=None, rows=None, **overrides):
+        """The authored curve case with its modulator settings replaced, rendered through the CLI."""
+        document = json.loads((ROOT / "data" / "panels" / "authored-synth" / "modulation-curves.snapshot.json").read_text())
+        patch = document["editedPatch"]
+        if lfos is not None:
+            patch["lfos"] = lfos
+        if envelopes is not None:
+            patch["envelopes"] = envelopes
+        if rows is not None:
+            patch["matrix"] = rows
+        patch.update(overrides)
+        document["basePatch"] = json.loads(json.dumps(patch))
+        return self.render_document(document)
+
+    @staticmethod
+    def flat_envelopes(**curves):
+        return [dict({"attack": 0.05, "decay": 0.4, "sustain": 0.6, "release": 0.35,
+                      "attackCurve": 0.0, "decayCurve": 0.0, "releaseCurve": 0.0}, **curves) for _ in range(4)]
+
+    @staticmethod
+    def lfo(waveform, rate=3.0, fade=0.0, sync="free", division="1/4"):
+        return {"rate": rate, "waveform": waveform, "fadeMs": fade, "syncMode": sync, "syncDivision": division}
+
+    def test_a_stage_curve_of_zero_is_the_existing_adsr_shape_exactly(self):
+        """A curve of 0 must be the literal identity, or every pre-D8 patch changes its sound."""
+        flat = self.modulated(envelopes=self.flat_envelopes())
+        omitted = [{k: v for k, v in e.items() if not k.endswith("Curve")} for e in self.flat_envelopes()]
+        self.assertEqual(self.modulated(envelopes=omitted)["pcmSha256"], flat["pcmSha256"])
+        # ...and a bent stage is audibly a different envelope, on each of the three stages.
+        for stage in ("attackCurve", "decayCurve", "releaseCurve"):
+            bent = self.modulated(envelopes=self.flat_envelopes(**{stage: 1.0}))
+            self.assertNotEqual(bent["pcmSha256"], flat["pcmSha256"], f"{stage} is inert")
+            self.assertGreater(bent["rms"], 0.0)
+            # The stage keeps its endpoints, so the render stays inside the same peak envelope.
+            self.assertLessEqual(bent["peak"], flat["peak"] * 1.05)
+
+    def test_the_fourth_envelope_is_a_matrix_source_and_defaults_when_a_patch_stores_three(self):
+        rows = [{"id": "e4-q", "enabled": True, "source": "e4", "destinationNode": "tone",
+                 "destinationParameter": "q", "depth": 1.0}]
+        slow = self.modulated(rows=rows, envelopes=self.flat_envelopes()[:3]
+                              + [{"attack": 2.0, "decay": 4.0, "sustain": 0.0, "release": 6.0}])
+        fast = self.modulated(rows=rows, envelopes=self.flat_envelopes()[:3]
+                              + [{"attack": 0.001, "decay": 0.01, "sustain": 0.0, "release": 0.02}])
+        self.assertNotEqual(slow["pcmSha256"], fast["pcmSha256"], "E4 does not reach the matrix")
+        # Three stored envelopes stay valid and decode with E4 at its construction default, which is
+        # the same render as writing that default out in full.
+        three = self.modulated(rows=rows, envelopes=self.flat_envelopes()[:3])
+        default_e4 = self.modulated(rows=rows, envelopes=self.flat_envelopes()[:3]
+                                    + [{"attack": 0.01, "decay": 0.1, "sustain": 1.0, "release": 0.2}])
+        self.assertEqual(three["pcmSha256"], default_e4["pcmSha256"])
+
+    def test_the_persisted_source_list_appends_e4(self):
+        out = subprocess.run([CLI, "inspect", "--stage", "catalog"], capture_output=True, text=True, check=True)
+        self.assertEqual(json.loads(out.stdout)["modulationSources"],
+                         ["e1", "e2", "e3", "l1", "l2", "velocity", "keyTracking", "pitchBend", "cc1",
+                          "macro1", "macro2", "macro3", "macro4", "e4"])
+
+    def test_every_lfo_shape_renders_and_the_first_two_indices_did_not_move(self):
+        rows = [{"id": "l1-cutoff", "enabled": True, "source": "l1", "destinationNode": "tone",
+                 "destinationParameter": "cutoff", "depth": 0.6}]
+        digests = {}
+        for shape in ("sine", "triangle", "saw", "square", "sampleHold", "randomSmooth"):
+            result = self.modulated(lfos=[self.lfo(shape), self.lfo("sine", rate=0.5)], rows=rows,
+                                    envelopes=self.flat_envelopes())
+            self.assertGreater(result["rms"], 0.0)
+            digests[shape] = result["pcmSha256"]
+        self.assertEqual(len(set(digests.values())), len(digests), "two LFO shapes render identically")
+
+    def test_the_random_lfo_shapes_repeat_exactly(self):
+        """V2: `sampleHold`/`randomSmooth` draw from the patch-seeded stream, never wall-clock entropy."""
+        rows = [{"id": "l1-cutoff", "enabled": True, "source": "l1", "destinationNode": "tone",
+                 "destinationParameter": "cutoff", "depth": 0.8}]
+        for shape in ("sampleHold", "randomSmooth"):
+            renders = [self.modulated(lfos=[self.lfo(shape, rate=8.0), self.lfo("sine")], rows=rows,
+                                      envelopes=self.flat_envelopes(), noiseSeed=4242) for _ in range(2)]
+            self.assertEqual(renders[0]["pcmSha256"], renders[1]["pcmSha256"], f"{shape} is not reproducible")
+            other_seed = self.modulated(lfos=[self.lfo(shape, rate=8.0), self.lfo("sine")], rows=rows,
+                                        envelopes=self.flat_envelopes(), noiseSeed=99)
+            self.assertNotEqual(other_seed["pcmSha256"], renders[0]["pcmSha256"], f"{shape} ignores the patch seed")
+
+    def test_the_lfo_fade_and_tempo_sync_are_real(self):
+        rows = [{"id": "l1-cutoff", "enabled": True, "source": "l1", "destinationNode": "tone",
+                 "destinationParameter": "cutoff", "depth": 0.8}]
+        envelopes = self.flat_envelopes()
+        immediate = self.modulated(lfos=[self.lfo("triangle"), self.lfo("sine")], rows=rows, envelopes=envelopes)
+        # 0 ms is exactly no fade; a real fade changes the first seconds of the render.
+        self.assertEqual(self.modulated(lfos=[self.lfo("triangle", fade=0.0), self.lfo("sine")], rows=rows,
+                                        envelopes=envelopes)["pcmSha256"], immediate["pcmSha256"])
+        self.assertNotEqual(self.modulated(lfos=[self.lfo("triangle", fade=2000.0), self.lfo("sine")], rows=rows,
+                                           envelopes=envelopes)["pcmSha256"], immediate["pcmSha256"])
+        # Sync follows the 120 BPM fallback the render manifest records, so a division is a rate.
+        quarter = self.modulated(lfos=[self.lfo("triangle", sync="sync", division="1/4"), self.lfo("sine")],
+                                 rows=rows, envelopes=envelopes)
+        self.assertEqual(self.modulated(lfos=[self.lfo("triangle", rate=2.0, sync="sync", division="1/4"),
+                                              self.lfo("sine")], rows=rows, envelopes=envelopes)["pcmSha256"],
+                         quarter["pcmSha256"], "a synced LFO still reads its free-running rate")
+        self.assertEqual(self.modulated(lfos=[self.lfo("triangle", rate=2.0), self.lfo("sine")], rows=rows,
+                                        envelopes=envelopes)["pcmSha256"], quarter["pcmSha256"],
+                         "1/4 at 120 BPM is not 2 Hz")
+        self.assertNotEqual(self.modulated(lfos=[self.lfo("triangle", sync="sync", division="1/8"), self.lfo("sine")],
+                                           rows=rows, envelopes=envelopes)["pcmSha256"], quarter["pcmSha256"])
+
+    def test_the_authored_modulation_cases_cover_every_envelope_and_every_shape(self):
+        root = ROOT / "data" / "panels" / "authored-synth"
+        patches = [json.loads((root / name).read_text())["editedPatch"]
+                   for name in ("modulation-curves.snapshot.json", "modulation-random.snapshot.json",
+                                "modulation-sync.snapshot.json")]
+        shapes = {lfo["waveform"] for patch in patches for lfo in patch["lfos"]}
+        self.assertEqual(shapes, {"sine", "triangle", "saw", "square", "sampleHold", "randomSmooth"})
+        curves = json.loads((root / "modulation-curves.snapshot.json").read_text())["editedPatch"]
+        self.assertEqual(len(curves["envelopes"]), 4)
+        self.assertTrue(all(any(e.get(stage) for stage in ("attackCurve", "decayCurve", "releaseCurve"))
+                            for e in curves["envelopes"]), "an authored envelope has no stage curve")
+        self.assertIn("e4", {row["source"] for row in curves["matrix"]})
+
     def test_authored_maximal_panel_case_sits_at_the_d8_bounds(self):
         patch = json.loads((ROOT / "data" / "panels" / "authored-synth" / "maximal.snapshot.json").read_text())["editedPatch"]
         self.assertEqual((len(patch["nodes"]), len(patch["edges"]), len(patch["matrix"]), len(patch["envelopes"])), (16, 48, 40, 4))

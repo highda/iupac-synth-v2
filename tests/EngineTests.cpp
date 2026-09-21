@@ -129,4 +129,19 @@ bool runEngineTests(){bool ok=true;auto patch=graphPatch();auto compiled=engine:
   const auto window=[&](std::size_t from,std::size_t to){return energy(std::vector<float>(tail.begin()+static_cast<long>(from),tail.begin()+static_cast<long>(to)));};
   ok&=expect(window(40000,56000)>0.f&&window(80000,96000)<window(40000,56000),"the longest reverb tail decays instead of running away");
  }
+ {// #125: a discrete LFO waveform change is a crossfaded transition, not a step.
+  // The published effective cutoff is the production matrix result, so an uncrossfaded switch from
+  // `sine` (phase 0, near zero) to `square` (+1 immediately) would show up here as one block-sized jump.
+  auto shapePatch=graphPatch();shapePatch.matrix={{"m1",true,domain::ModulationSource::l1,"b","cutoff",1}};shapePatch.lfos[0].rate=1;shapePatch.lfos[0].waveform=domain::LfoWaveform::sine;
+  auto sineCompiled=engine::compilePatch(shapePatch);std::size_t filterSlot=0;for(std::size_t n=0;n<sineCompiled.patch.nodeCount;++n)if(sineCompiled.patch.nodes[n].type==domain::ModuleType::filter)filterSlot=n;
+  const auto cutoffIndex=static_cast<std::size_t>(engine::ParameterTarget::cutoff);
+  engine::PatchCoordinator shapes;shapes.prepare(48000,128);(void)shapes.publish(sineCompiled.patch,{});std::array<float,128>sL{},sR{};for(int i=0;i<12;++i)shapes.render(sL,sR);
+  std::array shapeNote{engine::MidiEvent{0,engine::MidiEventType::noteOn,1,60,100,8192}};shapes.render(sL,sR,shapeNote);shapes.render(sL,sR);
+  const float beforeSwitch=shapes.effectiveValues().values[filterSlot][cutoffIndex];
+  auto squarePatch=shapePatch;squarePatch.lfos[0].waveform=domain::LfoWaveform::square;(void)shapes.publish(engine::compilePatch(squarePatch).patch,{});
+  float previous=beforeSwitch,largestStep=0,last=beforeSwitch;for(int i=0;i<12;++i){shapes.render(sL,sR);const float v=shapes.effectiveValues().values[filterSlot][cutoffIndex];largestStep=std::max(largestStep,std::abs(v-previous));previous=v;last=v;}
+  ok&=expect(shapes.activeVoiceCount()==1&&last>beforeSwitch+.2f,"the waveform change reaches the held voice");
+  ok&=expect(largestStep<std::abs(last-beforeSwitch)*.75f,"a discrete waveform change crossfades instead of stepping");
+ }
+
  return ok;}

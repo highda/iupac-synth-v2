@@ -29,7 +29,7 @@ std::string hash(std::string_view value) { return juce::SHA256(value.data(), val
 std::string moduleName(domain::ModuleType type) { return std::string(domain::moduleCatalog().at(static_cast<std::size_t>(type)).id); }
 std::string sourceName(domain::ModulationSource source)
 {
-    constexpr std::array names {"e1", "e2", "e3", "l1", "l2", "velocity", "keyTracking", "pitchBend", "cc1", "macro1", "macro2", "macro3", "macro4"};
+    constexpr std::array names {"e1", "e2", "e3", "l1", "l2", "velocity", "keyTracking", "pitchBend", "cc1", "macro1", "macro2", "macro3", "macro4", "e4"};
     return names.at(static_cast<std::size_t>(source));
 }
 std::string targetName(engine::ParameterTarget target)
@@ -166,7 +166,7 @@ MidiResult decodeMidiJson(std::string_view text, std::size_t maximumSamples)
 std::string inspectCatalog()
 {
     auto root = object(); put(root, "productVersion", juce::String(domain::productVersion().data())); put(root, "architecture", juce::String(domain::architectureVersion().data())); put(root, "patchVersion", domain::patchVersion);
-    juce::Array<juce::var> sources; for (std::size_t i = 0; i <= static_cast<std::size_t>(domain::ModulationSource::macro4); ++i) sources.add(juce::String(sourceName(static_cast<domain::ModulationSource>(i)))); put(root, "modulationSources", sources);
+    juce::Array<juce::var> sources; for (std::size_t i = 0; i < domain::modulationSourceCount; ++i) sources.add(juce::String(sourceName(static_cast<domain::ModulationSource>(i)))); put(root, "modulationSources", sources);
     juce::Array<juce::var> modules;
     for (const auto& descriptor : domain::moduleCatalog())
     {
@@ -196,8 +196,8 @@ std::string valueSignature(const engine::CompiledPatch& patch, const domain::Hos
     }
     for (std::size_t i = 0; i < patch.edgeCount; ++i) stream << patch.edges[i].gain << ',';
     for (std::size_t i = 0; i < patch.rowCount; ++i) stream << patch.rows[i].depth << ',';
-    for (const auto& envelope : patch.envelopes) stream << envelope.attack << ',' << envelope.decay << ',' << envelope.sustain << ',' << envelope.release << ',';
-    for (const auto& lfo : patch.lfos) stream << lfo.rate << ',' << static_cast<int>(lfo.waveform) << ',';
+    for (const auto& envelope : patch.envelopes) stream << envelope.attack << ',' << envelope.decay << ',' << envelope.sustain << ',' << envelope.release << ',' << envelope.attackCurve << ',' << envelope.decayCurve << ',' << envelope.releaseCurve << ',';
+    for (const auto& lfo : patch.lfos) stream << lfo.rate << ',' << static_cast<int>(lfo.waveform) << ',' << lfo.fadeMs << ',' << static_cast<int>(lfo.syncMode) << ',' << static_cast<int>(lfo.syncDivision) << ',';
     stream << patch.noiseSeed; for (const auto macro : controls.macros) stream << ',' << macro;
     stream << ',' << controls.outputGain << ',' << controls.width << ',' << controls.masterTune << ',' << controls.bypass;
     return hash(stream.str());

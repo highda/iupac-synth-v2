@@ -102,19 +102,42 @@ void SegmentToggle::paint(juce::Graphics&g)
 }
 void SegmentToggle::mouseDown(const juce::MouseEvent&e){if(e.mods.isPopupMenu())return;setIndex((int)std::floor(e.position.x/juce::jmax(1.0f,(float)getWidth())*(float)segments_.size()),true);}
 void AdsrCurve::setEnvelope(domain::Envelope env,bool notify){envelope_=env;repaint();if(notify&&onChange)onChange(envelope_);}
-std::array<juce::Point<float>,4>AdsrCurve::handles()const noexcept
+// The drawn shape of one bent stage, in stage-progress space. Identical in form to the engine's
+// stage warp (Modules.cpp): a curve of 0 is the straight line, and both endpoints stay exact.
+float stageShape(float progress,double curve)noexcept
+{
+ const float k=(float)juce::jlimit(-1.0,1.0,curve)*4.0f;progress=juce::jlimit(0.0f,1.0f,progress);
+ if(std::abs(k)<1.0e-4f)return progress;return (1.0f-std::exp(-k*progress))/(1.0f-std::exp(-k));
+}
+// Inverse of stageShape at the segment midpoint, which is a plain logistic: the curve value whose
+// bent stage passes through `fraction` halfway along. This is what a curve-handle drag solves.
+double stageCurveFromMidpoint(float fraction)noexcept
+{
+ const float f=juce::jlimit(0.02f,0.98f,fraction);return juce::jlimit(-1.0,1.0,0.5*std::log((double)f/(double)(1.0f-f)));
+}
+std::array<juce::Point<float>,7>AdsrCurve::handles()const noexcept
 {
  const float w=(float)getWidth()-6.0f,top=scaledText(*this,10.0f),bottom=(float)getHeight()-3.0f,x0=3.0f;const float a=x0+w*0.28f*(float)attackDescriptor.normalize(envelope_.attack),d=a+w*0.28f*(float)decayDescriptor.normalize(envelope_.decay),s=d+w*0.12f,r=s+w*0.28f*(float)releaseDescriptor.normalize(envelope_.release);const float sy=bottom-(bottom-top)*(float)envelope_.sustain;
- return{juce::Point<float>(a,top),juce::Point<float>(d,sy),juce::Point<float>(s,sy),juce::Point<float>(r,bottom)};
+ const auto mid=[](float xa,float ya,float xb,float yb,double curve){return juce::Point<float>((xa+xb)*0.5f,ya+(yb-ya)*stageShape(0.5f,curve));};
+ return{juce::Point<float>(a,top),juce::Point<float>(d,sy),juce::Point<float>(s,sy),juce::Point<float>(r,bottom),
+        mid(x0,bottom,a,top,envelope_.attackCurve),mid(a,top,d,sy,envelope_.decayCurve),mid(s,sy,r,bottom,envelope_.releaseCurve)};
 }
-int AdsrCurve::handleAt(juce::Point<float>p)const noexcept{const auto h=handles();int best=-1;float dist=64.0f;for(int i=0;i<4;++i){const float d=h[(std::size_t)i].getDistanceSquaredFrom(p);if(d<dist){dist=d;best=i;}}return best;}
+int AdsrCurve::handleAt(juce::Point<float>p)const noexcept{const auto h=handles();int best=-1;float dist=64.0f;for(int i=0;i<7;++i){const float d=h[(std::size_t)i].getDistanceSquaredFrom(p);if(d<dist){dist=d;best=i;}}return best;}
 void AdsrCurve::paint(juce::Graphics&g)
 {
- const auto h=handles();const float bottom=(float)getHeight()-3.0f;juce::Path p;p.startNewSubPath(3.0f,bottom);p.lineTo(h[0]);p.lineTo(h[1]);p.lineTo(h[2]);p.lineTo(h[3]);g.setColour(ink.withAlpha(0.35f));g.drawLine(3.0f,bottom,(float)getWidth()-3.0f,bottom,hairline);g.setColour(ink);g.strokePath(p,juce::PathStrokeType(hairline));
- for(int i=0;i<4;++i){g.setColour(i==hovered_||i==dragged_?accent:ink);g.fillEllipse(h[(std::size_t)i].x-2.0f,h[(std::size_t)i].y-2.0f,4.0f,4.0f);}
+ const auto h=handles();const float bottom=(float)getHeight()-3.0f;juce::Path p;p.startNewSubPath(3.0f,bottom);
+ // Each stage is drawn through its own curve, so the panel shows the shape the engine will run.
+ const auto stage=[&](float xa,float ya,float xb,float yb,double curve){for(int step=1;step<=12;++step){const float t=(float)step/12.0f;p.lineTo(xa+(xb-xa)*t,ya+(yb-ya)*stageShape(t,curve));}};
+ stage(3.0f,bottom,h[0].x,h[0].y,envelope_.attackCurve);stage(h[0].x,h[0].y,h[1].x,h[1].y,envelope_.decayCurve);p.lineTo(h[2]);stage(h[2].x,h[2].y,h[3].x,h[3].y,envelope_.releaseCurve);
+ g.setColour(ink.withAlpha(0.35f));g.drawLine(3.0f,bottom,(float)getWidth()-3.0f,bottom,hairline);g.setColour(ink);g.strokePath(p,juce::PathStrokeType(hairline));
+ for(int i=0;i<7;++i){g.setColour(i==hovered_||i==dragged_?accent:ink);const float radius=i<4?2.0f:1.5f;g.fillEllipse(h[(std::size_t)i].x-radius,h[(std::size_t)i].y-radius,radius*2.0f,radius*2.0f);}
  if(caption_.isNotEmpty()){g.setColour(ink.withAlpha(0.6f));drawCaption(g,caption_,getLocalBounds().removeFromTop(juce::roundToInt(scaledText(*this,8.0f))).withTrimmedLeft(2),juce::Justification::topLeft,scaledText(*this,7.0f));}
 }
-void AdsrCurve::bubble(int i){if(auto*s=shellOf(*this)){static constexpr std::array names{"ATTACK","DECAY","SUSTAIN","RELEASE"};const double v=i==0?envelope_.attack:i==1?envelope_.decay:i==2?envelope_.sustain:envelope_.release;s->showValue(*this,caption_.toUpperCase()+" "+names[(std::size_t)juce::jlimit(0,3,i)]+"  "+formatValue(v,i==2?"":"s"));}}
+double AdsrCurve::handleValue(int i)const noexcept
+{
+ switch(juce::jlimit(0,6,i)){case 0:return envelope_.attack;case 1:return envelope_.decay;case 2:return envelope_.sustain;case 3:return envelope_.release;case 4:return envelope_.attackCurve;case 5:return envelope_.decayCurve;default:return envelope_.releaseCurve;}
+}
+void AdsrCurve::bubble(int i){if(auto*s=shellOf(*this)){static constexpr std::array names{"ATTACK","DECAY","SUSTAIN","RELEASE","ATTACK CURVE","DECAY CURVE","RELEASE CURVE"};const int index=juce::jlimit(0,6,i);s->showValue(*this,caption_.toUpperCase()+" "+names[(std::size_t)index]+"  "+formatValue(handleValue(index),index==2||index>=4?"":"s"));}}
 void AdsrCurve::mouseMove(const juce::MouseEvent&e){hovered_=handleAt(e.position);repaint();if(hovered_>=0)bubble(hovered_);else if(auto*s=shellOf(*this))s->hideValue();}
 void AdsrCurve::mouseExit(const juce::MouseEvent&){if(dragged_<0){hovered_=-1;repaint();if(auto*s=shellOf(*this))s->hideValue();}}
 void AdsrCurve::mouseDown(const juce::MouseEvent&e){if(e.mods.isPopupMenu())return;dragged_=handleAt(e.position);repaint();}
@@ -122,19 +145,33 @@ void AdsrCurve::mouseDrag(const juce::MouseEvent&e)
 {
  if(dragged_<0)return;const auto h=handles();const float w=(float)getWidth()-6.0f,top=scaledText(*this,10.0f),bottom=(float)getHeight()-3.0f;auto env=envelope_;
  auto timeFrom=[&](const domain::ParameterDescriptor&d,float x,float origin){return d.denormalize(juce::jlimit(0.0,1.0,(double)(x-origin)/(double)(w*0.28f)));};
- switch(dragged_){case 0:env.attack=timeFrom(attackDescriptor,e.position.x,3.0f);break;case 1:env.decay=timeFrom(decayDescriptor,e.position.x,h[0].x);env.sustain=juce::jlimit(0.0,1.0,(double)(bottom-e.position.y)/(double)(bottom-top));break;case 2:env.sustain=juce::jlimit(0.0,1.0,(double)(bottom-e.position.y)/(double)(bottom-top));break;default:env.release=timeFrom(releaseDescriptor,e.position.x,h[2].x);}
+ // A curve grip moves only across its own stage: the endpoints stay where the ADSR handles put
+ // them, so bending a stage never changes its duration or its level.
+ const auto curveFrom=[&](float ya,float yb){return yb==ya?0.0:stageCurveFromMidpoint((float)((e.position.y-ya)/(yb-ya)));};
+ switch(dragged_){case 0:env.attack=timeFrom(attackDescriptor,e.position.x,3.0f);break;case 1:env.decay=timeFrom(decayDescriptor,e.position.x,h[0].x);env.sustain=juce::jlimit(0.0,1.0,(double)(bottom-e.position.y)/(double)(bottom-top));break;case 2:env.sustain=juce::jlimit(0.0,1.0,(double)(bottom-e.position.y)/(double)(bottom-top));break;case 3:env.release=timeFrom(releaseDescriptor,e.position.x,h[2].x);break;
+  case 4:env.attackCurve=curveFrom(bottom,h[0].y);break;case 5:env.decayCurve=curveFrom(h[0].y,h[1].y);break;default:env.releaseCurve=curveFrom(h[2].y,bottom);}
  setEnvelope(env,true);bubble(dragged_);
 }
 void AdsrCurve::mouseUp(const juce::MouseEvent&e){dragged_=-1;repaint();if(!isMouseOver())mouseExit(e);}
 void AdsrCurve::mouseDoubleClick(const juce::MouseEvent&e)
 {
- const int i=handleAt(e.position);if(i<0)return;if(auto*s=shellOf(*this)){juce::Component::SafePointer<AdsrCurve>self(this);const auto h=handles()[(std::size_t)i];const double v=i==0?envelope_.attack:i==1?envelope_.decay:i==2?envelope_.sustain:envelope_.release;
-  s->openEntry(*this,juce::Rectangle<int>((int)h.x-24,(int)h.y-8,48,16),formatEntry(v),[self,i](juce::String t){if(!self)return;auto parsed=parseNumber(t);if(!parsed)return;auto env=self->envelope_;switch(i){case 0:env.attack=juce::jlimit(attackDescriptor.minimum,attackDescriptor.maximum,*parsed);break;case 1:env.decay=juce::jlimit(decayDescriptor.minimum,decayDescriptor.maximum,*parsed);break;case 2:env.sustain=juce::jlimit(sustainDescriptor.minimum,sustainDescriptor.maximum,*parsed);break;default:env.release=juce::jlimit(releaseDescriptor.minimum,releaseDescriptor.maximum,*parsed);}self->setEnvelope(env,true);});}
+ const int i=handleAt(e.position);if(i<0)return;if(auto*s=shellOf(*this)){juce::Component::SafePointer<AdsrCurve>self(this);const auto h=handles()[(std::size_t)i];
+  s->openEntry(*this,juce::Rectangle<int>((int)h.x-24,(int)h.y-8,48,16),formatEntry(handleValue(i)),[self,i](juce::String t){if(!self)return;auto parsed=parseNumber(t);if(!parsed)return;auto env=self->envelope_;const double curve=juce::jlimit(-1.0,1.0,*parsed);switch(i){case 0:env.attack=juce::jlimit(attackDescriptor.minimum,attackDescriptor.maximum,*parsed);break;case 1:env.decay=juce::jlimit(decayDescriptor.minimum,decayDescriptor.maximum,*parsed);break;case 2:env.sustain=juce::jlimit(sustainDescriptor.minimum,sustainDescriptor.maximum,*parsed);break;case 3:env.release=juce::jlimit(releaseDescriptor.minimum,releaseDescriptor.maximum,*parsed);break;case 4:env.attackCurve=curve;break;case 5:env.decayCurve=curve;break;default:env.releaseCurve=curve;}self->setEnvelope(env,true);});}
 }
 void LfoPreview::paint(juce::Graphics&g)
 {
  auto r=getLocalBounds().toFloat().reduced(3.0f,3.0f);r.removeFromTop(scaledText(*this,7.0f));juce::Path p;const int n=48;const float cycles=2.0f;
- for(int i=0;i<=n;++i){const float t=(float)i/(float)n*cycles;float v=lfo_.waveform==domain::LfoWaveform::sine?std::sin(t*juce::MathConstants<float>::twoPi):(4.0f*std::abs(t-std::floor(t+0.5f))-1.0f);const auto pt=juce::Point<float>(r.getX()+(float)i/(float)n*r.getWidth(),r.getCentreY()-v*r.getHeight()*0.45f);if(i)p.lineTo(pt);else p.startNewSubPath(pt);}
+ // One fixed pseudo-random sequence stands in for the engine's patch-seeded stream: the preview
+ // shows the shape of `sampleHold`/`randomSmooth`, never a particular rendered draw.
+ static constexpr std::array<float,8>draws{0.62f,-0.38f,0.91f,-0.74f,0.16f,-0.95f,0.45f,-0.21f};
+ for(int i=0;i<=n;++i){const float t=(float)i/(float)n*cycles;const float phase=t-std::floor(t);const auto step=(std::size_t)((int)std::floor(t)%(int)draws.size());const auto previous=(step+draws.size()-1)%draws.size();
+  float v=0;switch(lfo_.waveform){case domain::LfoWaveform::sine:v=std::sin(t*juce::MathConstants<float>::twoPi);break;
+   case domain::LfoWaveform::triangle:v=4.0f*std::abs(t-std::floor(t+0.5f))-1.0f;break;
+   case domain::LfoWaveform::saw:v=2.0f*phase-1.0f;break;
+   case domain::LfoWaveform::square:v=phase<0.5f?1.0f:-1.0f;break;
+   case domain::LfoWaveform::sampleHold:v=draws[step];break;
+   case domain::LfoWaveform::randomSmooth:v=draws[previous]+(draws[step]-draws[previous])*(phase*phase*(3.0f-2.0f*phase));break;}
+  const auto pt=juce::Point<float>(r.getX()+(float)i/(float)n*r.getWidth(),r.getCentreY()-v*r.getHeight()*0.45f);if(i)p.lineTo(pt);else p.startNewSubPath(pt);}
  g.setColour(ink.withAlpha(0.35f));g.drawLine(r.getX(),r.getCentreY(),r.getRight(),r.getCentreY(),hairline);g.setColour(ink);g.strokePath(p,juce::PathStrokeType(hairline));
  if(caption_.isNotEmpty()){g.setColour(ink.withAlpha(0.6f));drawCaption(g,caption_+"  "+formatValue(lfo_.rate,"Hz"),getLocalBounds().removeFromTop(juce::roundToInt(scaledText(*this,8.0f))).withTrimmedLeft(2),juce::Justification::topLeft,scaledText(*this,7.0f));}
 }

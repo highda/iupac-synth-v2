@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <initializer_list>
 #include <set>
+#include <utility>
 #include <unordered_map>
 
 namespace iupac::domain
@@ -67,13 +69,13 @@ const std::array<ModuleDescriptor, moduleTypeCount> catalog {{
 std::string_view typeId(ModuleType type) { return catalog.at(static_cast<std::size_t>(type)).id; }
 std::optional<ModulationSource> sourceFrom(std::string_view s)
 {
-    constexpr std::array names{"e1", "e2", "e3", "l1", "l2", "velocity", "keyTracking", "pitchBend", "cc1", "macro1", "macro2", "macro3", "macro4"};
+    constexpr std::array names{"e1", "e2", "e3", "l1", "l2", "velocity", "keyTracking", "pitchBend", "cc1", "macro1", "macro2", "macro3", "macro4", "e4"};
     for (std::size_t i = 0; i < names.size(); ++i) if (s == names[i]) return static_cast<ModulationSource>(i);
     return {};
 }
 std::string_view sourceId(ModulationSource s)
 {
-    constexpr std::array names{"e1", "e2", "e3", "l1", "l2", "velocity", "keyTracking", "pitchBend", "cc1", "macro1", "macro2", "macro3", "macro4"};
+    constexpr std::array names{"e1", "e2", "e3", "l1", "l2", "velocity", "keyTracking", "pitchBend", "cc1", "macro1", "macro2", "macro3", "macro4", "e4"};
     return names.at(static_cast<std::size_t>(s));
 }
 
@@ -149,6 +151,19 @@ double ParameterDescriptor::denormalize(double value) const noexcept
 }
 const std::array<ModuleDescriptor, moduleTypeCount>& moduleCatalog() { return catalog; }
 std::string_view audioPortId(AudioPort port) noexcept { return port == AudioPort::modIn ? "modIn" : port == AudioPort::exciteIn ? "exciteIn" : "in"; }
+// Persisted names of the D8 modulator enums. `sine`/`triangle` stay first so a stored waveform name
+// and its index both keep their meaning.
+std::string_view lfoWaveformId(LfoWaveform waveform) noexcept
+{
+    constexpr std::array<std::string_view, lfoWaveformCount> names{"sine", "triangle", "saw", "square", "sampleHold", "randomSmooth"};
+    return names.at(static_cast<std::size_t>(waveform));
+}
+std::string_view lfoSyncModeId(LfoSyncMode mode) noexcept { return mode == LfoSyncMode::sync ? "sync" : "free"; }
+std::string_view lfoSyncDivisionId(LfoSyncDivision division) noexcept
+{
+    constexpr std::array<std::string_view, lfoSyncDivisionCount> names{"1/1", "1/2", "1/4", "1/4T", "1/8", "1/8T", "1/16"};
+    return names.at(static_cast<std::size_t>(division));
+}
 bool declaresPort(const ModuleDescriptor& m, AudioPort port) noexcept { return port == AudioPort::in ? !m.source : m.audioRateInput == port; }
 const ModuleDescriptor* findModule(std::string_view id) noexcept { auto i = std::ranges::find(catalog, id, &ModuleDescriptor::id); return i == catalog.end() ? nullptr : &*i; }
 const ParameterDescriptor* findParameter(const ModuleDescriptor& m, std::string_view id) noexcept { auto i = std::ranges::find(m.parameters, id, &ParameterDescriptor::id); return i == m.parameters.end() ? nullptr : &*i; }
@@ -211,13 +226,15 @@ std::string validate(const Patch& p)
     std::set<std::string> rowIds;
     for (const auto& row : p.matrix)
     {
-        if (static_cast<std::size_t>(row.source) > static_cast<std::size_t>(ModulationSource::macro4) || row.id.empty() || !rowIds.emplace(row.id).second || !std::isfinite(row.depth) || row.depth < -1 || row.depth > 1 || !nodes.contains(row.destinationNode)) return "invalid matrix row";
+        if (static_cast<std::size_t>(row.source) >= modulationSourceCount || row.id.empty() || !rowIds.emplace(row.id).second || !std::isfinite(row.depth) || row.depth < -1 || row.depth > 1 || !nodes.contains(row.destinationNode)) return "invalid matrix row";
         const auto& nd = catalog.at(static_cast<std::size_t>(nodes.at(row.destinationNode)->type));
         const auto* pd = findParameter(nd, row.destinationParameter);
         if (pd == nullptr || !pd->modulatable) return "illegal matrix destination";
     }
-    for (const auto& e : p.envelopes) if (!std::isfinite(e.attack) || e.attack < .001 || e.attack > 2 || !std::isfinite(e.decay) || e.decay < .01 || e.decay > 4 || !std::isfinite(e.sustain) || e.sustain < 0 || e.sustain > 1 || !std::isfinite(e.release) || e.release < .02 || e.release > 6) return "invalid envelope";
-    for (const auto& l : p.lfos) if (static_cast<std::size_t>(l.waveform) > static_cast<std::size_t>(LfoWaveform::triangle) || !std::isfinite(l.rate) || l.rate < .05 || l.rate > 12) return "invalid lfo";
+    for (const auto& e : p.envelopes) if (!std::isfinite(e.attack) || e.attack < .001 || e.attack > 2 || !std::isfinite(e.decay) || e.decay < .01 || e.decay > 4 || !std::isfinite(e.sustain) || e.sustain < 0 || e.sustain > 1 || !std::isfinite(e.release) || e.release < .02 || e.release > 6
+        || !std::isfinite(e.attackCurve) || e.attackCurve < -1 || e.attackCurve > 1 || !std::isfinite(e.decayCurve) || e.decayCurve < -1 || e.decayCurve > 1 || !std::isfinite(e.releaseCurve) || e.releaseCurve < -1 || e.releaseCurve > 1) return "invalid envelope";
+    for (const auto& l : p.lfos) if (static_cast<std::size_t>(l.waveform) >= lfoWaveformCount || !std::isfinite(l.rate) || l.rate < .05 || l.rate > 12
+        || !std::isfinite(l.fadeMs) || l.fadeMs < 0 || l.fadeMs > 5000 || static_cast<std::size_t>(l.syncMode) > static_cast<std::size_t>(LfoSyncMode::sync) || static_cast<std::size_t>(l.syncDivision) >= lfoSyncDivisionCount) return "invalid lfo";
     for (const auto& m : p.macros) if (!std::isfinite(m.defaultValue) || m.defaultValue < 0 || m.defaultValue > 1 || m.label.size() > 64) return "invalid macro";
     return {};
 }
@@ -228,8 +245,10 @@ juce::var encodePatchValue(const Patch& p)
     juce::Array<juce::var> nodes;
     for (const auto& n : p.nodes) { auto v=obj(); put(v,"id",n.id); put(v,"type",std::string(typeId(n.type))); auto ps=obj(); for(const auto& x:n.parameters) put(ps,x.id.c_str(),x.values.size()==1?juce::var(x.values[0]):doubles(x.values)); put(v,"parameters",ps); nodes.add(v); } put(root,"nodes",nodes);
     juce::Array<juce::var> edges; for(const auto& e:p.edges){auto v=obj();put(v,"source",e.source);put(v,"destination",e.destination);put(v,"gain",e.gain);if(e.port!=AudioPort::in)put(v,"port",audioPortId(e.port));edges.add(v);} put(root,"edges",edges);
-    juce::Array<juce::var> envs; for(const auto& e:p.envelopes){auto v=obj();put(v,"attack",e.attack);put(v,"decay",e.decay);put(v,"sustain",e.sustain);put(v,"release",e.release);envs.add(v);} put(root,"envelopes",envs);
-    juce::Array<juce::var> lfos; for(const auto& l:p.lfos){auto v=obj();put(v,"rate",l.rate);put(v,"waveform",std::string_view(l.waveform==LfoWaveform::sine?"sine":"triangle"));lfos.add(v);} put(root,"lfos",lfos);
+    // D8: encoding always writes the complete modulator set, including the four envelopes and the
+    // curve/fade/sync fields, so a saved patch never depends on the decoder's default fill.
+    juce::Array<juce::var> envs; for(const auto& e:p.envelopes){auto v=obj();put(v,"attack",e.attack);put(v,"decay",e.decay);put(v,"sustain",e.sustain);put(v,"release",e.release);put(v,"attackCurve",e.attackCurve);put(v,"decayCurve",e.decayCurve);put(v,"releaseCurve",e.releaseCurve);envs.add(v);} put(root,"envelopes",envs);
+    juce::Array<juce::var> lfos; for(const auto& l:p.lfos){auto v=obj();put(v,"rate",l.rate);put(v,"waveform",lfoWaveformId(l.waveform));put(v,"fadeMs",l.fadeMs);put(v,"syncMode",lfoSyncModeId(l.syncMode));put(v,"syncDivision",lfoSyncDivisionId(l.syncDivision));lfos.add(v);} put(root,"lfos",lfos);
     juce::Array<juce::var> rows; for(const auto& r:p.matrix){auto v=obj();put(v,"id",r.id);put(v,"enabled",r.enabled);put(v,"source",std::string(sourceId(r.source)));put(v,"destinationNode",r.destinationNode);put(v,"destinationParameter",r.destinationParameter);put(v,"depth",r.depth);rows.add(v);} put(root,"matrix",rows);
     juce::Array<juce::var> macros; for(const auto& m:p.macros){auto v=obj();put(v,"label",m.label);put(v,"default",m.defaultValue);macros.add(v);} put(root,"macros",macros);
     return root;
@@ -244,8 +263,17 @@ DecodeResult decodePatchValue(const juce::var& root)
     const auto* ns=arrayValue(o->getProperty("nodes")); if(!ns || static_cast<std::size_t>(ns->size()) > maximumNodes) return fail("nodes must be bounded array");
     for(const auto& nv:*ns){const auto* no=object(nv);if(!no||!exactKeys(*no,{"id","type","parameters"})||!no->getProperty("id").isString()||!no->getProperty("type").isString())return fail("invalid node");const auto* md=findModule(no->getProperty("type").toString().toStdString());const auto* po=object(no->getProperty("parameters"));if(!md||!po)return fail("invalid node type or parameters");Node n{no->getProperty("id").toString().toStdString(),md->type,{}};for(const auto& pd:md->parameters){ParameterValue pv{std::string(pd.id),{}};if(!po->hasProperty(pd.id.data())){if(!pd.postV1)return fail("missing parameter");pv.values.assign(pd.arraySize==0?1:pd.arraySize,pd.defaultValue);n.parameters.push_back(std::move(pv));continue;}auto value=po->getProperty(pd.id.data());if(pd.arraySize){const auto* a=arrayValue(value);if(!a)return fail("coefficient must be array");for(const auto& x:*a){double d;if(!number(x,d))return fail("nonfinite coefficient");pv.values.push_back(d);}}else{double d;if(!number(value,d))return fail("parameter must be finite number");pv.values.push_back(d);}n.parameters.push_back(std::move(pv));}for(const auto& property:po->getProperties())if(findParameter(*md,property.name.toString().toStdString())==nullptr)return fail("unknown parameter");p.nodes.push_back(std::move(n));}
     const auto* es=arrayValue(o->getProperty("edges"));if(!es||static_cast<std::size_t>(es->size())>maximumEdges)return fail("edges must be bounded array");for(const auto& ev:*es){const auto* eo=object(ev);double gain;if(!eo||!exactKeys(*eo,{"source","destination","gain"},{"port"})||!eo->getProperty("source").isString()||!eo->getProperty("destination").isString()||!number(eo->getProperty("gain"),gain))return fail("invalid edge");auto port=AudioPort::in;if(eo->hasProperty("port")){const auto name=eo->getProperty("port").toString();if(name=="in")port=AudioPort::in;else if(name=="modIn")port=AudioPort::modIn;else if(name=="exciteIn")port=AudioPort::exciteIn;else return fail("unknown audio port");}p.edges.push_back({eo->getProperty("source").toString().toStdString(),eo->getProperty("destination").toString().toStdString(),gain,port});}
-    const auto* envs=arrayValue(o->getProperty("envelopes"));if(!envs||(envs->size()!=static_cast<int>(envelopeCount)&&envs->size()!=static_cast<int>(envelopeCount)-1))return fail("three or four envelopes required");for(int i=0;i<envs->size();++i){const auto* x=object((*envs)[i]);auto& e=p.envelopes[i];if(!x||!exactKeys(*x,{"attack","decay","sustain","release"})||!number(x->getProperty("attack"),e.attack)||!number(x->getProperty("decay"),e.decay)||!number(x->getProperty("sustain"),e.sustain)||!number(x->getProperty("release"),e.release))return fail("invalid envelope");}
-    const auto* ls=arrayValue(o->getProperty("lfos"));if(!ls||ls->size()!=2)return fail("two lfos required");for(int i=0;i<2;++i){const auto* x=object((*ls)[i]);auto& l=p.lfos[i];if(!x||!exactKeys(*x,{"rate","waveform"})||!number(x->getProperty("rate"),l.rate)||!x->getProperty("waveform").isString())return fail("invalid lfo");auto w=x->getProperty("waveform").toString();if(w=="sine")l.waveform=LfoWaveform::sine;else if(w=="triangle")l.waveform=LfoWaveform::triangle;else return fail("unknown lfo waveform");}
+    const auto* envs=arrayValue(o->getProperty("envelopes"));if(!envs||(envs->size()!=static_cast<int>(envelopeCount)&&envs->size()!=static_cast<int>(envelopeCount)-1))return fail("three or four envelopes required");for(int i=0;i<envs->size();++i){const auto* x=object((*envs)[i]);auto& e=p.envelopes[i];if(!x||!exactKeys(*x,{"attack","decay","sustain","release"},{"attackCurve","decayCurve","releaseCurve"})||!number(x->getProperty("attack"),e.attack)||!number(x->getProperty("decay"),e.decay)||!number(x->getProperty("sustain"),e.sustain)||!number(x->getProperty("release"),e.release))return fail("invalid envelope");
+    // The three stage curves are post-v1, so a stored envelope may omit them and keep the flat 0
+    // shape it was saved with; a patch storing three envelopes leaves E4 at its construction default.
+    for(auto [key,field]:std::initializer_list<std::pair<const char*,double*>>{{"attackCurve",&e.attackCurve},{"decayCurve",&e.decayCurve},{"releaseCurve",&e.releaseCurve}}){const auto value=x->getProperty(key);if(value.isVoid())continue;if(!number(value,*field))return fail("invalid envelope");}}
+    const auto* ls=arrayValue(o->getProperty("lfos"));if(!ls||ls->size()!=2)return fail("two lfos required");for(int i=0;i<2;++i){const auto* x=object((*ls)[i]);auto& l=p.lfos[i];if(!x||!exactKeys(*x,{"rate","waveform"},{"fadeMs","syncMode","syncDivision"})||!number(x->getProperty("rate"),l.rate)||!x->getProperty("waveform").isString())return fail("invalid lfo");
+    const auto w=x->getProperty("waveform").toString();bool known=false;for(std::size_t k=0;k<lfoWaveformCount;++k)if(w==juce::String(juce::CharPointer_UTF8(lfoWaveformId(static_cast<LfoWaveform>(k)).data()))){l.waveform=static_cast<LfoWaveform>(k);known=true;break;}
+    if(!known)return fail("unknown lfo waveform");
+    // Fade and sync are post-v1 too: an omitted field is the free-running, fade-less LFO a pre-D8 patch stored.
+    if(const auto fade=x->getProperty("fadeMs");!fade.isVoid()&&!number(fade,l.fadeMs))return fail("invalid lfo");
+    if(const auto mode=x->getProperty("syncMode");!mode.isVoid()){if(!mode.isString())return fail("invalid lfo");const auto m=mode.toString();if(m=="free")l.syncMode=LfoSyncMode::free;else if(m=="sync")l.syncMode=LfoSyncMode::sync;else return fail("unknown lfo sync mode");}
+    if(const auto division=x->getProperty("syncDivision");!division.isVoid()){if(!division.isString())return fail("invalid lfo");bool found=false;for(std::size_t k=0;k<lfoSyncDivisionCount;++k)if(division.toString()==juce::String(juce::CharPointer_UTF8(lfoSyncDivisionId(static_cast<LfoSyncDivision>(k)).data()))){l.syncDivision=static_cast<LfoSyncDivision>(k);found=true;break;}if(!found)return fail("unknown lfo sync division");}}
     const auto* rs=arrayValue(o->getProperty("matrix"));if(!rs||static_cast<std::size_t>(rs->size())>maximumMatrixRows)return fail("matrix must be bounded array");for(const auto& rv:*rs){const auto* ro=object(rv);double depth;if(!ro||!exactKeys(*ro,{"id","enabled","source","destinationNode","destinationParameter","depth"})||!ro->getProperty("id").isString()||!ro->getProperty("enabled").isBool()||!ro->getProperty("source").isString()||!ro->getProperty("destinationNode").isString()||!ro->getProperty("destinationParameter").isString()||!number(ro->getProperty("depth"),depth))return fail("invalid matrix row");auto src=sourceFrom(ro->getProperty("source").toString().toStdString());if(!src)return fail("unknown modulation source");p.matrix.push_back({ro->getProperty("id").toString().toStdString(),static_cast<bool>(ro->getProperty("enabled")),*src,ro->getProperty("destinationNode").toString().toStdString(),ro->getProperty("destinationParameter").toString().toStdString(),depth});}
     const auto* ms=arrayValue(o->getProperty("macros"));if(!ms||ms->size()!=4)return fail("four macros required");for(int i=0;i<4;++i){const auto* x=object((*ms)[i]);double d;if(!x||!exactKeys(*x,{"label","default"})||!x->getProperty("label").isString()||!number(x->getProperty("default"),d))return fail("invalid macro");p.macros[i]={x->getProperty("label").toString().toStdString(),d};}
     if(auto e=validate(p);!e.empty())return fail(std::move(e)); return {std::move(p),{}};

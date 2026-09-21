@@ -86,7 +86,9 @@ public:
  std::function<void(domain::Envelope)>onChange;
  void paint(juce::Graphics&)override;void mouseMove(const juce::MouseEvent&)override;void mouseExit(const juce::MouseEvent&)override;void mouseDown(const juce::MouseEvent&)override;void mouseDrag(const juce::MouseEvent&)override;void mouseUp(const juce::MouseEvent&)override;void mouseDoubleClick(const juce::MouseEvent&)override;
 private:
- [[nodiscard]]std::array<juce::Point<float>,4>handles()const noexcept;[[nodiscard]]int handleAt(juce::Point<float>)const noexcept;void bubble(int handle);
+ // Seven handles: the four ADSR ones keep indices 0..3, and 4/5/6 are the D8 stage-curve grips
+ // sitting on the middle of the attack, decay and release segments (#125).
+ [[nodiscard]]std::array<juce::Point<float>,7>handles()const noexcept;[[nodiscard]]int handleAt(juce::Point<float>)const noexcept;[[nodiscard]]double handleValue(int handle)const noexcept;void bubble(int handle);
  domain::Envelope envelope_;juce::String caption_;int hovered_{-1},dragged_{-1};
 };
 class LfoPreview final:public juce::Component

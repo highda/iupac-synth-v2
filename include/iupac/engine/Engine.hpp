@@ -197,24 +197,60 @@ private:
     std::array<juce::dsp::StateVariableTPTFilter<float>, 4> modes_;
 };
 
+// Per-voice modulator sources. D8 (#125) adds the stage curves, the four new LFO shapes, the LFO
+// fade-in and LFO tempo sync; every one of them is the literal identity at its default, so a
+// pre-D8 patch produces bit-identical modulation.
 class ModulatorBank final
 {
 public:
     void prepare(double sampleRate) noexcept;
-    void configure(const std::array<domain::Envelope, domain::envelopeCount>&, const std::array<domain::Lfo, domain::lfoCount>&) noexcept;
+    // `patchSeed` is the patch's own noise seed: the two random LFO shapes draw from it and never
+    // from wall-clock entropy, which is what keeps a repeat render bit-identical (V2).
+    void configure(const std::array<domain::Envelope, domain::envelopeCount>&, const std::array<domain::Lfo, domain::lfoCount>&, std::uint32_t patchSeed = 0) noexcept;
+    // Host tempo for an LFO in `sync`; out-of-range or absent tempo is the documented 120 BPM.
+    void setTempo(double beatsPerMinute) noexcept;
     void reset() noexcept;
     void noteOn() noexcept;
     void noteOff() noexcept;
-    // E1..E3 then L1..L2, the leading block of ModulationSource. E4 is stored and reset with the
-    // bank but is not yet a matrix source (issue #125 appends `e4` to the persisted source list).
-    [[nodiscard]] std::array<float, 5> next() noexcept;
+    // E1..E3 then L1..L2 then E4, matching the persisted source order: the leading block keeps its
+    // positions and `e4` appends, exactly as the source id list does.
+    [[nodiscard]] std::array<float, 6> next() noexcept;
     [[nodiscard]] bool finalEnvelopeActive() const noexcept { return envelopes_[0].isActive(); }
 private:
+    // One stage-curve shaper per envelope. It rides on the JUCE ADSR rather than replacing it: the
+    // ADSR still owns the timing and the raw linear value, and the shaper bends that value inside
+    // the stage it is in. A curve of exactly 0 returns the ADSR sample untouched, so the default
+    // path is the previous code's arithmetic bit for bit.
+    struct StageShaper
+    {
+        float attackWarp{}, decayWarp{}, releaseWarp{};   // exp() bend strengths, 0 = straight
+        float attackNorm{1.0f}, decayNorm{1.0f}, releaseNorm{1.0f};
+        float sustain{1.0f};
+        float lastValue{}, lastShaped{}, releaseFrom{}, releaseShaped{};
+        bool attacking{}, releasing{};
+    };
+    [[nodiscard]] float shapeEnvelope(std::size_t index, float value) noexcept;
+    [[nodiscard]] float lfoRate(const domain::Lfo&) const noexcept;
+    // Everything the per-sample loop would otherwise recompute from settings that only change when
+    // a patch is published or the tempo moves: the sync-resolved rates and the fade length. The
+    // modulator loop runs once per sample per voice, so none of it belongs in `next()`.
+    void updateDerived() noexcept;
     std::array<juce::ADSR, domain::envelopeCount> envelopes_;
+    std::array<StageShaper, domain::envelopeCount> shapers_{};
     std::array<domain::Lfo, domain::lfoCount> lfoSettings_{}, previousLfoSettings_{};
     std::array<double, domain::lfoCount> lfoPhases_{};
-    double sampleRate_{48000.0};
-    std::uint64_t smoothingSample_{}, smoothingLength_{1};
+    // Deterministic per-LFO random stream for `sampleHold` and `randomSmooth`: one held value, the
+    // one before it (the ramp `randomSmooth` interpolates across) and the xorshift state itself.
+    std::array<float, domain::lfoCount> lfoHold_{}, lfoPreviousHold_{};
+    std::array<float, domain::lfoCount> rateHz_{1.0f, 1.0f}, previousRateHz_{1.0f, 1.0f};
+    std::array<double, domain::lfoCount> fadeSamples_{};
+    // True when any envelope declares a non-zero stage curve. False is the pre-D8 path: the JUCE
+    // ADSR sample is returned untouched and the shaper does no bookkeeping at all.
+    bool curvesActive_{};
+    std::array<std::uint32_t, domain::lfoCount> lfoRandom_{1, 1};
+    std::uint32_t patchSeed_{};
+    double sampleRate_{48000.0}, tempo_{fallbackTempoBpm};
+    std::uint64_t smoothingSample_{}, smoothingLength_{1}, sampleSinceNoteOn_{};
 };
 
 // Every matrix-eligible (continuous, modulatable) catalog parameter, in catalog order. The original
@@ -257,7 +293,7 @@ struct CompiledPatch
 [[nodiscard]] std::optional<ParameterTarget> parameterTarget(std::string_view) noexcept;
 struct CompileResult { CompiledPatch patch{}; std::string error; explicit operator bool() const noexcept { return error.empty(); } };
 [[nodiscard]] CompileResult compilePatch(const domain::Patch&);
-using ModulationInputs = std::array<float, static_cast<std::size_t>(domain::ModulationSource::macro4) + 1>;
+using ModulationInputs = std::array<float, domain::modulationSourceCount>;
 [[nodiscard]] ModuleValues applyModulation(const CompiledPatch&, std::size_t node,
                                             const ModuleValues&, const ModulationInputs&) noexcept;
 

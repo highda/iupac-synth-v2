@@ -40,6 +40,24 @@
             "snapshot": "reverb-bounded-tail.snapshot.json",
             "midi": "held-note.midi.json",
             "samples": 288000
+        },
+        {
+            "id": "modulation-stage-curves",
+            "snapshot": "modulation-curves.snapshot.json",
+            "midi": "held-note.midi.json",
+            "samples": 144000
+        },
+        {
+            "id": "modulation-random-shapes",
+            "snapshot": "modulation-random.snapshot.json",
+            "midi": "held-note.midi.json",
+            "samples": 144000
+        },
+        {
+            "id": "modulation-tempo-sync",
+            "snapshot": "modulation-sync.snapshot.json",
+            "midi": "held-note.midi.json",
+            "samples": 144000
         }
     ],
     "rejections": [

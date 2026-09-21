@@ -73,11 +73,27 @@ struct ModuleDescriptor
 struct ParameterValue { std::string id; std::vector<double> values; };
 struct Node { std::string id; ModuleType type{}; std::vector<ParameterValue> parameters; };
 struct AudioEdge { std::string source; std::string destination; double gain{}; AudioPort port{AudioPort::in}; }; // destination "output" is the final bus
-enum class ModulationSource { e1, e2, e3, l1, l2, velocity, keyTracking, pitchBend, cc1, macro1, macro2, macro3, macro4 };
+// `e4` appends (D8): every earlier stored source id keeps the value it had, so a pre-D8 matrix row
+// decodes to the same source it always named.
+enum class ModulationSource { e1, e2, e3, l1, l2, velocity, keyTracking, pitchBend, cc1, macro1, macro2, macro3, macro4, e4 };
+inline constexpr std::size_t modulationSourceCount = static_cast<std::size_t>(ModulationSource::e4) + 1;
 struct MatrixRow { std::string id; bool enabled{}; ModulationSource source{}; std::string destinationNode; std::string destinationParameter; double depth{}; };
-struct Envelope { double attack{0.01}, decay{0.1}, sustain{1.0}, release{0.2}; };
-enum class LfoWaveform { sine, triangle };
-struct Lfo { double rate{1.0}; LfoWaveform waveform{LfoWaveform::sine}; };
+// D8 stage curves: 0 is the existing JUCE ADSR shape exactly, +-1 bends the stage toward
+// logarithmic/exponential within the same duration and the same endpoints.
+struct Envelope { double attack{0.01}, decay{0.1}, sustain{1.0}, release{0.2}; double attackCurve{}, decayCurve{}, releaseCurve{}; };
+// `sine` and `triangle` keep indices 0 and 1; the four D8 shapes append (D8).
+enum class LfoWaveform { sine, triangle, saw, square, sampleHold, randomSmooth };
+inline constexpr std::size_t lfoWaveformCount = static_cast<std::size_t>(LfoWaveform::randomSmooth) + 1;
+enum class LfoSyncMode { free, sync };
+enum class LfoSyncDivision { whole, half, quarter, quarterTriplet, eighth, eighthTriplet, sixteenth };
+inline constexpr std::size_t lfoSyncDivisionCount = static_cast<std::size_t>(LfoSyncDivision::sixteenth) + 1;
+// Beats per cycle of each division, in enum order: the tempo-synced LFO period at the playhead's
+// tempo, the same table the delay's `syncDivision` uses.
+inline constexpr std::array<double, lfoSyncDivisionCount> lfoSyncBeats{4.0, 2.0, 1.0, 2.0 / 3.0, 0.5, 1.0 / 3.0, 0.25};
+struct Lfo { double rate{1.0}; LfoWaveform waveform{LfoWaveform::sine}; double fadeMs{}; LfoSyncMode syncMode{LfoSyncMode::free}; LfoSyncDivision syncDivision{LfoSyncDivision::quarter}; };
+[[nodiscard]] std::string_view lfoWaveformId(LfoWaveform) noexcept;
+[[nodiscard]] std::string_view lfoSyncModeId(LfoSyncMode) noexcept;
+[[nodiscard]] std::string_view lfoSyncDivisionId(LfoSyncDivision) noexcept;
 struct Macro { std::string label; double defaultValue{}; };
 
 struct Patch

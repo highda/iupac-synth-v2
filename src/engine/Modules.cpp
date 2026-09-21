@@ -361,10 +361,132 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         }
         else{const auto g=clampFinite(p.level,0,1,1);l*=g*cachedPanLeft_;r*=g*cachedPanRight_;}outL[i]=std::isfinite(l)?l*output:0;outR[i]=std::isfinite(r)?r*output:0;}
 }
-void ModulatorBank::prepare(double rate) noexcept {sampleRate_=std::max(1.0,rate);smoothingLength_=static_cast<std::uint64_t>(std::max(1.0,sampleRate_*.020));for(auto& e:envelopes_)e.setSampleRate(sampleRate_);}
-void ModulatorBank::configure(const std::array<domain::Envelope,domain::envelopeCount>& es,const std::array<domain::Lfo,domain::lfoCount>& ls) noexcept {previousLfoSettings_=lfoSettings_;lfoSettings_=ls;smoothingSample_=0;for(std::size_t i=0;i<domain::envelopeCount;++i){juce::ADSR::Parameters p;p.attack=static_cast<float>(std::clamp(es[i].attack,.001,2.0));p.decay=static_cast<float>(std::clamp(es[i].decay,.01,4.0));p.sustain=static_cast<float>(std::clamp(es[i].sustain,0.0,1.0));p.release=static_cast<float>(std::clamp(es[i].release,.02,6.0));envelopes_[i].setParameters(p);}}
-void ModulatorBank::reset() noexcept {lfoPhases_.fill(0);for(auto&e:envelopes_)e.reset();}
-void ModulatorBank::noteOn() noexcept {lfoPhases_.fill(0);for(auto& e:envelopes_)e.noteOn();}void ModulatorBank::noteOff() noexcept {for(auto& e:envelopes_)e.noteOff();}
-std::array<float,5> ModulatorBank::next() noexcept {std::array<float,5> r{};for(std::size_t i=0;i<domain::envelopeCount;++i){const auto sample=envelopes_[i].getNextSample();if(i<3)r[i]=sample;} // E4 runs with the bank; issue #125 makes it a matrix source
-const float x=smoothingSample_>=smoothingLength_?1.f:static_cast<float>(smoothingSample_)/static_cast<float>(smoothingLength_);for(std::size_t i=0;i<2;++i){const auto ph=lfoPhases_[i];const auto wave=[ph](domain::LfoWaveform waveform){if(waveform==domain::LfoWaveform::sine)return fastSin(ph);const auto scaled=static_cast<float>(2*ph/std::numbers::pi_v<double>);return ph>std::numbers::pi_v<double>*.5?2-scaled:ph<-std::numbers::pi_v<double>*.5?-2-scaled:scaled;};r[3+i]=std::lerp(wave(previousLfoSettings_[i].waveform),wave(lfoSettings_[i].waveform),x);const auto rate=std::lerp(previousLfoSettings_[i].rate,lfoSettings_[i].rate,static_cast<double>(x));lfoPhases_[i]=ph+twoPi*std::clamp(rate,.05,12.0)/sampleRate_;if(lfoPhases_[i]>std::numbers::pi_v<double>)lfoPhases_[i]-=twoPi;}if(smoothingSample_<smoothingLength_)++smoothingSample_;return r;}
+void ModulatorBank::prepare(double rate) noexcept {sampleRate_=std::max(1.0,rate);smoothingLength_=static_cast<std::uint64_t>(std::max(1.0,sampleRate_*.020));for(auto& e:envelopes_)e.setSampleRate(sampleRate_);updateDerived();}
+namespace {
+// Stage bend. `curve` 0 is the straight line the JUCE ADSR already draws; the exponential form
+// below keeps both endpoints exact (warp(0)=0, warp(1)=1) and stays monotone for every strength,
+// so a bent stage has the same duration, the same start and the same end as the flat one.
+constexpr float stageCurveStrength=4.0f;
+float stageWarp(float progress,float strength,float normalizer) noexcept
+{
+    progress=std::clamp(progress,0.f,1.f);
+    return (1.0f-std::exp(-strength*progress))*normalizer;
+}
+float stageNormalizer(float strength) noexcept {const auto d=1.0f-std::exp(-strength);return d==0.f?1.0f:1.0f/d;}
+// One deterministic draw from an LFO's own patch-seeded xorshift stream, in [-1, 1].
+float nextLfoRandom(std::uint32_t& state) noexcept
+{
+    state^=state<<13;state^=state>>17;state^=state<<5;
+    return static_cast<float>(static_cast<double>(state)/static_cast<double>(std::numeric_limits<std::uint32_t>::max()))*2.0f-1.0f;
+}
+std::uint32_t lfoSeed(std::uint32_t patchSeed,std::size_t index) noexcept
+{
+    const auto mixed=patchSeed*2654435761u+static_cast<std::uint32_t>(index+1)*2246822519u+1u;
+    return mixed==0?1u:mixed;
+}
+}
+void ModulatorBank::configure(const std::array<domain::Envelope,domain::envelopeCount>& es,const std::array<domain::Lfo,domain::lfoCount>& ls,std::uint32_t patchSeed) noexcept
+{
+    previousLfoSettings_=lfoSettings_;lfoSettings_=ls;smoothingSample_=0;patchSeed_=patchSeed;
+    for(std::size_t i=0;i<domain::envelopeCount;++i)
+    {
+        juce::ADSR::Parameters p;p.attack=static_cast<float>(std::clamp(es[i].attack,.001,2.0));p.decay=static_cast<float>(std::clamp(es[i].decay,.01,4.0));p.sustain=static_cast<float>(std::clamp(es[i].sustain,0.0,1.0));p.release=static_cast<float>(std::clamp(es[i].release,.02,6.0));envelopes_[i].setParameters(p);
+        auto& shaper=shapers_[i];shaper.sustain=p.sustain;
+        // The exp() normalizers are resolved here, not per sample: a curve of 0 stores a strength of
+        // exactly 0 and the shaper's fast path never evaluates exp() at all.
+        const auto curve=[](double value){return static_cast<float>(std::clamp(value,-1.0,1.0))*stageCurveStrength;};
+        shaper.attackWarp=curve(es[i].attackCurve);shaper.decayWarp=curve(es[i].decayCurve);shaper.releaseWarp=curve(es[i].releaseCurve);
+        shaper.attackNorm=stageNormalizer(shaper.attackWarp);shaper.decayNorm=stageNormalizer(shaper.decayWarp);shaper.releaseNorm=stageNormalizer(shaper.releaseWarp);
+    }
+    curvesActive_=std::ranges::any_of(shapers_,[](const StageShaper& shaper){return shaper.attackWarp!=0.f||shaper.decayWarp!=0.f||shaper.releaseWarp!=0.f;});
+    updateDerived();
+}
+void ModulatorBank::setTempo(double beatsPerMinute) noexcept {tempo_=beatsPerMinute>=20.0&&beatsPerMinute<=999.0?beatsPerMinute:fallbackTempoBpm;updateDerived();}
+// Resolved once per publication or tempo change, never per sample: the modulator loop runs for
+// every voice on every sample, so a sync division lookup or a fade length has no business there.
+void ModulatorBank::updateDerived() noexcept
+{
+    for(std::size_t i=0;i<domain::lfoCount;++i)
+    {
+        rateHz_[i]=lfoRate(lfoSettings_[i]);previousRateHz_[i]=lfoRate(previousLfoSettings_[i]);
+        const auto fadeMs=std::clamp(lfoSettings_[i].fadeMs,0.0,5000.0);
+        fadeSamples_[i]=fadeMs>0.0?std::max(1.0,fadeMs*.001*sampleRate_):0.0;
+    }
+}
+void ModulatorBank::reset() noexcept {lfoPhases_.fill(0);sampleSinceNoteOn_=0;for(auto&e:envelopes_)e.reset();for(auto&s:shapers_){s.lastValue=s.lastShaped=s.releaseFrom=s.releaseShaped=0;s.attacking=s.releasing=false;}
+    for(std::size_t i=0;i<domain::lfoCount;++i){lfoRandom_[i]=lfoSeed(patchSeed_,i);lfoPreviousHold_[i]=0;lfoHold_[i]=nextLfoRandom(lfoRandom_[i]);}}
+void ModulatorBank::noteOn() noexcept {lfoPhases_.fill(0);sampleSinceNoteOn_=0;for(auto& e:envelopes_)e.noteOn();for(auto&s:shapers_){s.attacking=true;s.releasing=false;s.lastValue=s.lastShaped=0;}
+    // The random shapes restart from the patch seed on every note-on, never from wall-clock state,
+    // so two renders of the same patch and the same MIDI produce the same stream (V2).
+    for(std::size_t i=0;i<domain::lfoCount;++i){lfoRandom_[i]=lfoSeed(patchSeed_,i);lfoPreviousHold_[i]=0;lfoHold_[i]=nextLfoRandom(lfoRandom_[i]);}}
+void ModulatorBank::noteOff() noexcept {for(std::size_t i=0;i<domain::envelopeCount;++i){envelopes_[i].noteOff();auto& s=shapers_[i];if(!s.releasing){s.releasing=true;s.attacking=false;s.releaseFrom=s.lastValue;s.releaseShaped=s.lastShaped;}}}
+float ModulatorBank::shapeEnvelope(std::size_t index,float value) noexcept
+{
+    auto& s=shapers_[index];float shaped=value;
+    if(s.releasing)
+    {
+        // The release always ends at zero and starts from wherever the envelope was, so a flat
+        // release with a flat attack before it returns the ADSR sample itself, untouched.
+        const float scale=s.releaseFrom>0.f?s.releaseShaped/s.releaseFrom:1.0f;
+        shaped=s.releaseWarp==0.f?value*scale
+             :s.releaseShaped*(1.0f-stageWarp(s.releaseFrom>0.f?1.0f-value/s.releaseFrom:1.0f,s.releaseWarp,s.releaseNorm));
+    }
+    else
+    {
+        if(s.attacking){if(value>=1.0f)s.attacking=false;else shaped=s.attackWarp==0.f?value:stageWarp(value,s.attackWarp,s.attackNorm);}
+        if(!s.attacking)
+        {
+            // Decay and sustain: the ADSR runs from 1 down to the sustain level, so the stage
+            // progress is what the curve bends, and the sustain level itself is an endpoint.
+            if(s.decayWarp==0.f)shaped=value;
+            else{const float progress=s.sustain<1.0f?std::clamp((1.0f-value)/(1.0f-s.sustain),0.f,1.0f):1.0f;shaped=1.0f+(s.sustain-1.0f)*stageWarp(progress,s.decayWarp,s.decayNorm);}
+        }
+    }
+    s.lastValue=value;s.lastShaped=shaped;return shaped;
+}
+float ModulatorBank::lfoRate(const domain::Lfo& lfo) const noexcept
+{
+    if(lfo.syncMode!=domain::LfoSyncMode::sync)return static_cast<float>(lfo.rate);
+    const auto beats=domain::lfoSyncBeats[std::min<std::size_t>(static_cast<std::size_t>(lfo.syncDivision),domain::lfoSyncDivisionCount-1)];
+    return static_cast<float>(tempo_/(60.0*beats));
+}
+std::array<float,6> ModulatorBank::next() noexcept
+{
+    std::array<float,6> r{};
+    // E1..E3, L1..L2, then E4: the persisted source order, which `e4` appends to. With every stage
+    // curve at 0 the shaper is skipped outright, so the default patch pays one predictable branch.
+    if(curvesActive_)for(std::size_t i=0;i<domain::envelopeCount;++i)r[i<3?i:5]=shapeEnvelope(i,envelopes_[i].getNextSample());
+    else for(std::size_t i=0;i<domain::envelopeCount;++i)r[i<3?i:5]=envelopes_[i].getNextSample();
+    const float x=smoothingSample_>=smoothingLength_?1.f:static_cast<float>(smoothingSample_)/static_cast<float>(smoothingLength_);
+    for(std::size_t i=0;i<2;++i)
+    {
+        const auto ph=lfoPhases_[i];
+        const auto wave=[&](domain::LfoWaveform waveform)->float{
+            switch(waveform)
+            {
+                case domain::LfoWaveform::sine:return fastSin(ph);
+                case domain::LfoWaveform::triangle:{const auto scaled=static_cast<float>(2*ph/std::numbers::pi_v<double>);return ph>std::numbers::pi_v<double>*.5?2-scaled:ph<-std::numbers::pi_v<double>*.5?-2-scaled:scaled;}
+                case domain::LfoWaveform::saw:return static_cast<float>(ph/std::numbers::pi_v<double>);
+                case domain::LfoWaveform::square:return ph<0?-1.f:1.f;
+                case domain::LfoWaveform::sampleHold:return lfoHold_[i];
+                case domain::LfoWaveform::randomSmooth:{const auto t=static_cast<float>((ph+std::numbers::pi_v<double>)/twoPi);const auto smooth=t*t*(3.0f-2.0f*t);return std::lerp(lfoPreviousHold_[i],lfoHold_[i],smooth);}
+            }
+            return 0;};
+        // Outside a transaction's crossfade only the live shape and the live rate are evaluated;
+        // the previous settings cost nothing once `x` has reached 1.
+        const bool blending=x<1.f;
+        float value=blending?std::lerp(wave(previousLfoSettings_[i].waveform),wave(lfoSettings_[i].waveform),x):wave(lfoSettings_[i].waveform);
+        // `fadeMs` ramps the LFO's depth up from zero after note-on. 0 ms is no multiplication at all.
+        if(fadeSamples_[i]>0.0&&static_cast<double>(sampleSinceNoteOn_)<fadeSamples_[i])value*=static_cast<float>(static_cast<double>(sampleSinceNoteOn_)/fadeSamples_[i]);
+        r[3+i]=value;
+        const auto rate=blending?std::lerp(previousRateHz_[i],rateHz_[i],x):rateHz_[i];
+        lfoPhases_[i]=ph+twoPi*std::clamp(static_cast<double>(rate),.05,12.0)/sampleRate_;
+        // A wrap is one cycle: both random shapes take exactly one new draw there, so the stream a
+        // patch produces depends only on its seed and on how many cycles have elapsed.
+        if(lfoPhases_[i]>std::numbers::pi_v<double>){lfoPhases_[i]-=twoPi;lfoPreviousHold_[i]=lfoHold_[i];lfoHold_[i]=nextLfoRandom(lfoRandom_[i]);}
+    }
+    if(smoothingSample_<smoothingLength_)++smoothingSample_;
+    ++sampleSinceNoteOn_;
+    return r;
+}
 }

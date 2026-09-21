@@ -1,7 +1,7 @@
 #include "EditorLanes.hpp"
 namespace iupac::ui
 {
-juce::String modulationSourceName(domain::ModulationSource s){static constexpr std::array n{"E1","E2","E3","L1","L2","VEL","KEY","BEND","CC1","MACRO 1","MACRO 2","MACRO 3","MACRO 4"};return n[(std::size_t)juce::jlimit(0,12,(int)s)];}
+juce::String modulationSourceName(domain::ModulationSource s){static constexpr std::array n{"E1","E2","E3","L1","L2","VEL","KEY","BEND","CC1","MACRO 1","MACRO 2","MACRO 3","MACRO 4","E4"};return n[(std::size_t)juce::jlimit(0,(int)domain::modulationSourceCount-1,(int)s)];}
 std::vector<LaneDestination>laneDestinations(const domain::Patch&p)
 {
  std::vector<LaneDestination>d;const auto map=assignSlots(p);
@@ -10,7 +10,7 @@ std::vector<LaneDestination>laneDestinations(const domain::Patch&p)
 }
 LaneView::LaneView(LaneMatrix&m,std::size_t row):matrix_(m),row_(row),depth_(domain::ParameterDescriptor{"depth","",-1,1,0,domain::ParameterScale::linear,domain::ParameterKind::continuous,false,0,20.0,{}},false,true)
 {
- setName("Lane "+juce::String((int)row+1));for(int i=0;i<13;++i)source_.addItem(modulationSourceName((domain::ModulationSource)i),i+1);source_.setName("Lane source");destination_.setName("Lane destination");depth_.setName("Lane depth");depth_.setStep(0.01);enable_.setClickingTogglesState(true);enable_.setName("Lane enable");remove_.setName("Lane remove");
+ setName("Lane "+juce::String((int)row+1));for(int i=0;i<(int)domain::modulationSourceCount;++i)source_.addItem(modulationSourceName((domain::ModulationSource)i),i+1);source_.setName("Lane source");destination_.setName("Lane destination");depth_.setName("Lane depth");depth_.setStep(0.01);enable_.setClickingTogglesState(true);enable_.setName("Lane enable");remove_.setName("Lane remove");
  source_.onChange=[this]{changed();};destination_.onChange=[this]{changed();};depth_.onChange=[this](double){changed();};enable_.onClick=[this]{changed();};remove_.onClick=[this]{if(matrix_.onRemove)matrix_.onRemove(row_);};
  for(auto*c:std::initializer_list<juce::Component*>{&source_,&destination_,&depth_,&enable_,&remove_})addAndMakeVisible(c);
 }
@@ -32,7 +32,7 @@ void LaneView::sync(const domain::MatrixRow&row,const std::vector<LaneDestinatio
 }
 domain::MatrixRow LaneView::row()const
 {
- auto r=value_;r.source=(domain::ModulationSource)juce::jlimit(0,12,source_.getSelectedId()-1);const int d=destination_.getSelectedId();if(d>0&&(std::size_t)d<=destinations_.size()){r.destinationNode=destinations_[(std::size_t)d-1].nodeId;r.destinationParameter=destinations_[(std::size_t)d-1].parameter;}r.depth=depth_.value();r.enabled=enable_.getToggleState();return r;
+ auto r=value_;r.source=(domain::ModulationSource)juce::jlimit(0,(int)domain::modulationSourceCount-1,source_.getSelectedId()-1);const int d=destination_.getSelectedId();if(d>0&&(std::size_t)d<=destinations_.size()){r.destinationNode=destinations_[(std::size_t)d-1].nodeId;r.destinationParameter=destinations_[(std::size_t)d-1].parameter;}r.depth=depth_.value();r.enabled=enable_.getToggleState();return r;
 }
 void LaneView::changed(){if(syncing_)return;matrix_.select(row_);if(matrix_.onEdit)matrix_.onEdit(row_,row());}
 LaneMatrix::LaneMatrix(){setName("Lane matrix");add_.setName("Add lane");add_.onClick=[this]{if(onAdd)onAdd();};addAndMakeVisible(add_);viewport_.setViewedComponent(&content_,false);viewport_.setScrollBarsShown(true,false);addAndMakeVisible(viewport_);}
