@@ -1,0 +1,493 @@
+{
+ "stateVersion": 1,
+ "basePatch": {
+  "patchVersion": 1,
+  "noiseSeed": 0,
+  "nodes": [],
+  "edges": [],
+  "envelopes": [
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 1.0,
+    "waveform": "sine",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   },
+   {
+    "rate": 1.0,
+    "waveform": "sine",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   }
+  ],
+  "matrix": [],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "editedPatch": {
+  "patchVersion": 1,
+  "noiseSeed": 4101,
+  "nodes": [
+   {
+    "id": "pad-a",
+    "type": "harmonic",
+    "parameters": {
+     "partialAmplitudes": [
+      1.0,
+      0.3299,
+      0.1724,
+      0.1088,
+      0.0761,
+      0.0569,
+      0.0444,
+      0.0359,
+      0.0297,
+      0.0251,
+      0.0216,
+      0.0188,
+      0.0165,
+      0.0147,
+      0.0131,
+      0.0118
+     ],
+     "partialRatios": [
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      14.0,
+      15.0,
+      16.0
+     ],
+     "partialPans": [
+      -0.9,
+      -0.78,
+      -0.66,
+      -0.54,
+      -0.42,
+      -0.3,
+      -0.18,
+      -0.06,
+      0.06,
+      0.18,
+      0.3,
+      0.42,
+      0.54,
+      0.66,
+      0.78,
+      0.9
+     ],
+     "tilt": 0.0,
+     "inharmonicity": 0.0,
+     "outputLevel": 0.34,
+     "unisonVoices": 7,
+     "detuneCents": 22.0,
+     "unisonSpread": 0.85,
+     "phaseRandom": 0.8,
+     "drift": 0.35,
+     "harmonicityMorph": 0.25,
+     "oddEvenBalance": -0.2,
+     "symmetry": 0.22,
+     "octave": 0,
+     "coarse": 0,
+     "fine": -6.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "pad-b",
+    "type": "harmonic",
+    "parameters": {
+     "partialAmplitudes": [
+      1.0,
+      0.3299,
+      0.1724,
+      0.1088,
+      0.0761,
+      0.0569,
+      0.0444,
+      0.0359,
+      0.0297,
+      0.0251,
+      0.0216,
+      0.0188,
+      0.0165,
+      0.0147,
+      0.0131,
+      0.0118
+     ],
+     "partialRatios": [
+      1.002,
+      2.004,
+      3.006,
+      4.008,
+      5.01,
+      6.012,
+      7.014,
+      8.016,
+      9.018,
+      10.02,
+      11.022,
+      12.024,
+      13.026,
+      14.028,
+      15.03,
+      16.032
+     ],
+     "partialPans": [
+      0.9,
+      0.78,
+      0.66,
+      0.54,
+      0.42,
+      0.3,
+      0.18,
+      0.06,
+      -0.06,
+      -0.18,
+      -0.3,
+      -0.42,
+      -0.54,
+      -0.66,
+      -0.78,
+      -0.9
+     ],
+     "tilt": 0.0,
+     "inharmonicity": 0.0,
+     "outputLevel": 0.26,
+     "unisonVoices": 5,
+     "detuneCents": 34.0,
+     "unisonSpread": 0.7,
+     "phaseRandom": 0.6,
+     "drift": 0.5,
+     "harmonicityMorph": 0.15,
+     "oddEvenBalance": 0.25,
+     "symmetry": 0.3,
+     "octave": 0,
+     "coarse": 7,
+     "fine": 9.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "pad-sub",
+    "type": "sub",
+    "parameters": {
+     "waveform": 0,
+     "octave": -1,
+     "drift": 0.25,
+     "fine": 0.0,
+     "keytrack": 1.0,
+     "outputLevel": 0.42
+    }
+   },
+   {
+    "id": "pad-mix",
+    "type": "mixer",
+    "parameters": {
+     "level": 0.9,
+     "pan": 0.0,
+     "outputLevel": 1.0
+    }
+   },
+   {
+    "id": "pad-lp",
+    "type": "filter",
+    "parameters": {
+     "mode": 3,
+     "cutoff": 520.0,
+     "q": 2.2,
+     "outputLevel": 1.0,
+     "drive": 2.4,
+     "keytrack": 0.3,
+     "envAmount": 0.35
+    }
+   },
+   {
+    "id": "pad-cho",
+    "type": "chorus",
+    "parameters": {
+     "rate": 0.22,
+     "depth": 0.75,
+     "voices": 4,
+     "feedback": 0.25,
+     "mix": 0.45,
+     "outputLevel": 1.0
+    }
+   },
+   {
+    "id": "pad-dly",
+    "type": "delay",
+    "parameters": {
+     "syncMode": 1,
+     "timeMs": 500.0,
+     "syncDivision": 4,
+     "spread": 0.7,
+     "feedback": 0.55,
+     "damping": 0.55,
+     "mix": 0.3,
+     "outputLevel": 1.0
+    }
+   },
+   {
+    "id": "pad-rev",
+    "type": "reverb",
+    "parameters": {
+     "size": 0.9,
+     "decaySeconds": 9.0,
+     "damping": 0.45,
+     "preDelayMs": 45.0,
+     "width": 1.0,
+     "mix": 0.45,
+     "outputLevel": 1.0
+    }
+   },
+   {
+    "id": "pad-wid",
+    "type": "width",
+    "parameters": {
+     "width": 1.6,
+     "bassMonoHz": 140.0,
+     "outputLevel": 1.0
+    }
+   }
+  ],
+  "edges": [
+   {
+    "source": "pad-a",
+    "destination": "pad-mix",
+    "gain": 0.9
+   },
+   {
+    "source": "pad-b",
+    "destination": "pad-mix",
+    "gain": 0.8
+   },
+   {
+    "source": "pad-sub",
+    "destination": "pad-mix",
+    "gain": 0.8
+   },
+   {
+    "source": "pad-mix",
+    "destination": "pad-lp",
+    "gain": 1.0
+   },
+   {
+    "source": "pad-lp",
+    "destination": "pad-cho",
+    "gain": 1.0
+   },
+   {
+    "source": "pad-cho",
+    "destination": "pad-dly",
+    "gain": 1.0
+   },
+   {
+    "source": "pad-dly",
+    "destination": "pad-rev",
+    "gain": 1.0
+   },
+   {
+    "source": "pad-rev",
+    "destination": "pad-wid",
+    "gain": 1.0
+   },
+   {
+    "source": "pad-wid",
+    "destination": "output",
+    "gain": 1.0
+   }
+  ],
+  "envelopes": [
+   {
+    "attack": 1.2,
+    "decay": 2.0,
+    "sustain": 0.85,
+    "release": 4.5,
+    "attackCurve": 0.7,
+    "decayCurve": -0.3,
+    "releaseCurve": 0.6
+   },
+   {
+    "attack": 0.9,
+    "decay": 3.0,
+    "sustain": 0.5,
+    "release": 3.0,
+    "attackCurve": 0.5,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.4
+   },
+   {
+    "attack": 0.02,
+    "decay": 0.2,
+    "sustain": 0.5,
+    "release": 0.4,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   },
+   {
+    "attack": 0.5,
+    "decay": 1.0,
+    "sustain": 0.7,
+    "release": 2.0,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 0.12,
+    "waveform": "randomSmooth",
+    "fadeMs": 2500.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   },
+   {
+    "rate": 0.35,
+    "waveform": "triangle",
+    "fadeMs": 1200.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   }
+  ],
+  "matrix": [
+   {
+    "id": "row-1",
+    "enabled": true,
+    "source": "e2",
+    "destinationNode": "pad-lp",
+    "destinationParameter": "cutoff",
+    "depth": 0.5
+   },
+   {
+    "id": "row-2",
+    "enabled": true,
+    "source": "l1",
+    "destinationNode": "pad-a",
+    "destinationParameter": "drift",
+    "depth": 0.3
+   },
+   {
+    "id": "row-3",
+    "enabled": true,
+    "source": "l2",
+    "destinationNode": "pad-b",
+    "destinationParameter": "symmetry",
+    "depth": 0.25
+   },
+   {
+    "id": "row-4",
+    "enabled": true,
+    "source": "e4",
+    "destinationNode": "pad-rev",
+    "destinationParameter": "mix",
+    "depth": 0.0
+   },
+   {
+    "id": "row-5",
+    "enabled": true,
+    "source": "macro1",
+    "destinationNode": "pad-lp",
+    "destinationParameter": "cutoff",
+    "depth": 0.3
+   }
+  ],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "controls": {
+  "macros": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "outputGain": -6.0,
+  "width": 0.5,
+  "masterTune": 0.0,
+  "bypass": false
+ }
+}

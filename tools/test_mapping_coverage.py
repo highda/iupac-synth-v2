@@ -76,6 +76,13 @@ class CoverageTests(unittest.TestCase):
             if entry["status"] == "provisional":
                 self.assertTrue(entry["note"], f"{entry['module']}.{entry['parameter']} is provisional with no owning leaf in 'note'")
 
+    def test_no_parameter_is_left_provisional(self):
+        # CHEMISTRY.md: a provisional entry must be resolved to `mapped` with calibration evidence
+        # before the release candidate. #128 (W19) resolved the last of them, so the table carries
+        # none and a new parameter cannot land provisional by default.
+        pending = sorted(f"{e['module']}.{e['parameter']}" for e in self.entries if e["status"] != "mapped")
+        self.assertEqual(pending, [], f"parameters still provisional, with no leaf left to own them: {pending}")
+
 
 if __name__ == "__main__":
     unittest.main(argv=sys.argv[:1], verbosity=2)

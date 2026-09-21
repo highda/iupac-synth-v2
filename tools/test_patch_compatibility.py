@@ -281,6 +281,50 @@ class CompatibilityTests(unittest.TestCase):
                             for e in curves["envelopes"]), "an authored envelope has no stage curve")
         self.assertIn("e4", {row["source"] for row in curves["matrix"]})
 
+    def test_the_authored_family_cases_reach_pad_stab_spike_and_bell(self):
+        # D8's finding was that the instrument converged on metallic bell-like results because pads,
+        # stabs and spikes were structurally unreachable (#104). These four authored cases are the
+        # standing proof that the widened engine reaches all four families, so each one has to keep
+        # using the breadth that makes its family possible rather than drifting back to a default.
+        root = ROOT / "data" / "panels" / "authored-synth"
+        panel = {case["id"]: case for case in json.loads((root / "panel.json").read_text())["cases"]}
+        for family in ("family-pad", "family-stab", "family-spike", "family-bell"):
+            self.assertIn(family, panel, f"{family} is not in the authored panel set")
+        patches = {f: json.loads((root / panel[f]["snapshot"]).read_text())["editedPatch"]
+                   for f in ("family-pad", "family-stab", "family-spike", "family-bell")}
+
+        def params(patch, kind):
+            return [n["parameters"] for n in patch["nodes"] if n["type"] == kind]
+
+        pad = patches["family-pad"]
+        self.assertTrue(any(p["unisonVoices"] >= 5 and p["drift"] > 0 for p in params(pad, "harmonic")),
+                        "the pad case no longer uses a wide drifting unison stack")
+        self.assertEqual({n["type"] for n in pad["nodes"]} & {"chorus", "delay", "reverb", "width"},
+                         {"chorus", "delay", "reverb", "width"}, "the pad case no longer uses the whole tail")
+        self.assertGreater(pad["envelopes"][0]["attack"], 0.5, "a pad needs a slow attack")
+
+        stab = patches["family-stab"]
+        self.assertLess(stab["envelopes"][0]["attack"], 0.01)
+        self.assertEqual(stab["envelopes"][0]["sustain"], 0.0, "a stab does not sustain")
+        self.assertTrue(any(p["envAmount"] >= 0.5 for p in params(stab, "filter")),
+                        "the stab case no longer snaps its filter with the envelope")
+        self.assertTrue(any(p["curve"] != 0 for p in params(stab, "shaper")), "the stab case lost its shaper curve")
+
+        spike = patches["family-spike"]
+        self.assertLess(spike["envelopes"][0]["decay"], 0.1)
+        self.assertTrue(any(e.get("port") == "modIn" for e in spike["edges"]),
+                        "the spike case no longer drives the audio-rate modIn port")
+        self.assertTrue(any(p["envAmount"] < 0 for p in params(spike, "filter")),
+                        "the spike case lost its inverted filter envelope")
+
+        bell = patches["family-bell"]
+        self.assertTrue(any(e.get("port") == "exciteIn" for e in bell["edges"]),
+                        "the bell case no longer excites the resonator through exciteIn")
+        self.assertTrue(any(p["mode"] == 1 and p["exciteDepth"] > 0 for p in params(bell, "resonator")),
+                        "the bell case no longer uses the modal resonator")
+        self.assertTrue(any(p["harmonicityMorph"] == 0 for p in params(bell, "harmonic")),
+                        "a bell keeps its inharmonic ratios: harmonicityMorph must stay 0")
+
     def test_authored_maximal_panel_case_sits_at_the_d8_bounds(self):
         patch = json.loads((ROOT / "data" / "panels" / "authored-synth" / "maximal.snapshot.json").read_text())["editedPatch"]
         self.assertEqual((len(patch["nodes"]), len(patch["edges"]), len(patch["matrix"]), len(patch["envelopes"])), (16, 48, 40, 4))

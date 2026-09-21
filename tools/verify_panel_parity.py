@@ -68,6 +68,11 @@ def main():
     parser.add_argument("--expectations", type=Path)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--write-expectations", action="store_true")
+    # The canonical platform is Linux arm64 (#42): its digests are what the macOS payload must
+    # reproduce. Writing expectations from any other platform must therefore say so instead of
+    # quietly relabelling the canonical platform as whatever measured last.
+    parser.add_argument("--canonical-platform")
+    parser.add_argument("--measurement-note", default="")
     arguments = parser.parse_args()
     expectations = arguments.expectations or arguments.repository / "data/panels/cross-platform-parity-v1.json"
 
@@ -80,9 +85,13 @@ def main():
                 "panels": measured}
 
     if arguments.write_expectations:
-        document["canonicalPlatform"] = platform_name
+        document["canonicalPlatform"] = arguments.canonical_platform or platform_name
+        document["measuredPlatform"] = platform_name
+        if arguments.measurement_note:
+            document["measurementNote"] = arguments.measurement_note
         expectations.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
         report = {"schemaVersion": 1, "status": "written", "platform": platform_name,
+                  "canonicalPlatform": document["canonicalPlatform"],
                   "expectations": str(expectations.name), "records": sum(len(x) for x in measured.values())}
         arguments.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
         print(f"wrote cross-platform parity expectations from {platform_name}")

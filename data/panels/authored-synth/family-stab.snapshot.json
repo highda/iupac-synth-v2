@@ -1,0 +1,378 @@
+{
+ "stateVersion": 1,
+ "basePatch": {
+  "patchVersion": 1,
+  "noiseSeed": 0,
+  "nodes": [],
+  "edges": [],
+  "envelopes": [
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 1.0,
+    "waveform": "sine",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   },
+   {
+    "rate": 1.0,
+    "waveform": "sine",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   }
+  ],
+  "matrix": [],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "editedPatch": {
+  "patchVersion": 1,
+  "noiseSeed": 4102,
+  "nodes": [
+   {
+    "id": "stab-a",
+    "type": "harmonic",
+    "parameters": {
+     "partialAmplitudes": [
+      1.0,
+      0.5,
+      0.3333,
+      0.25,
+      0.2,
+      0.1667,
+      0.1429,
+      0.125,
+      0.1111,
+      0.1,
+      0.0909,
+      0.0833,
+      0.0769,
+      0.0714,
+      0.0667,
+      0.0625
+     ],
+     "partialRatios": [
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      14.0,
+      15.0,
+      16.0
+     ],
+     "partialPans": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "tilt": 0.0,
+     "inharmonicity": 0.0,
+     "outputLevel": 0.5,
+     "unisonVoices": 3,
+     "detuneCents": 14.0,
+     "unisonSpread": 0.55,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "harmonicityMorph": 1.0,
+     "oddEvenBalance": 0.0,
+     "symmetry": 0.5,
+     "octave": 0,
+     "coarse": 0,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "stab-b",
+    "type": "fm",
+    "parameters": {
+     "carrierRatio": 1.0,
+     "modulatorRatio": 2.0,
+     "index": 1.4,
+     "outputLevel": 0.3,
+     "unisonVoices": 2,
+     "detuneCents": 8.0,
+     "unisonSpread": 0.4,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": 0,
+     "coarse": 7,
+     "fine": 0.0,
+     "keytrack": 1.0,
+     "modInDepth": 0.0
+    }
+   },
+   {
+    "id": "stab-mix",
+    "type": "mixer",
+    "parameters": {
+     "level": 1.0,
+     "pan": 0.0,
+     "outputLevel": 1.0
+    }
+   },
+   {
+    "id": "stab-lp",
+    "type": "filter",
+    "parameters": {
+     "mode": 0,
+     "cutoff": 700.0,
+     "q": 3.4,
+     "outputLevel": 1.0,
+     "drive": 4.0,
+     "keytrack": 0.25,
+     "envAmount": 0.75
+    }
+   },
+   {
+    "id": "stab-sat",
+    "type": "shaper",
+    "parameters": {
+     "drive": 6.5,
+     "wet": 0.7,
+     "outputLevel": 0.7,
+     "curve": 1
+    }
+   },
+   {
+    "id": "stab-rev",
+    "type": "reverb",
+    "parameters": {
+     "size": 0.3,
+     "decaySeconds": 0.9,
+     "damping": 0.7,
+     "preDelayMs": 8.0,
+     "width": 0.8,
+     "mix": 0.18,
+     "outputLevel": 1.0
+    }
+   }
+  ],
+  "edges": [
+   {
+    "source": "stab-a",
+    "destination": "stab-mix",
+    "gain": 1.0
+   },
+   {
+    "source": "stab-b",
+    "destination": "stab-mix",
+    "gain": 0.8
+   },
+   {
+    "source": "stab-mix",
+    "destination": "stab-lp",
+    "gain": 1.0
+   },
+   {
+    "source": "stab-lp",
+    "destination": "stab-sat",
+    "gain": 1.0
+   },
+   {
+    "source": "stab-sat",
+    "destination": "stab-rev",
+    "gain": 1.0
+   },
+   {
+    "source": "stab-rev",
+    "destination": "output",
+    "gain": 1.0
+   }
+  ],
+  "envelopes": [
+   {
+    "attack": 0.002,
+    "decay": 0.18,
+    "sustain": 0.0,
+    "release": 0.12,
+    "attackCurve": -0.8,
+    "decayCurve": -0.6,
+    "releaseCurve": -0.4
+   },
+   {
+    "attack": 0.001,
+    "decay": 0.09,
+    "sustain": 0.0,
+    "release": 0.08,
+    "attackCurve": -0.9,
+    "decayCurve": -0.9,
+    "releaseCurve": -0.5
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 0.4,
+    "release": 0.15,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   },
+   {
+    "attack": 0.02,
+    "decay": 0.3,
+    "sustain": 0.0,
+    "release": 0.2,
+    "attackCurve": 0.0,
+    "decayCurve": 0.0,
+    "releaseCurve": 0.0
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 4.0,
+    "waveform": "square",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   },
+   {
+    "rate": 1.0,
+    "waveform": "sine",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   }
+  ],
+  "matrix": [
+   {
+    "id": "row-1",
+    "enabled": true,
+    "source": "e2",
+    "destinationNode": "stab-lp",
+    "destinationParameter": "cutoff",
+    "depth": 0.85
+   },
+   {
+    "id": "row-2",
+    "enabled": true,
+    "source": "velocity",
+    "destinationNode": "stab-sat",
+    "destinationParameter": "drive",
+    "depth": 0.5
+   },
+   {
+    "id": "row-3",
+    "enabled": true,
+    "source": "e3",
+    "destinationNode": "stab-b",
+    "destinationParameter": "index",
+    "depth": 0.4
+   },
+   {
+    "id": "row-4",
+    "enabled": true,
+    "source": "macro2",
+    "destinationNode": "stab-lp",
+    "destinationParameter": "q",
+    "depth": 0.2
+   }
+  ],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "controls": {
+  "macros": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "outputGain": -6.0,
+  "width": 0.5,
+  "masterTune": 0.0,
+  "bypass": false
+ }
+}

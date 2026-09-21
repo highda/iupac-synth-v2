@@ -52,6 +52,7 @@ def main():
     parser.add_argument("--fixture", required=True)
     parser.add_argument("--pairs", required=True)
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--coverage", default=str(Path(__file__).resolve().parents[1] / "data/mapping-coverage.json"))
     args = parser.parse_args()
     fixture_path, pair_path = Path(args.fixture), Path(args.pairs)
     fixture = json.loads(fixture_path.read_text())
@@ -74,8 +75,8 @@ def main():
             analysis.write_text(json.dumps(records[identifier]["response"], sort_keys=True))
             trace = run_json([args.cli, "inspect", "--stage", "mapping", "--analysis", str(analysis),
                               "--request-id", identifier])
-            if trace["mappingVersion"] != 1 or trace["projectionVersion"] != 1:
-                raise AssertionError(f"{identifier}: versions not frozen at 1")
+            if trace["mappingVersion"] != 2 or trace["projectionVersion"] != 1:
+                raise AssertionError(f"{identifier}: versions not frozen at mapper 2 / projection 1")
             traces[identifier] = trace
             state = temporary / f"{identifier}.state.json"
             state.write_text(json.dumps(state_for(trace["patch"], trace), sort_keys=True))
@@ -139,6 +140,25 @@ def main():
         parallel |= any(count > 1 for count in incoming.values())
     if not serial: v3_failures.append("missing serial resonator graph")
     if not parallel: v3_failures.append("missing parallel resonator graph")
+    # Mapper-coverage invariant, second half (#128): the table claims every entry's `ruleId`
+    # appears in the generation trace. Check it against the traces actually produced above rather
+    # than trusting the table, so a rule that stops firing is a gate failure and not a stale note.
+    coverage = json.loads(Path(args.coverage).read_text())
+    traced_rules = {item["ruleId"] for trace in traces.values() for item in trace["rules"]}
+    declared_rules = {e["ruleId"] for e in coverage["entries"] if e["status"] == "mapped"}
+    absent = sorted(declared_rules - traced_rules)
+    if absent:
+        v3_failures.append(f"coverage ruleIds never traced: {absent}")
+    still_provisional = sorted(f"{e['module']}.{e['parameter']}" for e in coverage["entries"] if e["status"] != "mapped")
+    if still_provisional:
+        v3_failures.append(f"coverage entries still provisional: {still_provisional}")
+    # MAPPING-POLICY caps generated rows at 12 inside the 40-row Patch cap, so the rest stays
+    # editing room; D8 explicitly left that budget unchanged. Phase-4 parameters are reached by
+    # value assignment, never by spending more rows.
+    over_budget = {key: len(trace["patch"]["matrix"]) for key, trace in traces.items()
+                   if len(trace["patch"]["matrix"]) > 12}
+    if over_budget:
+        v3_failures.append(f"generated rows over the MAPPING-POLICY budget of 12: {over_budget}")
     peptides = [key for key in hard if any(token in key for token in ("gly", "ala", "cys", "met", "phe"))]
     peptide_axes = [tuple(traces[key]["sonicIntent"]["axes"][axis] for axis in ("density", "brightness", "decay")) for key in peptides]
     if len({signatures[key]["graph"] for key in peptides}) < 2 or len(set(peptide_axes)) < 2:
@@ -150,8 +170,14 @@ def main():
             if records[first]["response"]["analysis"]["canonicalIsomericSmiles"] != records[second]["response"]["analysis"]["canonicalIsomericSmiles"] and signatures[first]["value"] == signatures[second]["value"]:
                 v3_failures.append(f"equal holdout values: {first}/{second}")
     report = {
-        "gateVersion": 1, "metricVersion": 1, "mapperVersion": 1, "projectionVersion": 1,
+        "gateVersion": 1, "metricVersion": 1, "mapperVersion": 2, "projectionVersion": 1,
         "fixtureSha256": sha(fixture_path), "pairManifestSha256": sha(pair_path),
+        "coverageSha256": sha(Path(args.coverage)), "coverageVersion": coverage["coverageVersion"],
+        "coverage": {"declaredRules": sorted(declared_rules), "tracedRules": sorted(traced_rules),
+                     "declaredRulesNeverTraced": absent, "provisionalEntries": still_provisional,
+                     "maximumGeneratedRows": max(len(t["patch"]["matrix"]) for t in traces.values()),
+                     "maximumGeneratedNodes": max(len(t["patch"]["nodes"]) for t in traces.values()),
+                     "maximumGeneratedEdges": max(len(t["patch"]["edges"]) for t in traces.values())},
         "render": {"sampleRate": RATE, "blockSize": 128, "notes": list(NOTES), "velocity": VELOCITY,
                    "heldSeconds": 2, "releaseSeconds": 1},
         "panels": {"broad": broad, "hard": hard, "holdout": holdout},

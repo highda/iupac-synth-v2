@@ -1,110 +1,921 @@
 {
-  "coverageVersion": 1,
-  "note": "Mapper-coverage invariant, docs/architecture/CHEMISTRY.md#mapper-coverage-invariant (D8, issue #105). Every continuous/discrete/convenience/coefficientArray parameter of the production module catalog has exactly one entry here. status 'mapped' = the production generator assigns it today from the listed drivers and ruleId appears in the generation trace; status 'provisional' = reachable and declared, coefficient explicitly uncalibrated, note names the owning leaf. An empty drivers list is a failure, not a status. Drivers are existing SonicIntent axes (density, brightness, rigidity, roughness, decay, harmonicity, motion) and structuralDetail fields (bondOrderMean, bondOrderSpread, heteroPlacement, motifPlacement); phase 4 adds no new analysis fields.",
-  "entries": [
-    {"module": "harmonic", "parameter": "partialAmplitudes", "status": "mapped", "ruleId": "M1-primary-harmonic", "drivers": ["brightness"], "note": "authored by applyHarmonicSpectrum from tilt"},
-    {"module": "harmonic", "parameter": "partialRatios", "status": "mapped", "ruleId": "M1-primary-harmonic", "drivers": ["rigidity", "bondOrderSpread"], "note": "authored by applyHarmonicSpectrum from inharmonicity"},
-    {"module": "harmonic", "parameter": "partialPans", "status": "provisional", "ruleId": "M1-partial-pan", "drivers": ["motion", "heteroPlacement"], "note": "dead before D8: the generator never authors partial pans. W19 mapping-coverage leaf."},
-    {"module": "harmonic", "parameter": "tilt", "status": "mapped", "ruleId": "M1-primary-harmonic", "drivers": ["brightness"], "note": ""},
-    {"module": "harmonic", "parameter": "inharmonicity", "status": "mapped", "ruleId": "M1-primary-harmonic", "drivers": ["rigidity", "bondOrderSpread"], "note": ""},
-    {"module": "harmonic", "parameter": "outputLevel", "status": "mapped", "ruleId": "M1-primary", "drivers": ["density", "motion"], "note": "primary and secondary roles use different coefficients"},
-
-    {"module": "fm", "parameter": "carrierRatio", "status": "mapped", "ruleId": "M1-primary", "drivers": ["rigidity"], "note": "assigned only when FM is the primary source; the secondary FM role leaves the default"},
-    {"module": "fm", "parameter": "modulatorRatio", "status": "mapped", "ruleId": "M1-primary", "drivers": ["motifPlacement", "heteroPlacement"], "note": ""},
-    {"module": "fm", "parameter": "index", "status": "mapped", "ruleId": "M1-primary", "drivers": ["roughness", "motion"], "note": ""},
-    {"module": "fm", "parameter": "outputLevel", "status": "mapped", "ruleId": "M1-primary", "drivers": ["density", "motion"], "note": ""},
-
-    {"module": "noise", "parameter": "color", "status": "mapped", "ruleId": "M2-noise", "drivers": ["brightness"], "note": ""},
-    {"module": "noise", "parameter": "mode", "status": "mapped", "ruleId": "M2-noise", "drivers": ["decay"], "note": ""},
-    {"module": "noise", "parameter": "burstMs", "status": "mapped", "ruleId": "M2-noise", "drivers": ["decay"], "note": ""},
-    {"module": "noise", "parameter": "outputLevel", "status": "mapped", "ruleId": "M2-noise", "drivers": ["roughness"], "note": ""},
-
-    {"module": "resonator", "parameter": "mode", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["rigidity"], "note": ""},
-    {"module": "resonator", "parameter": "tuneRatio", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["density", "motifPlacement"], "note": ""},
-    {"module": "resonator", "parameter": "combFeedback", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["decay"], "note": ""},
-    {"module": "resonator", "parameter": "modalQ", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["rigidity"], "note": ""},
-    {"module": "resonator", "parameter": "modeRatios", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["bondOrderMean", "heteroPlacement", "motifPlacement"], "note": ""},
-    {"module": "resonator", "parameter": "modeLevels", "status": "mapped", "ruleId": "M3-resonator", "drivers": ["brightness", "bondOrderSpread", "motion"], "note": ""},
-    {"module": "resonator", "parameter": "outputLevel", "status": "provisional", "ruleId": "M3-resonator-level", "drivers": ["density"], "note": "generator writes the fixed value 0.7. W19 mapping-coverage leaf."},
-
-    {"module": "filter", "parameter": "mode", "status": "mapped", "ruleId": "M4-filter", "drivers": ["brightness"], "note": ""},
-    {"module": "filter", "parameter": "cutoff", "status": "mapped", "ruleId": "M4-filter", "drivers": ["brightness"], "note": ""},
-    {"module": "filter", "parameter": "q", "status": "mapped", "ruleId": "M4-filter", "drivers": ["harmonicity"], "note": ""},
-    {"module": "filter", "parameter": "outputLevel", "status": "provisional", "ruleId": "M4-filter-level", "drivers": ["density"], "note": "dead before D8: left at the descriptor default. W19 mapping-coverage leaf."},
-
-    {"module": "shaper", "parameter": "drive", "status": "mapped", "ruleId": "M4-shaper", "drivers": ["roughness", "bondOrderSpread"], "note": ""},
-    {"module": "shaper", "parameter": "wet", "status": "mapped", "ruleId": "M4-shaper", "drivers": ["roughness"], "note": ""},
-    {"module": "shaper", "parameter": "outputLevel", "status": "provisional", "ruleId": "M4-shaper-level", "drivers": ["density"], "note": "dead before D8: left at the descriptor default. W19 mapping-coverage leaf."},
-
-    {"module": "mixer", "parameter": "level", "status": "provisional", "ruleId": "M4-mixer", "drivers": ["density"], "note": "dead before D8: the generator never emits a mixer node. W19 mapping-coverage leaf."},
-    {"module": "mixer", "parameter": "pan", "status": "provisional", "ruleId": "M4-mixer", "drivers": ["motion", "heteroPlacement"], "note": "dead before D8: the generator never emits a mixer node. W19 mapping-coverage leaf."},
-    {"module": "mixer", "parameter": "outputLevel", "status": "provisional", "ruleId": "M4-mixer", "drivers": ["density"], "note": "dead before D8: the generator never emits a mixer node. W19 mapping-coverage leaf."},
-
-    {"module": "harmonic", "parameter": "unisonVoices", "status": "provisional", "ruleId": "M5-unison", "drivers": ["density", "motion"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "detuneCents", "status": "provisional", "ruleId": "M5-unison", "drivers": ["roughness", "bondOrderSpread"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "unisonSpread", "status": "provisional", "ruleId": "M5-unison", "drivers": ["motion", "heteroPlacement"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "phaseRandom", "status": "provisional", "ruleId": "M5-unison", "drivers": ["roughness"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "drift", "status": "provisional", "ruleId": "M5-drift", "drivers": ["motion", "decay"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "harmonicityMorph", "status": "provisional", "ruleId": "M6-spectral-shape", "drivers": ["harmonicity"], "note": "phase 4 parameter, reachable and declared; issue #121 implemented it as a render-time reshape and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "oddEvenBalance", "status": "provisional", "ruleId": "M6-spectral-shape", "drivers": ["bondOrderMean", "rigidity"], "note": "phase 4 parameter, reachable and declared; issue #121 implemented it as a render-time reshape and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "symmetry", "status": "provisional", "ruleId": "M6-spectral-shape", "drivers": ["motifPlacement", "brightness"], "note": "phase 4 parameter, reachable and declared; issue #121 implemented it as a render-time reshape and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "octave", "status": "provisional", "ruleId": "M7-pitch", "drivers": ["density"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the source pitch block and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "coarse", "status": "provisional", "ruleId": "M7-pitch", "drivers": ["motifPlacement"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the source pitch block and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "fine", "status": "provisional", "ruleId": "M7-pitch", "drivers": ["heteroPlacement"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the source pitch block and issue #128 calibrates its coefficient."},
-    {"module": "harmonic", "parameter": "keytrack", "status": "provisional", "ruleId": "M7-pitch", "drivers": ["rigidity"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the source pitch block and issue #128 calibrates its coefficient."},
-
-    {"module": "fm", "parameter": "unisonVoices", "status": "provisional", "ruleId": "M5-unison", "drivers": ["density", "motion"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "fm", "parameter": "detuneCents", "status": "provisional", "ruleId": "M5-unison", "drivers": ["roughness", "bondOrderSpread"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "fm", "parameter": "unisonSpread", "status": "provisional", "ruleId": "M5-unison", "drivers": ["motion", "heteroPlacement"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "fm", "parameter": "phaseRandom", "status": "provisional", "ruleId": "M5-unison", "drivers": ["roughness"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "fm", "parameter": "drift", "status": "provisional", "ruleId": "M5-drift", "drivers": ["motion", "decay"], "note": "phase 4 parameter, reachable and declared; issue #120 implements it and issue #128 calibrates its coefficient."},
-    {"module": "fm", "parameter": "octave", "status": "provisional", "ruleId": "M7-pitch", "drivers": ["density"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the source pitch block and issue #128 calibrates its coefficient."},
-    {"module": "fm", "parameter": "coarse", "status": "provisional", "ruleId": "M7-pitch", "drivers": ["motifPlacement"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the source pitch block and issue #128 calibrates its coefficient."},
-    {"module": "fm", "parameter": "fine", "status": "provisional", "ruleId": "M7-pitch", "drivers": ["heteroPlacement"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the source pitch block and issue #128 calibrates its coefficient."},
-    {"module": "fm", "parameter": "keytrack", "status": "provisional", "ruleId": "M7-pitch", "drivers": ["rigidity"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the source pitch block and issue #128 calibrates its coefficient."},
-    {"module": "fm", "parameter": "modInDepth", "status": "provisional", "ruleId": "M10-audio-rate", "drivers": ["roughness", "harmonicity"], "note": "phase 4 parameter; the audio-rate path is implemented (#127, the depth scales the signal cabled into the typed IN port) and issue #128 calibrates its coefficient."},
-
-    {"module": "resonator", "parameter": "exciteDepth", "status": "provisional", "ruleId": "M10-audio-rate", "drivers": ["rigidity", "roughness"], "note": "phase 4 parameter; the audio-rate path is implemented (#127, the depth scales the signal cabled into the typed IN port) and issue #128 calibrates its coefficient."},
-
-    {"module": "filter", "parameter": "drive", "status": "provisional", "ruleId": "M9-filter-depth", "drivers": ["roughness"], "note": "phase 4 parameter, reachable and declared; issue #126 implemented it as real DSP and issue #128 calibrates its coefficient."},
-    {"module": "filter", "parameter": "keytrack", "status": "provisional", "ruleId": "M9-filter-depth", "drivers": ["brightness"], "note": "phase 4 parameter, reachable and declared; issue #126 implemented it as real DSP and issue #128 calibrates its coefficient."},
-    {"module": "filter", "parameter": "envAmount", "status": "provisional", "ruleId": "M9-filter-depth", "drivers": ["decay", "motion"], "note": "phase 4 parameter, reachable and declared; issue #126 implemented it as real DSP and issue #128 calibrates its coefficient."},
-
-    {"module": "shaper", "parameter": "curve", "status": "provisional", "ruleId": "M9-shaper-curve", "drivers": ["roughness", "bondOrderSpread"], "note": "phase 4 parameter, reachable and declared; issue #126 implemented it as real DSP and issue #128 calibrates its coefficient."},
-
-    {"module": "sub", "parameter": "waveform", "status": "provisional", "ruleId": "M7-sub", "drivers": ["brightness"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as the sub oscillator's own control and issue #128 calibrates its coefficient."},
-    {"module": "sub", "parameter": "octave", "status": "provisional", "ruleId": "M7-sub", "drivers": ["density"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as the sub oscillator's own control and issue #128 calibrates its coefficient."},
-    {"module": "sub", "parameter": "drift", "status": "provisional", "ruleId": "M5-drift", "drivers": ["motion", "decay"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as the sub oscillator's own control and issue #128 calibrates its coefficient."},
-    {"module": "sub", "parameter": "fine", "status": "provisional", "ruleId": "M7-sub", "drivers": ["heteroPlacement"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the sub's pitch block and issue #128 calibrates its coefficient."},
-    {"module": "sub", "parameter": "keytrack", "status": "provisional", "ruleId": "M7-sub", "drivers": ["rigidity"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as part of the sub's pitch block and issue #128 calibrates its coefficient."},
-    {"module": "sub", "parameter": "outputLevel", "status": "provisional", "ruleId": "M7-sub", "drivers": ["density"], "note": "phase 4 parameter, reachable and declared; issue #122 implemented it as the sub oscillator's own control and issue #128 calibrates its coefficient."},
-
-    {"module": "chorus", "parameter": "rate", "status": "provisional", "ruleId": "M8-chorus", "drivers": ["motion"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "chorus", "parameter": "depth", "status": "provisional", "ruleId": "M8-chorus", "drivers": ["motion", "roughness"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "chorus", "parameter": "voices", "status": "provisional", "ruleId": "M8-chorus", "drivers": ["density"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "chorus", "parameter": "feedback", "status": "provisional", "ruleId": "M8-chorus", "drivers": ["decay"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "chorus", "parameter": "mix", "status": "provisional", "ruleId": "M8-chorus", "drivers": ["motion"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "chorus", "parameter": "outputLevel", "status": "provisional", "ruleId": "M8-chorus", "drivers": ["density"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-
-    {"module": "delay", "parameter": "syncMode", "status": "provisional", "ruleId": "M8-delay", "drivers": ["motion"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "delay", "parameter": "timeMs", "status": "provisional", "ruleId": "M8-delay", "drivers": ["decay", "motifPlacement"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "delay", "parameter": "syncDivision", "status": "provisional", "ruleId": "M8-delay", "drivers": ["motion"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "delay", "parameter": "spread", "status": "provisional", "ruleId": "M8-delay", "drivers": ["heteroPlacement"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "delay", "parameter": "feedback", "status": "provisional", "ruleId": "M8-delay", "drivers": ["decay"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "delay", "parameter": "damping", "status": "provisional", "ruleId": "M8-delay", "drivers": ["brightness"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "delay", "parameter": "mix", "status": "provisional", "ruleId": "M8-delay", "drivers": ["motion", "decay"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-    {"module": "delay", "parameter": "outputLevel", "status": "provisional", "ruleId": "M8-delay", "drivers": ["density"], "note": "phase 4 parameter, reachable and declared; issue #123 implements it and issue #128 calibrates its coefficient."},
-
-    {"module": "reverb", "parameter": "size", "status": "provisional", "ruleId": "M8-reverb", "drivers": ["density", "decay"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."},
-    {"module": "reverb", "parameter": "decaySeconds", "status": "provisional", "ruleId": "M8-reverb", "drivers": ["decay"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."},
-    {"module": "reverb", "parameter": "damping", "status": "provisional", "ruleId": "M8-reverb", "drivers": ["brightness"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."},
-    {"module": "reverb", "parameter": "preDelayMs", "status": "provisional", "ruleId": "M8-reverb", "drivers": ["motifPlacement"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."},
-    {"module": "reverb", "parameter": "width", "status": "provisional", "ruleId": "M8-reverb", "drivers": ["heteroPlacement"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."},
-    {"module": "reverb", "parameter": "mix", "status": "provisional", "ruleId": "M8-reverb", "drivers": ["decay", "motion"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."},
-    {"module": "reverb", "parameter": "outputLevel", "status": "provisional", "ruleId": "M8-reverb", "drivers": ["density"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."},
-
-    {"module": "width", "parameter": "width", "status": "provisional", "ruleId": "M8-width", "drivers": ["heteroPlacement", "motion"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."},
-    {"module": "width", "parameter": "bassMonoHz", "status": "provisional", "ruleId": "M8-width", "drivers": ["density"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."},
-    {"module": "width", "parameter": "outputLevel", "status": "provisional", "ruleId": "M8-width", "drivers": ["density"], "note": "phase 4 parameter, implemented by issue #124 and reachable and declared; issue #128 calibrates its coefficient."}
-  ]
+ "coverageVersion": 2,
+ "note": "Mapper-coverage invariant, docs/architecture/CHEMISTRY.md#mapper-coverage-invariant (D8, issues #105 and #128). Every continuous/discrete/convenience/coefficientArray parameter of the production module catalog has exactly one entry here. status 'mapped' = the production generator assigns it today from the listed drivers and ruleId appears in the generation trace; status 'provisional' = reachable and declared, coefficient explicitly uncalibrated, note names the owning leaf. No provisional entry remains: #128 (W19) resolved the phase-4 additions and the pre-existing harmonic.partialPans gap, and the mapping-coverage test now fails on any provisional entry. An empty drivers list is a failure, not a status. Drivers are existing SonicIntent axes (density, brightness, rigidity, roughness, decay, harmonicity, motion) and structuralDetail fields (bondOrderMean, bondOrderSpread, heteroPlacement, motifPlacement); phase 4 adds no new analysis fields.",
+ "entries": [
+  {
+   "module": "harmonic",
+   "parameter": "partialAmplitudes",
+   "status": "mapped",
+   "ruleId": "M1-primary-harmonic",
+   "drivers": [
+    "brightness"
+   ],
+   "note": "authored by applyHarmonicSpectrum from tilt"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "partialRatios",
+   "status": "mapped",
+   "ruleId": "M1-primary-harmonic",
+   "drivers": [
+    "rigidity",
+    "bondOrderSpread"
+   ],
+   "note": "authored by applyHarmonicSpectrum from inharmonicity"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "partialPans",
+   "status": "mapped",
+   "ruleId": "M1-partial-pan",
+   "drivers": [
+    "motion",
+    "heteroPlacement"
+   ],
+   "note": "motion opens the stereo width of the partial fan, heteroPlacement sets how fast it alternates across the sixteen columns"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "tilt",
+   "status": "mapped",
+   "ruleId": "M1-primary-harmonic",
+   "drivers": [
+    "brightness"
+   ],
+   "note": ""
+  },
+  {
+   "module": "harmonic",
+   "parameter": "inharmonicity",
+   "status": "mapped",
+   "ruleId": "M1-primary-harmonic",
+   "drivers": [
+    "rigidity",
+    "bondOrderSpread"
+   ],
+   "note": ""
+  },
+  {
+   "module": "harmonic",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M1-primary",
+   "drivers": [
+    "density",
+    "motion"
+   ],
+   "note": "primary and secondary roles use different coefficients"
+  },
+  {
+   "module": "fm",
+   "parameter": "carrierRatio",
+   "status": "mapped",
+   "ruleId": "M1-primary",
+   "drivers": [
+    "rigidity"
+   ],
+   "note": "assigned only when FM is the primary source; the secondary FM role leaves the default"
+  },
+  {
+   "module": "fm",
+   "parameter": "modulatorRatio",
+   "status": "mapped",
+   "ruleId": "M1-primary",
+   "drivers": [
+    "motifPlacement",
+    "heteroPlacement"
+   ],
+   "note": ""
+  },
+  {
+   "module": "fm",
+   "parameter": "index",
+   "status": "mapped",
+   "ruleId": "M1-primary",
+   "drivers": [
+    "roughness",
+    "motion"
+   ],
+   "note": ""
+  },
+  {
+   "module": "fm",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M1-primary",
+   "drivers": [
+    "density",
+    "motion"
+   ],
+   "note": ""
+  },
+  {
+   "module": "noise",
+   "parameter": "color",
+   "status": "mapped",
+   "ruleId": "M2-noise",
+   "drivers": [
+    "brightness"
+   ],
+   "note": ""
+  },
+  {
+   "module": "noise",
+   "parameter": "mode",
+   "status": "mapped",
+   "ruleId": "M2-noise",
+   "drivers": [
+    "decay"
+   ],
+   "note": ""
+  },
+  {
+   "module": "noise",
+   "parameter": "burstMs",
+   "status": "mapped",
+   "ruleId": "M2-noise",
+   "drivers": [
+    "decay"
+   ],
+   "note": ""
+  },
+  {
+   "module": "noise",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M2-noise",
+   "drivers": [
+    "roughness"
+   ],
+   "note": ""
+  },
+  {
+   "module": "resonator",
+   "parameter": "mode",
+   "status": "mapped",
+   "ruleId": "M3-resonator",
+   "drivers": [
+    "rigidity"
+   ],
+   "note": ""
+  },
+  {
+   "module": "resonator",
+   "parameter": "tuneRatio",
+   "status": "mapped",
+   "ruleId": "M3-resonator",
+   "drivers": [
+    "density",
+    "motifPlacement"
+   ],
+   "note": ""
+  },
+  {
+   "module": "resonator",
+   "parameter": "combFeedback",
+   "status": "mapped",
+   "ruleId": "M3-resonator",
+   "drivers": [
+    "decay"
+   ],
+   "note": ""
+  },
+  {
+   "module": "resonator",
+   "parameter": "modalQ",
+   "status": "mapped",
+   "ruleId": "M3-resonator",
+   "drivers": [
+    "rigidity"
+   ],
+   "note": ""
+  },
+  {
+   "module": "resonator",
+   "parameter": "modeRatios",
+   "status": "mapped",
+   "ruleId": "M3-resonator",
+   "drivers": [
+    "bondOrderMean",
+    "heteroPlacement",
+    "motifPlacement"
+   ],
+   "note": ""
+  },
+  {
+   "module": "resonator",
+   "parameter": "modeLevels",
+   "status": "mapped",
+   "ruleId": "M3-resonator",
+   "drivers": [
+    "brightness",
+    "bondOrderSpread",
+    "motion"
+   ],
+   "note": ""
+  },
+  {
+   "module": "resonator",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M3-resonator-level",
+   "drivers": [
+    "density"
+   ],
+   "note": "was the fixed value 0.7 before #128"
+  },
+  {
+   "module": "filter",
+   "parameter": "mode",
+   "status": "mapped",
+   "ruleId": "M4-filter",
+   "drivers": [
+    "brightness"
+   ],
+   "note": ""
+  },
+  {
+   "module": "filter",
+   "parameter": "cutoff",
+   "status": "mapped",
+   "ruleId": "M4-filter",
+   "drivers": [
+    "brightness"
+   ],
+   "note": ""
+  },
+  {
+   "module": "filter",
+   "parameter": "q",
+   "status": "mapped",
+   "ruleId": "M4-filter",
+   "drivers": [
+    "harmonicity"
+   ],
+   "note": ""
+  },
+  {
+   "module": "filter",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M4-filter-level",
+   "drivers": [
+    "density"
+   ],
+   "note": "trimmed with density so a dense patch does not gain level through the processor chain"
+  },
+  {
+   "module": "shaper",
+   "parameter": "drive",
+   "status": "mapped",
+   "ruleId": "M4-shaper",
+   "drivers": [
+    "roughness",
+    "bondOrderSpread"
+   ],
+   "note": ""
+  },
+  {
+   "module": "shaper",
+   "parameter": "wet",
+   "status": "mapped",
+   "ruleId": "M4-shaper",
+   "drivers": [
+    "roughness"
+   ],
+   "note": ""
+  },
+  {
+   "module": "shaper",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M4-shaper-level",
+   "drivers": [
+    "density"
+   ],
+   "note": "trimmed with density so a dense patch does not gain level through the processor chain"
+  },
+  {
+   "module": "mixer",
+   "parameter": "level",
+   "status": "mapped",
+   "ruleId": "M4-mixer",
+   "drivers": [
+    "density"
+   ],
+   "note": "the generator emits a mixer as the source summing bus whenever two or more sources are present (#128)"
+  },
+  {
+   "module": "mixer",
+   "parameter": "pan",
+   "status": "mapped",
+   "ruleId": "M4-mixer",
+   "drivers": [
+    "motion",
+    "heteroPlacement"
+   ],
+   "note": "stereo placement of the source bus; heteroPlacement is the offset, motion widens it"
+  },
+  {
+   "module": "mixer",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M4-mixer",
+   "drivers": [
+    "density"
+   ],
+   "note": "the source bus is close to level-neutral against the pre-#128 direct sum"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "unisonVoices",
+   "status": "mapped",
+   "ruleId": "M5-unison",
+   "drivers": [
+    "density",
+    "motion"
+   ],
+   "note": "1 + round(3*density + 2*motion), clamped to the declared 1..7"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "detuneCents",
+   "status": "mapped",
+   "ruleId": "M5-unison",
+   "drivers": [
+    "roughness",
+    "bondOrderSpread"
+   ],
+   "note": "6 + 26*roughness + 10*bondOrderSpread, clamped to 0..50"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "unisonSpread",
+   "status": "mapped",
+   "ruleId": "M5-unison",
+   "drivers": [
+    "motion",
+    "heteroPlacement"
+   ],
+   "note": "0.45 + 0.35*motion + 0.2*heteroPlacement; the floor keeps a two-copy stack off the coherent per-channel peak"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "phaseRandom",
+   "status": "mapped",
+   "ruleId": "M5-unison",
+   "drivers": [
+    "roughness"
+   ],
+   "note": "0.3 + 0.6*roughness"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "drift",
+   "status": "mapped",
+   "ruleId": "M5-drift",
+   "drivers": [
+    "motion",
+    "decay"
+   ],
+   "note": "0.12 + 0.45*motion + 0.25*decay, shared by every drift-capable source"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "harmonicityMorph",
+   "status": "mapped",
+   "ruleId": "M6-spectral-shape",
+   "drivers": [
+    "harmonicity"
+   ],
+   "note": "0.9*harmonicity; a render-time reshape, the stored ratios are untouched"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "oddEvenBalance",
+   "status": "mapped",
+   "ruleId": "M6-spectral-shape",
+   "drivers": [
+    "bondOrderMean",
+    "rigidity"
+   ],
+   "note": "(bondOrderMean-1.5)*0.8 + bipolar(rigidity)*0.3, clamped to -1..1"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "symmetry",
+   "status": "mapped",
+   "ruleId": "M6-spectral-shape",
+   "drivers": [
+    "motifPlacement",
+    "brightness"
+   ],
+   "note": "0.35 + 0.4*motifPlacement + 0.25*brightness"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "octave",
+   "status": "mapped",
+   "ruleId": "M7-pitch",
+   "drivers": [
+    "density"
+   ],
+   "note": "-floor(3.5*density): bigger molecules sit an octave or two lower"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "coarse",
+   "status": "mapped",
+   "ruleId": "M7-pitch",
+   "drivers": [
+    "motifPlacement"
+   ],
+   "note": "a consonant interval chosen by motifPlacement, assigned on the complementary source role only so the primary keeps the played pitch"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "fine",
+   "status": "mapped",
+   "ruleId": "M7-pitch",
+   "drivers": [
+    "heteroPlacement"
+   ],
+   "note": "bipolar(heteroPlacement) scaled by role: +/-8 cents on the primary, +/-35 on the complementary source"
+  },
+  {
+   "module": "harmonic",
+   "parameter": "keytrack",
+   "status": "mapped",
+   "ruleId": "M7-pitch",
+   "drivers": [
+    "rigidity"
+   ],
+   "note": "0.85 + 0.15*rigidity"
+  },
+  {
+   "module": "fm",
+   "parameter": "unisonVoices",
+   "status": "mapped",
+   "ruleId": "M5-unison",
+   "drivers": [
+    "density",
+    "motion"
+   ],
+   "note": "1 + round(3*density + 2*motion), clamped to the declared 1..7"
+  },
+  {
+   "module": "fm",
+   "parameter": "detuneCents",
+   "status": "mapped",
+   "ruleId": "M5-unison",
+   "drivers": [
+    "roughness",
+    "bondOrderSpread"
+   ],
+   "note": "6 + 26*roughness + 10*bondOrderSpread, clamped to 0..50"
+  },
+  {
+   "module": "fm",
+   "parameter": "unisonSpread",
+   "status": "mapped",
+   "ruleId": "M5-unison",
+   "drivers": [
+    "motion",
+    "heteroPlacement"
+   ],
+   "note": "0.45 + 0.35*motion + 0.2*heteroPlacement; the floor keeps a two-copy stack off the coherent per-channel peak"
+  },
+  {
+   "module": "fm",
+   "parameter": "phaseRandom",
+   "status": "mapped",
+   "ruleId": "M5-unison",
+   "drivers": [
+    "roughness"
+   ],
+   "note": "0.3 + 0.6*roughness"
+  },
+  {
+   "module": "fm",
+   "parameter": "drift",
+   "status": "mapped",
+   "ruleId": "M5-drift",
+   "drivers": [
+    "motion",
+    "decay"
+   ],
+   "note": "0.12 + 0.45*motion + 0.25*decay, shared by every drift-capable source"
+  },
+  {
+   "module": "fm",
+   "parameter": "octave",
+   "status": "mapped",
+   "ruleId": "M7-pitch",
+   "drivers": [
+    "density"
+   ],
+   "note": "-floor(3.5*density): bigger molecules sit an octave or two lower"
+  },
+  {
+   "module": "fm",
+   "parameter": "coarse",
+   "status": "mapped",
+   "ruleId": "M7-pitch",
+   "drivers": [
+    "motifPlacement"
+   ],
+   "note": "a consonant interval chosen by motifPlacement, assigned on the complementary source role only so the primary keeps the played pitch"
+  },
+  {
+   "module": "fm",
+   "parameter": "fine",
+   "status": "mapped",
+   "ruleId": "M7-pitch",
+   "drivers": [
+    "heteroPlacement"
+   ],
+   "note": "bipolar(heteroPlacement) scaled by role: +/-8 cents on the primary, +/-35 on the complementary source"
+  },
+  {
+   "module": "fm",
+   "parameter": "keytrack",
+   "status": "mapped",
+   "ruleId": "M7-pitch",
+   "drivers": [
+    "rigidity"
+   ],
+   "note": "0.85 + 0.15*rigidity"
+  },
+  {
+   "module": "fm",
+   "parameter": "modInDepth",
+   "status": "mapped",
+   "ruleId": "M10-audio-rate",
+   "drivers": [
+    "roughness",
+    "harmonicity"
+   ],
+   "note": "0.3 + 0.5*roughness - 0.3*harmonicity; the generator also cables secondary -> primary.modIn when FM leads and roughness >= 0.35, so the depth is not inert"
+  },
+  {
+   "module": "resonator",
+   "parameter": "exciteDepth",
+   "status": "mapped",
+   "ruleId": "M10-audio-rate",
+   "drivers": [
+    "rigidity",
+    "roughness"
+   ],
+   "note": "0.2 + 0.4*rigidity + 0.2*roughness; the generator also cables noise -> resonator.exciteIn when both nodes are present"
+  },
+  {
+   "module": "filter",
+   "parameter": "drive",
+   "status": "mapped",
+   "ruleId": "M9-filter-depth",
+   "drivers": [
+    "roughness"
+   ],
+   "note": "1 + 4*roughness"
+  },
+  {
+   "module": "filter",
+   "parameter": "keytrack",
+   "status": "mapped",
+   "ruleId": "M9-filter-depth",
+   "drivers": [
+    "brightness"
+   ],
+   "note": "0.7*brightness"
+  },
+  {
+   "module": "filter",
+   "parameter": "envAmount",
+   "status": "mapped",
+   "ruleId": "M9-filter-depth",
+   "drivers": [
+    "decay",
+    "motion"
+   ],
+   "note": "0.25 + 0.45*motion - 0.35*decay: a fast, moving molecule gets the stab, a slow one does not"
+  },
+  {
+   "module": "shaper",
+   "parameter": "curve",
+   "status": "mapped",
+   "ruleId": "M9-shaper-curve",
+   "drivers": [
+    "roughness",
+    "bondOrderSpread"
+   ],
+   "note": "floor(3*roughness + 2*bondOrderSpread), clamped to the five declared curves"
+  },
+  {
+   "module": "sub",
+   "parameter": "waveform",
+   "status": "mapped",
+   "ruleId": "M7-sub",
+   "drivers": [
+    "brightness"
+   ],
+   "note": "triangle from brightness >= 0.35, sine below"
+  },
+  {
+   "module": "sub",
+   "parameter": "octave",
+   "status": "mapped",
+   "ruleId": "M7-sub",
+   "drivers": [
+    "density"
+   ],
+   "note": "-1, or -2 once density >= 0.5"
+  },
+  {
+   "module": "sub",
+   "parameter": "drift",
+   "status": "mapped",
+   "ruleId": "M5-drift",
+   "drivers": [
+    "motion",
+    "decay"
+   ],
+   "note": "0.12 + 0.45*motion + 0.25*decay, shared by every drift-capable source"
+  },
+  {
+   "module": "sub",
+   "parameter": "fine",
+   "status": "mapped",
+   "ruleId": "M7-sub",
+   "drivers": [
+    "heteroPlacement"
+   ],
+   "note": "bipolar(heteroPlacement) scaled to +/-8 cents"
+  },
+  {
+   "module": "sub",
+   "parameter": "keytrack",
+   "status": "mapped",
+   "ruleId": "M7-sub",
+   "drivers": [
+    "rigidity"
+   ],
+   "note": "0.85 + 0.15*rigidity"
+  },
+  {
+   "module": "sub",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M7-sub",
+   "drivers": [
+    "density"
+   ],
+   "note": "0.16 + 0.26*density; the sub node is emitted when density >= 0.3 or decay >= 0.45"
+  },
+  {
+   "module": "chorus",
+   "parameter": "rate",
+   "status": "mapped",
+   "ruleId": "M8-chorus",
+   "drivers": [
+    "motion"
+   ],
+   "note": "0.2 + 2.5*motion Hz"
+  },
+  {
+   "module": "chorus",
+   "parameter": "depth",
+   "status": "mapped",
+   "ruleId": "M8-chorus",
+   "drivers": [
+    "motion",
+    "roughness"
+   ],
+   "note": "0.15 + 0.4*motion + 0.2*roughness"
+  },
+  {
+   "module": "chorus",
+   "parameter": "voices",
+   "status": "mapped",
+   "ruleId": "M8-chorus",
+   "drivers": [
+    "density"
+   ],
+   "note": "2 + round(2*density), clamped to the declared 2..4"
+  },
+  {
+   "module": "chorus",
+   "parameter": "feedback",
+   "status": "mapped",
+   "ruleId": "M8-chorus",
+   "drivers": [
+    "decay"
+   ],
+   "note": "0.3*decay"
+  },
+  {
+   "module": "chorus",
+   "parameter": "mix",
+   "status": "mapped",
+   "ruleId": "M8-chorus",
+   "drivers": [
+    "motion"
+   ],
+   "note": "0.15 + 0.35*motion"
+  },
+  {
+   "module": "chorus",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M8-chorus",
+   "drivers": [
+    "density"
+   ],
+   "note": "1 - 0.15*density"
+  },
+  {
+   "module": "delay",
+   "parameter": "syncMode",
+   "status": "mapped",
+   "ruleId": "M8-delay",
+   "drivers": [
+    "motion"
+   ],
+   "note": "sync once motion >= 0.4, free below"
+  },
+  {
+   "module": "delay",
+   "parameter": "timeMs",
+   "status": "mapped",
+   "ruleId": "M8-delay",
+   "drivers": [
+    "decay",
+    "motifPlacement"
+   ],
+   "note": "120 + 700*decay + 200*motifPlacement ms"
+  },
+  {
+   "module": "delay",
+   "parameter": "syncDivision",
+   "status": "mapped",
+   "ruleId": "M8-delay",
+   "drivers": [
+    "motion"
+   ],
+   "note": "round(6*(1-motion)) over the seven declared divisions: more motion, shorter division"
+  },
+  {
+   "module": "delay",
+   "parameter": "spread",
+   "status": "mapped",
+   "ruleId": "M8-delay",
+   "drivers": [
+    "heteroPlacement"
+   ],
+   "note": "0.8*bipolar(heteroPlacement)"
+  },
+  {
+   "module": "delay",
+   "parameter": "feedback",
+   "status": "mapped",
+   "ruleId": "M8-delay",
+   "drivers": [
+    "decay"
+   ],
+   "note": "0.15 + 0.45*decay"
+  },
+  {
+   "module": "delay",
+   "parameter": "damping",
+   "status": "mapped",
+   "ruleId": "M8-delay",
+   "drivers": [
+    "brightness"
+   ],
+   "note": "0.85 - 0.6*brightness"
+  },
+  {
+   "module": "delay",
+   "parameter": "mix",
+   "status": "mapped",
+   "ruleId": "M8-delay",
+   "drivers": [
+    "motion",
+    "decay"
+   ],
+   "note": "0.1 + 0.25*motion + 0.15*decay"
+  },
+  {
+   "module": "delay",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M8-delay",
+   "drivers": [
+    "density"
+   ],
+   "note": "1 - 0.15*density"
+  },
+  {
+   "module": "reverb",
+   "parameter": "size",
+   "status": "mapped",
+   "ruleId": "M8-reverb",
+   "drivers": [
+    "density",
+    "decay"
+   ],
+   "note": "0.25 + 0.45*density + 0.3*decay"
+  },
+  {
+   "module": "reverb",
+   "parameter": "decaySeconds",
+   "status": "mapped",
+   "ruleId": "M8-reverb",
+   "drivers": [
+    "decay"
+   ],
+   "note": "0.6 + 6*decay seconds"
+  },
+  {
+   "module": "reverb",
+   "parameter": "damping",
+   "status": "mapped",
+   "ruleId": "M8-reverb",
+   "drivers": [
+    "brightness"
+   ],
+   "note": "0.8 - 0.55*brightness"
+  },
+  {
+   "module": "reverb",
+   "parameter": "preDelayMs",
+   "status": "mapped",
+   "ruleId": "M8-reverb",
+   "drivers": [
+    "motifPlacement"
+   ],
+   "note": "5 + 60*motifPlacement ms"
+  },
+  {
+   "module": "reverb",
+   "parameter": "width",
+   "status": "mapped",
+   "ruleId": "M8-reverb",
+   "drivers": [
+    "heteroPlacement"
+   ],
+   "note": "0.55 + 0.45*heteroPlacement"
+  },
+  {
+   "module": "reverb",
+   "parameter": "mix",
+   "status": "mapped",
+   "ruleId": "M8-reverb",
+   "drivers": [
+    "decay",
+    "motion"
+   ],
+   "note": "0.1 + 0.3*decay + 0.15*motion"
+  },
+  {
+   "module": "reverb",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M8-reverb",
+   "drivers": [
+    "density"
+   ],
+   "note": "1 - 0.2*density"
+  },
+  {
+   "module": "width",
+   "parameter": "width",
+   "status": "mapped",
+   "ruleId": "M8-width",
+   "drivers": [
+    "heteroPlacement",
+    "motion"
+   ],
+   "note": "0.85 + 0.6*heteroPlacement + 0.3*motion over the declared 0..2"
+  },
+  {
+   "module": "width",
+   "parameter": "bassMonoHz",
+   "status": "mapped",
+   "ruleId": "M8-width",
+   "drivers": [
+    "density"
+   ],
+   "note": "70 + 180*density Hz"
+  },
+  {
+   "module": "width",
+   "parameter": "outputLevel",
+   "status": "mapped",
+   "ruleId": "M8-width",
+   "drivers": [
+    "density"
+   ],
+   "note": "1 - 0.1*density"
+  }
+ ]
 }

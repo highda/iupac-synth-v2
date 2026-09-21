@@ -227,6 +227,11 @@ RenderResult renderSnapshot(const domain::State& state, std::span<const engine::
     juce::AudioBuffer<float> buffer(2, static_cast<int>(settings.samples)); buffer.copyFrom(0, 0, left.data(), static_cast<int>(settings.samples)); buffer.copyFrom(1, 0, right.data(), static_cast<int>(settings.samples));
     std::error_code ec; if (!wav.parent_path().empty()) std::filesystem::create_directories(wav.parent_path(), ec); if (ec) return {{}, "cannot create WAV directory"};
     auto output = std::make_unique<juce::FileOutputStream>(juce::File(wav.string())); if (!output->openedOk()) return {{}, "cannot create WAV"};
+    // JUCE positions a FileOutputStream at the *end* of an existing file, so re-rendering to a path
+    // that already holds a take would leave the old RIFF header and samples in front of the new
+    // ones — every reader (the V4 distance metric, the V5 safety measurement, pluginval fixtures)
+    // then measures the previous run's audio and a recalibration looks like it changed nothing.
+    output->setPosition(0); if (const auto truncated = output->truncate(); truncated.failed()) return {{}, "cannot truncate WAV"};
     juce::WavAudioFormat format; std::unique_ptr<juce::AudioFormatWriter> writer(format.createWriterFor(output.release(), settings.sampleRate, 2, 32, {}, 0));
     if (!writer || !writer->writeFromAudioSampleBuffer(buffer, 0, buffer.getNumSamples())) return {{}, "cannot write WAV"}; writer.reset();
     double sum = 0, squared = 0, peak = 0; for (std::size_t i = 0; i < left.size(); ++i) { sum += left[i] + right[i]; squared += left[i]*left[i] + right[i]*right[i]; peak = std::max({peak, std::abs(static_cast<double>(left[i])), std::abs(static_cast<double>(right[i]))}); }

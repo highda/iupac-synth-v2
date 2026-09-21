@@ -10,7 +10,7 @@
 namespace iupac::chemistry
 {
 inline constexpr int sonicIntentVersion = 1;
-inline constexpr int mappingVersion = 1;
+inline constexpr int mappingVersion = 2;// MAPPING-POLICY version 2 (#128): the phase-4 coverage widening.
 
 struct StructuralDetail
 {
