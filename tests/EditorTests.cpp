@@ -165,6 +165,21 @@ int main(int argc,char**argv)
  if(amplitudes){const float w=(float)amplitudes->getWidth(),h=(float)amplitudes->getHeight();amplitudes->mouseDown(event(*amplitudes,{1.0f,2.0f}));amplitudes->mouseDrag(event(*amplitudes,{w-1.0f,h-2.0f},juce::ModifierKeys::leftButtonModifier,{1.0f,2.0f},1,true));amplitudes->mouseUp(event(*amplitudes,{w-1.0f,h-2.0f},juce::ModifierKeys::leftButtonModifier,{1.0f,2.0f},1,true));
   const auto v=values(processor.snapshot().editedPatch,"src1","partialAmplitudes");bool monotone=v.size()==16;for(std::size_t i=1;i<v.size()&&monotone;++i)monotone=v[i]<=v[i-1]+1e-9;ok&=expect(monotone&&v[0]>.9&&v[15]<.1,"one press-drag paints every crossed partial with interpolated values");}
  const auto oldRatio=values(processor.snapshot().editedPatch,"src1","partialRatios")[15];ok&=expect(editor->setParameter("src1","inharmonicity",0,.01),"harmonic convenience control is editable");ok&=expect(std::abs(values(processor.snapshot().editedPatch,"src1","partialRatios")[15]-oldRatio)>1e-6,"convenience edit stores the regenerated explicit array");
+ // D8 spectral shape (#121): the three render-time controls are on the harmonic slot, laid out (not
+ // merely constructed) and — unlike the convenience control above — they leave the stored arrays alone.
+ {
+  const auto ratiosBefore=values(processor.snapshot().editedPatch,"src1","partialRatios"),amplitudesBefore=values(processor.snapshot().editedPatch,"src1","partialAmplitudes");
+  for(const auto*id:{"harmonicityMorph","oddEvenBalance","symmetry"})
+  {
+   auto*c=field.slot(0).control(id);
+   if(!expect(c!=nullptr,"harmonic slot exposes the spectral-shape control")){ok=false;continue;}
+   ok&=expect(c->isVisible()&&!c->getBounds().isEmpty(),"spectral-shape control is laid out on the slot");
+   ok&=expect(editor->setParameter("src1",id,0,.25),"spectral-shape control is editable");
+   ok&=expect(std::abs(values(processor.snapshot().editedPatch,"src1",id)[0]-.25)<1e-9,"spectral-shape edit reaches the patch");
+  }
+  ok&=expect(values(processor.snapshot().editedPatch,"src1","partialRatios")==ratiosBefore&&values(processor.snapshot().editedPatch,"src1","partialAmplitudes")==amplitudesBefore,
+             "spectral-shape edits never rewrite the stored spectrum");
+ }
  auto*mode=field.slot(4).toggle("mode");if(expect(mode!=nullptr,"resonator slot exposes the mode toggle")){mode->mouseDown(event(*mode,{(float)mode->getWidth()-2.0f,2.0f}));ok&=expect(values(processor.snapshot().editedPatch,"res1","mode")[0]==1.0,"segment toggle click stores the enum");}
  ok&=expect(editor->setEnvelope(0,{.05,.2,.5,.8})&&std::abs(processor.snapshot().editedPatch.envelopes[0].sustain-.5)<1e-9,"envelope curve edits store the ADSR");
  // Lanes.

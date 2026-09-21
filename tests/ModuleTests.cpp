@@ -4,7 +4,10 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <initializer_list>
 #include <iostream>
+#include <limits>
+#include <utility>
 
 namespace
 {
@@ -66,6 +69,70 @@ bool runModuleTests()
         ok&=expect(renderSource(type,drifting,60,123,64)[0]!=renderSource(type,one,60,123,64)[0],"drift wanders the single-copy source");
         auto still=one;still.drift=0;still.phaseRandom=0;
         ok&=expect(renderSource(type,still,60,123,64)[0]==renderSource(type,one,60,123,64)[0],"zero drift leaves the source untouched");
+    }
+    // --- D8 spectral shape: harmonicityMorph, oddEvenBalance, symmetry (#121) ------------------
+    {
+        // An inharmonic spectrum, the kind the chemistry mapper actually produces: nothing lands on
+        // an integer, so every control below has something to do.
+        engine::ModuleValues bell;for(std::size_t i=0;i<16;++i){bell.ratios[i]=static_cast<float>(i+1)*1.31f+0.17f;bell.amplitudes[i]=1.0f/static_cast<float>(i+1);}
+        const auto reference=renderSource(domain::ModuleType::harmonic,bell,60,123,4);
+        // Catalog defaults are the literal identity, so a pre-D8 spectrum keeps its exact samples.
+        auto defaults=bell;defaults.harmonicityMorph=0;defaults.oddEvenBalance=0;defaults.symmetry=.5f;
+        const auto unchanged=renderSource(domain::ModuleType::harmonic,defaults,60,123,4);
+        ok&=expect(unchanged[0]==reference[0]&&unchanged[1]==reference[1],"spectral-shape defaults render the pre-D8 spectrum bit for bit");
+        // Each control moves the render on its own, and none of them touches the stored arrays.
+        for(const auto& [name,edit]:std::initializer_list<std::pair<const char*,engine::ModuleValues>>{
+                {"harmonicityMorph",[&]{auto v=bell;v.harmonicityMorph=1;return v;}()},
+                {"oddEvenBalance",[&]{auto v=bell;v.oddEvenBalance=1;return v;}()},
+                {"symmetry",[&]{auto v=bell;v.symmetry=1;return v;}()}})
+        {
+            const auto shaped=renderSource(domain::ModuleType::harmonic,edit,60,123,4);
+            ok&=expect(finiteActive(shaped[0]),name);
+            ok&=expect(shaped[0]!=reference[0],name);
+        }
+        // At full morph every ratio is its nearest integer, so morphing the bell renders exactly
+        // what the already-integer spectrum renders at morph 0 — the audible point of the control.
+        auto morphed=bell;morphed.harmonicityMorph=1;
+        auto integers=bell;for(std::size_t i=0;i<16;++i)integers.ratios[i]=std::round(bell.ratios[i]);
+        ok&=expect(renderSource(domain::ModuleType::harmonic,morphed,60,123,4)[0]==renderSource(domain::ModuleType::harmonic,integers,60,123,4)[0],
+                   "full harmonicity morph lands on the nearest integer series");
+        // Culling above 0.45 of the internal rate runs on the *morphed* ratio, not the stored one.
+        // At a 2 kHz fundamental and 96 kHz internally the limit is 43.2 kHz: ratio 21.55 sits just
+        // under it and sounds, its nearest integer 22 sits above it and is dropped.
+        auto renderAt=[&](const engine::ModuleValues& values,float fundamental){
+            engine::ModuleProcessor m(domain::ModuleType::harmonic);m.prepare(96000,512);m.noteOn(60,1,123,456);
+            std::array<float,512> zl{},zr{},ol{},orr{};m.process(values,fundamental,zl,zr,ol,orr);return ol;};
+        engine::ModuleValues edge;edge.amplitudes[0]=1;edge.ratios[0]=21.55f;
+        ok&=expect(finiteActive(renderAt(edge,2000.0f)),"a partial just under the cull limit still sounds");
+        auto over=edge;over.harmonicityMorph=1;
+        ok&=expect(std::ranges::all_of(renderAt(over,2000.0f),[](float x){return x==0;}),
+                   "the morph pushes a partial past the cull limit and it is dropped");
+        // oddEvenBalance attenuates only the group out of favour, so +1 silences the even partials
+        // and -1 the odd ones, and neither ever boosts a partial past its stored amplitude.
+        engine::ModuleValues odd;odd.amplitudes[0]=1;odd.ratios[0]=1;odd.ratios[1]=2;
+        engine::ModuleValues even;even.amplitudes[1]=1;even.ratios[0]=1;even.ratios[1]=2;
+        auto favourOdd=[](engine::ModuleValues v){v.oddEvenBalance=1;return v;};
+        auto favourEven=[](engine::ModuleValues v){v.oddEvenBalance=-1;return v;};
+        ok&=expect(renderSource(domain::ModuleType::harmonic,favourOdd(odd),60,123)[0]==renderSource(domain::ModuleType::harmonic,odd,60,123)[0],
+                   "oddEvenBalance +1 leaves the odd partials untouched");
+        ok&=expect(std::ranges::all_of(renderSource(domain::ModuleType::harmonic,favourOdd(even),60,123)[0],[](float x){return x==0;}),
+                   "oddEvenBalance +1 silences the even partials");
+        ok&=expect(std::ranges::all_of(renderSource(domain::ModuleType::harmonic,favourEven(odd),60,123)[0],[](float x){return x==0;}),
+                   "oddEvenBalance -1 silences the odd partials");
+        ok&=expect(renderSource(domain::ModuleType::harmonic,favourEven(even),60,123)[0]==renderSource(domain::ModuleType::harmonic,even,60,123)[0],
+                   "oddEvenBalance -1 leaves the even partials untouched");
+        // symmetry tilts across the partial index: 1 keeps the top partial and drops the first, 0
+        // the reverse, and both endpoints are attenuation only.
+        engine::ModuleValues top;top.amplitudes[15]=1;for(std::size_t i=0;i<16;++i)top.ratios[i]=static_cast<float>(i+1);
+        engine::ModuleValues bottom;bottom.amplitudes[0]=1;for(std::size_t i=0;i<16;++i)bottom.ratios[i]=static_cast<float>(i+1);
+        auto at=[](engine::ModuleValues v,float s){v.symmetry=s;return v;};
+        ok&=expect(std::ranges::all_of(renderSource(domain::ModuleType::harmonic,at(bottom,1),60,123)[0],[](float x){return x==0;}),"symmetry 1 drops the first partial");
+        ok&=expect(renderSource(domain::ModuleType::harmonic,at(top,1),60,123)[0]==renderSource(domain::ModuleType::harmonic,top,60,123)[0],"symmetry 1 keeps the top partial");
+        ok&=expect(std::ranges::all_of(renderSource(domain::ModuleType::harmonic,at(top,0),60,123)[0],[](float x){return x==0;}),"symmetry 0 drops the top partial");
+        ok&=expect(renderSource(domain::ModuleType::harmonic,at(bottom,0),60,123)[0]==renderSource(domain::ModuleType::harmonic,bottom,60,123)[0],"symmetry 0 keeps the first partial");
+        // Out-of-range values are clamped, never propagated as NaN.
+        auto wild=bell;wild.harmonicityMorph=9;wild.oddEvenBalance=-9;wild.symmetry=std::numeric_limits<float>::quiet_NaN();
+        ok&=expect(std::ranges::all_of(renderSource(domain::ModuleType::harmonic,wild,60,123,4)[0],[](float x){return std::isfinite(x);}),"spectral shape clamps its controls");
     }
     engine::ModulatorBank mods;mods.prepare(48000);std::array<domain::Envelope,domain::envelopeCount> es{};std::array<domain::Lfo,domain::lfoCount> ls{};ls[0].waveform=domain::LfoWaveform::triangle;mods.configure(es,ls);mods.noteOn();auto a=mods.next();ok&=expect(a[0]>=0&&a[3]>=-1&&a[3]<=1,"ADSR and LFO run");mods.noteOff();
     return ok;

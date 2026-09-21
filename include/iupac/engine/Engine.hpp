@@ -92,6 +92,9 @@ private:
     // `drift`: two slow deterministic wanders per voice (pitch and level), seeded per note-on.
     double driftPhase_{}, driftLevelPhase_{}, driftRate_{0.11}, driftLevelRate_{0.07};
     std::array<float, 16> cachedRatios_{{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}};
+    // D8 spectral shape (#121): the ratios the recursion actually runs at and the amplitudes the
+    // sum actually uses, both derived per block from the stored arrays and never written back.
+    std::array<float, 16> shapedAmplitudes_{};
     float cachedHarmonicFundamental_{-1.0f};
     std::uint32_t randomState_{1};
     std::array<float, 2> pink_{};

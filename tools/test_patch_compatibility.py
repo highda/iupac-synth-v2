@@ -74,6 +74,37 @@ class CompatibilityTests(unittest.TestCase):
             full.write_text(json.dumps(written_out_in_full(json.loads(FIXTURE.read_text()))))
             self.assertEqual(render(full)["pcmSha256"], baseline)
 
+    def test_the_spectral_shape_controls_never_rewrite_the_stored_spectrum(self):
+        """#121: `harmonicityMorph`/`oddEvenBalance`/`symmetry` reshape the render, not the patch.
+
+        The morph pulling a ratio toward its nearest integer is the obvious thing to implement by
+        rewriting `partialRatios`, and that would silently destroy the chemistry-derived spectrum on
+        the first save and stop the control being modulatable. This drives a real load/save round
+        trip through the production decoder and encoder (`inspect --stage patch`) and asserts the
+        arrays come back byte for byte, with the three controls off their defaults.
+        """
+        document = json.loads(FIXTURE.read_text())
+        harmonic = next(n for n in document["editedPatch"]["nodes"] if n["type"] == "harmonic")
+        stored = [1.07, 2.13, 3.41, 4.02, 5.77, 6.31, 7.19, 8.63,
+                  9.05, 10.44, 11.28, 12.91, 13.36, 14.72, 15.11, 16.58]
+        harmonic["parameters"]["partialRatios"] = stored
+        amplitudes = harmonic["parameters"]["partialAmplitudes"]
+        harmonic["parameters"]["harmonicityMorph"] = 1.0
+        harmonic["parameters"]["oddEvenBalance"] = 0.6
+        harmonic["parameters"]["symmetry"] = 0.2
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot = pathlib.Path(directory) / "shaped.snapshot.json"
+            snapshot.write_text(json.dumps(document))
+            self.assertTrue(render(snapshot)["pcmSha256"])  # the shaped patch renders on the production path
+            patch = pathlib.Path(directory) / "shaped.patch.json"
+            patch.write_text(json.dumps(document["editedPatch"]))
+            out = subprocess.run([CLI, "inspect", "--stage", "patch", "--patch", str(patch)],
+                                 capture_output=True, text=True, check=True)
+        node = next(n for n in json.loads(out.stdout)["nodes"] if n["type"] == "harmonic")
+        self.assertEqual(node["parameters"]["partialRatios"], stored)
+        self.assertEqual(node["parameters"]["partialAmplitudes"], amplitudes)
+        self.assertEqual(node["parameters"]["harmonicityMorph"], 1.0)
+
     def test_authored_maximal_panel_case_sits_at_the_d8_bounds(self):
         patch = json.loads((ROOT / "data" / "panels" / "authored-synth" / "maximal.snapshot.json").read_text())["editedPatch"]
         self.assertEqual((len(patch["nodes"]), len(patch["edges"]), len(patch["matrix"]), len(patch["envelopes"])), (16, 48, 40, 4))
