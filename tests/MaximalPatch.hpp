@@ -6,6 +6,7 @@
 // audio-rate ports — and maximumMatrixRows enabled rows, all through the production catalog.
 #include "iupac/domain/Patch.hpp"
 
+#include <cstdlib>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -24,6 +25,25 @@ inline domain::Node defaultNode(std::string id, std::string_view type)
         for (std::size_t i = 0; i < node.parameters[1].values.size(); ++i) node.parameters[1].values[i] = static_cast<double>(i + 1);
     }
     return node;
+}
+
+// The catalog is the source of the worst case's numbers: the fixture re-derives from it, and
+// `PatchTests` asserts the derived source-copy budget still equals the 9 VERIFICATION V8 states,
+// so widening `unisonVoices` fails loudly instead of silently moving the benchmark.
+inline const domain::ParameterDescriptor& catalogParameter(std::string_view type, std::string_view parameter)
+{
+    const auto* descriptor = domain::findModule(type);
+    for (const auto& candidate : descriptor->parameters)
+        if (candidate.id == parameter) return candidate;
+    std::abort();
+}
+
+// The per-voice source-copy budget VERIFICATION V8 fixes for the phase-4 worst case (D10):
+// `unisonVoices` at its catalog maximum on exactly one general source, the default on the other two.
+inline std::size_t worstCaseSourceCopyBudget()
+{
+    return static_cast<std::size_t>(catalogParameter("harmonic", "unisonVoices").maximum)
+         + (domain::generalSourceSlots - 1) * static_cast<std::size_t>(catalogParameter("harmonic", "unisonVoices").defaultValue);
 }
 
 inline domain::Patch maximalPatch()
@@ -58,11 +78,13 @@ inline domain::Patch maximalPatch()
     return patch;
 }
 
-// The fixed phase-4 worst-case benchmark patch (VERIFICATION V8, D8). It is `maximalPatch()` with
-// the three general source slots all unison-capable and held at `unisonVoices` 7, both typed
-// audio-rate depths open so the `modIn`/`exciteIn` branches actually run, and the whole
-// chorus -> delay -> reverb -> width tail driven away from its identity settings. Voice count is
-// still 16 everywhere: unison multiplies oscillator work, never polyphony (D3).
+// The fixed phase-4 worst-case benchmark patch (VERIFICATION V8, D8, restated by D10). It is
+// `maximalPatch()` with all three general source slots unison-capable and spending the per-voice
+// source-copy budget of 9 — `unisonVoices` at its catalog maximum on one of them and the catalog
+// default of 1 on the other two — both typed audio-rate depths open so the `modIn`/`exciteIn`
+// branches actually run, and the whole chorus -> delay -> reverb -> width tail driven away from its
+// identity settings. Voice count is still 16 everywhere: unison multiplies oscillator work, never
+// polyphony (D3).
 inline domain::Patch worstCaseBenchmarkPatch()
 {
     auto patch = maximalPatch();
@@ -77,7 +99,14 @@ inline domain::Patch worstCaseBenchmarkPatch()
                 for (auto& value_ : node.parameters)
                     if (value_.id == parameter) value_.values[0] = value;
     };
-    for (const auto* id : {"h1", "f1", "n1"}) { set(id, "unisonVoices", 7); set(id, "detuneCents", 24); set(id, "unisonSpread", 1.0); set(id, "drift", 0.5); }
+    // Unison is the per-voice source-copy budget of 9 (VERIFICATION V8, D10): `maximumUnisonVoices`
+    // on exactly one general source and the catalog default of 1 on the other two. Unison 7 on all
+    // three measured renderRatio 1.08 on the canonical container (#144/#146) — the worst
+    // constructible case, which no current hardware can play, rather than the worst plausible one.
+    // The detune, spread and drift settings stay on all three slots: they are free at one copy and
+    // keep the two single-copy sources away from their identity settings.
+    for (const auto* id : {"h1", "f1", "n1"}) { set(id, "detuneCents", 24); set(id, "unisonSpread", 1.0); set(id, "drift", 0.5); }
+    set("h1", "unisonVoices", catalogParameter("harmonic", "unisonVoices").maximum);
     set("f1", "index", 4.0); set("f1", "modInDepth", 1.0); set("r1", "exciteDepth", 1.0);
     set("q1", "mode", 3); set("q1", "drive", 8.0); set("q2", "drive", 4.0); // ladder24 is the most expensive filter mode
     set("x1", "mix", 0.5); set("x2", "mix", 0.5); set("x3", "mix", 0.5); set("x4", "width", 1.4);

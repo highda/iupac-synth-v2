@@ -231,11 +231,21 @@ bool runPatchTests()
         const auto worstCase = iupac::testing::worstCaseBenchmarkPatch();
         ok &= expect(worstCase.nodes.size() == maximumNodes && worstCase.edges.size() == maximumEdges && worstCase.matrix.size() == maximumMatrixRows,
                      "the worst-case benchmark patch is at every phase-4 bound");
-        std::size_t unisonSeven = 0;
+        // D10: the worst case is a per-voice source-copy budget, not unison on every source. The
+        // budget is derived from the catalog and pinned to the 9 VERIFICATION V8 states, so a
+        // catalog change re-derives the fixture and is caught here instead of silently moving V8.
+        ok &= expect(iupac::testing::worstCaseSourceCopyBudget() == 9,
+                     "the catalog still derives the V8 per-voice source-copy budget of 9");
+        std::size_t copies = 0, maximumUnison = 0;
         for (const auto& node : worstCase.nodes)
             for (const auto& parameter : node.parameters)
-                if (parameter.id == "unisonVoices" && parameter.values[0] == 7) ++unisonSeven;
-        ok &= expect(unisonSeven == generalSourceSlots, "the worst-case benchmark patch holds unisonVoices 7 on all three general source slots");
+                if (parameter.id == "unisonVoices")
+                {
+                    copies += static_cast<std::size_t>(parameter.values[0]);
+                    if (parameter.values[0] == iupac::testing::catalogParameter("harmonic", "unisonVoices").maximum) ++maximumUnison;
+                }
+        ok &= expect(copies == iupac::testing::worstCaseSourceCopyBudget() && maximumUnison == 1,
+                     "the worst-case benchmark patch spends the source-copy budget on exactly one general source");
         ok &= expect(std::ranges::any_of(worstCase.edges, [](const AudioEdge& e) { return e.port == AudioPort::modIn; })
                          && std::ranges::any_of(worstCase.edges, [](const AudioEdge& e) { return e.port == AudioPort::exciteIn; }),
                      "the worst-case benchmark patch cables both typed audio-rate inputs");
