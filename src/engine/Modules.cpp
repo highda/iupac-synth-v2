@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <limits>
 #include <numbers>
 
@@ -178,7 +179,7 @@ void ModuleProcessor::prepare(double rate,std::size_t block)
     if(type_==domain::ModuleType::reverb&&!reverb_){ownedReverb_=std::make_unique<ReverbNetwork>();ownedReverb_->prepare(spec);reverb_=ownedReverb_.get();}
     filter_.prepare(spec);for(auto& m:modes_)m.prepare(spec);reset();
 }
-void ModuleProcessor::reset() noexcept {phases_.fill(0);modPhases_.fill(0);for(auto& c:harmonicSin_)c.fill(0);for(auto& c:harmonicCos_)c.fill(1);cachedRatios_.fill(-1);cachedHarmonicFundamental_=-1;harmonicRenormalizeCountdown_=4096;pink_.fill(0);burstSamplesRemaining_=0;gate_=false;filterControlCountdown_=0;cachedPan_=cachedFundamental_=cachedFilterCutoff_=cachedFilterQ_=cachedModalQ_=std::numeric_limits<float>::quiet_NaN();cachedModeCutoffs_.fill(-1);cachedPans_.fill(std::numeric_limits<float>::quiet_NaN());
+void ModuleProcessor::reset() noexcept {phases_.fill(0);modPhases_.fill(0);for(auto& c:harmonicSin_)c.fill(0);for(auto& c:harmonicCos_)c.fill(1);cachedRatios_.fill(-1);cachedHarmonicFundamental_=-1;cachedRawAmplitudes_.fill(std::numeric_limits<float>::quiet_NaN());cachedRawRatios_.fill(std::numeric_limits<float>::quiet_NaN());cachedOddEvenBalance_=cachedSymmetry_=cachedHarmonicityMorph_=std::numeric_limits<float>::quiet_NaN();harmonicGainsDirty_=true;harmonicRenormalizeCountdown_=4096;pink_.fill(0);burstSamplesRemaining_=0;gate_=false;filterControlCountdown_=0;cachedPan_=cachedFundamental_=cachedFilterCutoff_=cachedFilterQ_=cachedModalQ_=std::numeric_limits<float>::quiet_NaN();cachedModeCutoffs_.fill(-1);cachedPans_.fill(std::numeric_limits<float>::quiet_NaN());
     unisonPhase_.fill(0);unisonModPhase_.fill(0);cachedDetuneCents_=cachedUnisonSpread_=std::numeric_limits<float>::quiet_NaN();cachedUnisonVoices_=0;unisonDirty_=true;pendingPhaseOffset_=false;
     driftPhase_=driftLevelPhase_=0;driftRate_=.11;driftLevelRate_=.07;
     effectDampLeft_=effectDampRight_=0;if(ownedReverb_)ownedReverb_->reset();
@@ -218,7 +219,33 @@ void ModuleProcessor::updateUnison(int voices,float detuneCents,float spread) no
         unisonPanRight_[static_cast<std::size_t>(c)]=voices==1?1.0f:gain*panGain(position*width,true);
     }
 }
+// (#144) The per-sample dispatch. `type_` is set once by setType() and never changes inside a
+// render, so the whole body below is compiled once per catalog type with the type as a compile-time
+// constant: every `type_ == domain::ModuleType::X` test in it becomes `true` or `false` and folds,
+// together with the branch it guards. Nothing about the arithmetic, its order or its operands
+// changes — the same source produces each instantiation — so every render is bit for bit the one
+// the single-function version produced; the authored panel digests are the production proof.
 void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<const float> inL,std::span<const float> inR,std::span<float> outL,std::span<float> outR,std::span<const float> modL,std::span<const float> modR) noexcept
+{
+    using domain::ModuleType;
+    switch(type_)
+    {
+        case ModuleType::harmonic: return processTyped<ModuleType::harmonic>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::fm:       return processTyped<ModuleType::fm>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::noise:    return processTyped<ModuleType::noise>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::sub:      return processTyped<ModuleType::sub>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::resonator:return processTyped<ModuleType::resonator>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::filter:   return processTyped<ModuleType::filter>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::shaper:   return processTyped<ModuleType::shaper>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::mixer:    return processTyped<ModuleType::mixer>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::chorus:   return processTyped<ModuleType::chorus>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::delay:    return processTyped<ModuleType::delay>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::reverb:   return processTyped<ModuleType::reverb>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::width:    return processTyped<ModuleType::width>(p,fundamental,inL,inR,outL,outR,modL,modR);
+    }
+}
+template<domain::ModuleType kType>
+void ModuleProcessor::processTyped(const ModuleValues& p,float fundamental,std::span<const float> inL,std::span<const float> inR,std::span<float> outL,std::span<float> outR,std::span<const float> modL,std::span<const float> modR) noexcept
 {
     const auto count=std::min({inL.size(),inR.size(),outL.size(),outR.size(),maximumModuleBlockSize});
     // D8 audio-rate modulation inputs (#127). An uncabled `modIn`/`exciteIn` arrives as empty spans
@@ -227,9 +254,23 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
     // phase offset the FM branch adds (`fastSin` wraps by subtraction, so an unbounded phase would
     // be an unbounded loop) and keeps the resonator's excitation finite.
     const bool audioRateInput=modL.size()>=count&&modR.size()>=count;fundamental=clampFinite(fundamental,1,static_cast<float>(sampleRate_*.45),440);auto output=clampFinite(p.outputLevel,0,1,0);
-    const bool unisonSource=type_==domain::ModuleType::harmonic||type_==domain::ModuleType::fm;
-    const bool pitchedSource=unisonSource||type_==domain::ModuleType::sub;
-    const auto copies=unisonSource?std::clamp(p.unisonVoices,1,static_cast<int>(maximumUnisonVoices)):1;
+    const bool unisonSource=kType==domain::ModuleType::harmonic||kType==domain::ModuleType::fm;
+    const bool pitchedSource=unisonSource||kType==domain::ModuleType::sub;
+    const auto requestedCopies=unisonSource?std::clamp(p.unisonVoices,1,static_cast<int>(maximumUnisonVoices)):1;
+    // (#144) Everything a pitched source derives from its controls rather than from the sample in
+    // front of it — the transposition multiplier, the per-copy detune ratios and pan gains, and the
+    // 112 per-(copy, partial) recursion deltas with their sine and cosine each — is guarded by an
+    // exact test of the inputs it was last built from, never by a counter. A throttle was tried
+    // here and reverted: at a 16-sample period it is invisible on a static patch but it re-times
+    // the derivation of a moving one, and it moved the `family-bell`, `family-pad` and
+    // `modulation-stage-curves` authored digests. The flag stays so the guards below read as one
+    // condition; it is unconditionally true.
+    const bool sourceControlUpdate=true;
+    // The modal resonator's four band-pass sections are coefficient updates with a tangent each, but
+    // `tuneRatio`, `modalQ` and `modeRatios` are matrix-modulatable, so they are resolved on every
+    // call and cached against their own inputs. They carry no counter for the same reason the
+    // pitched-source derivations above carry none: a counter re-times a modulated render.
+    const bool resonatorControlUpdate=kType==domain::ModuleType::resonator;
     // D8 pitch block (#122). `octave`, `coarse` and `fine` transpose the source away from the voice
     // fundamental and `keytrack` scales how much of the note it follows, all as one semitone offset.
     // At the catalog defaults (0 / 0 / 0 / 1) that offset is literally 0 and the branch below does
@@ -238,7 +279,7 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
     // the sub oscillator, whose own -1/-2 octave is just this same offset.
     if(pitchedSource)
     {
-        if(p.octave!=cachedPitchOctave_||p.coarse!=cachedPitchCoarse_||p.fine!=cachedPitchFine_||p.keytrack!=cachedPitchKeytrack_||note_!=cachedPitchNote_)
+        if(sourceControlUpdate&&(p.octave!=cachedPitchOctave_||p.coarse!=cachedPitchCoarse_||p.fine!=cachedPitchFine_||p.keytrack!=cachedPitchKeytrack_||note_!=cachedPitchNote_))
         {
             cachedPitchOctave_=p.octave;cachedPitchCoarse_=p.coarse;cachedPitchFine_=p.fine;cachedPitchKeytrack_=p.keytrack;cachedPitchNote_=note_;
             const auto semitones=12.0f*static_cast<float>(std::clamp(p.octave,-3,3))+static_cast<float>(std::clamp(p.coarse,-12,12))
@@ -247,7 +288,7 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
             cachedPitchMultiplier_=semitones==0.0f?1.0f:std::exp2(semitones/12.0f);
         }
         if(cachedPitchMultiplier_!=1.0f)fundamental=clampFinite(fundamental*cachedPitchMultiplier_,1,static_cast<float>(sampleRate_*.45),440);
-        updateUnison(copies,p.detuneCents,p.unisonSpread);
+        if(sourceControlUpdate)updateUnison(requestedCopies,p.detuneCents,p.unisonSpread);
         // `drift` (D9: a pair of slow sines, rate and start phase drawn per note-on) wanders pitch
         // and level around the note. Both multipliers are literally 1 at drift 0 — exp2(0) and
         // 1 + 0 — so a pre-D8 patch multiplies by one and keeps its exact samples. The wanders step
@@ -267,6 +308,9 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         if(driftPhase_>std::numbers::pi_v<double>)driftPhase_-=twoPi;if(driftLevelPhase_>std::numbers::pi_v<double>)driftLevelPhase_-=twoPi;
         fundamental=clampFinite(fundamental,1,static_cast<float>(sampleRate_*.45),440);output=clampFinite(output,0,1,0);
     }
+    // The copy count the render loops run at is the one `updateUnison` last prepared gains for, so
+    // a throttled `unisonVoices` can never read a detune ratio or a pan gain that was never built.
+    const auto copies=pitchedSource?static_cast<int>(cachedUnisonVoices_):1;
     if(pendingPhaseOffset_&&unisonSource)
     {
         // Deferred to the first block after note-on because `phaseRandom` is a patch value, not a
@@ -275,7 +319,7 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         if(random>0)for(std::size_t c=0;c<maximumUnisonVoices;++c)
         {
             const auto phase=twoPi*random*unisonPhase_[c];
-            if(type_==domain::ModuleType::harmonic){harmonicSin_[c].fill(static_cast<float>(std::sin(phase)));harmonicCos_[c].fill(static_cast<float>(std::cos(phase)));}
+            if(kType==domain::ModuleType::harmonic){harmonicSin_[c].fill(static_cast<float>(std::sin(phase)));harmonicCos_[c].fill(static_cast<float>(std::cos(phase)));}
             else {phases_[c]=std::remainder(phase,twoPi);modPhases_[c]=std::remainder(twoPi*random*unisonModPhase_[c],twoPi);}
         }
     }
@@ -283,7 +327,7 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
     // internal rate, so 0.2 of it is 0.4 of the output rate the contract names. `ladder24` reads the
     // same capped value through its own coefficient and `notch` reads it through the TPT bandpass,
     // so no mode can push a pole past that ceiling however hard `drive` is pushed.
-    if(type_==domain::ModuleType::filter&&filterControlCountdown_--==0){filterControlCountdown_=15;const auto cutoff=std::min(clampFinite(p.cutoff,30,18000,1000),static_cast<float>(sampleRate_*.2)),q=clampFinite(p.q,.5f,8,.707f);if(cutoff!=cachedFilterCutoff_){filter_.setCutoffFrequency(cutoff);cachedFilterCutoff_=cutoff;}if(q!=cachedFilterQ_){filter_.setResonance(q);cachedFilterQ_=q;}filter_.setType(p.mode==1||p.mode==4?juce::dsp::StateVariableTPTFilterType::bandpass:p.mode==2?juce::dsp::StateVariableTPTFilterType::highpass:juce::dsp::StateVariableTPTFilterType::lowpass);
+    if(kType==domain::ModuleType::filter&&filterControlCountdown_--==0){filterControlCountdown_=15;const auto cutoff=std::min(clampFinite(p.cutoff,30,18000,1000),static_cast<float>(sampleRate_*.2)),q=clampFinite(p.q,.5f,8,.707f);if(cutoff!=cachedFilterCutoff_){filter_.setCutoffFrequency(cutoff);cachedFilterCutoff_=cutoff;}if(q!=cachedFilterQ_){filter_.setResonance(q);cachedFilterQ_=q;}filter_.setType(p.mode==1||p.mode==4?juce::dsp::StateVariableTPTFilterType::bandpass:p.mode==2?juce::dsp::StateVariableTPTFilterType::highpass:juce::dsp::StateVariableTPTFilterType::lowpass);
         // The notch is the SVF identity x = highpass + R2 * bandpass + lowpass rearranged: the two
         // outer bands are x - R2 * bandpass, so one prepared filter serves it with no extra state.
         filterR2_=1.0f/q;
@@ -300,8 +344,16 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
     // has exactly one type, so reusing it is the whole storage cost of the C1 class the catalog
     // declares for `bassMonoHz`. setCutoffFrequency() is a tangent, so it is throttled exactly as
     // the filter module's is rather than run on every one of the tail's per-sample calls.
-    if(type_==domain::ModuleType::width&&filterControlCountdown_--==0){filterControlCountdown_=15;const auto hz=std::min(clampFinite(p.bassMonoHz,20,500,120),static_cast<float>(sampleRate_*.45));if(hz!=cachedFilterCutoff_){filter_.setType(juce::dsp::StateVariableTPTFilterType::lowpass);filter_.setResonance(.707f);filter_.setCutoffFrequency(hz);cachedFilterCutoff_=hz;}}
-    if(type_==domain::ModuleType::harmonic)for(std::size_t n=0;n<16;++n)if(p.pans[n]!=cachedPans_[n]){cachedPans_[n]=p.pans[n];panLeft_[n]=panGain(p.pans[n],false);panRight_[n]=panGain(p.pans[n],true);}
+    if(kType==domain::ModuleType::width&&filterControlCountdown_--==0){filterControlCountdown_=15;const auto hz=std::min(clampFinite(p.bassMonoHz,20,500,120),static_cast<float>(sampleRate_*.45));if(hz!=cachedFilterCutoff_){filter_.setType(juce::dsp::StateVariableTPTFilterType::lowpass);filter_.setResonance(.707f);filter_.setCutoffFrequency(hz);cachedFilterCutoff_=hz;}}
+    // (#144) `partialPans` feeds nothing but the two pan-gain arrays, so the whole 16-partial walk
+    // is skipped outright while the array has not moved. The bitwise test is what makes that exact:
+    // equal bits in mean the same two gains out, and it also settles the NaN case, which the
+    // element-wise `!=` below would otherwise re-derive on every one of the engine's per-sample calls.
+    if(kType==domain::ModuleType::harmonic&&std::memcmp(p.pans.data(),cachedPans_.data(),sizeof cachedPans_)!=0)
+    {
+        for(std::size_t n=0;n<16;++n)if(std::memcmp(&p.pans[n],&cachedPans_[n],sizeof(float))!=0){cachedPans_[n]=p.pans[n];panLeft_[n]=panGain(p.pans[n],false);panRight_[n]=panGain(p.pans[n],true);}
+        harmonicGainsDirty_=true;
+    }
     // D8 spectral shape (#121). All three controls reshape what is *rendered* and never touch the
     // stored arrays, so a saved spectrum survives a load/save round trip and every one of them stays
     // matrix-modulatable. `harmonicityMorph` pulls each ratio toward its nearest integer — the
@@ -311,8 +363,12 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
     // 0 low-heavy and 1 high-heavy. Each is the literal identity at its catalog default —
     // std::lerp(r,·,0) is r and both gains are 1 - 0*x = 1 exactly — which is what keeps a pre-D8
     // patch rendering the same samples (the `patch-compatibility` ctest is the production proof).
-    if(type_==domain::ModuleType::harmonic)
+    if(kType==domain::ModuleType::harmonic
+       &&(std::memcmp(p.amplitudes.data(),cachedRawAmplitudes_.data(),sizeof cachedRawAmplitudes_)!=0
+          ||std::memcmp(&p.oddEvenBalance,&cachedOddEvenBalance_,sizeof(float))!=0
+          ||std::memcmp(&p.symmetry,&cachedSymmetry_,sizeof(float))!=0))
     {
+        cachedRawAmplitudes_=p.amplitudes;cachedOddEvenBalance_=p.oddEvenBalance;cachedSymmetry_=p.symmetry;
         const auto balance=clampFinite(p.oddEvenBalance,-1,1,0),tilt=(clampFinite(p.symmetry,0,1,.5f)-.5f)*2.0f;
         const auto oddGain=1.0f+std::min(balance,0.0f),evenGain=1.0f-std::max(balance,0.0f);
         for(std::size_t n=0;n<16;++n)
@@ -325,40 +381,59 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
     // One recursion increment per (copy, partial). `detuneMultiplier_` is exactly 1 for a single
     // copy, so the product is bit for bit the pre-D8 increment. The morphed ratio is what is cached,
     // so both the increment and the 0.45-rate culling below run on the post-morph spectrum.
-    if(type_==domain::ModuleType::harmonic){const auto morph=clampFinite(p.harmonicityMorph,0,1,0);for(std::size_t n=0;n<16;++n){const auto stored=clampFinite(p.ratios[n],.5f,32,static_cast<float>(n+1));const auto ratio=std::lerp(stored,std::round(stored),morph);if(fundamental!=cachedHarmonicFundamental_||ratio!=cachedRatios_[n]||unisonDirty_){cachedRatios_[n]=ratio;for(int c=0;c<copies;++c){const auto delta=twoPi*fundamental*ratio*detuneMultiplier_[static_cast<std::size_t>(c)]/sampleRate_;harmonicDeltaSin_[static_cast<std::size_t>(c)][n]=static_cast<float>(std::sin(delta));harmonicDeltaCos_[static_cast<std::size_t>(c)][n]=static_cast<float>(std::cos(delta));}}}cachedHarmonicFundamental_=fundamental;unisonDirty_=false;}
-    if(type_==domain::ModuleType::mixer&&p.pan!=cachedPan_){cachedPan_=p.pan;cachedPanLeft_=panGain(p.pan,false);cachedPanRight_=panGain(p.pan,true);}
-    if(type_==domain::ModuleType::fm&&fundamental!=cachedFundamental_){cachedFundamental_=fundamental;const auto midi=69+12*std::log2(fundamental/440);cachedFmRolloff_=midi>84?std::max(0.0f,1-(midi-84)/43):1.f;}
+    if(kType==domain::ModuleType::harmonic&&sourceControlUpdate
+       &&(unisonDirty_||fundamental!=cachedHarmonicFundamental_
+          ||std::memcmp(p.ratios.data(),cachedRawRatios_.data(),sizeof cachedRawRatios_)!=0
+          ||std::memcmp(&p.harmonicityMorph,&cachedHarmonicityMorph_,sizeof(float))!=0))
+    {cachedRawRatios_=p.ratios;cachedHarmonicityMorph_=p.harmonicityMorph;harmonicGainsDirty_=true;const auto morph=clampFinite(p.harmonicityMorph,0,1,0);for(std::size_t n=0;n<16;++n){const auto stored=clampFinite(p.ratios[n],.5f,32,static_cast<float>(n+1));const auto ratio=std::lerp(stored,std::round(stored),morph);if(fundamental!=cachedHarmonicFundamental_||ratio!=cachedRatios_[n]||unisonDirty_){cachedRatios_[n]=ratio;for(int c=0;c<copies;++c){const auto delta=twoPi*fundamental*ratio*detuneMultiplier_[static_cast<std::size_t>(c)]/sampleRate_;harmonicDeltaSin_[static_cast<std::size_t>(c)][n]=static_cast<float>(std::sin(delta));harmonicDeltaCos_[static_cast<std::size_t>(c)][n]=static_cast<float>(std::cos(delta));}}}cachedHarmonicFundamental_=fundamental;unisonDirty_=false;}
+    // (#144) The 0.45-rate cull and the pan gain are folded into one per-copy array. Nothing it
+    // reads can move inside a sample, so recomputing it per sample bought nothing; the render
+    // arithmetic is unchanged, because an audible partial still multiplies by exactly the pan gain
+    // it did and a culled one multiplies by a literal zero in place of the loop's `continue`.
+    if(kType==domain::ModuleType::harmonic&&harmonicGainsDirty_)
+    {
+        harmonicGainsDirty_=false;
+        for(std::size_t c=0;c<maximumUnisonVoices;++c)for(std::size_t n=0;n<16;++n)
+        {
+            const bool audible=!(fundamental*cachedRatios_[n]*detuneMultiplier_[c]>sampleRate_*.45);
+            harmonicGainLeft_[c][n]=audible?panLeft_[n]:0.0f;harmonicGainRight_[c][n]=audible?panRight_[n]:0.0f;
+        }
+    }
+    if(kType==domain::ModuleType::mixer&&p.pan!=cachedPan_){cachedPan_=p.pan;cachedPanLeft_=panGain(p.pan,false);cachedPanRight_=panGain(p.pan,true);}
+    if(kType==domain::ModuleType::fm&&sourceControlUpdate&&fundamental!=cachedFundamental_){cachedFundamental_=fundamental;const auto midi=69+12*std::log2(fundamental/440);cachedFmRolloff_=midi>84?std::max(0.0f,1-(midi-84)/43):1.f;}
     for(std::size_t i=0;i<count;++i){float l=inL[i],r=inR[i];
-        if(type_==domain::ModuleType::harmonic){l=r=0;for(std::size_t c=0;c<static_cast<std::size_t>(copies);++c){auto& hs=harmonicSin_[c];auto& hc=harmonicCos_[c];const auto& ds=harmonicDeltaSin_[c];const auto& dc=harmonicDeltaCos_[c];float cl=0,cr=0;for(std::size_t n=0;n<16;++n){const auto hz=fundamental*cachedRatios_[n]*detuneMultiplier_[c];if(hz>sampleRate_*.45)continue;const auto s=hs[n]*shapedAmplitudes_[n];cl+=s*panLeft_[n];cr+=s*panRight_[n];const auto nextSin=hs[n]*dc[n]+hc[n]*ds[n];hc[n]=hc[n]*dc[n]-hs[n]*ds[n];hs[n]=nextSin;}l+=cl*unisonPanLeft_[c];r+=cr*unisonPanRight_[c];}if(--harmonicRenormalizeCountdown_==0){harmonicRenormalizeCountdown_=4096;for(std::size_t c=0;c<static_cast<std::size_t>(copies);++c)for(std::size_t n=0;n<16;++n){const auto magnitude=std::sqrt(harmonicSin_[c][n]*harmonicSin_[c][n]+harmonicCos_[c][n]*harmonicCos_[c][n]);if(magnitude>0){harmonicSin_[c][n]/=magnitude;harmonicCos_[c][n]/=magnitude;}}}}
+        if(kType==domain::ModuleType::harmonic){l=r=0;for(std::size_t c=0;c<static_cast<std::size_t>(copies);++c){auto& hs=harmonicSin_[c];auto& hc=harmonicCos_[c];const auto& ds=harmonicDeltaSin_[c];const auto& dc=harmonicDeltaCos_[c];const auto& gl=harmonicGainLeft_[c];const auto& gr=harmonicGainRight_[c];float cl=0,cr=0;for(std::size_t n=0;n<16;++n){const auto s=hs[n]*shapedAmplitudes_[n];cl+=s*gl[n];cr+=s*gr[n];const auto nextSin=hs[n]*dc[n]+hc[n]*ds[n];hc[n]=hc[n]*dc[n]-hs[n]*ds[n];hs[n]=nextSin;}l+=cl*unisonPanLeft_[c];r+=cr*unisonPanRight_[c];}if(--harmonicRenormalizeCountdown_==0){harmonicRenormalizeCountdown_=4096;for(std::size_t c=0;c<static_cast<std::size_t>(copies);++c)for(std::size_t n=0;n<16;++n){const auto magnitude=std::sqrt(harmonicSin_[c][n]*harmonicSin_[c][n]+harmonicCos_[c][n]*harmonicCos_[c][n]);if(magnitude>0){harmonicSin_[c][n]/=magnitude;harmonicCos_[c][n]/=magnitude;}}}}
         // D8 `fm.modIn` (#127): the cabled signal is added to the modulator operator's phase, scaled
         // by `modInDepth`, where full depth on a full-scale signal is one whole cycle. It is read as
         // an offset every sample and never accumulated into `modPhases_`, so it is phase modulation
         // and cannot integrate into a pitch drift. `modInDepth` 0 is the catalog default and makes
         // the offset literally 0.0, so the carrier expression is bit for bit the pre-D8 one.
-        else if(type_==domain::ModuleType::fm){const auto cr=clampFinite(p.carrierRatio,.5f,4,1),mr=clampFinite(p.modulatorRatio,.25f,8,1);const auto index=clampFinite(p.index,0,6,0)*cachedFmRolloff_;
+        else if(kType==domain::ModuleType::fm){const auto cr=clampFinite(p.carrierRatio,.5f,4,1),mr=clampFinite(p.modulatorRatio,.25f,8,1);const auto index=clampFinite(p.index,0,6,0)*cachedFmRolloff_;
             const auto modDepth=clampFinite(p.modInDepth,0,1,0);
             const double modOffset=audioRateInput&&modDepth>0?static_cast<double>(modDepth*clampFinite((modL[i]+modR[i])*.5f,-4,4,0))*twoPi:0.0;
             l=r=0;for(std::size_t c=0;c<static_cast<std::size_t>(copies);++c){const auto detune=detuneMultiplier_[c];const auto s=fastSin(phases_[c]+index*fastSin(modPhases_[c]+modOffset));l+=s*unisonPanLeft_[c];r+=s*unisonPanRight_[c];phases_[c]+=twoPi*fundamental*cr*detune/sampleRate_;modPhases_[c]+=twoPi*fundamental*mr*detune/sampleRate_;if(phases_[c]>std::numbers::pi_v<double>)phases_[c]-=twoPi;if(modPhases_[c]>std::numbers::pi_v<double>)modPhases_[c]-=twoPi;}}
-        else if(type_==domain::ModuleType::noise){const auto burst=static_cast<std::size_t>(sampleRate_*clampFinite(p.burstMilliseconds,1,500,80)*.001);if(p.mode==1&&burstSamplesRemaining_==std::numeric_limits<std::size_t>::max())burstSamplesRemaining_=burst;auto s=(gate_&&(p.mode==0||burstSamplesRemaining_>0))?nextNoise():0.0f;if(p.mode==1&&burstSamplesRemaining_>0)--burstSamplesRemaining_;if(p.color==1){pink_[0]=.99765f*pink_[0]+.099046f*s;pink_[1]=.963f*pink_[1]+.2965164f*s;s=.35f*(pink_[0]+pink_[1]+s*.1848f);}l=r=s;}
+        else if(kType==domain::ModuleType::noise){const auto burst=static_cast<std::size_t>(sampleRate_*clampFinite(p.burstMilliseconds,1,500,80)*.001);if(p.mode==1&&burstSamplesRemaining_==std::numeric_limits<std::size_t>::max())burstSamplesRemaining_=burst;auto s=(gate_&&(p.mode==0||burstSamplesRemaining_>0))?nextNoise():0.0f;if(p.mode==1&&burstSamplesRemaining_>0)--burstSamplesRemaining_;if(p.color==1){pink_[0]=.99765f*pink_[0]+.099046f*s;pink_[1]=.963f*pink_[1]+.2965164f*s;s=.35f*(pink_[0]+pink_[1]+s*.1848f);}l=r=s;}
         // D8 `resonator.exciteIn` (#127): the cabled signal is added to the excitation the resonator
         // is about to run, scaled by `exciteDepth`. At the default depth of 0 nothing is added, so
         // the comb and the modal bank see exactly the samples they saw before D8.
-        else if(type_==domain::ModuleType::resonator){const auto hz=fundamental*clampFinite(p.tuneRatio,.5f,4,1);
-            if(audioRateInput){const auto exciteDepth=clampFinite(p.exciteDepth,0,1,0);if(exciteDepth>0){l+=clampFinite(modL[i],-4,4,0)*exciteDepth;r+=clampFinite(modR[i],-4,4,0)*exciteDepth;}}if(p.mode==0){comb_->setDelay(std::clamp(static_cast<float>(sampleRate_/hz),1.0f,static_cast<float>(comb_->getMaximumDelayInSamples())));const auto fb=clampFinite(p.combFeedback,0,.97f,.4f),dl=comb_->popSample(0),dr=comb_->popSample(1);comb_->pushSample(0,l+dl*fb);comb_->pushSample(1,r+dr*fb);l=dl;r=dr;}else{float sl=0,sr=0;const auto q=clampFinite(p.modalQ,.5f,12,3);for(std::size_t m=0;m<4;++m){const auto cutoff=std::min(hz*clampFinite(p.modeRatios[m],.5f,4,1),static_cast<float>(sampleRate_*.4));modes_[m].setType(juce::dsp::StateVariableTPTFilterType::bandpass);if(cutoff!=cachedModeCutoffs_[m]){modes_[m].setCutoffFrequency(cutoff);cachedModeCutoffs_[m]=cutoff;}if(q!=cachedModalQ_)modes_[m].setResonance(q);const auto g=clampFinite(p.modeLevels[m],0,1,0);sl+=modes_[m].processSample(0,l)*g;sr+=modes_[m].processSample(1,r)*g;}cachedModalQ_=q;l=sl;r=sr;}}
-        else if(type_==domain::ModuleType::filter){
+        else if(kType==domain::ModuleType::resonator){const auto hz=fundamental*clampFinite(p.tuneRatio,.5f,4,1);
+            if(audioRateInput){const auto exciteDepth=clampFinite(p.exciteDepth,0,1,0);if(exciteDepth>0){l+=clampFinite(modL[i],-4,4,0)*exciteDepth;r+=clampFinite(modR[i],-4,4,0)*exciteDepth;}}if(p.mode==0){comb_->setDelay(std::clamp(static_cast<float>(sampleRate_/hz),1.0f,static_cast<float>(comb_->getMaximumDelayInSamples())));const auto fb=clampFinite(p.combFeedback,0,.97f,.4f),dl=comb_->popSample(0),dr=comb_->popSample(1);comb_->pushSample(0,l+dl*fb);comb_->pushSample(1,r+dr*fb);l=dl;r=dr;}else{float sl=0,sr=0;const auto q=clampFinite(p.modalQ,.5f,12,3);
+            if(resonatorControlUpdate){for(std::size_t m=0;m<4;++m){const auto cutoff=std::min(hz*clampFinite(p.modeRatios[m],.5f,4,1),static_cast<float>(sampleRate_*.4));modes_[m].setType(juce::dsp::StateVariableTPTFilterType::bandpass);if(cutoff!=cachedModeCutoffs_[m]){modes_[m].setCutoffFrequency(cutoff);cachedModeCutoffs_[m]=cutoff;}if(q!=cachedModalQ_)modes_[m].setResonance(q);}cachedModalQ_=q;}
+            for(std::size_t m=0;m<4;++m){const auto g=clampFinite(p.modeLevels[m],0,1,0);sl+=modes_[m].processSample(0,l)*g;sr+=modes_[m].processSample(1,r)*g;}l=sl;r=sr;}}
+        else if(kType==domain::ModuleType::filter){
             if(cachedFilterDrive_>1.0f){l=fastTanh(l*cachedFilterDrive_)*driveNormalizer_;r=fastTanh(r*cachedFilterDrive_)*driveNormalizer_;}
             if(p.mode==3){l=ladderSample(0,l);r=ladderSample(1,r);}
             else if(p.mode==4){const auto bl=filter_.processSample(0,l),br=filter_.processSample(1,r);l-=filterR2_*bl;r-=filterR2_*br;}
             else {l=filter_.processSample(0,l);r=filter_.processSample(1,r);}}
         // D8 shaper curves (#126). Curve 0 is the expression this line always carried, so `tanh`
         // renders the pre-D8 samples exactly; the other four are the bounded alternatives above.
-        else if(type_==domain::ModuleType::shaper){const auto d=clampFinite(p.drive,1,16,1),w=clampFinite(p.wet,0,1,1);
+        else if(kType==domain::ModuleType::shaper){const auto d=clampFinite(p.drive,1,16,1),w=clampFinite(p.wet,0,1,1);
             if(p.curve==0){l=std::lerp(l,fastTanh(l*d),w);r=std::lerp(r,fastTanh(r*d),w);}
             else {l=std::lerp(l,shapeSample(p.curve,l,d),w);r=std::lerp(r,shapeSample(p.curve,r,d),w);}}
         // D8 sub oscillator (#122): one directly evaluated sine or triangle — no wavetable — at the
         // pitch the block above resolved, so MIDI, masterTune, bend, `fine`, `keytrack`, `octave`
         // and `drift` all reach it exactly as they reach the other pitched sources.
-        else if(type_==domain::ModuleType::sub){const auto phase=phases_[0];l=r=p.waveform==1?triangleWave(phase):fastSin(phase);phases_[0]=phase+twoPi*fundamental/sampleRate_;if(phases_[0]>std::numbers::pi_v<double>)phases_[0]-=twoPi;}
+        else if(kType==domain::ModuleType::sub){const auto phase=phases_[0];l=r=p.waveform==1?triangleWave(phase):fastSin(phase);phases_[0]=phase+twoPi*fundamental/sampleRate_;if(phases_[0]>std::numbers::pi_v<double>)phases_[0]-=twoPi;}
         // D8 chorus (#123). `voices` taps read one prepared stereo line at swept delays and are
         // panned across the image with the same equal-power law unison uses, so a wider tap count
         // does not grow the level. `feedback` returns the panned wet sum to the line and `mix` is
@@ -367,9 +442,9 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         // One test covers the whole effects region and the branches inside it are only reached by a
         // node that is actually in the tail: `process()` runs once per sample, so a mixer at the end
         // of this chain must not pay a comparison per effect type (#122 measured what that costs).
-        else if(type_>=domain::ModuleType::chorus)
+        else if(kType>=domain::ModuleType::chorus)
         {
-        if(type_==domain::ModuleType::chorus&&effect_)
+        if(kType==domain::ModuleType::chorus&&effect_)
         {
             const auto taps=std::clamp(p.voices,2,4);
             const auto depth=clampFinite(p.depth,0,1,.3f),feedback=clampFinite(p.feedback,0,.9f,0),mix=clampFinite(p.mix,0,1,.3f);
@@ -394,7 +469,7 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         // against the host tempo (`fallbackTempoBpm` when the host has no playhead); `spread` skews
         // the two channels' times apart; `damping` is a one-pole inside the feedback path, so each
         // repeat is darker than the one before it.
-        else if(type_==domain::ModuleType::delay&&effect_)
+        else if(kType==domain::ModuleType::delay&&effect_)
         {
             const auto mix=clampFinite(p.mix,0,1,.3f),feedback=clampFinite(p.feedback,0,.95f,.35f);
             const auto damping=clampFinite(p.damping,0,1,.4f),spread=clampFinite(p.spread,-1,1,0);
@@ -413,7 +488,7 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         // D8 reverb (#124). The network is prepared once for the whole tail; here it is one sample
         // in and a dry/wet. `mix` 0 is std::lerp(l, ., 0) — the literal dry sample, so a reverb
         // node parked at mix 0 is a straight wire exactly as the chorus and the delay are.
-        else if(type_==domain::ModuleType::reverb&&reverb_)
+        else if(kType==domain::ModuleType::reverb&&reverb_)
         {
             const auto mix=clampFinite(p.mix,0,1,.25f);
             float wetL=0,wetR=0;
@@ -430,7 +505,7 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         // bass mono as the image opens. `width` at its default 1 is the literal identity — the
         // branch leaves `l` and `r` untouched — while the crossover still runs, so its state never
         // goes stale under a macro sweeping the control.
-        else if(type_==domain::ModuleType::width)
+        else if(kType==domain::ModuleType::width)
         {
             const auto amount=clampFinite(p.width,0,2,1);
             const auto mid=(l+r)*.5f,side=(l-r)*.5f;

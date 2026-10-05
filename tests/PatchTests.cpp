@@ -246,6 +246,11 @@ bool runPatchTests()
                 }
         ok &= expect(copies == iupac::testing::worstCaseSourceCopyBudget() && maximumUnison == 1,
                      "the worst-case benchmark patch spends the source-copy budget on exactly one general source");
+        std::size_t fullSpectra = 0;
+        for (const auto& node : worstCase.nodes)
+            for (const auto& parameter : node.parameters)
+                if (parameter.id == "partialAmplitudes" && std::ranges::none_of(parameter.values, [](double v) { return v == 0.0; })) ++fullSpectra;
+        ok &= expect(fullSpectra == 2, "both worst-case additive sources render a full 16-partial spectrum");
         ok &= expect(std::ranges::any_of(worstCase.edges, [](const AudioEdge& e) { return e.port == AudioPort::modIn; })
                          && std::ranges::any_of(worstCase.edges, [](const AudioEdge& e) { return e.port == AudioPort::exciteIn; }),
                      "the worst-case benchmark patch cables both typed audio-rate inputs");

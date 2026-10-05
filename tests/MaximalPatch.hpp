@@ -107,6 +107,20 @@ inline domain::Patch worstCaseBenchmarkPatch()
     // keep the two single-copy sources away from their identity settings.
     for (const auto* id : {"h1", "f1", "n1"}) { set(id, "detuneCents", 24); set(id, "unisonSpread", 1.0); set(id, "drift", 0.5); }
     set("h1", "unisonVoices", catalogParameter("harmonic", "unisonVoices").maximum);
+    // Both additive sources render a full 16-partial spectrum (#144). `defaultNode` leaves a
+    // harmonic slot at the catalog default of one partial, which is not a worst case for an
+    // oscillator whose cost is one recursion per partial per unison copy: the authored `lead`
+    // panels and every chemistry-derived spectrum fill all sixteen. The amplitudes fall as 1/n so
+    // the patch is a plausible bright tone rather than sixteen unit partials into the output
+    // guard; the render cost is the same either way, because the cost is per partial, not per
+    // level. Leaving the sparse default here would have let a later zero-amplitude skip pass V8
+    // on a patch it had itself made cheap.
+    for (const auto* id : {"h1", "n1"})
+        for (auto& node : patch.nodes)
+            if (node.id == id)
+                for (auto& value : node.parameters)
+                    if (value.id == "partialAmplitudes")
+                        for (std::size_t n = 0; n < value.values.size(); ++n) value.values[n] = 1.0 / static_cast<double>(n + 1);
     set("f1", "index", 4.0); set("f1", "modInDepth", 1.0); set("r1", "exciteDepth", 1.0);
     set("q1", "mode", 3); set("q1", "drive", 8.0); set("q2", "drive", 4.0); // ladder24 is the most expensive filter mode
     set("x1", "mix", 0.5); set("x2", "mix", 0.5); set("x3", "mix", 0.5); set("x4", "width", 1.4);

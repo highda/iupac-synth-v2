@@ -136,6 +136,17 @@ public:
                  std::span<const float> audioRateRight = {}) noexcept;
 
 private:
+    // (#144) The engine calls process() once per sample for every node of every active voice, so
+    // the node's own type is the most-taken branch in the instrument. It is fixed for the lifetime
+    // of the processor, so it is passed as a template argument and every `type_ ==` test in the
+    // body folds away at compile time: a mixer's call no longer walks the harmonic, FM, resonator
+    // and filter preambles to decide it is none of them. The body is the same code and the same
+    // arithmetic in the same order for each type, so no sample moves; only the dispatch does.
+    template <domain::ModuleType T>
+    void processTyped(const ModuleValues&, float fundamentalHz, std::span<const float> inputLeft,
+                      std::span<const float> inputRight, std::span<float> outputLeft,
+                      std::span<float> outputRight, std::span<const float> audioRateLeft,
+                      std::span<const float> audioRateRight) noexcept;
     static float clampFinite(float value, float lo, float hi, float fallback) noexcept;
     float nextNoise() noexcept;
     // Recomputes the per-copy detune ratios and pan/level gains when `unisonVoices`, `detuneCents`
@@ -164,6 +175,20 @@ private:
     // sum actually uses, both derived per block from the stored arrays and never written back.
     std::array<float, 16> shapedAmplitudes_{};
     float cachedHarmonicFundamental_{-1.0f};
+    // (#144) The raw inputs each harmonic derivation above was last built from. The engine calls
+    // process() once per sample, so without these the pan gains, the shaped amplitudes and the 112
+    // per-(copy, partial) recursion deltas were all re-derived on every sample of every voice even
+    // when nothing feeding them had moved. `std::memcmp` against the stored copy is the exact test:
+    // identical bits in means an identical derivation out, so skipping it cannot move a sample.
+    std::array<float, 16> cachedRawAmplitudes_{}, cachedRawRatios_{};
+    float cachedOddEvenBalance_{std::numeric_limits<float>::quiet_NaN()}, cachedSymmetry_{std::numeric_limits<float>::quiet_NaN()};
+    float cachedHarmonicityMorph_{std::numeric_limits<float>::quiet_NaN()};
+    // The per-copy render gains: the partial's pan gain, or a literal zero where the partial is
+    // above the 0.45-rate cull for that copy's detune. The cull depends only on the fundamental,
+    // the morphed ratio and the detune ratio, none of which can move inside one sample, so it is
+    // resolved here instead of inside the per-sample partial loop.
+    UnisonBank harmonicGainLeft_{}, harmonicGainRight_{};
+    bool harmonicGainsDirty_{true};
     std::uint32_t randomState_{1};
     std::array<float, 2> pink_{};
     std::array<float, 16> panLeft_{}, panRight_{}, cachedPans_{};
@@ -289,7 +314,13 @@ struct CompiledRow { domain::ModulationSource source{}; std::uint8_t node{}; Par
 // existing pass rather than by a second modulation path. The Patch cap itself is unchanged at 40.
 inline constexpr std::size_t implicitFilterRows = 4;
 inline constexpr std::size_t compiledRowCapacity = domain::maximumMatrixRows + implicitFilterRows;
-struct CompiledTarget { std::uint8_t node{}; ParameterTarget target{}; float minimum{}, maximum{}; domain::ParameterScale scale{}; std::array<std::uint8_t, compiledRowCapacity> rows{}; std::uint8_t rowCount{}; };
+// `normalizedBase` (#144) is the group's unmodulated node value already normalized into [0, 1].
+// The modulation pass runs once per sample for every target of every active voice, and the base
+// value and the range it normalizes against are both fixed for the life of the compiled patch,
+// so re-deriving it there bought nothing — and on a logarithmic target such as `cutoff` it cost
+// two `std::log` calls per target per voice per sample. It is resolved once in `prepareTargets`
+// from exactly the same expression, so the sum it feeds is bit for bit the one it replaces.
+struct CompiledTarget { std::uint8_t node{}; ParameterTarget target{}; float minimum{}, maximum{}; domain::ParameterScale scale{}; float normalizedBase{}; std::array<std::uint8_t, compiledRowCapacity> rows{}; std::uint8_t rowCount{}; };
 struct CompiledEdgeList { std::array<std::uint8_t, domain::maximumEdges> edges{}; std::uint8_t count{}; };
 struct CompiledPatch
 {

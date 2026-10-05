@@ -44,7 +44,7 @@ VoiceValues applyAllModulation(const CompiledPatch& patch, const ModulationInput
 {
  VoiceValues values{};
  for(std::size_t node=0;node<patch.nodeCount;++node)values[node]=patch.nodes[node].values;
- for(std::size_t targetIndex=0;targetIndex<patch.targetCount;++targetIndex){const auto&target=patch.targets[targetIndex];float contribution=0;for(std::size_t i=0;i<target.rowCount;++i){const auto&row=patch.rows[target.rows[i]];contribution+=row.depth*inputs[static_cast<std::size_t>(row.source)];}CompiledRow definition{};definition.minimum=target.minimum;definition.maximum=target.maximum;definition.scale=target.scale;auto&value=targetValue(values[target.node],target.target);value=denormalize(normalize(value,definition)+contribution,definition);}
+ for(std::size_t targetIndex=0;targetIndex<patch.targetCount;++targetIndex){const auto&target=patch.targets[targetIndex];float contribution=0;for(std::size_t i=0;i<target.rowCount;++i){const auto&row=patch.rows[target.rows[i]];contribution+=row.depth*inputs[static_cast<std::size_t>(row.source)];}CompiledRow definition{};definition.minimum=target.minimum;definition.maximum=target.maximum;definition.scale=target.scale;targetValue(values[target.node],target.target)=denormalize(target.normalizedBase+contribution,definition);}
  return values;
 }
 
@@ -53,6 +53,10 @@ void prepareTargets(CompiledPatch& patch) noexcept
  patch.targetCount=0;
  patch.outputEdges={};patch.tailOutputEdges={};for(auto&list:patch.incomingEdges)list={};for(std::size_t edgeIndex=0;edgeIndex<patch.edgeCount;++edgeIndex){const auto&edge=patch.edges[edgeIndex];auto&list=edge.toOutput?(edge.source>=patch.tailStart?patch.tailOutputEdges:patch.outputEdges):patch.incomingEdges[edge.destination];list.edges[list.count++]=static_cast<std::uint8_t>(edgeIndex);}
  for(std::size_t rowIndex=0;rowIndex<patch.rowCount;++rowIndex){const auto&row=patch.rows[rowIndex];CompiledTarget*group=nullptr;for(std::size_t i=0;i<patch.targetCount;++i)if(patch.targets[i].node==row.node&&patch.targets[i].target==row.target){group=&patch.targets[i];break;}if(!group){group=&patch.targets[patch.targetCount++];*group={};group->node=row.node;group->target=row.target;group->minimum=row.minimum;group->maximum=row.maximum;group->scale=row.scale;}group->rows[group->rowCount++]=static_cast<std::uint8_t>(rowIndex);}
+ // (#144) Resolve each group's normalized base once. It is exactly the expression the per-sample
+ // pass used to run — the group's unmodulated node value, clamped to the group's range and
+ // normalized on the group's scale — so the sum it feeds is unchanged; only the repetition goes.
+ for(std::size_t i=0;i<patch.targetCount;++i){auto&target=patch.targets[i];CompiledRow definition{};definition.minimum=target.minimum;definition.maximum=target.maximum;definition.scale=target.scale;target.normalizedBase=normalize(targetValue(patch.nodes[target.node].values,target.target),definition);}
  const auto voiceTargets=std::stable_partition(patch.targets.begin(),patch.targets.begin()+patch.targetCount,[&](const CompiledTarget&t){return t.node<patch.tailStart;});
  patch.voiceTargetCount=static_cast<std::uint8_t>(voiceTargets-patch.targets.begin());
 }
@@ -62,7 +66,7 @@ void prepareTargets(CompiledPatch& patch) noexcept
 void updateModulation(const CompiledPatch&patch,const ModulationInputs&inputs,VoiceValues&values,ModulationInputs&previous,bool&ready,std::size_t begin,std::size_t end)noexcept
 {
  if(!ready){for(std::size_t node=0;node<patch.nodeCount;++node)values[node]=patch.nodes[node].values;previous.fill(std::numeric_limits<float>::quiet_NaN());ready=true;}
- for(std::size_t targetIndex=begin;targetIndex<end;++targetIndex){const auto&target=patch.targets[targetIndex];bool changed=false;float contribution=0;for(std::size_t i=0;i<target.rowCount;++i){const auto&row=patch.rows[target.rows[i]];const auto sourceIndex=static_cast<std::size_t>(row.source);changed|=inputs[sourceIndex]!=previous[sourceIndex];contribution+=row.depth*inputs[sourceIndex];}if(changed){CompiledRow definition{};definition.minimum=target.minimum;definition.maximum=target.maximum;definition.scale=target.scale;auto&value=targetValue(values[target.node],target.target);value=targetValue(patch.nodes[target.node].values,target.target);value=denormalize(normalize(value,definition)+contribution,definition);}}
+ for(std::size_t targetIndex=begin;targetIndex<end;++targetIndex){const auto&target=patch.targets[targetIndex];bool changed=false;float contribution=0;for(std::size_t i=0;i<target.rowCount;++i){const auto&row=patch.rows[target.rows[i]];const auto sourceIndex=static_cast<std::size_t>(row.source);changed|=inputs[sourceIndex]!=previous[sourceIndex];contribution+=row.depth*inputs[sourceIndex];}if(changed){CompiledRow definition{};definition.minimum=target.minimum;definition.maximum=target.maximum;definition.scale=target.scale;targetValue(values[target.node],target.target)=denormalize(target.normalizedBase+contribution,definition);}}
  previous=inputs;
 }
 }
