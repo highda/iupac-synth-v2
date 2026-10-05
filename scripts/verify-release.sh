@@ -57,7 +57,7 @@ from pathlib import Path
 
 root, output, commit, package_status, tsan_status = (Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5])
 inputs = ["data/panels/authored-synth/panel.json", "data/panels/chemistry-manifest.json",
-          "data/panels/legacy-hard-pairs.json", "data/discovery/manifest-v1.json",
+          "data/panels/legacy-hard-pairs.json", "data/discovery/manifest-v2.json",
           "cmake/Dependencies.lock"]
 sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
 tool = lambda *c: subprocess.check_output(c, text=True, stderr=subprocess.STDOUT).splitlines()[0]

@@ -22,7 +22,7 @@ modules="$("$jdk/bin/jdeps" --ignore-missing-deps --multi-release 17 --print-mod
 "$jdk/bin/jlink" --module-path "$jdk/jmods" --add-modules "$modules" --strip-debug --no-header-files --no-man-pages --output "$output/java"
 mkdir -p "$output/resources/discovery" "$output/notices"
 cp "$repo_root/third_party/opsin/opsin-cli-2.8.0.jar" "$output/resources/opsin-cli-2.8.0.jar"
-cp "$repo_root/data/discovery/discovery-v1.sqlite3" "$repo_root/data/discovery/manifest-v1.json" "$output/resources/discovery/"
+cp "$repo_root/data/discovery/discovery-v2.sqlite3" "$repo_root/data/discovery/manifest-v2.json" "$output/resources/discovery/"
 cp "$jdk/release" "$output/notices/openjdk-release"
 cp /usr/share/doc/openjdk-17-jre-headless/copyright "$output/notices/openjdk-copyright"
 cp /usr/share/doc/python3.11-minimal/copyright "$output/notices/python-copyright"

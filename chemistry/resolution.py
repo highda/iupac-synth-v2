@@ -27,7 +27,7 @@ def exact_records(path, query, limit=32):
     try:
         rows = database.execute(
             "SELECT DISTINCT r.json FROM names n JOIN records r USING(record_id) "
-            "WHERE n.normalized=? ORDER BY r.display_name,r.canonical_smiles,r.record_id LIMIT ?",
+            "WHERE n.normalized=? ORDER BY r.rank DESC,r.record_id LIMIT ?",
             (normalize_name(query), max(1, min(int(limit), 32)) + 1),
         ).fetchall()
         return [json.loads(row[0]) for row in rows]

@@ -113,19 +113,19 @@ class PayloadLayoutTests(unittest.TestCase):
         jar, java = helper._payload_paths()
         self.assertEqual(jar, self.root / "resources" / "opsin-cli-2.8.0.jar")
         self.assertEqual(java, self.root / "java" / "bin" / "java")
-        self.assertEqual(helper._discovery_path(), self.root / "resources" / "discovery" / "discovery-v1.sqlite3")
+        self.assertEqual(helper._discovery_path(), self.root / "resources" / "discovery" / "discovery-v2.sqlite3")
 
     def test_declared_layout_is_honoured_without_filesystem_case_folding(self):
         (self.root / "helper" / helper.PAYLOAD_LAYOUT_FILE).write_text(json.dumps({
             "schemaVersion": 1, "layout": "test",
             "opsinJar": "../../Resources/chemistry/resources/opsin-cli-2.8.0.jar",
             "javaExecutable": "../java/bin/java",
-            "discoveryIndex": "../../Resources/chemistry/resources/discovery/discovery-v1.sqlite3"}))
+            "discoveryIndex": "../../Resources/chemistry/resources/discovery/discovery-v2.sqlite3"}))
         jar, java = helper._payload_paths()
         self.assertEqual(jar, (self.root.parent / "Resources/chemistry/resources/opsin-cli-2.8.0.jar").resolve())
         self.assertEqual(java, self.root / "java" / "bin" / "java")
         self.assertEqual(helper._discovery_path(),
-                         (self.root.parent / "Resources/chemistry/resources/discovery/discovery-v1.sqlite3").resolve())
+                         (self.root.parent / "Resources/chemistry/resources/discovery/discovery-v2.sqlite3").resolve())
 
     def test_damaged_declaration_is_a_bounded_input_error(self):
         (self.root / "helper" / helper.PAYLOAD_LAYOUT_FILE).write_text('{"opsinJar": 4}')

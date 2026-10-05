@@ -7,7 +7,7 @@ lib/vst3/IUPAC Synth 2.vst3/Contents/aarch64-linux/IUPAC Synth 2.so
 resources/chemistry/helper/iupac-analysis-helper
 resources/chemistry/java/bin/java
 resources/chemistry/resources/opsin-cli-2.8.0.jar
-resources/chemistry/resources/discovery/discovery-v1.sqlite3
+resources/chemistry/resources/discovery/discovery-v2.sqlite3
 lib/vst3/IUPAC Synth 2.vst3/Contents/Resources/chemistry/helper/iupac-analysis-helper
 share/iupac-synth-2/factory/All Modules.iupacpatch'
 printf '%s\n' "$required" | while IFS= read -r file; do

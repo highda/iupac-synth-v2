@@ -86,7 +86,7 @@ PAYLOAD_LAYOUT_KEYS = ("opsinJar", "javaExecutable", "discoveryIndex")
 DEFAULT_PAYLOAD_LAYOUT = {
     "opsinJar": "../resources/opsin-cli-2.8.0.jar",
     "javaExecutable": "../java/bin/java",
-    "discoveryIndex": "../resources/discovery/discovery-v1.sqlite3",
+    "discoveryIndex": "../resources/discovery/discovery-v2.sqlite3",
 }
 
 
@@ -127,7 +127,7 @@ def _discovery_path():
     if getattr(sys, "frozen", False):
         return _frozen_layout()["discoveryIndex"]
     root = _bundle_root()
-    return Path(os.environ.get("IUPAC_DISCOVERY_INDEX", root / "data" / "discovery" / "discovery-v1.sqlite3"))
+    return Path(os.environ.get("IUPAC_DISCOVERY_INDEX", root / "data" / "discovery" / "discovery-v2.sqlite3"))
 
 
 def _resolve_name(name, opsin_jar=None):
@@ -350,9 +350,10 @@ def process(request, opsin_jar):
         import discovery
         index = discovery.DiscoveryIndex(_discovery_path())
         if action == "discover":
-            if set(request) - {"protocolVersion", "requestId", "action", "query", "prefix", "limit"}:
+            if set(request) - {"protocolVersion", "requestId", "action", "query", "prefix", "limit", "after"}:
                 raise InputError("discovery request has unexpected fields")
-            result = {"discovery": index.search(request.get("query"), bool(request.get("prefix", False)), request.get("limit", discovery.MAX_RESULTS))}
+            result = {"discovery": index.search(request.get("query"), bool(request.get("prefix", False)),
+                                                request.get("limit", discovery.MAX_RESULTS), request.get("after"))}
         elif action == "record":
             result = {"record": index.record(request.get("recordId"))}
         elif action.startswith("cache-"):

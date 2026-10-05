@@ -15,7 +15,7 @@ resources/chemistry/helper/iupac-analysis-helper
 resources/chemistry/helper/payload-layout.json
 resources/chemistry/java/bin/java
 resources/chemistry/resources/opsin-cli-2.8.0.jar
-resources/chemistry/resources/discovery/discovery-v1.sqlite3
+resources/chemistry/resources/discovery/discovery-v2.sqlite3
 share/iupac-synth-2/factory/All Modules.iupacpatch'
 printf '%s\n' "$required" | while IFS= read -r file; do
     test -f "$root/$file" || { echo "repair or reinstall product; missing $file" >&2; exit 2; }
@@ -29,7 +29,7 @@ printf '%s\n' "$formats" | while IFS= read -r bundle; do
         "Contents/Resources/chemistry/helper/payload-layout.json" \
         "Contents/Resources/chemistry/java/bin/java" \
         "Contents/Resources/chemistry/resources/opsin-cli-2.8.0.jar" \
-        "Contents/Resources/chemistry/resources/discovery/discovery-v1.sqlite3"; do
+        "Contents/Resources/chemistry/resources/discovery/discovery-v2.sqlite3"; do
         test -f "$root/$bundle/$file" || { echo "repair or reinstall product; missing $bundle/$file" >&2; exit 2; }
     done
     test -x "$root/$bundle/Contents/Resources/chemistry/helper/iupac-analysis-helper" \

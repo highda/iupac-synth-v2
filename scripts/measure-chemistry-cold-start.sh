@@ -60,7 +60,7 @@ probe payload-read-only "find resources/chemistry/helper -type f -exec cat {} + 
 
 # Discovery index open and first query, measured directly against the shipped
 # snapshot through the same code path chemistry/resolution.py uses.
-index="$product/resources/chemistry/resources/discovery/discovery-v1.sqlite3"
+index="$product/resources/chemistry/resources/discovery/discovery-v2.sqlite3"
 discovery="$(python3 - "$index" <<'PY'
 import json, pathlib, sqlite3, sys, time
 path = pathlib.Path(sys.argv[1])

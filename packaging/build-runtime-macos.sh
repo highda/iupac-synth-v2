@@ -42,7 +42,7 @@ modules="$("$jdk/bin/jdeps" --ignore-missing-deps --multi-release 17 --print-mod
 
 mkdir -p "$output/resources/discovery" "$output/notices"
 cp "$repo_root/third_party/opsin/opsin-cli-2.8.0.jar" "$output/resources/opsin-cli-2.8.0.jar"
-cp "$repo_root/data/discovery/discovery-v1.sqlite3" "$repo_root/data/discovery/manifest-v1.json" "$output/resources/discovery/"
+cp "$repo_root/data/discovery/discovery-v2.sqlite3" "$repo_root/data/discovery/manifest-v2.json" "$output/resources/discovery/"
 
 # The flat payload states its own layout so bundle staging only has to rewrite
 # the declaration, never rely on a case-insensitive filesystem (#42, D4).
@@ -52,7 +52,7 @@ cat > "$output/helper/payload-layout.json" <<'LAYOUT'
   "layout": "flat",
   "opsinJar": "../resources/opsin-cli-2.8.0.jar",
   "javaExecutable": "../java/bin/java",
-  "discoveryIndex": "../resources/discovery/discovery-v1.sqlite3"
+  "discoveryIndex": "../resources/discovery/discovery-v2.sqlite3"
 }
 LAYOUT
 

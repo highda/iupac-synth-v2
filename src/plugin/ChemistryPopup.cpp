@@ -17,7 +17,7 @@ ChemistryPopup::ChemistryPopup(IupacSynthProcessor&o):owner_(o)
  apply_.onClick=[this]{if(input_.getText().trim().isEmpty()){status_.setText("enter a name or SMILES",juce::dontSendNotification);return;}awaitedGeneration_=owner_.applyChemistry(mode_.index()==0?chemistry::InputMode::name:chemistry::InputMode::smiles,input_.getText().toStdString());showPending(true);timerCallback();};
  reapply_.onClick=[this]{const auto e=owner_.reapplyChemistry();if(!e.empty()){if(onResult)onResult(e,{});status_.setText(e,juce::dontSendNotification);return;}awaitedGeneration_=owner_.chemistryStatus().generation;showPending(true);timerCallback();};
  cancel_.onClick=[this]{owner_.cancelChemistry();owner_.cancelDiscovery();showPending(false);};inspector_.onClick=[this]{trace_.setVisible(inspector_.getToggleState());if(onPreferredSize)onPreferredSize(getWidth(),trace_.isVisible()?630:400);resized();};
- search_.onClick=[this]{owner_.searchDiscovery(query_.getText().toStdString(),true);};cached_.onClick=[this]{owner_.inspectGeneratedCache();};clearCache_.onClick=[this]{const auto e=owner_.clearGeneratedCache();status_.setText(e.empty()?"Generated cache cleared; presets untouched":e,juce::dontSendNotification);};
+ search_.onClick=[this]{pagedQuery_=query_.getText().toStdString();nextPage_=juce::var();owner_.searchDiscovery(pagedQuery_,true);};cached_.onClick=[this]{owner_.inspectGeneratedCache();};clearCache_.onClick=[this]{const auto e=owner_.clearGeneratedCache();status_.setText(e.empty()?"Generated cache cleared; presets untouched":e,juce::dontSendNotification);};
  // A cached result is a file and loads at once; a validated structure starts the same
  // background generation Apply does, so it gets the same pending state rather than a
  // closed popup and a silent wait (#97).
@@ -63,7 +63,16 @@ void ChemistryPopup::timerCallback()
  // The request this popup started has finished: report it and leave, or stay open
  // with the diagnostic so the input can be corrected without retyping it.
  if(awaiting_&&!chemistry.busy&&chemistry.generation==awaitedGeneration_){const auto failed=chemistry.failed;showPending(false);if(failed){status_.setText(chemistry.text,juce::dontSendNotification);return;}if(onResult)onResult({},juce::String(chemistry.text));close();return;}
- auto discovery=owner_.discoveryStatus();if(discovery.generation!=shownDiscoveryGeneration_){status_.setText("Discovery: "+juce::String(discovery.text),juce::dontSendNotification);if(!discovery.busy){shownDiscoveryGeneration_=discovery.generation;candidates_.clear();labels_.clear();auto items=discovery.result.getProperty("candidates",{});if(!items.isArray())items=discovery.result;if(auto*a=items.getArray())for(const auto&x:*a){candidates_.add(x.clone());auto label=x.getProperty("displayName",{}).toString();if(label.isEmpty())label=x.getProperty("identity",{}).toString()+" [mapper "+x.getProperty("versions",{}).getProperty("mapper",{}).toString()+"]";labels_.add(label);}
- results_.deselectAllRows();results_.updateContent();results_.scrollToEnsureRowIsOnscreen(0);metadata_.setText({},juce::dontSendNotification);repaint();}}
+ auto discovery=owner_.discoveryStatus();if(discovery.generation!=shownDiscoveryGeneration_){status_.setText("Discovery: "+juce::String(discovery.text),juce::dontSendNotification);if(!discovery.busy){shownDiscoveryGeneration_=discovery.generation;if(!discovery.append){candidates_.clear();labels_.clear();}nextPage_=discovery.result.getProperty("next",{});auto items=discovery.result.getProperty("candidates",{});if(!items.isArray())items=discovery.result;if(auto*a=items.getArray())for(const auto&x:*a){candidates_.add(x.clone());auto label=x.getProperty("displayName",{}).toString();if(label.isEmpty())label=x.getProperty("identity",{}).toString()+" [mapper "+x.getProperty("versions",{}).getProperty("mapper",{}).toString()+"]";labels_.add(label);}
+ if(discovery.append){results_.updateContent();}else{results_.deselectAllRows();results_.updateContent();results_.scrollToEnsureRowIsOnscreen(0);metadata_.setText({},juce::dontSendNotification);}repaint();}}
+ loadMoreWhenNearEnd();
+}
+// The next page is requested once the last five rows come into view, by wheel, scrollbar or arrow keys alike.
+void ChemistryPopup::loadMoreWhenNearEnd()
+{
+ if(!nextPage_.isObject()||owner_.discoveryStatus().busy||labels_.isEmpty())return;
+ const auto lastVisible=results_.getRowContainingPosition(1,results_.getHeight()-2);
+ if(lastVisible>=0&&lastVisible<labels_.size()-5)return;
+ const auto after=nextPage_;nextPage_=juce::var();owner_.searchDiscovery(pagedQuery_,true,after);
 }
 #endif

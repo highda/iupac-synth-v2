@@ -1,0 +1,1211 @@
+{
+ "license": "CC0-1.0",
+ "note": "Common names a curious user types first (#138). Each must resolve by exact search to this QID as the top-ranked candidate. QIDs were reviewed against the item's display name and structure.",
+ "names": [
+  {
+   "name": "dopamine",
+   "sourceId": "Q170304",
+   "displayName": "dopamine"
+  },
+  {
+   "name": "serotonin",
+   "sourceId": "Q167934",
+   "displayName": "serotonin"
+  },
+  {
+   "name": "adrenaline",
+   "sourceId": "Q132621",
+   "displayName": "epinephrine"
+  },
+  {
+   "name": "epinephrine",
+   "sourceId": "Q132621",
+   "displayName": "epinephrine"
+  },
+  {
+   "name": "noradrenaline",
+   "sourceId": "Q186242",
+   "displayName": "norepinephrine"
+  },
+  {
+   "name": "norepinephrine",
+   "sourceId": "Q186242",
+   "displayName": "norepinephrine"
+  },
+  {
+   "name": "melatonin",
+   "sourceId": "Q180912",
+   "displayName": "melatonin"
+  },
+  {
+   "name": "oxytocin",
+   "sourceId": "Q169960",
+   "displayName": "oxytocin"
+  },
+  {
+   "name": "acetylcholine",
+   "sourceId": "Q180623",
+   "displayName": "acetylcholine"
+  },
+  {
+   "name": "histamine",
+   "sourceId": "Q61233",
+   "displayName": "histamine"
+  },
+  {
+   "name": "gamma-aminobutyric acid",
+   "sourceId": "Q210021",
+   "displayName": "γ-aminobutyric acid"
+  },
+  {
+   "name": "GABA",
+   "sourceId": "Q210021",
+   "displayName": "γ-aminobutyric acid"
+  },
+  {
+   "name": "glycine",
+   "sourceId": "Q620730",
+   "displayName": "glycine"
+  },
+  {
+   "name": "cortisol",
+   "sourceId": "Q190875",
+   "displayName": "cortisol"
+  },
+  {
+   "name": "testosterone",
+   "sourceId": "Q1318776",
+   "displayName": "testosterone"
+  },
+  {
+   "name": "estradiol",
+   "sourceId": "Q422416",
+   "displayName": "17β-estradiol"
+  },
+  {
+   "name": "progesterone",
+   "sourceId": "Q26963",
+   "displayName": "progesterone"
+  },
+  {
+   "name": "thyroxine",
+   "sourceId": "Q216852",
+   "displayName": "thyroxine"
+  },
+  {
+   "name": "vasopressin",
+   "sourceId": "Q21124841",
+   "displayName": "arginine vasopressin"
+  },
+  {
+   "name": "anandamide",
+   "sourceId": "Q410228",
+   "displayName": "anandamide"
+  },
+  {
+   "name": "adenosine",
+   "sourceId": "Q190012",
+   "displayName": "adenosine"
+  },
+  {
+   "name": "tryptamine",
+   "sourceId": "Q409439",
+   "displayName": "tryptamine"
+  },
+  {
+   "name": "caffeine",
+   "sourceId": "Q60235",
+   "displayName": "caffeine"
+  },
+  {
+   "name": "nicotine",
+   "sourceId": "Q28086552",
+   "displayName": "(−)-nicotine"
+  },
+  {
+   "name": "theobromine",
+   "sourceId": "Q206844",
+   "displayName": "theobromine"
+  },
+  {
+   "name": "theophylline",
+   "sourceId": "Q407308",
+   "displayName": "theophylline"
+  },
+  {
+   "name": "amphetamine",
+   "sourceId": "Q179452",
+   "displayName": "DL-amphetamine"
+  },
+  {
+   "name": "methylphenidate",
+   "sourceId": "Q422112",
+   "displayName": "methylphenidate"
+  },
+  {
+   "name": "modafinil",
+   "sourceId": "Q410441",
+   "displayName": "modafinil"
+  },
+  {
+   "name": "ephedrine",
+   "sourceId": "Q219626",
+   "displayName": "(−)-ephedrine"
+  },
+  {
+   "name": "pseudoephedrine",
+   "sourceId": "Q263958",
+   "displayName": "(+)-pseudoephedrine"
+  },
+  {
+   "name": "synephrine",
+   "sourceId": "Q421351",
+   "displayName": "oxedrine"
+  },
+  {
+   "name": "arecoline",
+   "sourceId": "Q423515",
+   "displayName": "arecoline"
+  },
+  {
+   "name": "taurine",
+   "sourceId": "Q207051",
+   "displayName": "taurine"
+  },
+  {
+   "name": "cocaine",
+   "sourceId": "Q41576",
+   "displayName": "cocaine"
+  },
+  {
+   "name": "heroin",
+   "sourceId": "Q60168",
+   "displayName": "heroin"
+  },
+  {
+   "name": "diamorphine",
+   "sourceId": "Q60168",
+   "displayName": "heroin"
+  },
+  {
+   "name": "morphine",
+   "sourceId": "Q81225",
+   "displayName": "morphine"
+  },
+  {
+   "name": "codeine",
+   "sourceId": "Q174723",
+   "displayName": "codeine"
+  },
+  {
+   "name": "fentanyl",
+   "sourceId": "Q407541",
+   "displayName": "fentanyl"
+  },
+  {
+   "name": "carfentanil",
+   "sourceId": "Q423386",
+   "displayName": "carfentanil"
+  },
+  {
+   "name": "oxycodone",
+   "sourceId": "Q407535",
+   "displayName": "oxycodone"
+  },
+  {
+   "name": "hydrocodone",
+   "sourceId": "Q411441",
+   "displayName": "hydrocodone"
+  },
+  {
+   "name": "methadone",
+   "sourceId": "Q179996",
+   "displayName": "(RS)-methadone"
+  },
+  {
+   "name": "buprenorphine",
+   "sourceId": "Q407721",
+   "displayName": "buprenorphine"
+  },
+  {
+   "name": "tramadol",
+   "sourceId": "Q407592",
+   "displayName": "tramadol"
+  },
+  {
+   "name": "methamphetamine",
+   "sourceId": "Q44909815",
+   "displayName": "DL-methamphetamine"
+  },
+  {
+   "name": "MDMA",
+   "sourceId": "Q69488",
+   "displayName": "MDMA"
+  },
+  {
+   "name": "ecstasy",
+   "sourceId": "Q69488",
+   "displayName": "MDMA"
+  },
+  {
+   "name": "MDA",
+   "sourceId": "Q223020",
+   "displayName": "3,4-methylenedioxyamphetamine"
+  },
+  {
+   "name": "LSD",
+   "sourceId": "Q23118",
+   "displayName": "lysergic acid diethylamide"
+  },
+  {
+   "name": "lysergic acid diethylamide",
+   "sourceId": "Q23118",
+   "displayName": "lysergic acid diethylamide"
+  },
+  {
+   "name": "psilocybin",
+   "sourceId": "Q208118",
+   "displayName": "psilocybin"
+  },
+  {
+   "name": "psilocin",
+   "sourceId": "Q409150",
+   "displayName": "psilocin"
+  },
+  {
+   "name": "DMT",
+   "sourceId": "Q407217",
+   "displayName": "dimethyltryptamine"
+  },
+  {
+   "name": "N,N-dimethyltryptamine",
+   "sourceId": "Q407217",
+   "displayName": "dimethyltryptamine"
+  },
+  {
+   "name": "mescaline",
+   "sourceId": "Q193140",
+   "displayName": "mescaline"
+  },
+  {
+   "name": "ketamine",
+   "sourceId": "Q243547",
+   "displayName": "(RS)-ketamine"
+  },
+  {
+   "name": "phencyclidine",
+   "sourceId": "Q407324",
+   "displayName": "phencyclidine"
+  },
+  {
+   "name": "PCP",
+   "sourceId": "Q407324",
+   "displayName": "phencyclidine"
+  },
+  {
+   "name": "GHB",
+   "sourceId": "Q207920",
+   "displayName": "4-hydroxybutyric acid"
+  },
+  {
+   "name": "THC",
+   "sourceId": "Q190067",
+   "displayName": "tetrahydrocannabinol"
+  },
+  {
+   "name": "tetrahydrocannabinol",
+   "sourceId": "Q190067",
+   "displayName": "tetrahydrocannabinol"
+  },
+  {
+   "name": "cannabidiol",
+   "sourceId": "Q422917",
+   "displayName": "cannabidiol"
+  },
+  {
+   "name": "CBD",
+   "sourceId": "Q422917",
+   "displayName": "cannabidiol"
+  },
+  {
+   "name": "cathinone",
+   "sourceId": "Q414242",
+   "displayName": "(−)-cathinone"
+  },
+  {
+   "name": "mephedrone",
+   "sourceId": "Q262613",
+   "displayName": "mephedrone"
+  },
+  {
+   "name": "methylone",
+   "sourceId": "Q4046265",
+   "displayName": "(RS)-methylone"
+  },
+  {
+   "name": "MDPV",
+   "sourceId": "Q417010",
+   "displayName": "methylenedioxypyrovalerone"
+  },
+  {
+   "name": "alpha-PVP",
+   "sourceId": "Q4734923",
+   "displayName": "α-pyrrolidinopentiophenone"
+  },
+  {
+   "name": "2C-B",
+   "sourceId": "Q229942",
+   "displayName": "2C-B"
+  },
+  {
+   "name": "salvinorin A",
+   "sourceId": "Q413512",
+   "displayName": "salvinorin A"
+  },
+  {
+   "name": "ibogaine",
+   "sourceId": "Q409455",
+   "displayName": "ibogaine"
+  },
+  {
+   "name": "mitragynine",
+   "sourceId": "Q414299",
+   "displayName": "mitragynine"
+  },
+  {
+   "name": "harmine",
+   "sourceId": "Q128381",
+   "displayName": "harmine"
+  },
+  {
+   "name": "nitrous oxide",
+   "sourceId": "Q905750",
+   "displayName": "nitrous oxide"
+  },
+  {
+   "name": "scopolamine",
+   "sourceId": "Q337188",
+   "displayName": "L-scopolamine"
+  },
+  {
+   "name": "bufotenin",
+   "sourceId": "Q408915",
+   "displayName": "bufotenine"
+  },
+  {
+   "name": "muscimol",
+   "sourceId": "Q412504",
+   "displayName": "muscimol"
+  },
+  {
+   "name": "ibotenic acid",
+   "sourceId": "Q411094",
+   "displayName": "(RS)-ibotenic acid"
+  },
+  {
+   "name": "flunitrazepam",
+   "sourceId": "Q62947",
+   "displayName": "flunitrazepam"
+  },
+  {
+   "name": "alprazolam",
+   "sourceId": "Q319877",
+   "displayName": "alprazolam"
+  },
+  {
+   "name": "Xanax",
+   "sourceId": "Q319877",
+   "displayName": "alprazolam"
+  },
+  {
+   "name": "diazepam",
+   "sourceId": "Q210402",
+   "displayName": "diazepam"
+  },
+  {
+   "name": "Valium",
+   "sourceId": "Q210402",
+   "displayName": "diazepam"
+  },
+  {
+   "name": "lorazepam",
+   "sourceId": "Q408265",
+   "displayName": "lorazepam"
+  },
+  {
+   "name": "clonazepam",
+   "sourceId": "Q407988",
+   "displayName": "clonazepam"
+  },
+  {
+   "name": "zolpidem",
+   "sourceId": "Q218842",
+   "displayName": "zolpidem"
+  },
+  {
+   "name": "phenobarbital",
+   "sourceId": "Q407241",
+   "displayName": "phenobarbital"
+  },
+  {
+   "name": "paracetamol",
+   "sourceId": "Q57055",
+   "displayName": "paracetamol"
+  },
+  {
+   "name": "acetaminophen",
+   "sourceId": "Q57055",
+   "displayName": "paracetamol"
+  },
+  {
+   "name": "Tylenol",
+   "sourceId": "Q57055",
+   "displayName": "paracetamol"
+  },
+  {
+   "name": "ibuprofen",
+   "sourceId": "Q186969",
+   "displayName": "ibuprofen"
+  },
+  {
+   "name": "aspirin",
+   "sourceId": "Q18216",
+   "displayName": "aspirin"
+  },
+  {
+   "name": "acetylsalicylic acid",
+   "sourceId": "Q18216",
+   "displayName": "aspirin"
+  },
+  {
+   "name": "naproxen",
+   "sourceId": "Q1215575",
+   "displayName": "naproxen"
+  },
+  {
+   "name": "diclofenac",
+   "sourceId": "Q244408",
+   "displayName": "Diclofenac"
+  },
+  {
+   "name": "fluoxetine",
+   "sourceId": "Q422244",
+   "displayName": "fluoxetine"
+  },
+  {
+   "name": "Prozac",
+   "sourceId": "Q422244",
+   "displayName": "fluoxetine"
+  },
+  {
+   "name": "sertraline",
+   "sourceId": "Q407617",
+   "displayName": "sertraline"
+  },
+  {
+   "name": "citalopram",
+   "sourceId": "Q409672",
+   "displayName": "(RS)-citalopram"
+  },
+  {
+   "name": "escitalopram",
+   "sourceId": "Q423757",
+   "displayName": "escitalopram"
+  },
+  {
+   "name": "venlafaxine",
+   "sourceId": "Q898407",
+   "displayName": "venlafaxine"
+  },
+  {
+   "name": "bupropion",
+   "sourceId": "Q834280",
+   "displayName": "bupropion"
+  },
+  {
+   "name": "metformin",
+   "sourceId": "Q19484",
+   "displayName": "metformin"
+  },
+  {
+   "name": "sildenafil",
+   "sourceId": "Q191521",
+   "displayName": "sildenafil"
+  },
+  {
+   "name": "Viagra",
+   "sourceId": "Q191521",
+   "displayName": "sildenafil"
+  },
+  {
+   "name": "tadalafil",
+   "sourceId": "Q424156",
+   "displayName": "tadalafil"
+  },
+  {
+   "name": "atorvastatin",
+   "sourceId": "Q668093",
+   "displayName": "atorvastatin"
+  },
+  {
+   "name": "simvastatin",
+   "sourceId": "Q670131",
+   "displayName": "simvastatin"
+  },
+  {
+   "name": "omeprazole",
+   "sourceId": "Q422210",
+   "displayName": "omeprazole"
+  },
+  {
+   "name": "lisinopril",
+   "sourceId": "Q412208",
+   "displayName": "lisinopril"
+  },
+  {
+   "name": "amlodipine",
+   "sourceId": "Q411347",
+   "displayName": "amlodipine"
+  },
+  {
+   "name": "metoprolol",
+   "sourceId": "Q409468",
+   "displayName": "(RS)-metoprolol"
+  },
+  {
+   "name": "warfarin",
+   "sourceId": "Q407431",
+   "displayName": "(RS)-warfarin"
+  },
+  {
+   "name": "amoxicillin",
+   "sourceId": "Q201928",
+   "displayName": "amoxicillin"
+  },
+  {
+   "name": "ciprofloxacin",
+   "sourceId": "Q256602",
+   "displayName": "ciprofloxacin"
+  },
+  {
+   "name": "doxycycline",
+   "sourceId": "Q422442",
+   "displayName": "doxycycline"
+  },
+  {
+   "name": "azithromycin",
+   "sourceId": "Q165399",
+   "displayName": "azithromycin"
+  },
+  {
+   "name": "prednisone",
+   "sourceId": "Q424972",
+   "displayName": "prednisone"
+  },
+  {
+   "name": "dexamethasone",
+   "sourceId": "Q422252",
+   "displayName": "dexamethasone"
+  },
+  {
+   "name": "hydrocortisone",
+   "sourceId": "Q190875",
+   "displayName": "cortisol"
+  },
+  {
+   "name": "levothyroxine",
+   "sourceId": "Q773449",
+   "displayName": "L-thyroxine"
+  },
+  {
+   "name": "loratadine",
+   "sourceId": "Q424049",
+   "displayName": "loratadine"
+  },
+  {
+   "name": "cetirizine",
+   "sourceId": "Q423075",
+   "displayName": "cetirizine"
+  },
+  {
+   "name": "diphenhydramine",
+   "sourceId": "Q413486",
+   "displayName": "diphenhydramine"
+  },
+  {
+   "name": "lidocaine",
+   "sourceId": "Q216935",
+   "displayName": "lidocaine"
+  },
+  {
+   "name": "haloperidol",
+   "sourceId": "Q251347",
+   "displayName": "haloperidol"
+  },
+  {
+   "name": "olanzapine",
+   "sourceId": "Q201872",
+   "displayName": "olanzapine"
+  },
+  {
+   "name": "quetiapine",
+   "sourceId": "Q408535",
+   "displayName": "quetiapine"
+  },
+  {
+   "name": "risperidone",
+   "sourceId": "Q412443",
+   "displayName": "risperidone"
+  },
+  {
+   "name": "gabapentin",
+   "sourceId": "Q410352",
+   "displayName": "gabapentin"
+  },
+  {
+   "name": "pregabalin",
+   "sourceId": "Q412174",
+   "displayName": "pregabalin"
+  },
+  {
+   "name": "oseltamivir",
+   "sourceId": "Q211509",
+   "displayName": "oseltamivir"
+  },
+  {
+   "name": "hydroxychloroquine",
+   "sourceId": "Q421094",
+   "displayName": "hydroxychloroquine"
+  },
+  {
+   "name": "chloroquine",
+   "sourceId": "Q422438",
+   "displayName": "chloroquine"
+  },
+  {
+   "name": "quinine",
+   "sourceId": "Q189522",
+   "displayName": "quinine"
+  },
+  {
+   "name": "methotrexate",
+   "sourceId": "Q422232",
+   "displayName": "methotrexate"
+  },
+  {
+   "name": "tamoxifen",
+   "sourceId": "Q412178",
+   "displayName": "tamoxifen"
+  },
+  {
+   "name": "finasteride",
+   "sourceId": "Q424167",
+   "displayName": "finasteride"
+  },
+  {
+   "name": "minoxidil",
+   "sourceId": "Q424165",
+   "displayName": "minoxidil"
+  },
+  {
+   "name": "acetone",
+   "sourceId": "Q49546",
+   "displayName": "acetone"
+  },
+  {
+   "name": "menthol",
+   "sourceId": "Q407418",
+   "displayName": "L-menthol"
+  },
+  {
+   "name": "vanillin",
+   "sourceId": "Q33495",
+   "displayName": "vanillin"
+  },
+  {
+   "name": "capsaicin",
+   "sourceId": "Q273169",
+   "displayName": "capsaicin"
+  },
+  {
+   "name": "citric acid",
+   "sourceId": "Q159683",
+   "displayName": "citric acid"
+  },
+  {
+   "name": "monosodium glutamate",
+   "sourceId": "Q179678",
+   "displayName": "monosodium L-glutamate"
+  },
+  {
+   "name": "MSG",
+   "sourceId": "Q179678",
+   "displayName": "monosodium L-glutamate"
+  },
+  {
+   "name": "ethanol",
+   "sourceId": "Q153",
+   "displayName": "ethanol"
+  },
+  {
+   "name": "methanol",
+   "sourceId": "Q14982",
+   "displayName": "methanol"
+  },
+  {
+   "name": "sucrose",
+   "sourceId": "Q4027534",
+   "displayName": "sucrose"
+  },
+  {
+   "name": "fructose",
+   "sourceId": "Q122043",
+   "displayName": "keto-D-fructose"
+  },
+  {
+   "name": "lactose",
+   "sourceId": "Q127900",
+   "displayName": "β-lactose"
+  },
+  {
+   "name": "aspartame",
+   "sourceId": "Q182040",
+   "displayName": "aspartame"
+  },
+  {
+   "name": "saccharin",
+   "sourceId": "Q191381",
+   "displayName": "saccharin"
+  },
+  {
+   "name": "sucralose",
+   "sourceId": "Q410209",
+   "displayName": "sucralose"
+  },
+  {
+   "name": "sorbitol",
+   "sourceId": "Q245280",
+   "displayName": "D-sorbitol"
+  },
+  {
+   "name": "glycerol",
+   "sourceId": "Q132501",
+   "displayName": "glycerol"
+  },
+  {
+   "name": "urea",
+   "sourceId": "Q48318",
+   "displayName": "urea"
+  },
+  {
+   "name": "acetic acid",
+   "sourceId": "Q47512",
+   "displayName": "acetic acid"
+  },
+  {
+   "name": "ascorbic acid",
+   "sourceId": "Q199678",
+   "displayName": "vitamin C"
+  },
+  {
+   "name": "vitamin C",
+   "sourceId": "Q199678",
+   "displayName": "vitamin C"
+  },
+  {
+   "name": "retinol",
+   "sourceId": "Q424976",
+   "displayName": "retinol"
+  },
+  {
+   "name": "cholesterol",
+   "sourceId": "Q43656",
+   "displayName": "cholesterol"
+  },
+  {
+   "name": "limonene",
+   "sourceId": "Q278809",
+   "displayName": "(±)-limonene"
+  },
+  {
+   "name": "eugenol",
+   "sourceId": "Q423357",
+   "displayName": "eugenol"
+  },
+  {
+   "name": "cinnamaldehyde",
+   "sourceId": "Q204036",
+   "displayName": "(E)-cinnamaldehyde"
+  },
+  {
+   "name": "linalool",
+   "sourceId": "Q410932",
+   "displayName": "linalool"
+  },
+  {
+   "name": "camphor",
+   "sourceId": "Q181559",
+   "displayName": "camphor"
+  },
+  {
+   "name": "thymol",
+   "sourceId": "Q408883",
+   "displayName": "thymol"
+  },
+  {
+   "name": "piperine",
+   "sourceId": "Q414501",
+   "displayName": "piperine"
+  },
+  {
+   "name": "allicin",
+   "sourceId": "Q409641",
+   "displayName": "allicin"
+  },
+  {
+   "name": "curcumin",
+   "sourceId": "Q312266",
+   "displayName": "curcumin"
+  },
+  {
+   "name": "quercetin",
+   "sourceId": "Q409478",
+   "displayName": "quercetin"
+  },
+  {
+   "name": "resveratrol",
+   "sourceId": "Q407329",
+   "displayName": "resveratrol"
+  },
+  {
+   "name": "benzene",
+   "sourceId": "Q2270",
+   "displayName": "benzene"
+  },
+  {
+   "name": "toluene",
+   "sourceId": "Q15779",
+   "displayName": "toluene"
+  },
+  {
+   "name": "formaldehyde",
+   "sourceId": "Q161210",
+   "displayName": "formaldehyde"
+  },
+  {
+   "name": "ammonia",
+   "sourceId": "Q4087",
+   "displayName": "ammonia"
+  },
+  {
+   "name": "hydrogen peroxide",
+   "sourceId": "Q171877",
+   "displayName": "hydrogen peroxide"
+  },
+  {
+   "name": "water",
+   "sourceId": "Q283",
+   "displayName": "water"
+  },
+  {
+   "name": "carbon dioxide",
+   "sourceId": "Q1997",
+   "displayName": "carbon dioxide"
+  },
+  {
+   "name": "methane",
+   "sourceId": "Q37129",
+   "displayName": "methane"
+  },
+  {
+   "name": "propane",
+   "sourceId": "Q131189",
+   "displayName": "propane"
+  },
+  {
+   "name": "butane",
+   "sourceId": "Q134192",
+   "displayName": "butane"
+  },
+  {
+   "name": "ethylene glycol",
+   "sourceId": "Q194207",
+   "displayName": "ethylene glycol"
+  },
+  {
+   "name": "isopropyl alcohol",
+   "sourceId": "Q16392",
+   "displayName": "isopropyl alcohol"
+  },
+  {
+   "name": "naphthalene",
+   "sourceId": "Q179724",
+   "displayName": "naphthalene"
+  },
+  {
+   "name": "phenol",
+   "sourceId": "Q130336",
+   "displayName": "phenol"
+  },
+  {
+   "name": "chloroform",
+   "sourceId": "Q172275",
+   "displayName": "chloroform"
+  },
+  {
+   "name": "diethyl ether",
+   "sourceId": "Q202218",
+   "displayName": "diethyl ether"
+  },
+  {
+   "name": "DEET",
+   "sourceId": "Q408389",
+   "displayName": "diethyltoluamide"
+  },
+  {
+   "name": "glyphosate",
+   "sourceId": "Q407232",
+   "displayName": "glyphosate"
+  },
+  {
+   "name": "bisphenol A",
+   "sourceId": "Q271980",
+   "displayName": "bisphenol A"
+  },
+  {
+   "name": "nitroglycerin",
+   "sourceId": "Q162867",
+   "displayName": "nitroglycerin"
+  },
+  {
+   "name": "TNT",
+   "sourceId": "Q170167",
+   "displayName": "TNT"
+  },
+  {
+   "name": "beta-carotene",
+   "sourceId": "Q306135",
+   "displayName": "β-carotene"
+  },
+  {
+   "name": "lycopene",
+   "sourceId": "Q208130",
+   "displayName": "lycopene"
+  },
+  {
+   "name": "tryptophan",
+   "sourceId": "Q181003",
+   "displayName": "tryptophan"
+  },
+  {
+   "name": "nicotinamide",
+   "sourceId": "Q192423",
+   "displayName": "niacinamide"
+  },
+  {
+   "name": "riboflavin",
+   "sourceId": "Q130365",
+   "displayName": "riboflavin"
+  },
+  {
+   "name": "folic acid",
+   "sourceId": "Q127060",
+   "displayName": "folic acid"
+  },
+  {
+   "name": "biotin",
+   "sourceId": "Q181354",
+   "displayName": "biotin"
+  },
+  {
+   "name": "Molly",
+   "sourceId": "Q69488",
+   "displayName": "MDMA"
+  },
+  {
+   "name": "crack",
+   "sourceId": "Q41576",
+   "displayName": "cocaine"
+  },
+  {
+   "name": "speed",
+   "sourceId": "Q179452",
+   "displayName": "DL-amphetamine"
+  },
+  {
+   "name": "special K",
+   "sourceId": "Q243547",
+   "displayName": "(RS)-ketamine"
+  },
+  {
+   "name": "angel dust",
+   "sourceId": "Q407324",
+   "displayName": "phencyclidine"
+  },
+  {
+   "name": "Ativan",
+   "sourceId": "Q408265",
+   "displayName": "lorazepam"
+  },
+  {
+   "name": "OxyContin",
+   "sourceId": "Q407535",
+   "displayName": "oxycodone"
+  },
+  {
+   "name": "naloxone",
+   "sourceId": "Q282902",
+   "displayName": "naloxone"
+  },
+  {
+   "name": "Adrenalin",
+   "sourceId": "Q132621",
+   "displayName": "epinephrine"
+  },
+  {
+   "name": "Benadryl",
+   "sourceId": "Q413486",
+   "displayName": "diphenhydramine"
+  },
+  {
+   "name": "cholecalciferol",
+   "sourceId": "Q139347",
+   "displayName": "cholecalciferol"
+  },
+  {
+   "name": "vitamin E",
+   "sourceId": "Q158348",
+   "displayName": "RRR-alpha-tocopherol"
+  },
+  {
+   "name": "vitamin A",
+   "sourceId": "Q424976",
+   "displayName": "retinol"
+  },
+  {
+   "name": "theanine",
+   "sourceId": "Q909931",
+   "displayName": "theanine"
+  },
+  {
+   "name": "L-theanine",
+   "sourceId": "Q909931",
+   "displayName": "theanine"
+  },
+  {
+   "name": "creatine",
+   "sourceId": "Q223600",
+   "displayName": "creatine"
+  },
+  {
+   "name": "glutathione",
+   "sourceId": "Q116907",
+   "displayName": "glutathione"
+  },
+  {
+   "name": "histidine",
+   "sourceId": "Q485277",
+   "displayName": "L-histidine"
+  },
+  {
+   "name": "leucine",
+   "sourceId": "Q483745",
+   "displayName": "L-leucine"
+  },
+  {
+   "name": "smack",
+   "sourceId": "Q60168",
+   "displayName": "heroin"
+  },
+  {
+   "name": "Advil",
+   "sourceId": "Q186969",
+   "displayName": "ibuprofen"
+  },
+  {
+   "name": "Ritalin",
+   "sourceId": "Q422112",
+   "displayName": "methylphenidate"
+  },
+  {
+   "name": "Zoloft",
+   "sourceId": "Q407617",
+   "displayName": "sertraline"
+  },
+  {
+   "name": "Lexapro",
+   "sourceId": "Q423757",
+   "displayName": "escitalopram"
+  },
+  {
+   "name": "Wellbutrin",
+   "sourceId": "Q834280",
+   "displayName": "bupropion"
+  },
+  {
+   "name": "Klonopin",
+   "sourceId": "Q407988",
+   "displayName": "clonazepam"
+  },
+  {
+   "name": "Ambien",
+   "sourceId": "Q218842",
+   "displayName": "zolpidem"
+  },
+  {
+   "name": "Lipitor",
+   "sourceId": "Q668093",
+   "displayName": "atorvastatin"
+  },
+  {
+   "name": "Cialis",
+   "sourceId": "Q424156",
+   "displayName": "tadalafil"
+  },
+  {
+   "name": "Claritin",
+   "sourceId": "Q424049",
+   "displayName": "loratadine"
+  },
+  {
+   "name": "Zyrtec",
+   "sourceId": "Q423075",
+   "displayName": "cetirizine"
+  },
+  {
+   "name": "Glucophage",
+   "sourceId": "Q19484",
+   "displayName": "metformin"
+  },
+  {
+   "name": "Plaquenil",
+   "sourceId": "Q421094",
+   "displayName": "hydroxychloroquine"
+  },
+  {
+   "name": "Tamiflu",
+   "sourceId": "Q211509",
+   "displayName": "oseltamivir"
+  },
+  {
+   "name": "Rohypnol",
+   "sourceId": "Q62947",
+   "displayName": "flunitrazepam"
+  },
+  {
+   "name": "roofies",
+   "sourceId": "Q62947",
+   "displayName": "flunitrazepam"
+  },
+  {
+   "name": "Narcan",
+   "sourceId": "Q282902",
+   "displayName": "naloxone"
+  },
+  {
+   "name": "Sudafed",
+   "sourceId": "Q263958",
+   "displayName": "(+)-pseudoephedrine"
+  }
+ ]
+}

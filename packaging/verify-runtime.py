@@ -48,7 +48,7 @@ def native_dependencies(path):
 def main():
     p=argparse.ArgumentParser(); p.add_argument("--source",type=Path,required=True); p.add_argument("--payload",type=Path,required=True); p.add_argument("--report",type=Path,required=True); a=p.parse_args()
     payload=a.payload.resolve(); exe=payload/"helper/iupac-analysis-helper"
-    required=[exe,payload/"java/bin/java",payload/"resources/opsin-cli-2.8.0.jar",payload/"resources/discovery/discovery-v1.sqlite3"]
+    required=[exe,payload/"java/bin/java",payload/"resources/opsin-cli-2.8.0.jar",payload/"resources/discovery/discovery-v2.sqlite3"]
     if any(not x.is_file() for x in required): raise RuntimeError("payload is incomplete")
     for path in payload.rglob("*"):
         if path.is_symlink() and payload not in path.resolve().parents: raise RuntimeError(f"escaping symlink: {path}")

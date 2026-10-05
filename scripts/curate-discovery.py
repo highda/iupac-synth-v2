@@ -1,69 +1,120 @@
 #!/usr/bin/env python3
-"""Explicit maintainer refresh of the bounded Wikidata snapshot (network required)."""
-import argparse, datetime, hashlib, json, sys, urllib.parse, urllib.request
+"""Explicit maintainer refresh of the Tier A Wikidata snapshot (network required).
+
+Tier A (owner decision on #138): every structure-bearing Wikidata item with at least one Wikipedia
+sitelink, ranked by sitelink count. This script only fetches and archives the exact SPARQL and
+`wbgetentities` responses; `scripts/build-discovery.py --write-data` converts the archive into the
+validated records, the index and the manifest, so the shipped data is always reproducible from the
+archive alone.
+"""
+import argparse, datetime, gzip, hashlib, json, sys, time, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "chemistry"))
-import discovery
+USER_AGENT = "iupac-synth-v2-curation/2.0 (https://github.com/highda/iupac-synth-v2)"
+# The item list (sitelinked items with either SMILES property) is one query; projecting the values
+# in that same query exceeds the service's 60 s limit, so values are fetched for explicit QID batches.
+# One item-list query per SMILES property (a UNION of the two doubles the scan and times out).
+ITEMS_QUERIES = {prop: f"SELECT ?item ?sitelinks WHERE {{ ?item wdt:{prop} [] ; wikibase:sitelinks ?sitelinks . FILTER(?sitelinks > 0) }}"
+                 for prop in ("P233", "P2017")}
+VALUE_PROPERTIES = {"canonicalSmiles": "P233", "isomericSmiles": "P2017", "inchiKey": "P235"}
+VALUE_BATCH = 1000
+BATCH = 50
 
-SPARQL = '''SELECT ?item ?smiles WHERE {
- ?item wdt:P233 ?smiles.
-} LIMIT 1200'''
-USER_AGENT = "iupac-synth-v2-curation/1.0 (https://github.com/highda/iupac-synth-v2)"
 
-def get_json(url):
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=60) as response: return json.load(response)
+def compact(value):
+    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
 
-def categories(name, smiles):
-    text = name.casefold(); result = set()
-    if any(x in text for x in ("acid", "alanine", "glycine", "peptide")): result.add("amino-acids-short-peptides")
-    if any(x in text for x in ("ose", "sugar", "glucose", "fructose", "ribose")): result.add("carbohydrates")
-    if any(x in text for x in ("steroid", "cholest", "estr", "testost", "lipid", "fatty")): result.add("lipids-steroids")
-    if any(x in text for x in ("water", "ethanol", "methanol", "acetone", "benzene", "solvent", "glycol")): result.add("solvents-material-ingredients")
-    if "." in smiles or "[Na" in smiles or "[Cl-" in smiles: result.add("salts-inorganic")
-    if "c" in smiles: result.add("aromatic-heterocyclic")
-    if len(smiles) < 20: result.add("simple-organics")
-    if len(smiles) > 35: result.add("common-natural-products")
-    return sorted(result or {"simple-organics"})
+
+def fetch(url, accept="application/json", data=None):
+    for attempt in range(8):
+        request = urllib.request.Request(url, data=data, headers={"User-Agent": USER_AGENT, "Accept": accept})
+        try:
+            with urllib.request.urlopen(request, timeout=300) as response:
+                return response.read().decode("utf-8")
+        except (urllib.error.URLError, TimeoutError) as exc:
+            wait = 10 * (attempt + 1)
+            print(f"retry {attempt + 1} after {exc}; waiting {wait}s", file=sys.stderr)
+            time.sleep(wait)
+    raise SystemExit(f"giving up on {url[:120]}")
+
+
+def sparql(query):
+    """One exact TSV response; a Java stack trace in the body means the service timed out mid-stream."""
+    for attempt in range(4):
+        text = fetch("https://query.wikidata.org/sparql", "text/tab-separated-values",
+                     urllib.parse.urlencode({"query": query}).encode())
+        if "\tat " not in text and "Exception" not in text:
+            return {"query": query, "sha256": hashlib.sha256(text.encode()).hexdigest(), "response": text}
+        print(f"truncated SPARQL response, retry {attempt + 1}", file=sys.stderr)
+        time.sleep(30)
+    raise SystemExit("SPARQL keeps timing out")
+
+
+def tsv_rows(text):
+    lines = text.splitlines()
+    return [line.split("\t") for line in lines[1:] if line]
+
+
+def fetch_values(qids):
+    values = []
+    for name, prop in VALUE_PROPERTIES.items():
+        for offset in range(0, len(qids), VALUE_BATCH):
+            ids = " ".join("wd:" + q for q in qids[offset:offset + VALUE_BATCH])
+            values.append(dict(sparql(f"SELECT ?item ?value WHERE {{ VALUES ?item {{ {ids} }} ?item wdt:{prop} ?value }}"), property=prop))
+            time.sleep(1)
+        print(f"{name}: done", file=sys.stderr)
+    return values
+
 
 def main():
-    parser=argparse.ArgumentParser(); parser.add_argument("--output-root", type=Path, default=ROOT); args=parser.parse_args()
-    query_url="https://query.wikidata.org/sparql?"+urllib.parse.urlencode({"query":SPARQL,"format":"json"})
-    query=get_json(query_url); candidates={row["item"]["value"].rsplit("/",1)[-1]:row for row in query["results"]["bindings"]}
-    qids=list(candidates); accepted=[]; rejected=[]; archives=[]; seen=set(); retrieved=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
-    for offset in range(0,len(qids),50):
-        url="https://www.wikidata.org/w/api.php?"+urllib.parse.urlencode({"action":"wbgetentities","ids":"|".join(qids[offset:offset+50]),"props":"info|labels|aliases","languages":"en","format":"json","formatversion":2})
-        payload=get_json(url); archives.append({"url":url,"sha256":hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(",",":")).encode()).hexdigest(),"response":payload})
-        entities = payload["entities"].values() if isinstance(payload["entities"], dict) else payload["entities"]
-        for entity in entities:
-            qid=entity["id"]; row=candidates[qid]; label=entity.get("labels",{}).get("en",{}).get("value")
-            if not label: continue
-            names=[label]+[x["value"] for x in entity.get("aliases",{}).get("en",[])]; names=list(dict.fromkeys(names))[:discovery.MAX_ALIASES]
-            source={"schemaVersion":1,"sourceId":qid,"revision":entity["lastrevid"],"retrievedAt":retrieved,"structure":row["smiles"]["value"],"structureFormat":"smiles",
-                    "inchiKey":None,"names":[{"language":"en","value":x} for x in names],"categories":categories(label,row["smiles"]["value"])}
-            try:
-                record=discovery.convert_record(source)
-                if record["validationStatus"] != "validated": raise discovery.DiscoveryError("identifier conflict")
-                if record["canonicalIsomericSmiles"] in seen: raise discovery.DiscoveryError("duplicate canonical structure")
-                seen.add(record["canonicalIsomericSmiles"]); accepted.append(record)
-            except Exception as exc: rejected.append({"sourceId":qid,"reason":str(exc)})
-    if len(accepted)<256: raise SystemExit(f"only {len(accepted)} records validated")
-    accepted=sorted(accepted,key=lambda x:(len(x["names"])<2,x["recordId"]))[:256]
-    data=args.output_root/"data/discovery"; data.mkdir(parents=True,exist_ok=True)
-    records=data/"records-v1.jsonl"; records.write_text("".join(json.dumps(x,sort_keys=True,ensure_ascii=False,separators=(",",":"))+"\n" for x in sorted(accepted,key=lambda x:x["recordId"])),encoding="utf-8")
-    archive=data/"wikidata-archive-v1.json"; archive.write_text(json.dumps({"license":"CC0-1.0","retrievedAt":retrieved,"query":SPARQL,"queryResponseSha256":hashlib.sha256(json.dumps(query,sort_keys=True,separators=(",",":")).encode()).hexdigest(),"queryResponse":query,"batches":archives},sort_keys=True,separators=(",",":")),encoding="utf-8")
-    discovery.build_index(records,data/"discovery-v1.sqlite3")
-    panel_canonicals=set()
-    for panel in (ROOT/"data/panels").glob("*.json"):
-        def visit(value):
-            if isinstance(value,dict):
-                if isinstance(value.get("canonicalIsomericSmiles"),str): panel_canonicals.add(value["canonicalIsomericSmiles"])
-                for child in value.values(): visit(child)
-            elif isinstance(value,list):
-                for child in value: visit(child)
-        visit(json.loads(panel.read_text()))
-    manifest={"schemaVersion":1,"recordCount":len(accepted),"twoNameCount":sum(len(x["names"])>=2 for x in accepted),"outsideMappingPanels":sum(x["canonicalIsomericSmiles"] not in panel_canonicals for x in accepted),"categories":sorted({c for x in accepted for c in x["categories"]}),"rejected":rejected,"files":{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in (records,archive,data/"discovery-v1.sqlite3")}}
-    (data/"manifest-v1.json").write_text(json.dumps(manifest,sort_keys=True,indent=2)+"\n")
-if __name__=="__main__": main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--archive", type=Path, default=ROOT / "data/discovery/wikidata-archive-v2.json.gz")
+    args = parser.parse_args()
+    retrieved = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+    # The SPARQL stage is checkpointed beside the archive so a restart resumes at the entity stage.
+    checkpoint = args.archive.with_name(args.archive.name + ".sparql-checkpoint.json")
+    if checkpoint.is_file():
+        saved = json.loads(checkpoint.read_text())
+        retrieved, items, values = saved["retrievedAt"], saved["items"], saved["values"]
+    else:
+        items = [dict(sparql(query), property=prop) for prop, query in ITEMS_QUERIES.items()]
+        values = None
+    sitelinks = {}
+    for listing in items:
+        for item, count in tsv_rows(listing["response"]):
+            sitelinks[item.strip("<>").rsplit("/", 1)[-1]] = int(count)
+    qids = sorted(sitelinks, key=lambda q: int(q[1:]))
+    print(f"items: {len(qids)}", file=sys.stderr)
+    if values is None:
+        values = fetch_values(qids)
+        checkpoint.write_text(json.dumps({"retrievedAt": retrieved, "items": items, "values": values}))
+
+    batches = []
+    for offset in range(0, len(qids), BATCH):
+        url = "https://www.wikidata.org/w/api.php?" + urllib.parse.urlencode({
+            "action": "wbgetentities", "ids": "|".join(qids[offset:offset + BATCH]), "props": "info|labels|aliases",
+            "languages": "en", "format": "json", "formatversion": 2})
+        for attempt in range(30):
+            payload = json.loads(fetch(url))
+            if payload.get("error", {}).get("code") != "maxlag":
+                break
+            # The API asks clients to back off while replicas lag; this is load shedding, not failure.
+            time.sleep(min(60, 5 + float(payload["error"].get("lag", 5))))
+        if "error" in payload:
+            raise SystemExit(f"wbgetentities error: {payload['error']}")
+        batches.append({"url": url, "sha256": hashlib.sha256(compact(payload)).hexdigest(), "response": payload})
+        if len(batches) % 50 == 0:
+            print(f"entities: {offset + BATCH}/{len(qids)}", file=sys.stderr)
+        time.sleep(0.2)
+    archive = {"license": "CC0-1.0", "tier": "A", "retrievedAt": retrieved, "items": items, "values": values, "batches": batches}
+    args.archive.parent.mkdir(parents=True, exist_ok=True)
+    # mtime=0 keeps the gzip container deterministic for identical content.
+    with gzip.GzipFile(args.archive, "wb", mtime=0) as stream:
+        stream.write(json.dumps(archive, sort_keys=True, separators=(",", ":")).encode())
+    checkpoint.unlink(missing_ok=True)
+    print(f"archived {len(qids)} items in {len(batches)} batches to {args.archive}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()

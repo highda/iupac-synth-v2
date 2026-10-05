@@ -1,0 +1,176 @@
+{
+ "license": "CC0-1.0",
+ "note": "Repository-reviewed common names Wikidata lacks (#138). Each attaches a name to an archived QID whose recorded structure is exactly what the name means; no structure is supplied here. Mixtures, combination products, devices and form-ambiguous names (glucose, atropine, ivermectin, Adderall, Percocet, Suboxone) are deliberately absent.",
+ "aliases": [
+  {
+   "name": "ketamine",
+   "sourceId": "Q243547",
+   "reason": "racemate; the drug is (RS)-ketamine"
+  },
+  {
+   "name": "metoprolol",
+   "sourceId": "Q409468",
+   "reason": "racemate"
+  },
+  {
+   "name": "warfarin",
+   "sourceId": "Q407431",
+   "reason": "racemate"
+  },
+  {
+   "name": "methylone",
+   "sourceId": "Q4046265",
+   "reason": "racemate"
+  },
+  {
+   "name": "ibotenic acid",
+   "sourceId": "Q411094",
+   "reason": "racemate"
+  },
+  {
+   "name": "limonene",
+   "sourceId": "Q278809",
+   "reason": "racemate, stereo unspecified"
+  },
+  {
+   "name": "sorbitol",
+   "sourceId": "Q245280",
+   "reason": "sorbitol is D-glucitol"
+  },
+  {
+   "name": "monosodium glutamate",
+   "sourceId": "Q179678",
+   "reason": "L-glutamate salt"
+  },
+  {
+   "name": "MSG",
+   "sourceId": "Q179678",
+   "reason": "L-glutamate salt"
+  },
+  {
+   "name": "diamorphine",
+   "sourceId": "Q60168",
+   "reason": "INN of heroin"
+  },
+  {
+   "name": "smack",
+   "sourceId": "Q60168",
+   "reason": "street name"
+  },
+  {
+   "name": "alpha-PVP",
+   "sourceId": "Q4734923",
+   "reason": "ASCII spelling of α-PVP"
+  },
+  {
+   "name": "Xanax",
+   "sourceId": "Q319877",
+   "reason": "brand"
+  },
+  {
+   "name": "Valium",
+   "sourceId": "Q210402",
+   "reason": "brand"
+  },
+  {
+   "name": "Tylenol",
+   "sourceId": "Q57055",
+   "reason": "brand"
+  },
+  {
+   "name": "Viagra",
+   "sourceId": "Q191521",
+   "reason": "brand"
+  },
+  {
+   "name": "Advil",
+   "sourceId": "Q186969",
+   "reason": "brand"
+  },
+  {
+   "name": "Ritalin",
+   "sourceId": "Q422112",
+   "reason": "brand"
+  },
+  {
+   "name": "Zoloft",
+   "sourceId": "Q407617",
+   "reason": "brand"
+  },
+  {
+   "name": "Lexapro",
+   "sourceId": "Q423757",
+   "reason": "brand"
+  },
+  {
+   "name": "Wellbutrin",
+   "sourceId": "Q834280",
+   "reason": "brand"
+  },
+  {
+   "name": "Klonopin",
+   "sourceId": "Q407988",
+   "reason": "brand"
+  },
+  {
+   "name": "Ambien",
+   "sourceId": "Q218842",
+   "reason": "brand"
+  },
+  {
+   "name": "Lipitor",
+   "sourceId": "Q668093",
+   "reason": "brand"
+  },
+  {
+   "name": "Cialis",
+   "sourceId": "Q424156",
+   "reason": "brand"
+  },
+  {
+   "name": "Claritin",
+   "sourceId": "Q424049",
+   "reason": "brand"
+  },
+  {
+   "name": "Zyrtec",
+   "sourceId": "Q423075",
+   "reason": "brand"
+  },
+  {
+   "name": "Glucophage",
+   "sourceId": "Q19484",
+   "reason": "brand"
+  },
+  {
+   "name": "Plaquenil",
+   "sourceId": "Q421094",
+   "reason": "brand"
+  },
+  {
+   "name": "Tamiflu",
+   "sourceId": "Q211509",
+   "reason": "brand"
+  },
+  {
+   "name": "Rohypnol",
+   "sourceId": "Q62947",
+   "reason": "brand"
+  },
+  {
+   "name": "roofies",
+   "sourceId": "Q62947",
+   "reason": "street name"
+  },
+  {
+   "name": "Narcan",
+   "sourceId": "Q282902",
+   "reason": "brand"
+  },
+  {
+   "name": "Sudafed",
+   "sourceId": "Q263958",
+   "reason": "brand"
+  }
+ ]
+}

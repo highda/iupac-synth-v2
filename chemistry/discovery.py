@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Production offline discovery index and disposable metadata cache."""
 
+import gzip
 import hashlib
 import json
 import os
@@ -12,12 +13,19 @@ import helper
 from resolution import ResolutionError, normalize_name as _normalize_name
 from rdkit import Chem
 
-SCHEMA_VERSION = 1
-INDEX_SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+INDEX_SCHEMA_VERSION = 2
 CACHE_SCHEMA_VERSION = 1
-MAX_RESULTS = 32
+# Tier A (#138): keyset pages of 50 ranked candidates into the browser list.
+MAX_RESULTS = 50
+MAX_RECORDS = 40000
+# A page must fit the helper's 256 KiB response, so candidates carry at most this many names; the
+# full record (all aliases) is one `record` request away.
+MAX_CANDIDATE_NAMES = 8
+STRUCTURE_PROPERTIES = ("P2017", "P233")
 MAX_QUERY_BYTES = 256
-MAX_ALIASES = 32
+# Popular items carry long brand-name alias lists; 32 cut off plain names such as `estradiol` (#138).
+MAX_ALIASES = 128
 MAX_CACHE_ENTRIES = 1000
 BUSY_TIMEOUT_MS = 250
 
@@ -50,6 +58,12 @@ def convert_record(source, opsin_jar=""):
     structure = _bounded_text(source.get("structure"), "structure", 8192)
     if source.get("structureFormat") != "smiles":
         raise DiscoveryError("only recorded SMILES structures are supported")
+    structure_property = source.get("structureProperty")
+    if structure_property not in STRUCTURE_PROPERTIES:
+        raise DiscoveryError("structureProperty must be P2017 (isomeric) or P233 (canonical SMILES)")
+    rank = source.get("rank")
+    if not isinstance(rank, int) or rank < 0:
+        raise DiscoveryError("rank must be a non-negative sitelink count")
     analysis = helper.analyze("smiles", structure, opsin_jar)
     canonical = analysis["canonicalIsomericSmiles"]
     aliases = []
@@ -60,7 +74,7 @@ def convert_record(source, opsin_jar=""):
         if name not in aliases:
             aliases.append(name)
     if not aliases or len(aliases) > MAX_ALIASES:
-        raise DiscoveryError("record must contain 1 to 32 distinct English names")
+        raise DiscoveryError(f"record must contain 1 to {MAX_ALIASES} distinct English names")
     claimed_key = source.get("inchiKey")
     diagnostics = []
     status = "validated"
@@ -76,7 +90,14 @@ def convert_record(source, opsin_jar=""):
             raise
         except Exception as exc:
             raise DiscoveryError(f"unable to derive InChIKey: {exc}") from exc
-        if not derived_key or derived_key.upper() != claimed_key:
+        # An isomeric SMILES must reproduce the whole key. A canonical SMILES carries no stereo, so only
+        # the connectivity block is comparable; checking more would demand stereo the source never stated.
+        compared = derived_key.upper() if derived_key else ""
+        if structure_property == "P233":
+            compared, claimed_compared = compared[:14], claimed_key[:14]
+        else:
+            claimed_compared = claimed_key
+        if not compared or compared != claimed_compared:
             status = "conflict"
             diagnostics.append("recorded InChIKey disagrees with the source structure")
     reference = source.get("referenceStructure")
@@ -87,7 +108,8 @@ def convert_record(source, opsin_jar=""):
         "schemaVersion": SCHEMA_VERSION, "recordId": f"wikidata:{qid}@{revision}",
         "provider": "wikidata", "sourceId": qid, "revision": revision,
         "displayName": aliases[0], "names": aliases, "categories": sorted(set(source.get("categories", []))),
-        "sourceStructure": structure, "structureFormat": "smiles", "canonicalIsomericSmiles": canonical,
+        "sourceStructure": structure, "structureFormat": "smiles", "structureProperty": structure_property,
+        "rank": rank, "canonicalIsomericSmiles": canonical,
         "inchiKey": claimed_key, "sourceUrl": f"https://www.wikidata.org/wiki/{qid}",
         "revisionUrl": f"https://www.wikidata.org/w/index.php?title={qid}&oldid={revision}",
         "retrievedAt": _bounded_text(source.get("retrievedAt"), "retrievedAt", 64), "license": "CC0-1.0",
@@ -96,8 +118,34 @@ def convert_record(source, opsin_jar=""):
     }
 
 
+# Fields every record of a snapshot shares are stored once in the index metadata, and the two Wikidata
+# URLs are derived from the QID and revision, so the index holds only what varies per record (#138).
+SHARED_FIELDS = ("analysisVersion", "backend", "license", "provider", "retrievedAt", "schemaVersion", "structureFormat")
+
+
+def read_records(path):
+    data = Path(path).read_bytes()
+    if data[:2] == b"\x1f\x8b":
+        data = gzip.decompress(data)
+    return [json.loads(line) for line in data.decode("utf-8").splitlines() if line]
+
+
+def _compact_record(record, shared):
+    row = {key: value for key, value in record.items() if key not in shared and key not in ("sourceUrl", "revisionUrl")}
+    if not row.get("diagnostics"):
+        row.pop("diagnostics", None)
+    return row
+
+
+def _expand_record(row, shared):
+    record = dict(shared, diagnostics=[], **row)
+    record["sourceUrl"] = f"https://www.wikidata.org/wiki/{record['sourceId']}"
+    record["revisionUrl"] = f"https://www.wikidata.org/w/index.php?title={record['sourceId']}&oldid={record['revision']}"
+    return record
+
+
 def build_index(records_path, database_path):
-    records = [json.loads(line) for line in Path(records_path).read_text(encoding="utf-8").splitlines() if line]
+    records = read_records(records_path)
     temporary = Path(str(database_path) + ".new")
     temporary.unlink(missing_ok=True)
     db = sqlite3.connect(temporary)
@@ -105,20 +153,33 @@ def build_index(records_path, database_path):
       PRAGMA journal_mode=DELETE; PRAGMA synchronous=FULL;
       CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
       CREATE TABLE records(record_id TEXT PRIMARY KEY, source_id TEXT NOT NULL, revision INTEGER NOT NULL,
-        display_name TEXT NOT NULL, canonical_smiles TEXT NOT NULL, status TEXT NOT NULL, json TEXT NOT NULL);
+        display_name TEXT NOT NULL, canonical_smiles TEXT NOT NULL, status TEXT NOT NULL, rank INTEGER NOT NULL,
+        json TEXT NOT NULL);
       CREATE TABLE names(normalized TEXT NOT NULL, display TEXT NOT NULL, record_id TEXT NOT NULL REFERENCES records(record_id));
-      CREATE INDEX names_lookup ON names(normalized, display, record_id);
+      CREATE INDEX names_lookup ON names(normalized, record_id);
+      CREATE INDEX records_rank ON records(rank DESC, record_id);
     """)
     digest = hashlib.sha256(Path(records_path).read_bytes()).hexdigest()
+    shared = {key: records[0][key] for key in SHARED_FIELDS if records and all(x.get(key) == records[0][key] for x in records)}
     db.executemany("INSERT INTO metadata VALUES(?,?)", (("schemaVersion", str(INDEX_SCHEMA_VERSION)), ("recordsSha256", digest),
+        ("sharedFields", json.dumps(shared, sort_keys=True)),
         ("sqliteVersion", sqlite3.sqlite_version), ("sqliteCompileOptions", json.dumps([x[0] for x in db.execute("pragma compile_options")]))))
+    if len(records) > MAX_RECORDS:
+        raise DiscoveryError(f"snapshot exceeds {MAX_RECORDS} records")
     for record in sorted(records, key=lambda x: x["recordId"]):
-        encoded = json.dumps(record, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-        db.execute("INSERT INTO records VALUES(?,?,?,?,?,?,?)", (record["recordId"], record["sourceId"], record["revision"],
-            record["displayName"], record["canonicalIsomericSmiles"], record["validationStatus"], encoded))
-        db.executemany("INSERT INTO names VALUES(?,?,?)", ((normalize_name(name), name, record["recordId"]) for name in record["names"]))
+        encoded = json.dumps(_compact_record(record, shared), sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        db.execute("INSERT INTO records VALUES(?,?,?,?,?,?,?,?)", (record["recordId"], record["sourceId"], record["revision"],
+            record["displayName"], record["canonicalIsomericSmiles"], record["validationStatus"], record["rank"], encoded))
+        normalized = dict.fromkeys(normalize_name(name) for name in record["names"])
+        db.executemany("INSERT INTO names VALUES(?,?,?)", ((key, "", record["recordId"]) for key in normalized))
     db.commit(); db.execute("VACUUM"); db.close()
     os.replace(temporary, database_path)
+
+
+def _candidate(record):
+    """A page row: the record with its name list bounded, so 50 rows fit one helper response."""
+    names = record["names"]
+    return dict(record, names=names[:MAX_CANDIDATE_NAMES], nameCount=len(names))
 
 
 class DiscoveryIndex:
@@ -128,26 +189,36 @@ class DiscoveryIndex:
         version = self.db.execute("SELECT value FROM metadata WHERE key='schemaVersion'").fetchone()
         if version != (str(INDEX_SCHEMA_VERSION),):
             self.db.close(); raise DiscoveryError("unsupported discovery index schema")
+        self.shared = json.loads(self.db.execute("SELECT value FROM metadata WHERE key='sharedFields'").fetchone()[0])
 
-    def search(self, query, prefix=False, limit=MAX_RESULTS):
+    def search(self, query, prefix=False, limit=MAX_RESULTS, after=None):
+        """One ranked page: most-sitelinked first, then record ID, continued by keyset, never OFFSET."""
         normalized = normalize_name(query)
         limit = max(1, min(int(limit), MAX_RESULTS))
         if prefix:
-            escaped = normalized.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
-            predicate, value = "n.normalized LIKE ? ESCAPE '\\'", escaped
+            # A half-open range over the normalized names uses the index, unlike LIKE.
+            predicate, values = "normalized >= ? AND normalized < ?", [normalized, normalized + "\U0010ffff"]
         else:
-            predicate, value = "n.normalized = ?", normalized
-        rows = self.db.execute(f"SELECT DISTINCT r.json,n.display FROM names n JOIN records r USING(record_id) WHERE {predicate} "
-            "ORDER BY n.normalized,r.display_name,r.canonical_smiles,r.record_id LIMIT ?", (value, limit + 1)).fetchall()
-        return {"query": query, "match": "prefix" if prefix else "exact", "candidates": [json.loads(x[0]) for x in rows[:limit]],
-                "truncated": len(rows) > limit, "limit": limit}
+            predicate, values = "normalized = ?", [normalized]
+        keyset = ""
+        if after is not None:
+            if not isinstance(after, dict) or not isinstance(after.get("rank"), int) or not isinstance(after.get("recordId"), str):
+                raise DiscoveryError("page cursor must carry rank and recordId")
+            keyset = "AND (rank < ? OR (rank = ? AND record_id > ?))"
+            values += [after["rank"], after["rank"], _bounded_text(after["recordId"], "recordId", 128)]
+        rows = self.db.execute(f"SELECT json FROM records WHERE record_id IN (SELECT record_id FROM names WHERE {predicate}) "
+            f"{keyset} ORDER BY rank DESC, record_id LIMIT ?", (*values, limit + 1)).fetchall()
+        candidates = [_candidate(_expand_record(json.loads(x[0]), self.shared)) for x in rows[:limit]]
+        following = {"rank": candidates[-1]["rank"], "recordId": candidates[-1]["recordId"]} if len(rows) > limit else None
+        return {"query": query, "match": "prefix" if prefix else "exact", "candidates": candidates,
+                "truncated": following is not None, "limit": limit, "next": following}
 
     def record(self, record_id):
         record_id = _bounded_text(record_id, "recordId", 128)
         row = self.db.execute("SELECT json FROM records WHERE record_id=?", (record_id,)).fetchone()
         if not row:
             raise DiscoveryError("discovery record was not found")
-        return json.loads(row[0])
+        return _expand_record(json.loads(row[0]), self.shared)
 
 
 class DiscoveryCache:

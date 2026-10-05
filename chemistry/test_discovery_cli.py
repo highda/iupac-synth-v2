@@ -8,7 +8,7 @@ CLI=Path(sys.argv.pop(1)).resolve()
 
 class DiscoveryCliTests(unittest.TestCase):
     def invoke(self,*args,env=None):
-        variables=dict(os.environ,IUPAC_CHEMISTRY_HELPER=str(ROOT/"chemistry/helper.py"),IUPAC_DISCOVERY_INDEX=str(ROOT/"data/discovery/discovery-v1.sqlite3"))
+        variables=dict(os.environ,IUPAC_CHEMISTRY_HELPER=str(ROOT/"chemistry/helper.py"),IUPAC_DISCOVERY_INDEX=str(ROOT/"data/discovery/discovery-v2.sqlite3"))
         if env: variables.update(env)
         run=subprocess.run([str(CLI),*args],text=True,capture_output=True,env=variables,timeout=30)
         self.assertEqual(run.returncode,0,run.stderr); return json.loads(run.stdout)

@@ -8,7 +8,7 @@ test ! -e /usr/bin/javac
 test ! -e /usr/bin/pip
 test ! -d /workspace
 test ! -d /src
-test -f "$payload/resources/discovery/discovery-v1.sqlite3"
+test -f "$payload/resources/discovery/discovery-v2.sqlite3"
 export PATH=/no-external-runtime PYTHONHOME=/no/python PYTHONPATH=/no/modules JAVA_HOME=/no/java CLASSPATH=/no/jar LD_LIBRARY_PATH=/no/libs
 name='{"protocolVersion":1,"requestId":"name","mode":"name","text":"2,2,2-trifluoroethan-1-ol"}'
 smiles='{"protocolVersion":1,"requestId":"smiles","mode":"smiles","text":"CCN(CC)C(=O)c1ccc(Cl)cc1"}'

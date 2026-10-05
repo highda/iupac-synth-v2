@@ -24,6 +24,8 @@ private:
  // Apply is unavailable while its own request is in flight, and Cancel is the way out (#97).
  void showPending(bool);
  IupacSynthProcessor&owner_;iupac::ui::SegmentToggle mode_{{"name","smiles"}};juce::TextEditor input_,trace_,query_;juce::TextButton apply_{"apply"},reapply_{"reapply"},cancel_{"cancel"},inspector_{"inspector"},search_{"search"},cached_{"cached"},clearCache_{"clear cache"},open_{"apply / reopen"},closeButton_{"close"};juce::Label status_,metadata_;juce::ListBox results_;juce::StringArray labels_;juce::Array<juce::var>candidates_;std::uint64_t shownChemistryGeneration_{},shownDiscoveryGeneration_{},awaitedGeneration_{};bool awaiting_{};juce::Rectangle<int>browserTitle_;
+ // Keyset paging (#138): the query the shown rows answer and the cursor of the page after them.
+ std::string pagedQuery_;juce::var nextPage_;void loadMoreWhenNearEnd();
 };
 // In-editor modal overlay (#101). The popup is a child of the editor, never a desktop window: a separate window
 // floats above every application system-wide and, in the out-of-process AU, has no parent relationship to the host's

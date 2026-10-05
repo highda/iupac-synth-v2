@@ -1,0 +1,6374 @@
+{
+ "archivedItems": 31318,
+ "categories": [
+  "amino-acids-short-peptides",
+  "aromatic-heterocyclic",
+  "carbohydrates",
+  "common-natural-products",
+  "lipids-steroids",
+  "salts-inorganic",
+  "simple-organics",
+  "solvents-material-ingredients"
+ ],
+ "files": {
+  "discovery-v2.sqlite3": "acbbcf3d8e8ebe0960c72e6a440b9db368c83814f717f134b15561f8878a41e4",
+  "records-v2.jsonl.gz": "3fbf9a749107c4596bc275f8b72ab6356946a33763ccf75c7eec9c1bb174f88a",
+  "reviewed-aliases-v2.json": "45b13861bbfa1a262ff3091c0de2a4e682fd2357122e566b866184ab8ad1add8",
+  "wikidata-archive-v2.json.gz": "77200f15a9ff96d17e1c309bfe2e888e937c34d64abea0ce107415930cc3d3f1"
+ },
+ "outsideMappingPanels": 29740,
+ "recordCount": 29740,
+ "rejected": [
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q5319"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q12190"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q26075"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27267"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27506"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q28734"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q29004"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q29588"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q30536"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q34402"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q43177"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q54389"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q73972"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q77213"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q96385"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q101497"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q102296"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q103517"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q107429"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q118815"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q133878"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q134856"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q138227"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q138809"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q139295"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q143623"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q161219"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q161466"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q174337"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q177911"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q178566"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q179894"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q182738"
+  },
+  {
+   "reason": "duplicate canonical structure of Q21124841",
+   "sourceId": "Q183011"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q183453"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q186319"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q201552"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q205021"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q205629"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q209260"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q211205"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q217813"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q219660"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q220410"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q243309"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q245911"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q249208"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q252251"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q255933"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q258653"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q262183"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q271021"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q281419"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q282557"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q285687"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q286975"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q287745"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q306156"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q309033"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q309328"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q310828"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q333936"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q338005"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q339657"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q345024"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q349427"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q355518"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q355679"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q368158"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q368965"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q379842"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q389036"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q407142"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q407446"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q407495"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q407684"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q407993"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q408057"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q408184"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q408810"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q408822"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q409035"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q409241"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q409658"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q410548"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q410614"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q410875"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q410897"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q410968"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q411087"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q411126"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q411162"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q411250"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q411294"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q411297"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q411305"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q411320"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q411330"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q411407"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q411777"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q411822"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q411844"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q411905"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q412082"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q412415"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q412492"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q412519"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q412874"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q412994"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q413036"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q413278"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q413733"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q414000"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q414015"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q414182"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q414317"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q414567"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q414591"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q414599"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q414854"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q414932"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q415410"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q415480"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q415484"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q415555"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q415588"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q415920"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q416194"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q416243"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q416326"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q416490"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q416502"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q416513"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q416641"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q416814"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q416861"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q416883"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q416904"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q417040"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q417044"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q417069"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q417103"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q417125"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q417165"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q417250"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q417304"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q417309"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q417437"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q417762"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q417928"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q418111"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q418153"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q418221"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q418276"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q418474"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q418533"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q418564"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q418611"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q418878"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q419070"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q419170"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q419209"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q419364"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q419447"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q419597"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q419621"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q419676"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q419721"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q419784"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q419802"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q419900"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q420070"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q420138"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q420191"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q420217"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q420284"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q420394"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q420401"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q420527"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q420540"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q420857"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q420934"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q421233"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q421255"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q421272"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q421291"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q421333"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q421356"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q421369"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q421387"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q421389"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q421481"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q421607"
+  },
+  {
+   "reason": "duplicate canonical structure of Q130387514",
+   "sourceId": "Q421685"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q422017"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q423143"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q423783"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q423846"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q423937"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q424091"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q424213"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q424386"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q424481"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q424525"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q424712"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q424889"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q424906"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q424958"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q425018"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q425059"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q425065"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q425180"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q425240"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q425248"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q425412"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q426095"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q426511"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q426607"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q426660"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q447553"
+  },
+  {
+   "reason": "duplicate canonical structure of Q674",
+   "sourceId": "Q457556"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q473546"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q496058"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q503527"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q506710"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q532908"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q560542"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q570828"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q593248"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q594482"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q619815"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q620080"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q650187"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q662225"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q739601"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q778163"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q793997"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q808214"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q808221"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q808801"
+  },
+  {
+   "reason": "duplicate canonical structure of Q623",
+   "sourceId": "Q866179"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q900926"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q902508"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q903824"
+  },
+  {
+   "reason": "duplicate canonical structure of Q72501213",
+   "sourceId": "Q903911"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q904153"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q904668"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q905712"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q906716"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q920725"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q935387"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q965955"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q1014287"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q1026338"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q1026348"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1033359"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q1055858"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q1073242"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q1076381"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q1091519"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q1092934"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q1104487"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1104521"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1144598"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q1151249"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1188583"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1227136"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1306078"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1313546"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q1341604"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1387655"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1392795"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1398857"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q1444906"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1630230"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q1829318"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1876481"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q1916758"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1943387"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q1951971"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q1956032"
+  },
+  {
+   "reason": "duplicate canonical structure of Q1054",
+   "sourceId": "Q1961418"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q1977479"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2008962"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2069306"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2090740"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q2115937"
+  },
+  {
+   "reason": "duplicate canonical structure of Q116269",
+   "sourceId": "Q2122463"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q2171592"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2171595"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2185998"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q2200141"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q2246598"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2261930"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2281857"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q2284773"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q2345425"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q2371053"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2393155"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q2402883"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q2436874"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q2453096"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q2456623"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q2491361"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q2510124"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q2512764"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2598317"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2602246"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q2615051"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2616064"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2629234"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q2629666"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q2632721"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q2637746"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2642646"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2658632"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2680367"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2695590"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q2699537"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q2710669"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q2756638"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q2757844"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2816001"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2823324"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q2832212"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2866762"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q2911240"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2930105"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q2937944"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2964094"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2964147"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q2982809"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q2985253"
+  },
+  {
+   "reason": "duplicate canonical structure of Q420628",
+   "sourceId": "Q3003746"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q3008606"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q3027893"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3032708"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3055852"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q3066718"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3073451"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q3074506"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3077184"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3078751"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3095007"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3114549"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3132209"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3133620"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q3147909"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3154061"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3208529"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q3232732"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3267971"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3269787"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q3271899"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q3278962"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3289067"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3305467"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q3315722"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3333513"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q3333710"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q3348772"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3381500"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3381501"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3382146"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3410841"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3429576"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q3489655"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q3497038"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3502267"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3512695"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3517399"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q3524660"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3604516"
+  },
+  {
+   "reason": "duplicate canonical structure of Q407674",
+   "sourceId": "Q3607328"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q3629883"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3639883"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3655600"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3680923"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q3757667"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q3788373"
+  },
+  {
+   "reason": "duplicate canonical structure of Q4138103",
+   "sourceId": "Q3792007"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q3809537"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q3877359"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q3877364"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q3908488"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q3964293"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4032852"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q4063718"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q4066270"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4068819"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4069959"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4096518"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4096853"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4096855"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4096857"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q4119810"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4132745"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4134914"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4134915"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4134927"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4134928"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q4134934"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4134936"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q4134938"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q4134940"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4134945"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4134960"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4138044"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4138047"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4138098"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4138101"
+  },
+  {
+   "reason": "duplicate canonical structure of Q186357",
+   "sourceId": "Q4138106"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4138110"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4138113"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4138117"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q4138118"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4138146"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4161095"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4161096"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4161097"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4161099"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4161194"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4161305"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4161310"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4161315"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4161431"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4163873"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4164129"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4164130"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4164131"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4202633"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4202637"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4202644"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q4202664"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4202666"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4202667"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4214593"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q4291506"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4291661"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4321602"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332787"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332794"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q4332797"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332802"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q4332819"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332839"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332841"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332858"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332859"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332867"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332874"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332908"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4332913"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4337137"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4337152"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4337154"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q4348634"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4348807"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4351337"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4351339"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4353986"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q4363318"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4381023"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q4383874"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4419176"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4419238"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445793"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445799"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445806"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445812"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445831"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4445835"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445836"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445837"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445854"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445860"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445871"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4445879"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4456631"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4456643"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4456645"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4456685"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q4456691"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4457904"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4461968"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4463120"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4463256"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4463330"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4463331"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4492122"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4492140"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4493190"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4493202"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4493225"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4498184"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4498194"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4498195"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4498200"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4498210"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4498231"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4505498"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4505500"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4505855"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4505890"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q4532979"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4532986"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4596737"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4596757"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4596759"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q4596915"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4637036"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4641512"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q4652489"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q4652961"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4680659"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4705902"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4716536"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4733653"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q4737382"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4737393"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q4747302"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4747307"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4782227"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4807670"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q4820777"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q4860325"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4885099"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4890804"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q4906733"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q4981048"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5017058"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5036049"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5055130"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5057298"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q5087002"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5089008"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q5102988"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q5103232"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5120032"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5120191"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q5198929"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5261117"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5269968"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5272476"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5275456"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5275604"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5277314"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5278705"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5332352"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5404502"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5404861"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q5410758"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q5445335"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5446672"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5571076"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5572322"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q5645461"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5652292"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q5954736"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q6003986"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q6062315"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q6072218"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q6184691"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q6419441"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q6481346"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q6583647"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q6584547"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q6593502"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q6647955"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q6694803"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q6745105"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q6806652"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q6909584"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q6951350"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q6951387"
+  },
+  {
+   "reason": "name is missing or oversized",
+   "sourceId": "Q6954330"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7039308"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7069952"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q7108522"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7120083"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q7164927"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q7197959"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q7198091"
+  },
+  {
+   "reason": "duplicate canonical structure of Q178450",
+   "sourceId": "Q7226155"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7230068"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7234707"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7234713"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7234718"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7246827"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q7256727"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7260204"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7280510"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q7339199"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q7553318"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q7553330"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7600135"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7624768"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7671383"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7675206"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q7706217"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q7706737"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7709707"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7709713"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7777225"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7777226"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q7843941"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q7851139"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7911668"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7915670"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q7922030"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q7950759"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q8041945"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q8052674"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q8074531"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q8214050"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q9002676"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q9003473"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q9148438"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q9255129"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q9295397"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q9552900"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q10854268"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q10859487"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q10859742"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q10860582"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q10861089"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q10866545"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q10880252"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q11058399"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q11129388"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q11129393"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q11129394"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q11309641"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q11737423"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q11850806"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q13019044"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q13896593"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q14035670"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q15149231"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q15233061"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15276735"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15409399"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15409431"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15410177"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15410941"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15410968"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15426665"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15427831"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15427926"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15624043"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627937"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627942"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15627946"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627949"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627957"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627960"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15627961"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627977"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15627978"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627979"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627980"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627981"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627983"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627985"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15627993"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628000"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628019"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628034"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15628035"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15628037"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628053"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q15628059"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628062"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628069"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628082"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628098"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628100"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15628102"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628124"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628128"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15628130"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15628137"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15628152"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628154"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628161"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628169"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628171"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628178"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628183"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628184"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628185"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628219"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628242"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628252"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628267"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628276"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628277"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628278"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628284"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628287"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628301"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628303"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628309"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628316"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628324"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628325"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628341"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15628348"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628349"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628361"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628362"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15628375"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628377"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628378"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628380"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628385"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q15628396"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q15628397"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628420"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15628438"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15628528"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15629418"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15632742"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15632782"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15632784"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q15632825"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15634151"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15634199"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15634254"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15643844"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15643857"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15643860"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15643863"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15712807"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15720828"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15725528"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15725529"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15725536"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15725543"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15725544"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15725547"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15725548"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15725550"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15725555"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15725557"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15726124"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q15742183"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q15926183"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q15966013"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16081460"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q16326443"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q16326579"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q16326589"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16524837"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16534043"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q16634590"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16635966"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q16635988"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q16635996"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16635998"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16636009"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16644625"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q16652161"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16661873"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16672201"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16682762"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16682763"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16696003"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16707514"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16707516"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q16712736"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16712756"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16714115"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q16714127"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q16715989"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q17057352"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure; recorded reference structure disagrees with the source structure",
+   "sourceId": "Q17318234"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q17319205"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q17337785"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q17355205"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q17388101"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q17424872"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q17429377"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q17443531"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q17486825"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q17563012"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q17749260"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18002870"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18056605"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18086400"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18086439"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q18205761"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211423"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211430"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211432"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211463"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211477"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211484"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211505"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211530"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211531"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211558"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211578"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211592"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q18211629"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211634"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211646"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211655"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211686"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211696"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211699"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q18211701"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q18211710"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211714"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q18211716"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211735"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211737"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q18211744"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211766"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211787"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211791"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211799"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211816"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211836"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211844"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211850"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211853"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211865"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211886"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211887"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211888"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211890"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211921"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211972"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211983"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211984"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q18211987"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211991"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18211992"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211993"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18211999"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q18212011"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212014"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212017"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212024"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212031"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212033"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18212054"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212068"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18212071"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212073"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212077"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18212083"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212177"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212198"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212199"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212207"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212250"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212253"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18212478"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q18212782"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18228386"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18233742"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q18234760"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q18234771"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18354870"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18397697"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18397722"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18397791"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18397799"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18399451"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18405404"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18405475"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18405535"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18406759"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18406778"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18406785"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18406965"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18407605"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409478"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409480"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409482"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18409591"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409594"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409598"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409600"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409604"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409605"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409607"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409608"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18409609"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18467224"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q18470593"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18472690"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18544687"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18613664"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18613670"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18654125"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q18657657"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q18747523"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q19298810"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19613219"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q19614429"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19614434"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19614438"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19614478"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19614805"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19614809"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19614829"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q19614916"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q19614979"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19788377"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19800927"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q19800987"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q19822725"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q19827926"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q19833311"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q19946842"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q20164387"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q20707800"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q20748662"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20817221"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20878964"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20979579"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20979584"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20979586"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20979588"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20979593"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20979594"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20979598"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20979599"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20979782"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20979791"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20979797"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20979803"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q20980328"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980337"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980345"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980347"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980350"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980602"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980605"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980615"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980634"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980635"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980784"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980792"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980806"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980811"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980812"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980814"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980816"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980843"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980846"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980865"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980870"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980873"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980875"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980877"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980879"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980881"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980882"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980884"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980885"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980887"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980889"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20980904"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20981009"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20981010"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20981016"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20981017"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20981020"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20981031"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20981033"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20981035"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982233"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982238"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982239"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982240"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982241"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982245"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q20982330"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982362"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982364"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982384"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20982393"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20984659"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20984672"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20984675"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20984932"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20984933"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20984954"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20984959"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20985782"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20985789"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20985800"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20985803"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20985806"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20986121"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20986152"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q20986154"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20986226"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20986790"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20989165"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20989167"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20989172"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20989175"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20992663"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20992666"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20992667"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993123"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993125"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993128"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993138"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993140"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993607"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993634"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993638"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993639"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993643"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993720"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993722"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993723"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993724"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993725"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q20993727"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21002433"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21002434"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21002439"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21002470"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21002471"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21002472"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21002474"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21002475"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21002476"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21004289"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21006457"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21006458"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21006468"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007339"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007346"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007347"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007363"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007366"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007368"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007372"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007373"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007374"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007377"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007378"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007379"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007380"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007384"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007402"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007406"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007412"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007413"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007414"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007418"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007420"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007421"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007422"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007432"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007438"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007446"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007447"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007456"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007462"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007463"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007465"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007466"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007467"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007469"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007471"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007473"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007474"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007475"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007485"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007489"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007496"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007497"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007500"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007504"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007507"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007509"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21007511"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009785"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009793"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009797"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009934"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009953"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009955"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009957"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009958"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009964"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009965"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009975"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009976"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009981"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21009983"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010289"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010294"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010305"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010316"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010331"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010540"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010544"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010547"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010549"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010550"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010564"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010567"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010569"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010571"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010572"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010575"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010578"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010579"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010580"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010582"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010587"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010603"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010606"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010636"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010638"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010640"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010645"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21010646"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21030671"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21032737"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q21083935"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21097911"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21097928"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21097929"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21097930"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21097932"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q21098923"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q21098976"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q21099291"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q21099636"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q21099644"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q21099667"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q21099668"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21662409"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21662634"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21662687"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21663009"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21663017"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21663038"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21663405"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21663455"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21663598"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21663670"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21663672"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21663721"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21674816"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21674817"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21674838"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21674839"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21684011"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843152"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843154"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843164"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843183"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843213"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843236"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843276"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843327"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843368"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843556"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843626"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21843754"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21844507"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21844579"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q21855246"
+  },
+  {
+   "reason": "duplicate canonical structure of Q424248",
+   "sourceId": "Q23905960"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q24063673"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q24386902"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q24576516"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q24629073"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q24629076"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629089"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629144"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629159"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q24629188"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629209"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629211"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629225"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q24629250"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629259"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629316"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629325"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629524"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629801"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24629926"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q24630107"
+  },
+  {
+   "reason": "duplicate canonical structure of Q2823213",
+   "sourceId": "Q24699118"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q24886653"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q25100811"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q25101128"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q25101403"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q25323738"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q25323853"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q25323988"
+  },
+  {
+   "reason": "duplicate canonical structure of Q7941885",
+   "sourceId": "Q25326690"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q25378030"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25380886"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25380961"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381295"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381375"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381447"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381485"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381532"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381535"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381572"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q25381681"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381763"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381768"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381772"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381825"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381877"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381886"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381914"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381920"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381923"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381955"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25381967"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382008"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382089"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382096"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382106"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382114"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382219"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382293"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382347"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382435"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382662"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382664"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382682"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382689"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382692"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382744"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382792"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382798"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382826"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25382897"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25383031"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25383084"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25383191"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384197"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384252"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384261"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384306"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384356"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384740"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384762"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384769"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384841"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384848"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384955"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384959"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25384985"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25385185"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25385252"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25385294"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25385338"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25385515"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25385545"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390098"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390148"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390204"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390205"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390236"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390240"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390261"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390267"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390290"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390388"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390502"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390617"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390722"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390723"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390972"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25390988"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25394613"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q25394633"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q25394636"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q25403157"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q25404063"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q25473404"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q25473414"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q25474113"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q25474182"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207743"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207744"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207750"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207755"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207756"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207758"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207763"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207764"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207767"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207768"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207771"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207772"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207775"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q26207777"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q26804746"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q26836370"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q26840944"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q26841347"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q27074785"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q27087141"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27089212"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q27094367"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27102771"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27103499"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27104724"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27105091"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27105264"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27106633"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q27106819"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27108300"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q27108380"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q27108663"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27108981"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27109806"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27109818"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27109976"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27109984"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27109986"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27110312"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27110377"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q27110419"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27116967"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q27117066"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q27117449"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27117817"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27117867"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27121644"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27121669"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27123261"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q27126421"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27138189"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27144914"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27155616"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q27155789"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27156035"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27160125"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q27251132"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27253242"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q27256913"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27259606"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27260620"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q27261089"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27261338"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27268285"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27275209"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27275856"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27276191"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27276324"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27276423"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27278205"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q27279583"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27279646"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27279756"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27280844"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q27282836"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q27284631"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27287570"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q27295692"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27887090"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q27893831"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q27902945"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q27908556"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q27926732"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q28102231"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q28209438"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q28417815"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q28976361"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q29970378"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q30314354"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q30715915"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q30895870"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q30941260"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q33035232"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q33616143"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q38135257"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q39046344"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q39717462"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q48247950"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q48997405"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q48999072"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q49095820"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q52991336"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q54441166"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q54973755"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q55236804"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q55524806"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q55525180"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q55582002"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q55582657"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q56250684"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q56277982"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q56278395"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q56282632"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q56427387"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q56427531"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q56860082"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q56955674"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q60199930"
+  },
+  {
+   "reason": "duplicate canonical structure of Q27108424",
+   "sourceId": "Q60794989"
+  },
+  {
+   "reason": "duplicate canonical structure of Q60794987",
+   "sourceId": "Q60794990"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q61083245"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q61466836"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q61643025"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q62086578"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q63392692"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q63395475"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q63398940"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q63409671"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q63441402"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q64065213"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q64573321"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q64606274"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q64732446"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q64995456"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q65060041"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q65062358"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q66000256"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q67039731"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q70242298"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q70344251"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q70881580"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q72443010"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q72443036"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q72443039"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q72463130"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q72467744"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q72468425"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q72469548"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q72469767"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q72487279"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q72496232"
+  },
+  {
+   "reason": "duplicate canonical structure of Q417414",
+   "sourceId": "Q72501207"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q72507165"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q72507910"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q72858637"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q73227255"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q74702938"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q75034258"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q75064155"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q75068334"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q81829787"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q81977189"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q81982433"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q81982472"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q81984025"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q81989376"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q81991606"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q81992104"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q82416960"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q82475020"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q82527450"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q82634584"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q82742771"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q82893930"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q82897341"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q82903488"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q82910013"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q82911387"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q82913784"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q82998554"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q83021167"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q83032598"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q83032601"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q83032602"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q83032648"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q83032650"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q83032651"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q83032653"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q83032655"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q83034260"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q83035252"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q83048244"
+  },
+  {
+   "reason": "duplicate canonical structure of Q48937953",
+   "sourceId": "Q83064659"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q85021238"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q85763967"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q97368473"
+  },
+  {
+   "reason": "duplicate canonical structure of Q420176",
+   "sourceId": "Q102302298"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q104776279"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q105178253"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q105613603"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q105981459"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q106377581"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q106948682"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q107522077"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q108197189"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q108450928"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q108897237"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q109435599"
+  },
+  {
+   "reason": "duplicate canonical structure of Q8072309",
+   "sourceId": "Q109649508"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q109749769"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q109795738"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q110106686"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q110143786"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q110269375"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q110868249"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q110887419"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q110887427"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q110936693"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q113254653"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q113691142"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q115060226"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q115487991"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q115620070"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q116857340"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q116889989"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q117226962"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q117289680"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q118124776"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q119141011"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q119734968"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q120491833"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q120919994"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q122902396"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q123248554"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q123340497"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q123481340"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q123784910"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q123857827"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q123857931"
+  },
+  {
+   "reason": "structure must contain 1 to 256 heavy atoms",
+   "sourceId": "Q123907235"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q124669070"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q124721174"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q125153072"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q125186321"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q125364419"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q125451931"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q125823083"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q125989414"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q126476646"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q126604702"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q127220599"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q127600641"
+  },
+  {
+   "reason": "structure exceeds 8 disconnected components",
+   "sourceId": "Q128753092"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q128771082"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q129677554"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q130259921"
+  },
+  {
+   "reason": "duplicate canonical structure of Q130387514",
+   "sourceId": "Q130387503"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q130442033"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q130467161"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q130478555"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q130493773"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q131241097"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q131377351"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q133036725"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q133042726"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q133296904"
+  },
+  {
+   "reason": "duplicate canonical structure of Q133884000",
+   "sourceId": "Q133884003"
+  },
+  {
+   "reason": "duplicate canonical structure of Q133884000",
+   "sourceId": "Q133884008"
+  },
+  {
+   "reason": "duplicate canonical structure of Q133884000",
+   "sourceId": "Q133884026"
+  },
+  {
+   "reason": "duplicate canonical structure of Q133884000",
+   "sourceId": "Q133884037"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q134880909"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q135070728"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q135450454"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q136032508"
+  },
+  {
+   "reason": "conflict: recorded reference structure disagrees with the source structure",
+   "sourceId": "Q136302988"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q137174615"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q137800054"
+  },
+  {
+   "reason": "queries, wildcards, reactions, and extended stereochemistry are unsupported",
+   "sourceId": "Q137804748"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q138007632"
+  },
+  {
+   "reason": "conflict: recorded InChIKey disagrees with the source structure",
+   "sourceId": "Q138318874"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q138527596"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q138751932"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q139582129"
+  },
+  {
+   "reason": "no English label",
+   "sourceId": "Q140051371"
+  },
+  {
+   "reason": "structure is invalid or contains query atoms",
+   "sourceId": "Q140650920"
+  }
+ ],
+ "rejectedByReason": {
+  "conflict": 530,
+  "duplicate canonical structure of Q1054": 1,
+  "duplicate canonical structure of Q116269": 1,
+  "duplicate canonical structure of Q130387514": 2,
+  "duplicate canonical structure of Q133884000": 4,
+  "duplicate canonical structure of Q178450": 1,
+  "duplicate canonical structure of Q186357": 1,
+  "duplicate canonical structure of Q21124841": 1,
+  "duplicate canonical structure of Q27108424": 1,
+  "duplicate canonical structure of Q2823213": 1,
+  "duplicate canonical structure of Q407674": 1,
+  "duplicate canonical structure of Q4138103": 1,
+  "duplicate canonical structure of Q417414": 1,
+  "duplicate canonical structure of Q420176": 1,
+  "duplicate canonical structure of Q420628": 1,
+  "duplicate canonical structure of Q424248": 1,
+  "duplicate canonical structure of Q48937953": 1,
+  "duplicate canonical structure of Q60794987": 1,
+  "duplicate canonical structure of Q623": 1,
+  "duplicate canonical structure of Q674": 1,
+  "duplicate canonical structure of Q72501213": 1,
+  "duplicate canonical structure of Q7941885": 1,
+  "duplicate canonical structure of Q8072309": 1,
+  "name is missing or oversized": 1,
+  "no English label": 588,
+  "queries, wildcards, reactions, and extended stereochemistry are unsupported": 103,
+  "structure exceeds 8 disconnected components": 197,
+  "structure is invalid or contains query atoms": 106,
+  "structure must contain 1 to 256 heavy atoms": 27
+ },
+ "retrievedAt": "2026-10-05T15:57:32+00:00",
+ "schemaVersion": 2,
+ "structureProperties": {
+  "P2017": 8780,
+  "P233": 20960
+ },
+ "tier": "A",
+ "twoNameCount": 18221
+}
