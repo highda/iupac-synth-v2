@@ -11,6 +11,9 @@
 #include <fstream>
 #if defined(__linux__)
 #include <unistd.h>
+#if defined(__linux__)
+#include <sys/prctl.h>
+#endif
 #elif defined(__APPLE__)
 #include <mach/mach.h>
 #endif
@@ -371,6 +374,13 @@ domain::Patch withoutEffectsTail(const domain::Patch& source)
 std::string benchmark(const domain::State& state, std::size_t seconds, std::string& error)
 {
     constexpr double sampleRate = 48000; constexpr std::size_t blockSize = 128;
+#if defined(__linux__)
+    // V8's "no growth over stress" reads RSS. With transparent huge pages set to `always` (Docker
+    // Desktop's 6.12 kernel), khugepaged collapses already-touched memory into 2 MiB pages at
+    // arbitrary moments and RSS jumps by megabytes with no allocation at all (#129). Opting this
+    // process out makes RSS count the pages the engine actually touches.
+    ::prctl(PR_SET_THP_DISABLE, 1, 0, 0, 0);
+#endif
     if (seconds < 1 || seconds > 60) { error = "benchmark duration must be 1..60 seconds"; return {}; }
     if (state.editedPatch.nodes.empty()) { error = "benchmark requires an audible authored patch"; return {}; }
     const auto compiled = engine::compilePatch(state.editedPatch); if (!compiled) { error = compiled.error; return {}; }
