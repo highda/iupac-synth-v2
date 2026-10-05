@@ -1,0 +1,405 @@
+{
+ "stateVersion": 1,
+ "basePatch": {
+  "patchVersion": 1,
+  "noiseSeed": 0,
+  "nodes": [
+   {
+    "id": "saw",
+    "type": "osc",
+    "parameters": {
+     "waveform": 2,
+     "pulseWidth": 0.5,
+     "outputLevel": 0.6,
+     "unisonVoices": 5,
+     "detuneCents": 18,
+     "unisonSpread": 0.8,
+     "phaseRandom": 0.7,
+     "drift": 0.2,
+     "octave": 0.0,
+     "coarse": 0.0,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "pulse",
+    "type": "osc",
+    "parameters": {
+     "waveform": 3,
+     "pulseWidth": 0.3,
+     "outputLevel": 0.5,
+     "unisonVoices": 1.0,
+     "detuneCents": 12.0,
+     "unisonSpread": 0.5,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": -1,
+     "coarse": 0.0,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "tri",
+    "type": "osc",
+    "parameters": {
+     "waveform": 1,
+     "pulseWidth": 0.5,
+     "outputLevel": 0.4,
+     "unisonVoices": 1.0,
+     "detuneCents": 12.0,
+     "unisonSpread": 0.5,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": 0.0,
+     "coarse": 7,
+     "fine": 5,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "bus",
+    "type": "mixer",
+    "parameters": {
+     "level": 1.0,
+     "pan": 0.0,
+     "outputLevel": 1.0
+    }
+   },
+   {
+    "id": "lp",
+    "type": "filter",
+    "parameters": {
+     "mode": 0,
+     "cutoff": 2400,
+     "q": 1.4,
+     "outputLevel": 1.0,
+     "drive": 1.0,
+     "keytrack": 0.0,
+     "envAmount": 0.0
+    }
+   }
+  ],
+  "edges": [
+   {
+    "source": "saw",
+    "destination": "bus",
+    "gain": 0.5
+   },
+   {
+    "source": "pulse",
+    "destination": "bus",
+    "gain": 0.4
+   },
+   {
+    "source": "tri",
+    "destination": "bus",
+    "gain": 0.3
+   },
+   {
+    "source": "bus",
+    "destination": "lp",
+    "gain": 1.0
+   },
+   {
+    "source": "lp",
+    "destination": "output",
+    "gain": 0.7
+   }
+  ],
+  "envelopes": [
+   {
+    "attack": 0.01,
+    "decay": 0.3,
+    "sustain": 0.8,
+    "release": 0.3
+   },
+   {
+    "attack": 0.005,
+    "decay": 0.4,
+    "sustain": 0.2,
+    "release": 0.3
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 0.8,
+    "waveform": "triangle",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   },
+   {
+    "rate": 0.3,
+    "waveform": "sine",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   }
+  ],
+  "matrix": [
+   {
+    "id": "row-1",
+    "enabled": true,
+    "source": "l1",
+    "destinationNode": "pulse",
+    "destinationParameter": "pulseWidth",
+    "depth": 0.35
+   },
+   {
+    "id": "row-2",
+    "enabled": true,
+    "source": "e2",
+    "destinationNode": "lp",
+    "destinationParameter": "cutoff",
+    "depth": 0.3
+   },
+   {
+    "id": "row-3",
+    "enabled": true,
+    "source": "velocity",
+    "destinationNode": "saw",
+    "destinationParameter": "outputLevel",
+    "depth": 0.2
+   }
+  ],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "editedPatch": {
+  "patchVersion": 1,
+  "noiseSeed": 7311,
+  "nodes": [
+   {
+    "id": "saw",
+    "type": "osc",
+    "parameters": {
+     "waveform": 2,
+     "pulseWidth": 0.5,
+     "outputLevel": 0.6,
+     "unisonVoices": 5,
+     "detuneCents": 18,
+     "unisonSpread": 0.8,
+     "phaseRandom": 0.7,
+     "drift": 0.2,
+     "octave": 0.0,
+     "coarse": 0.0,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "pulse",
+    "type": "osc",
+    "parameters": {
+     "waveform": 3,
+     "pulseWidth": 0.3,
+     "outputLevel": 0.5,
+     "unisonVoices": 1.0,
+     "detuneCents": 12.0,
+     "unisonSpread": 0.5,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": -1,
+     "coarse": 0.0,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "tri",
+    "type": "osc",
+    "parameters": {
+     "waveform": 1,
+     "pulseWidth": 0.5,
+     "outputLevel": 0.4,
+     "unisonVoices": 1.0,
+     "detuneCents": 12.0,
+     "unisonSpread": 0.5,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": 0.0,
+     "coarse": 7,
+     "fine": 5,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "bus",
+    "type": "mixer",
+    "parameters": {
+     "level": 1.0,
+     "pan": 0.0,
+     "outputLevel": 1.0
+    }
+   },
+   {
+    "id": "lp",
+    "type": "filter",
+    "parameters": {
+     "mode": 0,
+     "cutoff": 2400,
+     "q": 1.4,
+     "outputLevel": 1.0,
+     "drive": 1.0,
+     "keytrack": 0.0,
+     "envAmount": 0.0
+    }
+   }
+  ],
+  "edges": [
+   {
+    "source": "saw",
+    "destination": "bus",
+    "gain": 0.5
+   },
+   {
+    "source": "pulse",
+    "destination": "bus",
+    "gain": 0.4
+   },
+   {
+    "source": "tri",
+    "destination": "bus",
+    "gain": 0.3
+   },
+   {
+    "source": "bus",
+    "destination": "lp",
+    "gain": 1.0
+   },
+   {
+    "source": "lp",
+    "destination": "output",
+    "gain": 0.7
+   }
+  ],
+  "envelopes": [
+   {
+    "attack": 0.01,
+    "decay": 0.3,
+    "sustain": 0.8,
+    "release": 0.3
+   },
+   {
+    "attack": 0.005,
+    "decay": 0.4,
+    "sustain": 0.2,
+    "release": 0.3
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 0.8,
+    "waveform": "triangle",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   },
+   {
+    "rate": 0.3,
+    "waveform": "sine",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   }
+  ],
+  "matrix": [
+   {
+    "id": "row-1",
+    "enabled": true,
+    "source": "l1",
+    "destinationNode": "pulse",
+    "destinationParameter": "pulseWidth",
+    "depth": 0.35
+   },
+   {
+    "id": "row-2",
+    "enabled": true,
+    "source": "e2",
+    "destinationNode": "lp",
+    "destinationParameter": "cutoff",
+    "depth": 0.3
+   },
+   {
+    "id": "row-3",
+    "enabled": true,
+    "source": "velocity",
+    "destinationNode": "saw",
+    "destinationParameter": "outputLevel",
+    "depth": 0.2
+   }
+  ],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "controls": {
+  "macros": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "outputGain": -6.0,
+  "width": 0.5,
+  "masterTune": 0.0,
+  "bypass": false
+ }
+}

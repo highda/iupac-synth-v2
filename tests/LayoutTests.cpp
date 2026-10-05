@@ -60,7 +60,7 @@ SlotKind kindOf(iupac::domain::ModuleType type)
     using T = iupac::domain::ModuleType;
     switch (type)
     {
-        case T::harmonic: case T::fm: case T::noise: return SlotKind::source;
+        case T::harmonic: case T::fm: case T::noise: case T::osc: case T::wavetable: return SlotKind::source;
         case T::resonator: return SlotKind::resonator;
         case T::filter: return SlotKind::filter;
         case T::shaper: return SlotKind::shaper;

@@ -1,4 +1,5 @@
 #include "iupac/engine/Engine.hpp"
+#include "iupac/engine/Wavetables.hpp"
 
 #include <algorithm>
 #include <array>
@@ -264,6 +265,85 @@ bool runModuleTests()
         ok&=expect(renderSub(-2,0,1,84)==renderSub(-1,0,1,72),"the sub octave is measured from the note it is playing");
         ok&=expect(renderSub(-1,0,0,72)==renderSub(-1,0,0,84),"keytrack 0 pins the sub to one pitch");
         ok&=expect(renderSub(-1,50,1,72)!=renderSub(-1,0,1,72),"fine detunes the sub");
+    }
+    // --- D12 classic oscillator and wavetable source (#166) --------------------------------------
+    {
+        using Type=domain::ModuleType;
+        // Mono render of `blocks` 512-sample blocks at a chosen internal rate.
+        auto renderSource=[&](Type type,const engine::ModuleValues& v,int note,double rate=96000,int blocks=1){
+            engine::ModuleProcessor m(type);m.prepare(rate,512);m.noteOn(note,1,7,11);
+            std::array<float,512> zl{},zr{},ol{},orr{};for(int b=0;b<blocks;++b)m.process(v,440.0f*std::exp2(static_cast<float>(note-69)/12.0f),zl,zr,ol,orr);
+            return std::pair{ol,orr};};
+        auto crossings=[](const std::array<float,512>& x){int n=0;for(std::size_t i=1;i<x.size();++i)if((x[i-1]<0)!=(x[i]<0))++n;return n;};
+        auto bounded=[](const std::array<float,512>& x,float limit){return std::ranges::all_of(x,[limit](float s){return std::isfinite(s)&&std::abs(s)<=limit;});};
+        auto difference=[](const std::array<float,512>& a,const std::array<float,512>& b){float d=0;for(std::size_t i=0;i<a.size();++i)d=std::max(d,std::abs(a[i]-b[i]));return d;};
+        engine::ModuleValues base;base.outputLevel=1;base.pulseWidth=.5f;
+        // C5 at an 8 kHz internal rate: 512 samples hold 33.5 cycles, so every shape crosses zero
+        // 66 or 67 times. That is the pitch contract for all four shapes at once.
+        std::array<std::array<float,512>,4> shapes{};
+        for(int wave=0;wave<4;++wave)
+        {
+            auto v=base;v.waveform=wave;shapes[static_cast<std::size_t>(wave)]=renderSource(Type::osc,v,72,8000).first;
+            ok&=expect(std::abs(crossings(shapes[static_cast<std::size_t>(wave)])-67)<=2,"every oscillator shape runs at the voice fundamental");
+            ok&=expect(finiteActive(shapes[static_cast<std::size_t>(wave)])&&bounded(shapes[static_cast<std::size_t>(wave)],1.3f),"every oscillator shape is finite and bounded");
+        }
+        for(std::size_t a=0;a<4;++a)for(std::size_t b=a+1;b<4;++b)ok&=expect(difference(shapes[a],shapes[b])>.1f,"the four oscillator shapes are different signals");
+        // The saw's only discontinuity is band-limited: no sample-to-sample step reaches the naive 2.
+        {auto v=base;v.waveform=2;const auto saw=renderSource(Type::osc,v,48).first;float step=0;for(std::size_t i=1;i<saw.size();++i)step=std::max(step,std::abs(saw[i]-saw[i-1]));
+         ok&=expect(step<1.6f,"the saw's wrap is a band-limited step");}
+        // Pulse width reshapes the square and leaves no DC behind: whole cycles of a 20% pulse sum to ~0.
+        {auto v=base;v.waveform=3;v.pulseWidth=.2f;const auto narrow=renderSource(Type::osc,v,69,44000*2,1).first; // 440 Hz at 88 kHz: 200 samples per cycle
+         double mean=0;for(std::size_t i=0;i<400;++i)mean+=narrow[i];mean/=400;
+         ok&=expect(difference(narrow,renderSource(Type::osc,[&]{auto s=base;s.waveform=3;return s;}(),69,88000).first)>.5f,"pulseWidth reshapes the square");
+         ok&=expect(std::abs(mean)<.02,"a narrow pulse carries no DC");
+         auto wild=v;wild.pulseWidth=std::numeric_limits<float>::quiet_NaN();wild.waveform=99;
+         ok&=expect(bounded(renderSource(Type::osc,wild,69).first,1.3f),"the oscillator clamps its controls");}
+        // Tables are built on demand off the audio thread (the compiler does it for a patch); an
+        // unbuilt one renders silence rather than building inside process().
+        ok&=expect(engine::wavetableIfBuilt(engine::wavetableCount-1)==nullptr,"a table nobody asked for is not built");
+        {auto v=base;v.table=static_cast<int>(engine::wavetableCount)-1;const auto silent=renderSource(Type::wavetable,v,60).first;
+         ok&=expect(std::ranges::all_of(silent,[](float s){return s==0.0f;}),"an unbuilt table is silence, never a render-time build");}
+        for(std::size_t t=0;t<engine::wavetableCount;++t)(void)engine::wavetable(t);
+        ok&=expect(engine::wavetableIfBuilt(engine::wavetableCount-1)!=nullptr,"building a table publishes it to the audio accessor");
+        {const auto* choices=domain::findParameter(*domain::findModule("wavetable"),"table");
+         ok&=expect(choices&&choices->choices.size()==engine::wavetableCount&&std::ranges::equal(choices->choices,engine::wavetableNames),"the catalog's table choices are the engine's tables, in order");}
+        // Both new sources take the shared unison and pitch blocks.
+        for(const auto type:{Type::osc,Type::wavetable})
+        {
+            auto v=base;v.waveform=2;v.table=0;v.position=.6f;
+            const auto [monoL,monoR]=renderSource(type,v,60,96000,4);
+            ok&=expect(monoL==monoR&&finiteActive(monoL),"one copy is centred and audible");
+            auto stack=v;stack.unisonVoices=7;stack.detuneCents=30;stack.unisonSpread=1;
+            const auto [wideL,wideR]=renderSource(type,stack,60,96000,4);
+            ok&=expect(wideL!=monoL&&wideL!=wideR&&bounded(wideL,3.0f)&&bounded(wideR,3.0f),"seven detuned copies widen the source");
+            auto scattered=stack;scattered.phaseRandom=1;
+            ok&=expect(renderSource(type,scattered,60,96000,4).first!=wideL,"phaseRandom scatters the unison start phases");
+            ok&=expect(renderSource(type,scattered,60,96000,4).first==renderSource(type,scattered,60,96000,4).first,"the scattered phases are reproducible");
+            auto up=v;up.octave=1;auto semis=v;semis.coarse=12;
+            ok&=expect(renderSource(type,up,60).first==renderSource(type,semis,60).first,"octave +1 and coarse +12 are the same transposition");
+            ok&=expect(difference(renderSource(type,up,60).first,renderSource(type,v,72).first)<1e-3f,"octave +1 is the note an octave higher");
+            auto pinned=v;pinned.keytrack=0;
+            ok&=expect(renderSource(type,pinned,60).first==renderSource(type,pinned,84).first,"keytrack 0 pins the source to one pitch");
+        }
+        // The wavetable bank: built off the audio thread by prepare(), eight different tables,
+        // `position` morphs within one, and the first frame of `analog` is the plain sine.
+        std::array<std::array<float,512>,engine::wavetableCount> tables{};
+        for(std::size_t t=0;t<engine::wavetableCount;++t)
+        {
+            auto v=base;v.table=static_cast<int>(t);v.position=.5f;tables[t]=renderSource(Type::wavetable,v,48).first;
+            ok&=expect(finiteActive(tables[t])&&bounded(tables[t],1.3f),"every wavetable is finite and bounded");
+            auto end=v;end.position=1;ok&=expect(difference(tables[t],renderSource(Type::wavetable,end,48).first)>.02f,"position morphs the table");
+        }
+        for(std::size_t a=0;a<engine::wavetableCount;++a)for(std::size_t b=a+1;b<engine::wavetableCount;++b)ok&=expect(difference(tables[a],tables[b])>.05f,"the eight wavetables are different signals");
+        {auto v=base;v.table=0;v.position=0;auto sine=base;sine.waveform=0;
+         ok&=expect(difference(renderSource(Type::wavetable,v,60).first,renderSource(Type::osc,sine,60).first)<.01f,"the analog table opens on a sine");
+         ok&=expect(std::abs(crossings(renderSource(Type::wavetable,v,72,8000).first)-67)<=2,"the wavetable source runs at the voice fundamental");
+         // Near the top of the keyboard only the low-harmonic bands are read: a full square would
+         // alias, the band-limited read stays inside the unit circle of its few harmonics.
+         auto square=base;square.table=0;square.position=1;
+         ok&=expect(bounded(renderSource(Type::wavetable,square,120).first,1.3f),"the top of the keyboard reads a band-limited frame");
+         auto wild=base;wild.table=99;wild.position=std::numeric_limits<float>::quiet_NaN();
+         ok&=expect(bounded(renderSource(Type::wavetable,wild,60).first,1.3f),"the wavetable source clamps its controls");}
     }
     // --- D8 audio-rate modulation inputs (#127) -------------------------------------------------
     // The typed IN port at the processor level: an uncabled port is an empty span, a cabled one at

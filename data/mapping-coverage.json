@@ -1,6 +1,6 @@
 {
- "coverageVersion": 2,
- "note": "Mapper-coverage invariant, docs/architecture/CHEMISTRY.md#mapper-coverage-invariant (D8, issues #105 and #128). Every continuous/discrete/convenience/coefficientArray parameter of the production module catalog has exactly one entry here. status 'mapped' = the production generator assigns it today from the listed drivers and ruleId appears in the generation trace; status 'provisional' = reachable and declared, coefficient explicitly uncalibrated, note names the owning leaf. No provisional entry remains: #128 (W19) resolved the phase-4 additions and the pre-existing harmonic.partialPans gap, and the mapping-coverage test now fails on any provisional entry. An empty drivers list is a failure, not a status. Drivers are existing SonicIntent axes (density, brightness, rigidity, roughness, decay, harmonicity, motion) and structuralDetail fields (bondOrderMean, bondOrderSpread, heteroPlacement, motifPlacement); phase 4 adds no new analysis fields.",
+ "coverageVersion": 3,
+ "note": "Mapper-coverage invariant, docs/architecture/CHEMISTRY.md#mapper-coverage-invariant (D8, issues #105 and #128). Every continuous/discrete/convenience/coefficientArray parameter of the production module catalog has exactly one entry here. status 'mapped' = the production generator assigns it today from the listed drivers and ruleId appears in the generation trace; status 'provisional' = reachable and declared, coefficient explicitly uncalibrated, note names the owning leaf. No provisional entry remains: #128 (W19) resolved the phase-4 additions and the pre-existing harmonic.partialPans gap, and the mapping-coverage test now fails on any provisional entry. An empty drivers list is a failure, not a status. Drivers are existing SonicIntent axes (density, brightness, rigidity, roughness, decay, harmonicity, motion) and structuralDetail fields (bondOrderMean, bondOrderSpread, heteroPlacement, motifPlacement); phase 4 adds no new analysis fields. D12 (#166, phase 5 #165): the `osc` and `wavetable` source types land ahead of the ground-up mapper rework, so their entries carry status 'unmapped' — the generator does not emit them yet, the drivers list is empty and the note names the owning roadmap. 'unmapped' is accepted for those two modules only; the owner's phase-5 rule is that curated beats complete, so the rework may leave parameters unreachable from chemistry, but it must replace these entries with its own decision.",
  "entries": [
   {
    "module": "harmonic",
@@ -916,6 +916,198 @@
     "density"
    ],
    "note": "1 - 0.1*density"
+  },
+  {
+   "module": "osc",
+   "parameter": "waveform",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "pulseWidth",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "outputLevel",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "unisonVoices",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "detuneCents",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "unisonSpread",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "phaseRandom",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "drift",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "octave",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "coarse",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "fine",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "osc",
+   "parameter": "keytrack",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "table",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "position",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "outputLevel",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "unisonVoices",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "detuneCents",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "unisonSpread",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "phaseRandom",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "drift",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "octave",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "coarse",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "fine",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
+  },
+  {
+   "module": "wavetable",
+   "parameter": "keytrack",
+   "status": "unmapped",
+   "ruleId": "D12-unmapped",
+   "drivers": [],
+   "note": "phase 5 mapper rework (#165) owns this entry"
   }
  ]
 }

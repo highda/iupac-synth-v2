@@ -16,7 +16,10 @@ import unittest
 AXES = {"density", "brightness", "rigidity", "roughness", "decay", "harmonicity", "motion"}
 DETAIL = {"bondOrderMean", "bondOrderSpread", "heteroPlacement", "motifPlacement"}
 DRIVERS = AXES | DETAIL
-STATUSES = {"mapped", "provisional"}
+STATUSES = {"mapped", "provisional", "unmapped"}
+# D12 (#166): the two source types that landed ahead of the phase-5 mapper rework (#165). Only
+# these may be `unmapped`; every other module still has to be reachable from chemistry.
+UNMAPPED_MODULES = {"osc", "wavetable"}
 REQUIRED = ("module", "parameter", "status", "ruleId", "drivers", "note")
 # Every parameter kind the descriptor vocabulary defines; all of them need an entry.
 COVERED_KINDS = {"continuous", "discrete", "convenience", "coefficientArray"}
@@ -67,6 +70,10 @@ class CoverageTests(unittest.TestCase):
                 self.assertIn(field, entry, f"{label} is missing '{field}'")
             self.assertIn(entry["status"], STATUSES, f"{label} has status {entry['status']!r}")
             self.assertTrue(entry["ruleId"], f"{label} has no ruleId")
+            if entry["status"] == "unmapped":
+                self.assertIn(entry["module"], UNMAPPED_MODULES, f"{label} may not be unmapped: only the D12 source types are")
+                self.assertTrue(entry["note"], f"{label} is unmapped with no owner in 'note'")
+                continue
             self.assertTrue(entry["drivers"], f"{label} has an empty drivers list: that is a failure, not a status")
             unknown = sorted(set(entry["drivers"]) - DRIVERS)
             self.assertEqual(unknown, [], f"{label} names drivers that are not SonicIntent axes or structuralDetail fields: {unknown}")
@@ -80,7 +87,7 @@ class CoverageTests(unittest.TestCase):
         # CHEMISTRY.md: a provisional entry must be resolved to `mapped` with calibration evidence
         # before the release candidate. #128 (W19) resolved the last of them, so the table carries
         # none and a new parameter cannot land provisional by default.
-        pending = sorted(f"{e['module']}.{e['parameter']}" for e in self.entries if e["status"] != "mapped")
+        pending = sorted(f"{e['module']}.{e['parameter']}" for e in self.entries if e["status"] == "provisional")
         self.assertEqual(pending, [], f"parameters still provisional, with no leaf left to own them: {pending}")
 
 

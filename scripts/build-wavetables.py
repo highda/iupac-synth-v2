@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Sampled wavetables for the `wavetable` source (D12, #166).
+
+The sampled tables are single-cycle waveforms from Adventure Kid Waveforms (AKWF-FREE, CC0-1.0),
+vendored under `third_party/akwf/` with the upstream licence and a manifest of file hashes.
+
+  build-wavetables.py                 regenerate src/engine/WavetableData.cpp from the vendored files
+  build-wavetables.py --check         fail when the generated source is stale (offline, stdlib only)
+  build-wavetables.py --select DIR    maintainer refresh: choose frames from an upstream checkout
+                                      (needs NumPy) and rewrite third_party/akwf/, then regenerate
+
+A table is up to sixteen cycles of one upstream folder. `--select` orders a folder's cycles by
+spectral centroid and keeps sixteen evenly spaced ones, so `position` sweeps dark to bright
+through real variations of one instrument rather than through an arbitrary file order.
+"""
+import argparse, hashlib, json, shutil, struct, sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+VENDOR = ROOT / "third_party/akwf"
+GENERATED = ROOT / "src/engine/WavetableData.cpp"
+UPSTREAM = "https://github.com/KristofferKarlAxelEkstrand/AKWF-FREE"
+FRAMES = 16
+CYCLE = 600
+# Catalog order after the eight synthesized tables. Append only: a stored `table` index is ABI.
+TABLES = (("cello", "AKWF_cello"), ("violin", "AKWF_violin"), ("flute", "AKWF_flute"), ("clarinet", "AKWF_clarinett"),
+          ("oboe", "AKWF_oboe"), ("altosax", "AKWF_altosax"), ("piano", "AKWF_piano"), ("epiano", "AKWF_epiano"),
+          ("eorgan", "AKWF_eorgan"), ("aguitar", "AKWF_aguitar"), ("eguitar", "AKWF_eguitar"), ("ebass", "AKWF_ebass"),
+          ("dbass", "AKWF_dbass"), ("voice", "AKWF_hvoice"), ("fmsynth", "AKWF_fmsynth"), ("chip", "AKWF_oscchip"),
+          ("vgame", "AKWF_vgame"), ("granular", "AKWF_granular"), ("overtone", "AKWF_overtone"), ("blended", "AKWF_bw_blended"),
+          ("distorted", "AKWF_distorted"), ("handdrawn", "AKWF_hdrawn"), ("theremin", "AKWF_theremin"), ("clavinet", "AKWF_clavinet"))
+
+
+def read_cycle(path):
+    """The 16-bit mono PCM of one AKWF file, or None when it is not the 600-sample original format."""
+    raw = path.read_bytes()
+    if raw[:4] != b"RIFF" or raw[8:12] != b"WAVE":
+        return None
+    offset, fmt, data = 12, None, None
+    while offset + 8 <= len(raw):
+        tag, size = raw[offset:offset + 4], struct.unpack("<I", raw[offset + 4:offset + 8])[0]
+        body = raw[offset + 8:offset + 8 + size]
+        if tag == b"fmt ": fmt = struct.unpack("<HHIIHH", body[:16])
+        elif tag == b"data": data = body
+        offset += 8 + size + (size & 1)
+    if not fmt or data is None or fmt[0] != 1 or fmt[1] != 1 or fmt[5] != 16 or len(data) != 2 * CYCLE:
+        return None
+    return list(struct.unpack(f"<{CYCLE}h", data))
+
+
+def select(upstream):
+    import numpy as np
+    revision = (upstream / ".git").exists() and __import__("subprocess").run(
+        ["git", "-C", str(upstream), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+    if VENDOR.exists():
+        shutil.rmtree(VENDOR)
+    (VENDOR / "waveforms").mkdir(parents=True)
+    shutil.copy(upstream / "LICENSE.md", VENDOR / "LICENSE.md")
+    manifest = {"source": UPSTREAM, "revision": revision or None, "license": "CC0-1.0", "cycleSamples": CYCLE, "tables": []}
+    for name, folder in TABLES:
+        scored = []
+        for path in sorted((upstream / "AKWF" / folder).glob("*.wav")):
+            cycle = read_cycle(path)
+            if cycle is None:
+                continue
+            spectrum = np.abs(np.fft.rfft(np.array(cycle, dtype=float)))[1:CYCLE // 2]
+            if spectrum.sum() <= 0:
+                continue
+            scored.append((float((spectrum * np.arange(1, len(spectrum) + 1)).sum() / spectrum.sum()), path))
+        scored.sort(key=lambda item: (item[0], item[1].name))
+        if len(scored) > FRAMES:
+            scored = [scored[round(i * (len(scored) - 1) / (FRAMES - 1))] for i in range(FRAMES)]
+        if len(scored) < 2:
+            raise SystemExit(f"{folder}: fewer than two usable cycles")
+        target = VENDOR / "waveforms" / name
+        target.mkdir()
+        files = []
+        for _, path in scored:
+            shutil.copy(path, target / path.name)
+            files.append({"file": path.name, "upstream": f"AKWF/{folder}/{path.name}", "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+        manifest["tables"].append({"name": name, "upstreamFolder": folder, "frames": files})
+    (VENDOR / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
+
+
+def generate():
+    manifest = json.loads((VENDOR / "manifest.json").read_text())
+    if [t["name"] for t in manifest["tables"]] != [name for name, _ in TABLES]:
+        raise SystemExit("third_party/akwf/manifest.json does not list the catalog's tables in order")
+    lines = ["// Generated by scripts/build-wavetables.py from third_party/akwf (AKWF-FREE, CC0-1.0,",
+             f"// revision {manifest['revision']}). Do not edit: regenerate.",
+             '#include "iupac/engine/Wavetables.hpp"', "", "namespace iupac::engine", "{",
+             f"const std::array<SampledWavetable, sampledWavetableCount> sampledWavetables{{{{"]
+    for table in manifest["tables"]:
+        cycles = []
+        for frame in table["frames"]:
+            path = VENDOR / "waveforms" / table["name"] / frame["file"]
+            if hashlib.sha256(path.read_bytes()).hexdigest() != frame["sha256"]:
+                raise SystemExit(f"{path}: hash differs from the manifest")
+            cycles.append(read_cycle(path))
+        lines.append(f"    {{{len(cycles)}, {{{{")
+        for cycle in cycles:
+            lines.append("        {{" + ",".join(map(str, cycle)) + "}},")
+        lines.append("    }}},")
+    lines += ["}};", "}", ""]
+    return "\n".join(lines)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--select", type=Path)
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    if args.select:
+        select(args.select)
+    text = generate()
+    if args.check:
+        if not GENERATED.is_file() or GENERATED.read_text() != text:
+            raise SystemExit(f"{GENERATED.relative_to(ROOT)} is stale: run scripts/build-wavetables.py")
+        print("sampled wavetable source is up to date")
+        return
+    GENERATED.write_text(text)
+    print(f"wrote {GENERATED.relative_to(ROOT)}")
+
+
+if __name__ == "__main__":
+    main()

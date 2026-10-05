@@ -80,6 +80,9 @@ struct ModuleValues
     float timeMs{375.0f}, spread{}, damping{0.4f};
     float size{0.5f}, decaySeconds{2.0f}, preDelayMs{20.0f}, width{1.0f}, bassMonoHz{120.0f};
     int unisonVoices{1}, octave{}, coarse{}, waveform{}, curve{}, voices{2}, syncMode{}, syncDivision{4};
+    // D12 (#166): the classic oscillator's pulse width and the wavetable source's table and frame position.
+    float pulseWidth{0.5f}, position{};
+    int table{};
 };
 
 // The prepared reverb network. It is a plain value type owned by whoever prepares the tail (the
@@ -236,6 +239,9 @@ private:
     // One sample of the 24 dB ladder for one channel: input saturation folds the resonant feedback
     // in, so the output can never leave [-1, 1] however high `q` and `drive` are driven.
     float ladderSample(std::size_t channel, float input) noexcept;
+    // D12 wavetable source (#166): the octave band the current pitch reads, cached against the
+    // fundamental (`cachedFundamental_`, which only FM otherwise uses).
+    int wavetableLevel_{};
 };
 
 // Per-voice modulator sources. D8 (#125) adds the stage curves, the four new LFO shapes, the LFO
@@ -298,8 +304,9 @@ private:
 // fourteen keep their positions so a stored effective-value column never moves.
 enum class ParameterTarget : std::uint8_t { carrierRatio, modulatorRatio, index, burstMilliseconds, tuneRatio, combFeedback, modalQ, cutoff, q, drive, wet, level, pan, outputLevel,
                                             detuneCents, unisonSpread, drift, harmonicityMorph, oddEvenBalance, symmetry, fine, keytrack, modInDepth, exciteDepth, envAmount,
-                                            rate, depth, feedback, mix, timeMs, spread, damping, size, decaySeconds, preDelayMs, width, bassMonoHz };
-inline constexpr std::size_t parameterTargetCount = static_cast<std::size_t>(ParameterTarget::bassMonoHz) + 1;
+                                            rate, depth, feedback, mix, timeMs, spread, damping, size, decaySeconds, preDelayMs, width, bassMonoHz,
+                                            pulseWidth, position };
+inline constexpr std::size_t parameterTargetCount = static_cast<std::size_t>(ParameterTarget::position) + 1;
 // Catalog range of one matrix-eligible scalar, resolved at compile time so the audio thread can normalize without catalog lookups.
 struct CompiledRange { float minimum{}, maximum{1}; domain::ParameterScale scale{}; bool eligible{}; };
 struct CompiledNode { domain::ModuleType type{}; ModuleValues values{}; std::uint32_t idHash{}; std::array<CompiledRange, parameterTargetCount> ranges{}; };

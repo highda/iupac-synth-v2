@@ -1,4 +1,5 @@
 #include "iupac/engine/Engine.hpp"
+#include "iupac/engine/Wavetables.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -24,6 +25,24 @@ float triangleWave(double phase) noexcept {const auto scaled=static_cast<float>(
 // a source to one pitch and 1 is the ordinary keyboard. C4 is the reference the mapper already
 // treats as the instrument centre (`keyTracking` is (note - 60) / 36 in the matrix).
 constexpr int keytrackReferenceNote = 60;
+// D12 classic oscillator (#166). `t` is the phase in [0, 1) and `dt` the phase step per sample.
+// polyBLEP is the two-sample polynomial residual of a band-limited unit step, subtracted around
+// each discontinuity; polyBLAMP is its integral, the residual of a band-limited corner, and is
+// what keeps the triangle's two slope changes from aliasing. At the 2x internal rate both leave
+// the audible band clean well past the top of the keyboard.
+float polyBlep(double t,double dt) noexcept
+{
+    if(t<dt){const auto x=t/dt;return static_cast<float>(x+x-x*x-1.0);}
+    if(t>1.0-dt){const auto x=(t-1.0)/dt;return static_cast<float>(x*x+x+x+1.0);}
+    return 0.0f;
+}
+float polyBlamp(double t,double dt) noexcept
+{
+    double x;
+    if(t<dt)x=t/dt;else if(t>1.0-dt)x=(1.0-t)/dt;else return 0.0f;
+    const auto y=1.0-x;return static_cast<float>(y*y*y/6.0);
+}
+double wrapUnit(double t) noexcept {return t>=1.0?t-1.0:t;}
 float fastTanh(float value)noexcept{if(value>=5)return 1;if(value<=-5)return-1;return juce::dsp::FastMathApproximations::tanh(value);}
 // D9 delegates the chorus modulation shape and the delay's sync arithmetic (#123).
 // The chorus is `voices` taps on one prepared stereo line, each swept by the same sine at a phase
@@ -193,7 +212,7 @@ void ModuleProcessor::noteOn(int note,int channel,std::uint32_t seed,std::uint32
     // holds. Only the three unison/drift-capable source types draw, so the noise stream is untouched
     // and a pre-D8 noise node still renders the identical sequence. The draws happen whatever
     // `unisonVoices` is, so the stream does not depend on the copy count either.
-    if(type_==domain::ModuleType::harmonic||type_==domain::ModuleType::fm||type_==domain::ModuleType::sub)
+    if(type_==domain::ModuleType::harmonic||type_==domain::ModuleType::fm||type_==domain::ModuleType::sub||type_==domain::ModuleType::osc||type_==domain::ModuleType::wavetable)
     {
         const auto unit=[this]{return (nextNoise()+1.0f)*.5f;};
         for(auto& v:unisonPhase_)v=unit();for(auto& v:unisonModPhase_)v=unit();
@@ -242,6 +261,8 @@ void ModuleProcessor::process(const ModuleValues& p,float fundamental,std::span<
         case ModuleType::delay:    return processTyped<ModuleType::delay>(p,fundamental,inL,inR,outL,outR,modL,modR);
         case ModuleType::reverb:   return processTyped<ModuleType::reverb>(p,fundamental,inL,inR,outL,outR,modL,modR);
         case ModuleType::width:    return processTyped<ModuleType::width>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::osc:      return processTyped<ModuleType::osc>(p,fundamental,inL,inR,outL,outR,modL,modR);
+        case ModuleType::wavetable:return processTyped<ModuleType::wavetable>(p,fundamental,inL,inR,outL,outR,modL,modR);
     }
 }
 template<domain::ModuleType kType>
@@ -254,7 +275,8 @@ void ModuleProcessor::processTyped(const ModuleValues& p,float fundamental,std::
     // phase offset the FM branch adds (`fastSin` wraps by subtraction, so an unbounded phase would
     // be an unbounded loop) and keeps the resonator's excitation finite.
     const bool audioRateInput=modL.size()>=count&&modR.size()>=count;fundamental=clampFinite(fundamental,1,static_cast<float>(sampleRate_*.45),440);auto output=clampFinite(p.outputLevel,0,1,0);
-    const bool unisonSource=kType==domain::ModuleType::harmonic||kType==domain::ModuleType::fm;
+    const bool phaseSource=kType==domain::ModuleType::osc||kType==domain::ModuleType::wavetable;
+    const bool unisonSource=kType==domain::ModuleType::harmonic||kType==domain::ModuleType::fm||phaseSource;
     const bool pitchedSource=unisonSource||kType==domain::ModuleType::sub;
     const auto requestedCopies=unisonSource?std::clamp(p.unisonVoices,1,static_cast<int>(maximumUnisonVoices)):1;
     // (#144) Everything a pitched source derives from its controls rather than from the sample in
@@ -320,6 +342,8 @@ void ModuleProcessor::processTyped(const ModuleValues& p,float fundamental,std::
         {
             const auto phase=twoPi*random*unisonPhase_[c];
             if(kType==domain::ModuleType::harmonic){harmonicSin_[c].fill(static_cast<float>(std::sin(phase)));harmonicCos_[c].fill(static_cast<float>(std::cos(phase)));}
+            // The D12 sources keep their phase as a fraction of a cycle in [0, 1).
+            else if(phaseSource)phases_[c]=std::clamp(static_cast<double>(random*unisonPhase_[c]),0.0,0.999999);
             else {phases_[c]=std::remainder(phase,twoPi);modPhases_[c]=std::remainder(twoPi*random*unisonModPhase_[c],twoPi);}
         }
     }
@@ -442,7 +466,63 @@ void ModuleProcessor::processTyped(const ModuleValues& p,float fundamental,std::
         // One test covers the whole effects region and the branches inside it are only reached by a
         // node that is actually in the tail: `process()` runs once per sample, so a mixer at the end
         // of this chain must not pay a comparison per effect type (#122 measured what that costs).
-        else if(kType>=domain::ModuleType::chorus)
+        // D12 classic oscillator (#166). One band-limited shape per unison copy: the sine is evaluated
+        // directly, the saw and the pulse carry a polyBLEP at each step and the triangle a polyBLAMP
+        // at each corner. `pulseWidth` shapes the square only; its DC term (2w - 1) is removed so a
+        // narrow pulse never leans on the V5 DC bound, and it is matrix-modulatable, which is PWM.
+        else if(kType==domain::ModuleType::osc)
+        {
+            const auto wave=std::clamp(p.waveform,0,3);const auto width=static_cast<double>(clampFinite(p.pulseWidth,.05f,.95f,.5f));
+            l=r=0;
+            for(std::size_t c=0;c<static_cast<std::size_t>(copies);++c)
+            {
+                const auto t=phases_[c];const auto dt=std::min(.45,static_cast<double>(fundamental)*detuneMultiplier_[c]/sampleRate_);
+                float s;
+                switch(wave)
+                {
+                    case 0: s=-fastSin(twoPi*(t-.5));break;
+                    case 1: s=static_cast<float>(1.0-4.0*std::abs(t-.5))+static_cast<float>(8.0*dt)*(polyBlamp(t,dt)-polyBlamp(wrapUnit(t+.5),dt));break;
+                    case 2: s=static_cast<float>(2.0*t-1.0)-polyBlep(t,dt);break;
+                    default:s=(t<width?1.0f:-1.0f)+polyBlep(t,dt)-polyBlep(wrapUnit(t+1.0-width),dt)-static_cast<float>(2.0*width-1.0);break;
+                }
+                l+=s*unisonPanLeft_[c];r+=s*unisonPanRight_[c];
+                phases_[c]=t+dt;if(phases_[c]>=1.0)phases_[c]-=1.0;
+            }
+        }
+        // D12 wavetable source (#166). Each copy reads two adjacent frames of the selected table at
+        // the octave band its own pitch allows and crossfades them by `position`. The band is chosen
+        // from the highest copy's frequency, so every stored harmonic sits below 0.45 of the internal
+        // rate; a band switch only ever adds or removes content above the audible range.
+        else if(kType==domain::ModuleType::wavetable)
+        {
+            l=r=0;
+            const auto table=static_cast<std::size_t>(std::clamp(p.table,0,static_cast<int>(wavetableCount)-1));
+            // An unbuilt table is silence, never a build: the compiler builds every table a patch names.
+            if(const auto* wave=wavetableIfBuilt(table))
+            {
+                const auto top=static_cast<double>(fundamental)*detuneMultiplier_[static_cast<std::size_t>(copies-1)];
+                if(fundamental!=cachedFundamental_||unisonDirty_)
+                {
+                    cachedFundamental_=fundamental;unisonDirty_=false;
+                    const auto allowed=sampleRate_*.45/std::max(1.0,top);
+                    int level=0;while(static_cast<double>(wavetableLevelHarmonics(static_cast<std::size_t>(level)))>allowed&&level<static_cast<int>(wavetableLevels)-1)++level;
+                    wavetableLevel_=level;
+                }
+                const auto level=static_cast<std::size_t>(wavetableLevel_);const auto size=wavetableLevelSize(level);
+                const auto scaled=clampFinite(p.position,0,1,0)*static_cast<float>(wavetableFrames-1);
+                const auto first=std::min(static_cast<std::size_t>(scaled),wavetableFrames-2);const auto blend=scaled-static_cast<float>(first);
+                const auto* a=wave->frame(first,level);const auto* b=wave->frame(first+1,level);
+                for(std::size_t c=0;c<static_cast<std::size_t>(copies);++c)
+                {
+                    const auto t=phases_[c];const auto dt=std::min(.45,static_cast<double>(fundamental)*detuneMultiplier_[c]/sampleRate_);
+                    const auto x=t*static_cast<double>(size);const auto i=std::min(static_cast<std::size_t>(x),size-1);const auto f=static_cast<float>(x-static_cast<double>(i));
+                    const auto sa=a[i]+(a[i+1]-a[i])*f,sb=b[i]+(b[i+1]-b[i])*f;const auto s=sa+(sb-sa)*blend;
+                    l+=s*unisonPanLeft_[c];r+=s*unisonPanRight_[c];
+                    phases_[c]=t+dt;if(phases_[c]>=1.0)phases_[c]-=1.0;
+                }
+            }
+        }
+        else if(kType>=domain::ModuleType::chorus&&kType<=domain::ModuleType::width)
         {
         if(kType==domain::ModuleType::chorus&&effect_)
         {

@@ -54,7 +54,7 @@ bool runPatchTests()
 {
     bool ok = true;
     const auto& catalog = moduleCatalog();
-    ok &= expect(catalog.size() == moduleTypeCount && moduleTypeCount == 12, "twelve stable module types");
+    ok &= expect(catalog.size() == moduleTypeCount && moduleTypeCount == 14, "fourteen stable module types");
     for (const auto& module : catalog)
         for (const auto& parameter : module.parameters)
         {

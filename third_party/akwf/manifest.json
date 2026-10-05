@@ -1,0 +1,2047 @@
+{
+ "source": "https://github.com/KristofferKarlAxelEkstrand/AKWF-FREE",
+ "revision": "8de90bf94376670947369e69de0af6b9fbd19286",
+ "license": "CC0-1.0",
+ "cycleSamples": 600,
+ "tables": [
+  {
+   "name": "cello",
+   "upstreamFolder": "AKWF_cello",
+   "frames": [
+    {
+     "file": "AKWF_cello_0019.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0019.wav",
+     "sha256": "6260f45f21167f56e632c236c91dcfaa465e4611d1310863c74d12e0419619ac"
+    },
+    {
+     "file": "AKWF_cello_0003.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0003.wav",
+     "sha256": "e7ad3ec32dd0a74830dc60b19fa3c034f4da8d309b3bd1dcd621226f58d48b0d"
+    },
+    {
+     "file": "AKWF_cello_0006.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0006.wav",
+     "sha256": "d050195e69c89108fb5bc8514414c2de18e57c28c7cf3773175c77379f225636"
+    },
+    {
+     "file": "AKWF_cello_0012.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0012.wav",
+     "sha256": "d84570a015f616d3e02652cb1f4ce980d2ef59abfb2d324d82197472ce5f9b6e"
+    },
+    {
+     "file": "AKWF_cello_0007.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0007.wav",
+     "sha256": "5ccd289970631688d789e6810317a6d622e1eab44996dd6d3ff44fbb3c1c5053"
+    },
+    {
+     "file": "AKWF_cello_0018.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0018.wav",
+     "sha256": "dc1c92354c2cae3765c17c8863b197f8f650c2f49b0c9c9a69837e3903dd4798"
+    },
+    {
+     "file": "AKWF_cello_0011.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0011.wav",
+     "sha256": "34c87525fcee7a42b66ac5823a6eeb9741a83eeb7eb25fd1f26ddfb74a0b87fc"
+    },
+    {
+     "file": "AKWF_cello_0005.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0005.wav",
+     "sha256": "db6bcf0728014527b542886e22d5d67cb09d77e4d91ac050acc092491d36a929"
+    },
+    {
+     "file": "AKWF_cello_0016.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0016.wav",
+     "sha256": "061f1b137bbb893830542005d1b2f31c6216e9fce80c28017361c2d4f17ce92a"
+    },
+    {
+     "file": "AKWF_cello_0009.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0009.wav",
+     "sha256": "153026a0b94d5e9d747dd85bff16e796d4b0f219e0b5a8d8a5ae6a0357e54d03"
+    },
+    {
+     "file": "AKWF_cello_0015.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0015.wav",
+     "sha256": "e4ba6ea03aaba5af417350849e9564ddfa09b9bfdd9c7ebbf1e5d4c8b851859b"
+    },
+    {
+     "file": "AKWF_cello_0010.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0010.wav",
+     "sha256": "66ee2079918d554b6273cffc4b202900c1e5afa487c43cdf5c69e5cb6071ab5b"
+    },
+    {
+     "file": "AKWF_cello_0008.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0008.wav",
+     "sha256": "d97de17ca8df679f5077e169f114e1bab5aae1e8ee84428affee8cf9f0ea1175"
+    },
+    {
+     "file": "AKWF_cello_0014.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0014.wav",
+     "sha256": "db5fd6bf41ead68fc219f3bed7dcd34de9eb2061066da07083a2e127807b9fc2"
+    },
+    {
+     "file": "AKWF_cello_0004.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0004.wav",
+     "sha256": "b75e0df1adacaa7fe38156dfa9829a8e029d4debaaac709c051fecd19d2ee34d"
+    },
+    {
+     "file": "AKWF_cello_0001.wav",
+     "upstream": "AKWF/AKWF_cello/AKWF_cello_0001.wav",
+     "sha256": "3f71289e6d7ee612b233957e6b5930ec77ffee266caed76c7b2ce4f2ad72ac83"
+    }
+   ]
+  },
+  {
+   "name": "violin",
+   "upstreamFolder": "AKWF_violin",
+   "frames": [
+    {
+     "file": "AKWF_violin_0014.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0014.wav",
+     "sha256": "d65d91dd5722d8a6bb378b7b476c1118c63a797d5a25f3b84911aa9b7a97d49a"
+    },
+    {
+     "file": "AKWF_violin_0011.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0011.wav",
+     "sha256": "e8f09b1cbd1f1d2571f621ba0283d784293dca9a8ee9b791d88af26c449873fe"
+    },
+    {
+     "file": "AKWF_violin_0012.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0012.wav",
+     "sha256": "9753cab368c7e2d0d6009f20461a55bbb6e500f8894f4e41b129532565234d3f"
+    },
+    {
+     "file": "AKWF_violin_0009.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0009.wav",
+     "sha256": "e6ffdc3524af427d9db086dca8da39dca3b7f6dd6e29afbf34b5533d412725ab"
+    },
+    {
+     "file": "AKWF_violin_0010.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0010.wav",
+     "sha256": "b35c1e20d446e733cab222cfa4defa30838ad03b02be6c6994f98c587eca4b9e"
+    },
+    {
+     "file": "AKWF_violin_0013.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0013.wav",
+     "sha256": "8881c615e42209ee7bab3e887e92edd007f2a91f748e463becd1361fcc8dc69c"
+    },
+    {
+     "file": "AKWF_violin_0006.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0006.wav",
+     "sha256": "dd14c14ccda8f8445fe89d3a5886331feded3bc25d833872f31186664dd34133"
+    },
+    {
+     "file": "AKWF_violin_0005.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0005.wav",
+     "sha256": "14e115b50c3831e5c7792b5fc4612d197a3c9bab8da0c43c3468a71f29b8dedc"
+    },
+    {
+     "file": "AKWF_violin_0008.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0008.wav",
+     "sha256": "50fadb21dc9f9355b1fef1c4c087ccdfd9f1095e3e36a842b9eb7f8abe004189"
+    },
+    {
+     "file": "AKWF_violin_0003.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0003.wav",
+     "sha256": "c245a6296f668d193aa819db89966f62f6dd691f5365b5043dd4f7d99482fe3c"
+    },
+    {
+     "file": "AKWF_violin_0004.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0004.wav",
+     "sha256": "048f4072c55228d8824cb398bb79d1ab78b3beacf6deddb396d8adc98699c37e"
+    },
+    {
+     "file": "AKWF_violin_0007.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0007.wav",
+     "sha256": "3021d1f6a4d84f421cd27b0fe031b3b4718c9486953bd2868e912dadd371493d"
+    },
+    {
+     "file": "AKWF_violin_0002.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0002.wav",
+     "sha256": "a43eb1fe9b8100ceb5f3049c15fc807070f864230d79d0a50afb26baa8d81221"
+    },
+    {
+     "file": "AKWF_violin_0001.wav",
+     "upstream": "AKWF/AKWF_violin/AKWF_violin_0001.wav",
+     "sha256": "8d725ce44162ec4c51513182a23626b44dd17b1a80b2180f582fca1682cf2eb9"
+    }
+   ]
+  },
+  {
+   "name": "flute",
+   "upstreamFolder": "AKWF_flute",
+   "frames": [
+    {
+     "file": "AKWF_flute_0014.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0014.wav",
+     "sha256": "40e2fcff9ccbbbc4f19ba936a45bb2489d01b7f4a43e6b499091d6e287c50b13"
+    },
+    {
+     "file": "AKWF_flute_0013.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0013.wav",
+     "sha256": "c729bd1dc562c6d5e0e63d00a3431e7ae4bbdd854ced6f14e0acf7247ee46c44"
+    },
+    {
+     "file": "AKWF_flute_0009.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0009.wav",
+     "sha256": "70346d17cba71933385aa99f26d21a4a02a44fe8d8e7dbfc6e056dc1cdd011b3"
+    },
+    {
+     "file": "AKWF_flute_0008.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0008.wav",
+     "sha256": "26d5bd4b0a69cc1c0b553f4cf9f832aad9a78ae079855c5d2adcb31b12db7843"
+    },
+    {
+     "file": "AKWF_flute_0012.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0012.wav",
+     "sha256": "75fd57f9adef743b7d5d6d68178a9798a0e648d58be2c3a1f1364731f794593f"
+    },
+    {
+     "file": "AKWF_flute_0010.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0010.wav",
+     "sha256": "d8ecd8473a0bf7370961298668d92496bed797cf34ae276c4f11915ec4b42cd9"
+    },
+    {
+     "file": "AKWF_flute_0011.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0011.wav",
+     "sha256": "b066026ab36614548e0a9dd31c72dd2ba067aefd3d55dcee159a826417fd697c"
+    },
+    {
+     "file": "AKWF_flute_0007.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0007.wav",
+     "sha256": "680de0cee4df415d10d33846f928c2d91c5c571bc08d135b4ab8ec6d9647c3a4"
+    },
+    {
+     "file": "AKWF_flute_0015.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0015.wav",
+     "sha256": "8e58931a9c3bedced2314a16030ead10f8be34f64e5e4815c48bf661710fcf3f"
+    },
+    {
+     "file": "AKWF_flute_0016.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0016.wav",
+     "sha256": "a8a90be960cecbc098becce63829ca3c01a5f44d2b10e3b20d71a3ba2615bbe6"
+    },
+    {
+     "file": "AKWF_flute_0001.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0001.wav",
+     "sha256": "9c84f3e721a7b6a6e74420ac0674a62f9ea0a171c0f59feb9ad4a1c2dafe0311"
+    },
+    {
+     "file": "AKWF_flute_0005.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0005.wav",
+     "sha256": "847e1984a608f58141ba4f72b0d88d961d1956568295e7ad87fc38f0a70ad1e5"
+    },
+    {
+     "file": "AKWF_flute_0002.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0002.wav",
+     "sha256": "0aa7db22bf94af093be48af09cc962363afd3c29af53d85a14f17a4d35d8d062"
+    },
+    {
+     "file": "AKWF_flute_0004.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0004.wav",
+     "sha256": "1a4b13b34f43957ffc0dc306588383fe006558bc62b53fd03bfa68054a56caaf"
+    },
+    {
+     "file": "AKWF_flute_0017.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0017.wav",
+     "sha256": "e23ddd796fd0aa98d20966b83ed7c6303fd4cb1866590e00f71c24d28078cd1b"
+    },
+    {
+     "file": "AKWF_flute_0003.wav",
+     "upstream": "AKWF/AKWF_flute/AKWF_flute_0003.wav",
+     "sha256": "b7cd16edef32c96f89d033ae62182e73a51747d3f2bb9c88f30508081ecac35c"
+    }
+   ]
+  },
+  {
+   "name": "clarinet",
+   "upstreamFolder": "AKWF_clarinett",
+   "frames": [
+    {
+     "file": "AKWF_clarinett_0011.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0011.wav",
+     "sha256": "db63a4019f31e02963a0e74ce11521e09c6e09504c3094b567d8cccd4f7f058d"
+    },
+    {
+     "file": "AKWF_clarinett_0008.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0008.wav",
+     "sha256": "29cec90d022a4815f86bfa99d2c28102c4b6bb5f58631d8b88c74ea2ede080e6"
+    },
+    {
+     "file": "AKWF_clarinett_0009.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0009.wav",
+     "sha256": "342091423bdaa749c1f07e001aa24119790d486bc70ea9c37fa45659cb6fb082"
+    },
+    {
+     "file": "AKWF_clarinett_0007.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0007.wav",
+     "sha256": "40da73ddc74149b7eebd8081359affc843dcbf08d5fe00b9f4286b80f7d6ade5"
+    },
+    {
+     "file": "AKWF_clarinett_0006.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0006.wav",
+     "sha256": "6a990779441f58cfba126e87797a539db3b7b680f8828c28688b5432bcbc5a3e"
+    },
+    {
+     "file": "AKWF_clarinett_0019.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0019.wav",
+     "sha256": "290701760dbf77f1cd82c4b97717db14a0c23c8d1e20f9bdb2d62f4833fe7585"
+    },
+    {
+     "file": "AKWF_clarinett_0014.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0014.wav",
+     "sha256": "68bf055ac2dc138d2040d3bb9a01cfacd90ad153020573ac6b6424c967e7bafa"
+    },
+    {
+     "file": "AKWF_clarinett_0005.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0005.wav",
+     "sha256": "3fa8dad178f4ce6cd767edb093abb19293ebd493a20065b316413566b9e820be"
+    },
+    {
+     "file": "AKWF_clarinett_0015.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0015.wav",
+     "sha256": "8c9a124e11f3445f4d9db83d176047c054ef19fb107551e326435adaae345d1e"
+    },
+    {
+     "file": "AKWF_clarinett_0004.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0004.wav",
+     "sha256": "15517673f8b622586971a346b776ba64b07936c2eafda6039132c33ed8cd77e9"
+    },
+    {
+     "file": "AKWF_clarinett_0022.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0022.wav",
+     "sha256": "34d15891e56ed495e0007aabd125d339db7a243dc9bd2e581c746eba4ee227c6"
+    },
+    {
+     "file": "AKWF_clarinett_0021.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0021.wav",
+     "sha256": "d3dd27c05cfaeaa2aaacb619868e32316d4b3baea88b2bb35e0b15cdee27c1b4"
+    },
+    {
+     "file": "AKWF_clarinett_0001.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0001.wav",
+     "sha256": "3d1b4335917313a14a7c79f0a770c3ad0d99dd039a0ba220f16cc80d2e18584f"
+    },
+    {
+     "file": "AKWF_clarinett_0002.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0002.wav",
+     "sha256": "3cc3a66cfe241b1bd1d7f7121feb95b5a2e1dc7fd39ce6f13a38aa97809fe6a9"
+    },
+    {
+     "file": "AKWF_clarinett_0023.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0023.wav",
+     "sha256": "c7459a5c25202bd071bca469f58aab29d0315066079845419ec5a1cf8305eedb"
+    },
+    {
+     "file": "AKWF_clarinett_0020.wav",
+     "upstream": "AKWF/AKWF_clarinett/AKWF_clarinett_0020.wav",
+     "sha256": "6efab3016c31c70ac5e532df8807bbc58b12d8b9664ff0ea6f652f8dfbb354cb"
+    }
+   ]
+  },
+  {
+   "name": "oboe",
+   "upstreamFolder": "AKWF_oboe",
+   "frames": [
+    {
+     "file": "AKWF_oboe_0009.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0009.wav",
+     "sha256": "f5d97be045f912a003ed1bac5c45c7ecea0dc3f19160ba3c48d985748c33b57b"
+    },
+    {
+     "file": "AKWF_oboe_0008.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0008.wav",
+     "sha256": "735ac1931bc6cc2f4bee9e1aa670d2a4de8e7dbff8795c651efdf6fc0c02505a"
+    },
+    {
+     "file": "AKWF_oboe_0007.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0007.wav",
+     "sha256": "94bebd48fc71a04169105c07e81cde233cae6a8484e12bc5a3b09b29536235ad"
+    },
+    {
+     "file": "AKWF_oboe_0001.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0001.wav",
+     "sha256": "b6fb29a31325bc13e14901dc086ec8a30a93e8aca4df1ea00e905cc99aeecc77"
+    },
+    {
+     "file": "AKWF_oboe_0005.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0005.wav",
+     "sha256": "12b409f18fc76b820f48075f906d03449fb235ed85e74b6a75b41e751706621f"
+    },
+    {
+     "file": "AKWF_oboe_0006.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0006.wav",
+     "sha256": "0767b4cf3fb734db93e439d95486073a1e77bea23c5711adb74b47dfd142d9fe"
+    },
+    {
+     "file": "AKWF_oboe_0004.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0004.wav",
+     "sha256": "e8c4206f6c3c117c61ad02af175fbd09ec931a66ba9e84b5964a32a05e22317f"
+    },
+    {
+     "file": "AKWF_oboe_0010.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0010.wav",
+     "sha256": "64799060aa7867d205b3f6c409e5e34097aadb20f6e17f0af9c8bd29cb55fd47"
+    },
+    {
+     "file": "AKWF_oboe_0003.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0003.wav",
+     "sha256": "e5fd4c469558a2680b110c334200db9089d7d9af4f2e22996c741fd5ae6217fe"
+    },
+    {
+     "file": "AKWF_oboe_0012.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0012.wav",
+     "sha256": "7159cd2e7772f2f018b8a80d1ae4e2e8e501f6d1a600bfcb188c843d21f0b5ee"
+    },
+    {
+     "file": "AKWF_oboe_0011.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0011.wav",
+     "sha256": "6f108da874ea3aa043d848c7cc89a1d8d1156ca3cd0be16846dbc77e2cdd181f"
+    },
+    {
+     "file": "AKWF_oboe_0002.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0002.wav",
+     "sha256": "0bd7bbcfaa620c9af7e59396175bae00fe883665af32d8c5f28342a900db2a0d"
+    },
+    {
+     "file": "AKWF_oboe_0013.wav",
+     "upstream": "AKWF/AKWF_oboe/AKWF_oboe_0013.wav",
+     "sha256": "b741f2272a8a16b900bb02b368881b942377313ad6ff379650654bdc54e42a3c"
+    }
+   ]
+  },
+  {
+   "name": "altosax",
+   "upstreamFolder": "AKWF_altosax",
+   "frames": [
+    {
+     "file": "AKWF_altosax_0002.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0002.wav",
+     "sha256": "26e9247b33aef55b9f1912f9322900e452c67d453638b213f3e236b3d95be82f"
+    },
+    {
+     "file": "AKWF_altosax_0003.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0003.wav",
+     "sha256": "99f987576a930c501ce718e092e6c2d30696258f07543efc87529626e5d585cb"
+    },
+    {
+     "file": "AKWF_altosax_0016.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0016.wav",
+     "sha256": "a5196e8081e41832f61ad142411aa5907a4f9afcd7443a47ec46452db1b935a4"
+    },
+    {
+     "file": "AKWF_altosax_0004.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0004.wav",
+     "sha256": "5e6527ba95339ee05210cf564ee2852ee9e843233e549d23233fca806e6ad589"
+    },
+    {
+     "file": "AKWF_altosax_0020.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0020.wav",
+     "sha256": "0b350f2c85374cd7404ddd289eee7dde35aa8410fe738d37893bd58bea79a864"
+    },
+    {
+     "file": "AKWF_altosax_0024.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0024.wav",
+     "sha256": "5d0c32e48966e62b2f4d3d531dfc8d3c04a4375363b9665a36a59c5e5330c38e"
+    },
+    {
+     "file": "AKWF_altosax_0022.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0022.wav",
+     "sha256": "e5a2adf601dcb71fa368eaf246b8c5d169f3ac21689d299db0c8028a1cf0e30d"
+    },
+    {
+     "file": "AKWF_altosax_0011.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0011.wav",
+     "sha256": "b679882e9cd460142c43f2a3416c99046de3fb09b20cc09b8fe114b9383c4d43"
+    },
+    {
+     "file": "AKWF_altosax_0010.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0010.wav",
+     "sha256": "d37bb6687225777e255a262613206e8c48d9fe7dbde221da15b02cb5a6dc5fc1"
+    },
+    {
+     "file": "AKWF_altosax_0009.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0009.wav",
+     "sha256": "0382588c80c229e31ab5f15308ec4b30771b7ffe5153bd0d8cb3de24c60a4dfa"
+    },
+    {
+     "file": "AKWF_altosax_0019.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0019.wav",
+     "sha256": "ebcc51b056af7dee907f5767813a6caba7bb3c492782b74749ac3f583c2afd79"
+    },
+    {
+     "file": "AKWF_altosax_0001.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0001.wav",
+     "sha256": "84f1e0d4107da73f36c8e8d34b3a77f5224b472af0b1c4613f47aa28a7fbef85"
+    },
+    {
+     "file": "AKWF_altosax_0006.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0006.wav",
+     "sha256": "a92d39b57341dc5f83d63d8a395c74a271a9fe9c3f229ad8841a1ecfb451a49b"
+    },
+    {
+     "file": "AKWF_altosax_0005.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0005.wav",
+     "sha256": "8fbc9e20696acddc7f96bdda33024a4abf3bd9cfefa7068b947df9d50c869aec"
+    },
+    {
+     "file": "AKWF_altosax_0025.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0025.wav",
+     "sha256": "61da24dca3cf0c42f88a1f664c569171b6f9b027925e4b5efe55e298a5059424"
+    },
+    {
+     "file": "AKWF_altosax_0018.wav",
+     "upstream": "AKWF/AKWF_altosax/AKWF_altosax_0018.wav",
+     "sha256": "5d6fbcf0645d92d2767e1ae469e03ddcdcbca4f46d77b5710cef045be602793b"
+    }
+   ]
+  },
+  {
+   "name": "piano",
+   "upstreamFolder": "AKWF_piano",
+   "frames": [
+    {
+     "file": "AKWF_piano_0010.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0010.wav",
+     "sha256": "ce45b7bb99c996c13e124f754b7eea24456ff3b5d04e352205c8828d327b2241"
+    },
+    {
+     "file": "AKWF_piano_0021.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0021.wav",
+     "sha256": "44dd4fa9b9d25218fe2c74cad43598d5ea583446cce57679ef2e36ae94088ab7"
+    },
+    {
+     "file": "AKWF_piano_0020.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0020.wav",
+     "sha256": "18172b8c84ce5dcd3e017d721281eb9ee469a433ea5f794b970b2c5e5063ddfd"
+    },
+    {
+     "file": "AKWF_piano_0029.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0029.wav",
+     "sha256": "cc579144f9d7c4d6e1463498c16215f4213749b538956fe0d3738255044d3b02"
+    },
+    {
+     "file": "AKWF_piano_0016.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0016.wav",
+     "sha256": "3ea7e6a3d6c9ce3e342dd0fa4b36c470b5e09e9c830d04e3098a9b37db87cb78"
+    },
+    {
+     "file": "AKWF_piano_0023.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0023.wav",
+     "sha256": "9de79286ae3063b905f847ac56fb4aeb092c722889bdd8ea760e311876ddb5f7"
+    },
+    {
+     "file": "AKWF_piano_0013.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0013.wav",
+     "sha256": "0893a7cd622434640b2fe1610e434ccd3ce92c60e5055c8dffea8fc549ccf190"
+    },
+    {
+     "file": "AKWF_piano_0018.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0018.wav",
+     "sha256": "ae269008eb93b4fd0e462ec830066bc0020eead1fe4867662bb3df11a978c6e8"
+    },
+    {
+     "file": "AKWF_piano_0004.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0004.wav",
+     "sha256": "1bb61f27ea7f61645530ea6e0586a83a467c1ce92ef93fd3fa6cc9f213128a0c"
+    },
+    {
+     "file": "AKWF_piano_0002.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0002.wav",
+     "sha256": "c7789235febc8d141e6724b19da1edea764e0cbda5797d556b8aad0b898f444f"
+    },
+    {
+     "file": "AKWF_piano_0012.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0012.wav",
+     "sha256": "766b780bf40cfda478dac7e5124d3da40fd336a5508769e5b96278ff774434cf"
+    },
+    {
+     "file": "AKWF_piano_0014.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0014.wav",
+     "sha256": "9a70b6bbeb7aef2eacf54b9c29f9447630cc67b5b9dd65f6fc3b038063e2497d"
+    },
+    {
+     "file": "AKWF_piano_0024.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0024.wav",
+     "sha256": "80bf417726a7e39004e0b767c5fe5e3315837d204e0f099b01aaf1a44dd67cbd"
+    },
+    {
+     "file": "AKWF_piano_0008.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0008.wav",
+     "sha256": "a3af5a41143e7f8ae74a1520d29910a6abab1d0c22f64a00bafdbc8fddd9deb5"
+    },
+    {
+     "file": "AKWF_piano_0009.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0009.wav",
+     "sha256": "de0d065bee5e17d57ea8caa90e6a3e68ae3d18c67ea194360d7e698e908b1b27"
+    },
+    {
+     "file": "AKWF_piano_0022.wav",
+     "upstream": "AKWF/AKWF_piano/AKWF_piano_0022.wav",
+     "sha256": "2d175b9c8ff649c6ec90c91bb0eb86e44f7175718d0081d825282159ce1f0d79"
+    }
+   ]
+  },
+  {
+   "name": "epiano",
+   "upstreamFolder": "AKWF_epiano",
+   "frames": [
+    {
+     "file": "AKWF_epiano_0019.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0019.wav",
+     "sha256": "cd8007cc036728a2642a35bec48546f23daad8e36b99336af91363ce10532c95"
+    },
+    {
+     "file": "AKWF_epiano_0057.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0057.wav",
+     "sha256": "64b8ded2b371991aab0d0c9ef6316e13a11d8e7c1c6994825cad1fa29843ea21"
+    },
+    {
+     "file": "AKWF_epiano_0061.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0061.wav",
+     "sha256": "6cc50ce9fe6d11a58bf07db3690acec9c255e92371607acbf378e2d861862682"
+    },
+    {
+     "file": "AKWF_epiano_0065.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0065.wav",
+     "sha256": "4d4730d1a6204f0879d981d9e8229c9cee329e2622fb073d1e1e5b1721ff127e"
+    },
+    {
+     "file": "AKWF_epiano_0050.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0050.wav",
+     "sha256": "9df0e14f85f3c7ccaff8c8732da706eb24fc5f66dca9534ef234503ee44135f4"
+    },
+    {
+     "file": "AKWF_epiano_0044.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0044.wav",
+     "sha256": "25e625ef55b7319a145e4d69e57049bdf9cba80cffb1c9e0902203485db08eef"
+    },
+    {
+     "file": "AKWF_epiano_0052.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0052.wav",
+     "sha256": "b7112bb006ae54c9fe52943856c45ec2e13743e0ed58bad8421fc65c7f4946de"
+    },
+    {
+     "file": "AKWF_epiano_0036.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0036.wav",
+     "sha256": "fe91551fd51cb38c251378d4f0e3c2717b535be7ce12ede531058124ed6cfbd0"
+    },
+    {
+     "file": "AKWF_epiano_0063.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0063.wav",
+     "sha256": "6815bbc010cc33e7e86dba44f457dc2410480a98ff5093783fe656f05c000f6e"
+    },
+    {
+     "file": "AKWF_epiano_0001.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0001.wav",
+     "sha256": "844df08a41e1296169d14426b9f348ca8e0f9ad3ef465b5d136982b1d3f49c0e"
+    },
+    {
+     "file": "AKWF_epiano_0049.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0049.wav",
+     "sha256": "a82ab239e02284d0b4be44008894ae123cc4f4d0cf287045ebd2a9c620961a6c"
+    },
+    {
+     "file": "AKWF_epiano_0055.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0055.wav",
+     "sha256": "ad3ac648e487b7aacea5bd59a4ea50059a82f27d2a6d66b15a499e9531a36fbf"
+    },
+    {
+     "file": "AKWF_epiano_0030.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0030.wav",
+     "sha256": "17259b46bcf639c5d51f2f5cc405883cab52740d37875b7bf36d3b88909b90bd"
+    },
+    {
+     "file": "AKWF_epiano_0035.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0035.wav",
+     "sha256": "715b9e73c0b44bc7472016a15693d5a4f260de074a99822f26e45b17a1bdc6c3"
+    },
+    {
+     "file": "AKWF_epiano_0038.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0038.wav",
+     "sha256": "0a20eedc174f5f05fc744aa394b90d01f7d4130f8bc9c8777e2724609382be90"
+    },
+    {
+     "file": "AKWF_epiano_0008.wav",
+     "upstream": "AKWF/AKWF_epiano/AKWF_epiano_0008.wav",
+     "sha256": "6f9f24c4d7f5859f2db0676806933832ab529a3575d755baa021fde00e1d3bf0"
+    }
+   ]
+  },
+  {
+   "name": "eorgan",
+   "upstreamFolder": "AKWF_eorgan",
+   "frames": [
+    {
+     "file": "AKWF_eorgan_0070.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0070.wav",
+     "sha256": "535d4fd795d623e9aba6e7d3cd5e999432a369c94de5ed9c3f56c46728dd5850"
+    },
+    {
+     "file": "AKWF_eorgan_0004.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0004.wav",
+     "sha256": "c8601a34b8ada792b8cb4b61ffde3061bddccd395674af4b51d50b44be91bcdf"
+    },
+    {
+     "file": "AKWF_eorgan_0067.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0067.wav",
+     "sha256": "3129669b8edf0d4aeb11e020c9fbb9fffb477cdb008d514ae23a6cd0702bbb57"
+    },
+    {
+     "file": "AKWF_eorgan_0056.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0056.wav",
+     "sha256": "0004d8ba328bc43a0736bdaa79fd5bf609244f5e9cd9d04042084925699922c9"
+    },
+    {
+     "file": "AKWF_eorgan_0071.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0071.wav",
+     "sha256": "dca69713daa5c81f9e4497bbb3dbf88a4eed195a52511d94ddec96547fd3495f"
+    },
+    {
+     "file": "AKWF_eorgan_0153.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0153.wav",
+     "sha256": "b99ff284681eb3cdf2c13fd926b4fe160382b9b556e89f346690488292105698"
+    },
+    {
+     "file": "AKWF_eorgan_0126.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0126.wav",
+     "sha256": "ed7ce006981ebc161240ef1b059471a16adcacd32d7f8a683aafda314f2ccc4e"
+    },
+    {
+     "file": "AKWF_eorgan_0066.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0066.wav",
+     "sha256": "7a968c40730d772062447c7d8974dfedd176e13d21931a7a3e1fa4aa590f3c21"
+    },
+    {
+     "file": "AKWF_eorgan_0063.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0063.wav",
+     "sha256": "e19a8252c86ecbe5775e8edf9c81658b6f94968ddf45cef5ce8b6258f2069065"
+    },
+    {
+     "file": "AKWF_eorgan_0139.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0139.wav",
+     "sha256": "ce4f2a34dee0b35b253b57081d3568942f7e68f230c0e6838b1cbb5d50fc7689"
+    },
+    {
+     "file": "AKWF_eorgan_0097.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0097.wav",
+     "sha256": "3d47e8f1e0218fd263dde632c6c4890bf8409c4e947637e81482d78136028618"
+    },
+    {
+     "file": "AKWF_eorgan_0127.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0127.wav",
+     "sha256": "d94bbb6c733162b2bdf7cd7ae6cc3bb12a58a261a114e2ebf582281a967d290c"
+    },
+    {
+     "file": "AKWF_eorgan_0083.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0083.wav",
+     "sha256": "5a2d98c46d2cc3d2d99afb4b2d0471e9fa791772b9c2adb2f26513d17ae4ea89"
+    },
+    {
+     "file": "AKWF_eorgan_0077.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0077.wav",
+     "sha256": "c74857962938e932559221d8ddaedbc77935d8a030441eab7b24eaf26c0e46e6"
+    },
+    {
+     "file": "AKWF_eorgan_0039.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0039.wav",
+     "sha256": "0db200ba1ea905c39ac98b7a5586481bc44e6d6fac52d88d575b49a453bd1fb7"
+    },
+    {
+     "file": "AKWF_eorgan_0042.wav",
+     "upstream": "AKWF/AKWF_eorgan/AKWF_eorgan_0042.wav",
+     "sha256": "b3500b9433f6df87db02c82aef906fb0765b388626e1f7c0fa63419a0ed8818d"
+    }
+   ]
+  },
+  {
+   "name": "aguitar",
+   "upstreamFolder": "AKWF_aguitar",
+   "frames": [
+    {
+     "file": "AKWF_aguitar_0007.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0007.wav",
+     "sha256": "0c2de78928b44d138782506564aeb294280511e20694494b0975d4af8ecddd45"
+    },
+    {
+     "file": "AKWF_aguitar_0024.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0024.wav",
+     "sha256": "dcbd8103250a1d3259961cb05dc7c2ee38fcadbaf0284df2b446f2e9586c3497"
+    },
+    {
+     "file": "AKWF_aguitar_0034.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0034.wav",
+     "sha256": "cc08a582428a6cd427bc49d6813c2675e0c0cb1b3f1f1a869f2b566fddf1d2b5"
+    },
+    {
+     "file": "AKWF_aguitar_0026.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0026.wav",
+     "sha256": "72e6e92378d65bb7c29d9743a91acb6cd9e8cf06a07f75694a6060c63fed6fb6"
+    },
+    {
+     "file": "AKWF_aguitar_0003.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0003.wav",
+     "sha256": "0ec1019d785fd21381c5032db6b3290bcfee254df938ca6ac78206a62e86653c"
+    },
+    {
+     "file": "AKWF_aguitar_0002.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0002.wav",
+     "sha256": "eddc4c4cee29c4e677f53e311a6d0957039b2fcef73d4b1632d5dfdca89b5030"
+    },
+    {
+     "file": "AKWF_aguitar_0004.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0004.wav",
+     "sha256": "0562f853f957288040aa8106e36c51e15b052ea31a6eb8ba79f65cd4e00edd3c"
+    },
+    {
+     "file": "AKWF_aguitar_0037.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0037.wav",
+     "sha256": "1041e47daaa12d8710e95308fb05c715adcbe6311f2e9a27375dda7ca3a3caf9"
+    },
+    {
+     "file": "AKWF_aguitar_0009.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0009.wav",
+     "sha256": "110844c81db4f05755f602bae5342b980a16a19ae6c8155f86956538167f5e22"
+    },
+    {
+     "file": "AKWF_aguitar_0016.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0016.wav",
+     "sha256": "93436e2e2f5f63f3235006e3dc7e58bd411118e076880d93332ab539ca176a8c"
+    },
+    {
+     "file": "AKWF_aguitar_0011.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0011.wav",
+     "sha256": "45e90c409204582acd793fe76a5f0d8b5d68b5bfda40758b7532ecc5cee73662"
+    },
+    {
+     "file": "AKWF_aguitar_0028.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0028.wav",
+     "sha256": "e635e6eeaa1c10369551c7a21b34e7da78cc3c98c33b06c13a6f371fac34948b"
+    },
+    {
+     "file": "AKWF_aguitar_0019.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0019.wav",
+     "sha256": "9bdf67637b0b933d1851a50f9d720fc1cc1aeadd0267977eb1e1fe726a0bd961"
+    },
+    {
+     "file": "AKWF_aguitar_0022.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0022.wav",
+     "sha256": "3acda8b8c3b6882cd9056dc876aff4b5c54623c522611d8dff5bd5e9e8b48953"
+    },
+    {
+     "file": "AKWF_aguitar_0027.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0027.wav",
+     "sha256": "9a1856e2a9d40c4a6f64b5d30fdf1c10fb179cefaf2b41bc9b51b8ac679c71b7"
+    },
+    {
+     "file": "AKWF_aguitar_0031.wav",
+     "upstream": "AKWF/AKWF_aguitar/AKWF_aguitar_0031.wav",
+     "sha256": "59d086d66f244717f9667bef6b44834a0477e49dcf3db59e393c8ac3bc981b77"
+    }
+   ]
+  },
+  {
+   "name": "eguitar",
+   "upstreamFolder": "AKWF_eguitar",
+   "frames": [
+    {
+     "file": "AKWF_eguitar_0010.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0010.wav",
+     "sha256": "30d9e54d6a8844e913b782035a5f67a0feee3ec79a8f8a98d3f4a513d73d5cc0"
+    },
+    {
+     "file": "AKWF_eguitar_0003.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0003.wav",
+     "sha256": "3cf6edf7c96128ae1c70796571e13e2077e73f8eb81b73c0f703a01e47c94f7d"
+    },
+    {
+     "file": "AKWF_eguitar_0012.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0012.wav",
+     "sha256": "ee3c59bcee90def9feab7c1676601646b51be91e82f21c7c69c3dfa501e2bd11"
+    },
+    {
+     "file": "AKWF_eguitar_0007.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0007.wav",
+     "sha256": "33a06f96d318642713ecc96af516bba10fe8aebe8823dfbbbca29e4268276750"
+    },
+    {
+     "file": "AKWF_eguitar_0021.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0021.wav",
+     "sha256": "ef6db91e533e33a1edf66c694c2341e4adcd7a6edd0695b6c5e6891396c7d011"
+    },
+    {
+     "file": "AKWF_eguitar_0008.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0008.wav",
+     "sha256": "4264b14c1bd1aefd00fc5ec2c34ee029bab160715027f7633a6ef39353ffabfe"
+    },
+    {
+     "file": "AKWF_eguitar_0005.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0005.wav",
+     "sha256": "efcf3406cca7a92622b214ffdd089d8ec577431c4831ccb9f72a381f376162c5"
+    },
+    {
+     "file": "AKWF_eguitar_0022.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0022.wav",
+     "sha256": "026bd7ffc2235a3ad055377621c4e55d7b81713fb220fc13cb67f70afe4e1828"
+    },
+    {
+     "file": "AKWF_eguitar_0009.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0009.wav",
+     "sha256": "9ea1c51c34fec11232301f6f87d032f041d4f10be4025aab2c05f14986279b50"
+    },
+    {
+     "file": "AKWF_eguitar_0013.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0013.wav",
+     "sha256": "3d978d889f852beba5073ae04165f0c68d836507609a135cfa02e6876920218c"
+    },
+    {
+     "file": "AKWF_eguitar_0020.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0020.wav",
+     "sha256": "188d568578184b5368d6e82e09603ca11b745c58daa03239fc2d45145ac2b778"
+    },
+    {
+     "file": "AKWF_eguitar_0018.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0018.wav",
+     "sha256": "32668d9b103f94107e3153617e10a30bf19043a9d0700e7526a35847b9ca69a8"
+    },
+    {
+     "file": "AKWF_eguitar_0004.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0004.wav",
+     "sha256": "7b79e284b11aeaa6f24beb656d5f3492ae548202ee2e21b41a57298ae4f14339"
+    },
+    {
+     "file": "AKWF_eguitar_0011.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0011.wav",
+     "sha256": "0f5009b44a7dedb6f5779c5c279c334c0a42bc9a2882eed99671754dc9bf70dc"
+    },
+    {
+     "file": "AKWF_eguitar_0001.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0001.wav",
+     "sha256": "46fccdca2f27e87505539e85b6e01582777bc64d931a947e0e2eb18b0267c641"
+    },
+    {
+     "file": "AKWF_eguitar_0014.wav",
+     "upstream": "AKWF/AKWF_eguitar/AKWF_eguitar_0014.wav",
+     "sha256": "1a1b8e315aee9665cac3e1d65d34fa695607649e040cc031ee6f5d25c89ff8fb"
+    }
+   ]
+  },
+  {
+   "name": "ebass",
+   "upstreamFolder": "AKWF_ebass",
+   "frames": [
+    {
+     "file": "AKWF_ebass_0026.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0026.wav",
+     "sha256": "79076b89d2f019869ce10ad930dada9d7bbbbb37a28be07b385f4b04df70b102"
+    },
+    {
+     "file": "AKWF_ebass_0017.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0017.wav",
+     "sha256": "e5c93bbc41903fb2d6990f3a8e435b8e9d0abff9c4c3b98e696bf866dc34ac2b"
+    },
+    {
+     "file": "AKWF_ebass_0019.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0019.wav",
+     "sha256": "eeafbfe1290b6d52ae90a454b2a3a5a8f064f7a25165df9f3b2e5b8246bb4120"
+    },
+    {
+     "file": "AKWF_ebass_0024.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0024.wav",
+     "sha256": "ff637fd5de9fa0ae6b48fdf8faef9a6236fbb7b970d413888708cc0248b84ab4"
+    },
+    {
+     "file": "AKWF_ebass_0062.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0062.wav",
+     "sha256": "dacaeed4df8d165a0c02ee55e74ab11b0376f480e214ebb0ffa0b01cff50c282"
+    },
+    {
+     "file": "AKWF_ebass_0057.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0057.wav",
+     "sha256": "bcf5ca81f4a3b0b76428e966159dbe0e891186ee9f2182e09d541b5892263a6e"
+    },
+    {
+     "file": "AKWF_ebass_0031.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0031.wav",
+     "sha256": "fa078ebbcceb3bb7c492e14f29e7e63a5b03f353e3eff545c141a66585901a3b"
+    },
+    {
+     "file": "AKWF_ebass_0061.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0061.wav",
+     "sha256": "36ddb3e6d09433a68501eaed272df6e20f44ee17012747a1eec1e98a8577e820"
+    },
+    {
+     "file": "AKWF_ebass_0035.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0035.wav",
+     "sha256": "a99c388e0703105bed2e75eae512688bf4647acb903b3bfffe43f4b70b9850a2"
+    },
+    {
+     "file": "AKWF_ebass_0040.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0040.wav",
+     "sha256": "b8c0c980df3d0f7c93da0dcbe72678e27b9fa142b0ff31f311e3bae429a7a037"
+    },
+    {
+     "file": "AKWF_ebass_0011.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0011.wav",
+     "sha256": "b385994e39c1bf5e477a19baefc9e5ba4f8b2bed32147ebc9102b84ab4259874"
+    },
+    {
+     "file": "AKWF_ebass_0028.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0028.wav",
+     "sha256": "de39ab299b43d8cb3743725be7299283e2b7cca1bf57e216e6a9b54f6665e0fd"
+    },
+    {
+     "file": "AKWF_ebass_0012.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0012.wav",
+     "sha256": "1327d9069289d5a2adef896e735caf2bbb10a614af02239fe9889eb45105131e"
+    },
+    {
+     "file": "AKWF_ebass_0047.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0047.wav",
+     "sha256": "f280ca6aff72be6ac6a268be54726904f45ec53c5fe62f70de0224609b6779ef"
+    },
+    {
+     "file": "AKWF_ebass_0051.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0051.wav",
+     "sha256": "0b43a5057f117252699a000d3b39142d106fca65904814edd15e18a4bd7c5c20"
+    },
+    {
+     "file": "AKWF_ebass_0023.wav",
+     "upstream": "AKWF/AKWF_ebass/AKWF_ebass_0023.wav",
+     "sha256": "7d8df69eb09eaada3c4053d9f07a16bbf88ceea9c0a663cca614a58e51b9b5f9"
+    }
+   ]
+  },
+  {
+   "name": "dbass",
+   "upstreamFolder": "AKWF_dbass",
+   "frames": [
+    {
+     "file": "AKWF_dbass_0032.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0032.wav",
+     "sha256": "bce8a3fba9407e899ad13c4f1f9a5a1d1967c1ff1dc8a45caa0f2a570ac2d272"
+    },
+    {
+     "file": "AKWF_dbass_0029.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0029.wav",
+     "sha256": "af173498371a306f4e0bc9521478ac4846fb590109108ee7e708ab692984b29b"
+    },
+    {
+     "file": "AKWF_dbass_0038.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0038.wav",
+     "sha256": "40341fc2e9083a2d787a9b31426859050e3beb5c90e64b22f945300951ce6f1f"
+    },
+    {
+     "file": "AKWF_dbass_0007.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0007.wav",
+     "sha256": "13fd2b332f9f7f38436f78b7bf5e7ee7c32a4094ae4673b54e0c78af50848e5f"
+    },
+    {
+     "file": "AKWF_dbass_0050.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0050.wav",
+     "sha256": "8291e02ba0132330b2f536d8811b5d1a0d0c2f704b30e20f0530120bfaea4eef"
+    },
+    {
+     "file": "AKWF_dbass_0061.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0061.wav",
+     "sha256": "f64df6b13a8cc63bf21a221d56e62fe41077f9708bbefb06c332ae121d9a1ef1"
+    },
+    {
+     "file": "AKWF_dbass_0012.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0012.wav",
+     "sha256": "c494ee8beb8abfe5807a355084a0302b9554f16fb69feca0a614bd053673c364"
+    },
+    {
+     "file": "AKWF_dbass_0048.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0048.wav",
+     "sha256": "f9dbc76a5cd71d64f80d18e14cffc8795d377f24f17a089abc727b6a22dd97e4"
+    },
+    {
+     "file": "AKWF_dbass_0052.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0052.wav",
+     "sha256": "a870df257d4a26b6185666f4047f49eb183b35a8192558a84e5e0c0669ddc787"
+    },
+    {
+     "file": "AKWF_dbass_0069.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0069.wav",
+     "sha256": "ef1ba9716a658cae339ff66e48ff467a5bfbcf91007b09c23c02bf487137fc33"
+    },
+    {
+     "file": "AKWF_dbass_0036.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0036.wav",
+     "sha256": "4290fde575d7c1633459eede3c7c7a57c897fbe53d8b5f6962689556e338b636"
+    },
+    {
+     "file": "AKWF_dbass_0059.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0059.wav",
+     "sha256": "78387f93b58513b419795a966d43659f23c35612b5fa40f2bfe447c2b22ce4c9"
+    },
+    {
+     "file": "AKWF_dbass_0044.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0044.wav",
+     "sha256": "5561d75a8a80a8f3475e45759d11ecdad59577b26457aadd1cadcac7cca80c82"
+    },
+    {
+     "file": "AKWF_dbass_0011.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0011.wav",
+     "sha256": "46eec8a6ad07b6850ba2308e7595e0409a4f4f102e1434c2e15c2d24f38f7ea5"
+    },
+    {
+     "file": "AKWF_dbass_0041.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0041.wav",
+     "sha256": "f8ec7328df0796f7576e3d5adbfce322229d76f25895afc6d0da9038a5c7ae59"
+    },
+    {
+     "file": "AKWF_dbass_0010.wav",
+     "upstream": "AKWF/AKWF_dbass/AKWF_dbass_0010.wav",
+     "sha256": "ef1776ef54855bafc42575174e24b28cfdc95085c5a28a294d84bd899b4211aa"
+    }
+   ]
+  },
+  {
+   "name": "voice",
+   "upstreamFolder": "AKWF_hvoice",
+   "frames": [
+    {
+     "file": "AKWF_hvoice_0083.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0083.wav",
+     "sha256": "7e9a0e7e670c0e337b1520c7c142ba58dd7478d7a70c8f30da31cfe039179f40"
+    },
+    {
+     "file": "AKWF_hvoice_0076.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0076.wav",
+     "sha256": "6695814865354e8129ab51dbeec787c34a27b385358a62401a810d99ff927e45"
+    },
+    {
+     "file": "AKWF_hvoice_0026.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0026.wav",
+     "sha256": "739d241611336172f929866713d25b910bdd4faac3d106c8b0061b5eed4c7608"
+    },
+    {
+     "file": "AKWF_hvoice_0001.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0001.wav",
+     "sha256": "ea57edce5b9b72b0380c0269081c75fae7be4df13ce74bdb5b555892a5714220"
+    },
+    {
+     "file": "AKWF_hvoice_0082.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0082.wav",
+     "sha256": "62a4fc299b5cadebda51d8fe129ac2c3fdcd7502aab2c235c0e1f498e6517ad2"
+    },
+    {
+     "file": "AKWF_hvoice_0077.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0077.wav",
+     "sha256": "e836bc460bca19ea443adb4c9c442690a7a464a89ac1a466f47c9bcefbfffa9c"
+    },
+    {
+     "file": "AKWF_hvoice_0092.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0092.wav",
+     "sha256": "92aac6b1454da43efbdb01cbdf8e82ae3a47e31348cff2991d14613fe8c9451b"
+    },
+    {
+     "file": "AKWF_hvoice_0039.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0039.wav",
+     "sha256": "fb0857884062afd3b632ccbaab550130850bd8b936f57493b9d4b87229cc7f02"
+    },
+    {
+     "file": "AKWF_hvoice_0064.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0064.wav",
+     "sha256": "919db4466ec91a9b25351553820352c32ba2d22692483f48a72251c710f5dcc8"
+    },
+    {
+     "file": "AKWF_hvoice_0065.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0065.wav",
+     "sha256": "c7cb04affc2f95526287e2deb3b502e37f6dcc6acda739451536f5c8eb3df4a7"
+    },
+    {
+     "file": "AKWF_hvoice_0028.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0028.wav",
+     "sha256": "ddeedbc1525e823fb16b62427bfe6489735df0f3990b85384f46459c540297fa"
+    },
+    {
+     "file": "AKWF_hvoice_0052.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0052.wav",
+     "sha256": "a12639f0e24b7d198c0a1151765fa680ad294ea011f7bf3a91f35f2749880624"
+    },
+    {
+     "file": "AKWF_hvoice_0043.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0043.wav",
+     "sha256": "5e173dde1ae5a7aa84f938041394afbacd852f2e94c3c99f4a8edc9afc4df1e4"
+    },
+    {
+     "file": "AKWF_hvoice_0020.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0020.wav",
+     "sha256": "66f2c1c50c12aea6590aa39c54b4a17d7acc1212cdccebdeac15c58cb40fc513"
+    },
+    {
+     "file": "AKWF_hvoice_0050.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0050.wav",
+     "sha256": "2ebbfbecd42a4f0c16f7f4b8346eaf2b22a1f9a8d5626ddffd97afa1b027ceb9"
+    },
+    {
+     "file": "AKWF_hvoice_0061.wav",
+     "upstream": "AKWF/AKWF_hvoice/AKWF_hvoice_0061.wav",
+     "sha256": "41ce4a5babbcf3816b5db10ed07417f909fde6293848d8b3ecf26103c14fb989"
+    }
+   ]
+  },
+  {
+   "name": "fmsynth",
+   "upstreamFolder": "AKWF_fmsynth",
+   "frames": [
+    {
+     "file": "AKWF_fmsynth_0070.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0070.wav",
+     "sha256": "ff1c36ed7ec82f700223d044f4237e934deb943292de25886856b6b0bbe18911"
+    },
+    {
+     "file": "AKWF_fmsynth_0079.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0079.wav",
+     "sha256": "4da73cb5a6f91fdbfe46ef26ee5ef47424f802d52d3b742ddc38ab6c03a5da5d"
+    },
+    {
+     "file": "AKWF_fmsynth_0114.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0114.wav",
+     "sha256": "99814f83a79a5fbb51daf4e9ad36cf79f14045230cf3bdc46023baca6513d146"
+    },
+    {
+     "file": "AKWF_fmsynth_0104.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0104.wav",
+     "sha256": "0d2c77a95e9a00f6a97851d35584a5100a60d1eee05d2d8a5103d2c2adf51632"
+    },
+    {
+     "file": "AKWF_fmsynth_0121.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0121.wav",
+     "sha256": "d926f3c144f114a9e8d7fe0fecc8e48bf42d5906d5d552f8f27feab1b7f7479b"
+    },
+    {
+     "file": "AKWF_fmsynth_0043.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0043.wav",
+     "sha256": "5b137838cd3354edc84338e2cf46d5fac0934e457fabe56d16f168075c1109b4"
+    },
+    {
+     "file": "AKWF_fmsynth_0112.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0112.wav",
+     "sha256": "6761fa8a9c4727eca7b23b1f1efecb15cb1ce501a54d67c5605f1f14de696f1b"
+    },
+    {
+     "file": "AKWF_fmsynth_0110.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0110.wav",
+     "sha256": "ed6f00c9e9fb8c2d9dd54da10553fc6ddefe626bf642e5ffd488d96eef3384ac"
+    },
+    {
+     "file": "AKWF_fmsynth_0072.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0072.wav",
+     "sha256": "1db306ec5b7b6fcbf8f2903b6881f3dd163ee3ffef7d76979d8ec0f2250fe5ce"
+    },
+    {
+     "file": "AKWF_fmsynth_0080.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0080.wav",
+     "sha256": "f026c7bea613d1a49400a0fa866452d7e8e3c7f1f5fb8ea7b8a084e5f8d7b742"
+    },
+    {
+     "file": "AKWF_fmsynth_0081.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0081.wav",
+     "sha256": "f329ab1e48638c5cceaae4a4ab3c2bed04cdd21e8a6e0d32566ce696008b4f0b"
+    },
+    {
+     "file": "AKWF_fmsynth_0092.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0092.wav",
+     "sha256": "5fd308f58551b808fcc74900daaf40e2e0f1f403308e63a7e098f489555b8497"
+    },
+    {
+     "file": "AKWF_fmsynth_0016.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0016.wav",
+     "sha256": "a6c7559cdb8987b0ed181a8dd15de08316d74c86e675a785c34c2da06ff21fc1"
+    },
+    {
+     "file": "AKWF_fmsynth_0060.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0060.wav",
+     "sha256": "28701cce909111c71c7f27a204fcaeed2880e6603e507fd4de75f52bfc37361a"
+    },
+    {
+     "file": "AKWF_fmsynth_0035.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0035.wav",
+     "sha256": "55974ca816d427a980199f1132ce95a78f51bf73f81a228b76831cc451570b49"
+    },
+    {
+     "file": "AKWF_fmsynth_0026.wav",
+     "upstream": "AKWF/AKWF_fmsynth/AKWF_fmsynth_0026.wav",
+     "sha256": "d661655a8df5cc29b4c23d3d5a2bfbeb0da8d97c47010a17b8fb2de604093a71"
+    }
+   ]
+  },
+  {
+   "name": "chip",
+   "upstreamFolder": "AKWF_oscchip",
+   "frames": [
+    {
+     "file": "AKWF_oscchip_0026.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0026.wav",
+     "sha256": "eca36cd9a31d983d3010300ad0ef7c161c7f4a71644cd7a5d51faf9a82b5bb79"
+    },
+    {
+     "file": "AKWF_oscchip_0153.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0153.wav",
+     "sha256": "64c15492b5affb137a8ac0d24201b240433c7c00fe7857e2c08aaedb324799d2"
+    },
+    {
+     "file": "AKWF_oscchip_0032.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0032.wav",
+     "sha256": "a9d6a79ef0e324bc9e6208a001ae67e3f1fd7fd4059727b5aab594f96d856a1d"
+    },
+    {
+     "file": "AKWF_oscchip_0121.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0121.wav",
+     "sha256": "1ef88692e3261ac5c0d29fcfccc19205563f8e860bf0b96cf04c5f6451d4b71b"
+    },
+    {
+     "file": "AKWF_oscchip_0078.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0078.wav",
+     "sha256": "2a541f44da530333271f1ef356877fd81784849d6922c7dc21f83949e14886f0"
+    },
+    {
+     "file": "AKWF_oscchip_0063.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0063.wav",
+     "sha256": "c328e8461854e2a7164c0077bf166c980e3b8137fb6bd69484aad3b71b70b587"
+    },
+    {
+     "file": "AKWF_oscchip_0142.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0142.wav",
+     "sha256": "f40b42f4c9412cdfbe406579bb1cecedbac24c4f298b604f9bf23928d0bfd508"
+    },
+    {
+     "file": "AKWF_oscchip_0143.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0143.wav",
+     "sha256": "5a36e906659bbef2bb09e80d1fde5752ff249915e63cd8eaa64413c6fb0c7024"
+    },
+    {
+     "file": "AKWF_oscchip_0119.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0119.wav",
+     "sha256": "32d6f541db951c12da660e150b778515bafe040232ff50b1a5f217b3805c80d4"
+    },
+    {
+     "file": "AKWF_oscchip_0103.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0103.wav",
+     "sha256": "2851457f0c79205366bad2808f7debc469041492a5137aba3efa75bc3554e5bb"
+    },
+    {
+     "file": "AKWF_oscchip_0007.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0007.wav",
+     "sha256": "b461a26e565575c4fb03f43680178ac3180acbd85e34d65d1645148c6828a1b1"
+    },
+    {
+     "file": "AKWF_oscchip_0012.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0012.wav",
+     "sha256": "7e953df3de235ff01b243a5c4908e2b45d97dcf7b6d0c45bbfe4fb25bf2edccc"
+    },
+    {
+     "file": "AKWF_oscchip_0105.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0105.wav",
+     "sha256": "d6bcda264d2056db89e58050e1eb43b01e778812efc8e911e879e5db875abfc0"
+    },
+    {
+     "file": "AKWF_oscchip_0073.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0073.wav",
+     "sha256": "ea117ada1228bf9df99adc92994d751cd813f96203448a0e51cbfea2abd91d65"
+    },
+    {
+     "file": "AKWF_oscchip_0064.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0064.wav",
+     "sha256": "59b035cbba2ddf08ec2bbdcb5e9d0a6e2dcb0497ebabf5db98923790cd20aeb7"
+    },
+    {
+     "file": "AKWF_oscchip_0085.wav",
+     "upstream": "AKWF/AKWF_oscchip/AKWF_oscchip_0085.wav",
+     "sha256": "932aa4aedc9120ac800f148955765ed2d64a603110f5bd286e9bf635b0ae23c0"
+    }
+   ]
+  },
+  {
+   "name": "vgame",
+   "upstreamFolder": "AKWF_vgame",
+   "frames": [
+    {
+     "file": "AKWF_vgame_0096.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0096.wav",
+     "sha256": "bfc2ed6e276041962c7676975f85cb4b8bfa8a92560dcda4eac458648f3a8fa0"
+    },
+    {
+     "file": "AKWF_vgame_0092.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0092.wav",
+     "sha256": "26c5799e784fee800c4af85525ae87d3ad52cf95a45499ac2101bfd25df1295b"
+    },
+    {
+     "file": "AKWF_vgame_0080.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0080.wav",
+     "sha256": "c1043fb2b0ba0dac98257404c538727c4e5134cb195db3231acb741f99c51065"
+    },
+    {
+     "file": "AKWF_vgame_0069.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0069.wav",
+     "sha256": "7474e2aa4091ad24434a54f7e658bfe1c77e45e43d6d88a7d544c30b6c3aedfd"
+    },
+    {
+     "file": "AKWF_vgame_0022.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0022.wav",
+     "sha256": "a76b16b80fef12cb93a67f4f20fe8b9542418934430ba9cb85eefda20270cd76"
+    },
+    {
+     "file": "AKWF_vgame_0050.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0050.wav",
+     "sha256": "2f7bce590198aeb3288164d4e61052872e9be2b83c71b39717202ba3f76a98b4"
+    },
+    {
+     "file": "AKWF_vgame_0047.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0047.wav",
+     "sha256": "672f4473a248a82e90b9f98d203f976d1eb03fca8cebd99c3d49923ab8650960"
+    },
+    {
+     "file": "AKWF_vgame_0046.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0046.wav",
+     "sha256": "c0adc21e718c519f424cdc395404dd3bb5a69163fa08588cf2999d0082f13f0b"
+    },
+    {
+     "file": "AKWF_vgame_0013.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0013.wav",
+     "sha256": "c6d9dd068f5caa1256daded0907255faed4d29a7f8e48781ebf7f151092a7955"
+    },
+    {
+     "file": "AKWF_vgame_0030.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0030.wav",
+     "sha256": "f32b96c24ed3f391ba5a42d093fd88f9d70bbad5d1ec4ccb42d0c01b70fbfa29"
+    },
+    {
+     "file": "AKWF_vgame_0109.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0109.wav",
+     "sha256": "230fc73739ef0add607c185af109d3446ec4f5d3fbd568d73a1c48b15623d443"
+    },
+    {
+     "file": "AKWF_vgame_0127.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0127.wav",
+     "sha256": "97e71efb023197e1596b83745bf7fb308e74509ad4c5d710bdea221c4f90fde7"
+    },
+    {
+     "file": "AKWF_vgame_0101.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0101.wav",
+     "sha256": "4c2405e7da6a3e6f9fcb0e6d91cb2c4d723fd81c0e033b77f45f32657d340751"
+    },
+    {
+     "file": "AKWF_vgame_0100.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0100.wav",
+     "sha256": "61652c43851ec9474ae2f51c4d23719734d603a4603cb2750e8a82ebc4dd7d44"
+    },
+    {
+     "file": "AKWF_vgame_0105.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0105.wav",
+     "sha256": "f16351a23500560373f05c4904e0242fba5c16bde497068697eee8aac30a86ff"
+    },
+    {
+     "file": "AKWF_vgame_0119.wav",
+     "upstream": "AKWF/AKWF_vgame/AKWF_vgame_0119.wav",
+     "sha256": "c37ada4eb02fed25bafce6f9d5b2cd664cdfef0f3e95d76a86171386fb8f93e2"
+    }
+   ]
+  },
+  {
+   "name": "granular",
+   "upstreamFolder": "AKWF_granular",
+   "frames": [
+    {
+     "file": "AKWF_granular_0022.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0022.wav",
+     "sha256": "5645f076caf89d3421bdc8caeeed081f1f424922181ae382b81d60297dd315a3"
+    },
+    {
+     "file": "AKWF_granular_0026.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0026.wav",
+     "sha256": "27e9edd81ce3c5cccd123cbc902f6887bf6676307b8b0702fc3df539fc5ff90b"
+    },
+    {
+     "file": "AKWF_granular_0009.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0009.wav",
+     "sha256": "74e2671a0b399605caadbb3e94377cc09b95b4b5b667e862a81392291ce344c0"
+    },
+    {
+     "file": "AKWF_granular_0014.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0014.wav",
+     "sha256": "49aa0331959e4743ac1cd6f9fc33d683aa01a6e68d86ab42a86df2ac82204ec2"
+    },
+    {
+     "file": "AKWF_granular_0043.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0043.wav",
+     "sha256": "ec7ba77754f27b70ee13c00813baf83b51dab7bcbad73caf1e43d6dbac59162b"
+    },
+    {
+     "file": "AKWF_granular_0011.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0011.wav",
+     "sha256": "ce13425179c1898721f7840c23951156e8a10c8de96b43f81577b3a5c126eb7d"
+    },
+    {
+     "file": "AKWF_granular_0027.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0027.wav",
+     "sha256": "e77da17afc0d3da426fac418c6bbfeccca815f6eeefbeb05b6ce40e4d74ecf01"
+    },
+    {
+     "file": "AKWF_granular_0012.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0012.wav",
+     "sha256": "e1b06c6c1a06ffee5200bf7adfc9648c85cb2a5011b07fb3d8e28a15d1191107"
+    },
+    {
+     "file": "AKWF_granular_0030.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0030.wav",
+     "sha256": "f24bf87f21da39b7009cd1f6da75d20b47d03ad4aad45b697b5b578794b234bb"
+    },
+    {
+     "file": "AKWF_granular_0018.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0018.wav",
+     "sha256": "f07e215cee09079d00e15ffdac73a99756f622d71b2dc3d1892fa6a60ae73350"
+    },
+    {
+     "file": "AKWF_granular_0015.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0015.wav",
+     "sha256": "ac7a2fba664dd876b1c93e6a7bfdb478bbf7525b2b97645f3def082c10d1ff6f"
+    },
+    {
+     "file": "AKWF_granular_0003.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0003.wav",
+     "sha256": "36e9c330667bbedd97db7add1a0a03f9d64d0008be4a98813544955d1075933b"
+    },
+    {
+     "file": "AKWF_granular_0034.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0034.wav",
+     "sha256": "0d5cd3ce99fc711f6f5f76c69a729472fce64aea204cb692163cf84ee22f0937"
+    },
+    {
+     "file": "AKWF_granular_0016.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0016.wav",
+     "sha256": "017d470f9365d890dde9ae4a883871f74de4fa8697f4299c5576e0cc084622ee"
+    },
+    {
+     "file": "AKWF_granular_0017.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0017.wav",
+     "sha256": "570764d7dd24fe5ca2d3b2ec219b4587326e8bf48ea36db8a2e6cb8947e8c2f6"
+    },
+    {
+     "file": "AKWF_granular_0008.wav",
+     "upstream": "AKWF/AKWF_granular/AKWF_granular_0008.wav",
+     "sha256": "095794ca76595b000338d45607a9a2773f87116f16a5df0c0adc777839511c0c"
+    }
+   ]
+  },
+  {
+   "name": "overtone",
+   "upstreamFolder": "AKWF_overtone",
+   "frames": [
+    {
+     "file": "AKWF_overtone_0001.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0001.wav",
+     "sha256": "ca8a054584c82b67b91f7ec34e63b1f3085f5a17dabe6c9b6a8010a6f17f8782"
+    },
+    {
+     "file": "AKWF_overtone_0043.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0043.wav",
+     "sha256": "0c58f4739307dacf4f3356b7aab6543afae59108da0a73d7b827e27b94ad608e"
+    },
+    {
+     "file": "AKWF_overtone_0020.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0020.wav",
+     "sha256": "18bd8461ca1fa7bb2207779da89009108c9e0f0469663267f01e9258c54d8382"
+    },
+    {
+     "file": "AKWF_overtone_0006.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0006.wav",
+     "sha256": "a645621e0a44d1765248c116c7065747d5300e446e8664c108c6111198ed39d9"
+    },
+    {
+     "file": "AKWF_overtone_0004.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0004.wav",
+     "sha256": "1e78fdc7ab601972f4ad3c5bc791afd052d7ccc10d18037c90a6020c108d47c1"
+    },
+    {
+     "file": "AKWF_overtone_0031.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0031.wav",
+     "sha256": "b3603f25f5dff5fc20b71d48c13719432adbada7b9b982605488da66c8251683"
+    },
+    {
+     "file": "AKWF_overtone_0025.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0025.wav",
+     "sha256": "1ba47e30b6c64a0f39c2dc5a0ca183f4ce28fef0ab0b3b6f7a4dbfc2f4476523"
+    },
+    {
+     "file": "AKWF_overtone_0012.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0012.wav",
+     "sha256": "0c12870ec83c36114ac1bea736f8cb996d642244c72237d19a78e54f78983fc5"
+    },
+    {
+     "file": "AKWF_overtone_0024.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0024.wav",
+     "sha256": "88600f232d191464d69cf42ef34db502dc3522e1fabcba21a8722edd6ff687ab"
+    },
+    {
+     "file": "AKWF_overtone_0041.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0041.wav",
+     "sha256": "2d991fec12d8946108a29b5bfb94ab6caa347a33d96851b651ea7432676df4a0"
+    },
+    {
+     "file": "AKWF_overtone_0003.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0003.wav",
+     "sha256": "497819e8c30386445e8970b1da8c6a2c997b84960d7f47ba1e00b9b640e86afb"
+    },
+    {
+     "file": "AKWF_overtone_0026.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0026.wav",
+     "sha256": "f5bdf91673658a26a5c369942480c066eba52e091e1f51f7fd38dc29dd35bfb8"
+    },
+    {
+     "file": "AKWF_overtone_0035.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0035.wav",
+     "sha256": "9079f0b2f8728dcc39fa6045bfcdbc9a9046ae5eb57a8f9ca2baef37a3710b55"
+    },
+    {
+     "file": "AKWF_overtone_0021.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0021.wav",
+     "sha256": "6e97d694c4c46168bd2ce239d08d0b47444916d4593fd8091b15cc0a4db8e019"
+    },
+    {
+     "file": "AKWF_overtone_0038.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0038.wav",
+     "sha256": "920055c84896bd3ef35d80fd26d5da586fe8ea98ee2de88848f7cb9add9251df"
+    },
+    {
+     "file": "AKWF_overtone_0034.wav",
+     "upstream": "AKWF/AKWF_overtone/AKWF_overtone_0034.wav",
+     "sha256": "cd3e8c5c2cf85f053d075b294b41920093457f5894a476ca4375a40ed613fbd6"
+    }
+   ]
+  },
+  {
+   "name": "blended",
+   "upstreamFolder": "AKWF_bw_blended",
+   "frames": [
+    {
+     "file": "AKWF_blended_0076.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0076.wav",
+     "sha256": "f5673b6dd6290a37cff1b072514670fc7cba59225ceb1e0d5f41005957d83534"
+    },
+    {
+     "file": "AKWF_blended_0008.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0008.wav",
+     "sha256": "52b449826a01e4aa2a2d7def8a1d8c247fc68298f47518c4f62d8404f5a9e921"
+    },
+    {
+     "file": "AKWF_blended_0007.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0007.wav",
+     "sha256": "7bab35b6f7e8d3ac4326a42ac34a6d917b68b94d401ad8ad850d6e0de338c306"
+    },
+    {
+     "file": "AKWF_blended_0065.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0065.wav",
+     "sha256": "321b59d345d973fcac9b045bf6a37cc8512edd91897502983af08e8246d9802b"
+    },
+    {
+     "file": "AKWF_blended_0011.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0011.wav",
+     "sha256": "566c275dd9881923dc394410d94cdae1de01254a2e8949e63562691aa5966e8a"
+    },
+    {
+     "file": "AKWF_blended_0064.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0064.wav",
+     "sha256": "9066cc95275bb5efe315a80a507f6505eb910ef36aa2a61ad2a8e465d1000aaf"
+    },
+    {
+     "file": "AKWF_blended_0074.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0074.wav",
+     "sha256": "77ad594deb5b77845213f2dc67be82dfa35aa66174c4c5a08eb272cd4d8ee4bb"
+    },
+    {
+     "file": "AKWF_blended_0001.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0001.wav",
+     "sha256": "ddf0671b317d246c488fbf64cee3ae12b4964839e99037581861ce7121bee7e0"
+    },
+    {
+     "file": "AKWF_blended_0026.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0026.wav",
+     "sha256": "93282fe9a608c1ac1e5938ee59932097d0b6ddfbee149e3ea70d2d037a411030"
+    },
+    {
+     "file": "AKWF_blended_0025.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0025.wav",
+     "sha256": "4428120c67423582393a2c4885f4584ead0873b3aefbc0a61c31f53b8518fbf6"
+    },
+    {
+     "file": "AKWF_blended_0055.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0055.wav",
+     "sha256": "8c5c12076eb03f0081408868f50790479de5340279e7f9cdad68a08df9b34430"
+    },
+    {
+     "file": "AKWF_blended_0050.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0050.wav",
+     "sha256": "d325c00321537319dd070212f30f52681a46f843d8a59120acb96b6bdcf97063"
+    },
+    {
+     "file": "AKWF_blended_0062.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0062.wav",
+     "sha256": "4e2dae5492cca939ee3dea539bf1c59c4960b2afad5d4a400f65774c5e37a667"
+    },
+    {
+     "file": "AKWF_blended_0057.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0057.wav",
+     "sha256": "b0ccbfe034a9cda3d4226f8005f0c6b2cbfc052d14b6c5e079e31be81fd9cc3b"
+    },
+    {
+     "file": "AKWF_blended_0052.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0052.wav",
+     "sha256": "1f0e57e87c440f3865fce72b7339b5ffdc063da78b76776a257821862af65891"
+    },
+    {
+     "file": "AKWF_blended_0068.wav",
+     "upstream": "AKWF/AKWF_bw_blended/AKWF_blended_0068.wav",
+     "sha256": "11f21556f63a9ef1de3b8e2fda5fa2cd5cd8d647b106cf53736f862579ccfae8"
+    }
+   ]
+  },
+  {
+   "name": "distorted",
+   "upstreamFolder": "AKWF_distorted",
+   "frames": [
+    {
+     "file": "AKWF_distorted_0020.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0020.wav",
+     "sha256": "6e98a4b668aba0426119c522bea9ab07434a82a17a1cd609ed2f66d40cc90f9c"
+    },
+    {
+     "file": "AKWF_distorted_0021.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0021.wav",
+     "sha256": "e44043da2c019b6c0c936b2708f4addda2db17760e50c422ef7263ae92829b3f"
+    },
+    {
+     "file": "AKWF_distorted_0017.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0017.wav",
+     "sha256": "ffa486158af0d9955b8f2e5082e361e29c0fd01440da0b563540697ded73f1ac"
+    },
+    {
+     "file": "AKWF_distorted_0040.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0040.wav",
+     "sha256": "15cdd54cd3de763801ac37ecb6460f6fa08c17ae392847a15237500e2f98baa2"
+    },
+    {
+     "file": "AKWF_distorted_0005.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0005.wav",
+     "sha256": "b19138d39f240806b28ece2d6a3c3ae0e70a1d6802ad25d6dbe2da9530258037"
+    },
+    {
+     "file": "AKWF_distorted_0002.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0002.wav",
+     "sha256": "7334832bb6ec448a9b3edcc06e70ec5175b0425ba37fa326f78bcb81d4555294"
+    },
+    {
+     "file": "AKWF_distorted_0033.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0033.wav",
+     "sha256": "fe758bfcfca1eb431bc7b9981870d736fcf1e3b0e54398b0b90fefea207a99d0"
+    },
+    {
+     "file": "AKWF_distorted_0006.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0006.wav",
+     "sha256": "4cd88c284072667038b833f2d20913b05cecf163bd0a369b030d4ad6ee00ff35"
+    },
+    {
+     "file": "AKWF_distorted_0034.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0034.wav",
+     "sha256": "491047cbfc5b4ba3d30b0bd9b943084e222a4ee10f1cf5b75af10fe913875056"
+    },
+    {
+     "file": "AKWF_distorted_0030.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0030.wav",
+     "sha256": "4753772e9504ce4f3d84e8c6efa868df3c4fefb4e76eb49fb29c468281b16e0c"
+    },
+    {
+     "file": "AKWF_distorted_0027.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0027.wav",
+     "sha256": "3d871894fbc7ae57df8956d59987cd70d844bd11b5f949b9fc665f995e660fcc"
+    },
+    {
+     "file": "AKWF_distorted_0012.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0012.wav",
+     "sha256": "bfa452582c145b3d98d20bc18f50edd558abe214d6a49a6eabbee925ae304656"
+    },
+    {
+     "file": "AKWF_distorted_0015.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0015.wav",
+     "sha256": "1608cc67be1f4f4990bad8f27ea0bc49785774cb986a96861fa97311025e0d1d"
+    },
+    {
+     "file": "AKWF_distorted_0031.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0031.wav",
+     "sha256": "34174de4c4b8f08d120830385616a4d309c39645a1b1bca66c6efb5bafbf3980"
+    },
+    {
+     "file": "AKWF_distorted_0043.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0043.wav",
+     "sha256": "68e927b4d411db9335bdf1f442406e2e09beeea9b0a4d6076083521057e66b07"
+    },
+    {
+     "file": "AKWF_distorted_0045.wav",
+     "upstream": "AKWF/AKWF_distorted/AKWF_distorted_0045.wav",
+     "sha256": "5f5f78ee368322494e4be17c414823d337d32f34b0f0ff162c81ed2bb4fe208c"
+    }
+   ]
+  },
+  {
+   "name": "handdrawn",
+   "upstreamFolder": "AKWF_hdrawn",
+   "frames": [
+    {
+     "file": "AKWF_hdrawn_0005.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0005.wav",
+     "sha256": "b268c5180aef5c636df4abe07eb64aa59d1ce61f5be4f64a9dbe6609415a19d7"
+    },
+    {
+     "file": "AKWF_hdrawn_0018.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0018.wav",
+     "sha256": "68ce2f3e265a76e9141e4c8296d227fc13450f10479b563f359263f7bbad4b2f"
+    },
+    {
+     "file": "AKWF_hdrawn_0015.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0015.wav",
+     "sha256": "91b50fd1e52bc68afdbd5a931cc462a4b2c065f610b42f0e12933ed1646c9ad8"
+    },
+    {
+     "file": "AKWF_hdrawn_0045.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0045.wav",
+     "sha256": "39329d9bf8b3da0cd373df4978623e9e64b61e5e59bdd0204ebeaa43900cad53"
+    },
+    {
+     "file": "AKWF_hdrawn_0022.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0022.wav",
+     "sha256": "a26d7ef658a5e17b47c9cfc6bf211438c1708802f9b0346f771d3a2b2dac113a"
+    },
+    {
+     "file": "AKWF_hdrawn_0009.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0009.wav",
+     "sha256": "9fc31795f4821ee258c7aca3b3febd77b2978f7e43d09722952b904ef7386058"
+    },
+    {
+     "file": "AKWF_hdrawn_0040.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0040.wav",
+     "sha256": "b81cd9da49e04163ecbca724b34d43d8baa05cc9e0c518bdcd0c531dfd09c6a6"
+    },
+    {
+     "file": "AKWF_hdrawn_0019.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0019.wav",
+     "sha256": "9c64a99d459be924e67112157566bf914c99efa3710fb42bd5a34c0057422d45"
+    },
+    {
+     "file": "AKWF_hdrawn_0025.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0025.wav",
+     "sha256": "6fc23f853a52179cd240dff457ccb08d0adbc49443b65ca826c1512f5ea2df94"
+    },
+    {
+     "file": "AKWF_hdrawn_0035.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0035.wav",
+     "sha256": "5835b9448f0af3aefb82d3bb9fabb5d4bf3134c2f3b84c57333d47475e3f5afe"
+    },
+    {
+     "file": "AKWF_hdrawn_0050.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0050.wav",
+     "sha256": "ee02a34053c325905dcf7748ef616c998707f3b7187a8fa9c085e86cd53ca28f"
+    },
+    {
+     "file": "AKWF_hdrawn_0036.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0036.wav",
+     "sha256": "508ab07788e27ff56c2f000ca35579b2e474f8a2732b62f690f204f45eeec602"
+    },
+    {
+     "file": "AKWF_hdrawn_0029.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0029.wav",
+     "sha256": "910ba6241febe2a6fd49b265380e6d196c1609800e3c718af562a9292532a349"
+    },
+    {
+     "file": "AKWF_hdrawn_0021.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0021.wav",
+     "sha256": "2c84022551785228155fcceae2bb6ff3a0e228d8c79c5fda855a829b9432aa88"
+    },
+    {
+     "file": "AKWF_hdrawn_0003.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0003.wav",
+     "sha256": "6b1f4ed4fcbdbfd546787237d0877deb530b0b034f462a9579fea7e6e39c6520"
+    },
+    {
+     "file": "AKWF_hdrawn_0026.wav",
+     "upstream": "AKWF/AKWF_hdrawn/AKWF_hdrawn_0026.wav",
+     "sha256": "814b765ea91953bb904ee72bf65df63e3fe43ffe6c4edc3549da26afad9c98e0"
+    }
+   ]
+  },
+  {
+   "name": "theremin",
+   "upstreamFolder": "AKWF_theremin",
+   "frames": [
+    {
+     "file": "AKWF_theremin_0004.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0004.wav",
+     "sha256": "3ea80b4e563f7efd5f678c3b6d08089eeda0396c5f0992da921787cd3d4650e4"
+    },
+    {
+     "file": "AKWF_tannerin_0001.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_tannerin_0001.wav",
+     "sha256": "c1574ccbdb7d564b282cf27291fedad2998f8a45d634c2f19c74d9001b8c54d3"
+    },
+    {
+     "file": "AKWF_tannerin_0003.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_tannerin_0003.wav",
+     "sha256": "792029720fdbded50a150012997f2b1efe532d085ffc4d0ba75ad7474b0b8eab"
+    },
+    {
+     "file": "AKWF_theremin_0018.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0018.wav",
+     "sha256": "1d3de64e3d1daf5274ae95eb7adeef5b0d269c016fe60100ea201bd5e14f8945"
+    },
+    {
+     "file": "AKWF_tannerin_0004.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_tannerin_0004.wav",
+     "sha256": "9726d65be60692d434f0b20c0a88c9d8117407874f1e375a491b454bb3284867"
+    },
+    {
+     "file": "AKWF_theremin_0015.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0015.wav",
+     "sha256": "94356ab59aa3062be20466f6cc216570f130d4eb843c19af978df100e9052b3b"
+    },
+    {
+     "file": "AKWF_tannerin_0002.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_tannerin_0002.wav",
+     "sha256": "f665bbeb4d0677bf2cf3d1d436841ab18241868af5835eb8602a8e3b2dc7ad77"
+    },
+    {
+     "file": "AKWF_theremin_0014.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0014.wav",
+     "sha256": "71863e4ac20156d574ff450f7df2670beb9a8e86f9e60fd8d7a50258cb2a8d90"
+    },
+    {
+     "file": "AKWF_theremin_0011.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0011.wav",
+     "sha256": "49f0b67ade68d802f80be71186834205507f52f1c449e33ef6f97c8b8ed2b0cf"
+    },
+    {
+     "file": "AKWF_theremin_0008.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0008.wav",
+     "sha256": "286cc87d888adfad3032e6eb3306410823e3bae829f3e39e8419149cbb8b5cd6"
+    },
+    {
+     "file": "AKWF_theremin_0013.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0013.wav",
+     "sha256": "a4b813751288ea83d187fc7200cfef3ace31a692d7a033107520842467421df9"
+    },
+    {
+     "file": "AKWF_theremin_0021.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0021.wav",
+     "sha256": "b3fb713ef327aa3399a7c82161c85c499802bc8d3c59fc964f69fee8ea1633d6"
+    },
+    {
+     "file": "AKWF_theremin_0009.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0009.wav",
+     "sha256": "3b9765f163ae02a22d225b89e32e8e907615731ebb54da62804c9538f8b93042"
+    },
+    {
+     "file": "AKWF_theremin_0002.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0002.wav",
+     "sha256": "c45d8c2ef129e4b013b447d42754b23326f33e6322addfb9e2cb0bf8d239a04a"
+    },
+    {
+     "file": "AKWF_theremin_0012.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0012.wav",
+     "sha256": "e9846bc2ea77ce9f7f21e0d354464f49d65659566d0b7d9d531055145bb8157e"
+    },
+    {
+     "file": "AKWF_theremin_0022.wav",
+     "upstream": "AKWF/AKWF_theremin/AKWF_theremin_0022.wav",
+     "sha256": "6b7bf1ada0c55c7bc7ef5e21cb2b1478f74296a371468a477aabf8890e1e5f1a"
+    }
+   ]
+  },
+  {
+   "name": "clavinet",
+   "upstreamFolder": "AKWF_clavinet",
+   "frames": [
+    {
+     "file": "AKWF_clavinet_0018.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0018.wav",
+     "sha256": "7332320e93a42da2f5ffe785cec57385cf7b58f88575168c70a9c93853948e42"
+    },
+    {
+     "file": "AKWF_clavinet_0017.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0017.wav",
+     "sha256": "f3cb6f13b6689dbe652b8102cccdecdbcc334230b518ccdbcb41e5db95b114ff"
+    },
+    {
+     "file": "AKWF_clavinet_0010.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0010.wav",
+     "sha256": "8e68fa9cdccac3c7902ce822f8a09cee1362e414832c99c14001046072ee8aed"
+    },
+    {
+     "file": "AKWF_clavinet_0013.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0013.wav",
+     "sha256": "efa375698069ad25abaaea40346b3972b988f5f70486c78382524704fe737a21"
+    },
+    {
+     "file": "AKWF_clavinet_0029.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0029.wav",
+     "sha256": "902b299da77e65c6c6f2109923e99c1fc6513c9b0d84e082b40afe721ed1b183"
+    },
+    {
+     "file": "AKWF_clavinet_0032.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0032.wav",
+     "sha256": "8abcd63ffd6bb09ad98f79245af11344c6c15f04a75cf1bc7618e55e005e8a73"
+    },
+    {
+     "file": "AKWF_clavinet_0033.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0033.wav",
+     "sha256": "92436a3cfb4127c3a4ceb54d781cf1765993ef97238e633ec6fe07a61a584d0b"
+    },
+    {
+     "file": "AKWF_clavinet_0016.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0016.wav",
+     "sha256": "09be20ea27fb51cf66769332f74a39e45657b800db0c03e00f0da2fa5a74d865"
+    },
+    {
+     "file": "AKWF_clavinet_0021.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0021.wav",
+     "sha256": "9a9df8ffeb26742ba6e1744d586a8a751e259e0f49195a03e5914e1863592417"
+    },
+    {
+     "file": "AKWF_clavinet_0008.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0008.wav",
+     "sha256": "c9ef0e582d5e0196ad1ba5a26540bdc957d99ae528a131704e8a31b7c699dd56"
+    },
+    {
+     "file": "AKWF_clavinet_0015.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0015.wav",
+     "sha256": "cd384f81383581e22adad04b2508573086c8268b1a159467ad6a9a2bcb361ac2"
+    },
+    {
+     "file": "AKWF_clavinet_0007.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0007.wav",
+     "sha256": "1fcada29fd8491d9ae476afb4d6d27ca85669b394fd067fd330bd151e03614bc"
+    },
+    {
+     "file": "AKWF_clavinet_0005.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0005.wav",
+     "sha256": "27e5c7a742f7e6cf7c242c1a99ac3b4171d62ee535bb8100719258d3b976b20b"
+    },
+    {
+     "file": "AKWF_clavinet_0004.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0004.wav",
+     "sha256": "dfd589d36927c6d3fd54e4d56083535643e4d42f080ae7f167d47f9907510577"
+    },
+    {
+     "file": "AKWF_clavinet_0003.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0003.wav",
+     "sha256": "ff725bb20e4fb5bf3fe79433bab425a12faecf8f9304031f0cae4457cfb35807"
+    },
+    {
+     "file": "AKWF_clavinet_0001.wav",
+     "upstream": "AKWF/AKWF_clavinet/AKWF_clavinet_0001.wav",
+     "sha256": "00a13bbeade424870f0d1b7fb631679875786456fe6f49373352cfd0b6e7e964"
+    }
+   ]
+  }
+ ]
+}

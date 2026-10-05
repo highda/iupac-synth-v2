@@ -1,0 +1,369 @@
+{
+ "stateVersion": 1,
+ "basePatch": {
+  "patchVersion": 1,
+  "noiseSeed": 0,
+  "nodes": [
+   {
+    "id": "vowel",
+    "type": "wavetable",
+    "parameters": {
+     "table": 3,
+     "position": 0.1,
+     "outputLevel": 0.6,
+     "unisonVoices": 3,
+     "detuneCents": 10,
+     "unisonSpread": 0.7,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": 0.0,
+     "coarse": 0.0,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "comb",
+    "type": "wavetable",
+    "parameters": {
+     "table": 7,
+     "position": 0.5,
+     "outputLevel": 0.5,
+     "unisonVoices": 1.0,
+     "detuneCents": 12.0,
+     "unisonSpread": 0.5,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": -1,
+     "coarse": 0.0,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "sweep",
+    "type": "wavetable",
+    "parameters": {
+     "table": 8,
+     "position": 0,
+     "outputLevel": 0.35,
+     "unisonVoices": 1.0,
+     "detuneCents": 12.0,
+     "unisonSpread": 0.5,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": 0.0,
+     "coarse": 12,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "bus",
+    "type": "mixer",
+    "parameters": {
+     "level": 1.0,
+     "pan": 0.0,
+     "outputLevel": 1.0
+    }
+   }
+  ],
+  "edges": [
+   {
+    "source": "vowel",
+    "destination": "bus",
+    "gain": 0.5
+   },
+   {
+    "source": "comb",
+    "destination": "bus",
+    "gain": 0.4
+   },
+   {
+    "source": "sweep",
+    "destination": "bus",
+    "gain": 0.3
+   },
+   {
+    "source": "bus",
+    "destination": "output",
+    "gain": 0.7
+   }
+  ],
+  "envelopes": [
+   {
+    "attack": 0.01,
+    "decay": 0.3,
+    "sustain": 0.8,
+    "release": 0.3
+   },
+   {
+    "attack": 0.005,
+    "decay": 0.4,
+    "sustain": 0.2,
+    "release": 0.3
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 0.8,
+    "waveform": "triangle",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   },
+   {
+    "rate": 0.3,
+    "waveform": "sine",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   }
+  ],
+  "matrix": [
+   {
+    "id": "row-1",
+    "enabled": true,
+    "source": "l1",
+    "destinationNode": "vowel",
+    "destinationParameter": "position",
+    "depth": 0.8
+   },
+   {
+    "id": "row-2",
+    "enabled": true,
+    "source": "e2",
+    "destinationNode": "sweep",
+    "destinationParameter": "position",
+    "depth": 0.9
+   },
+   {
+    "id": "row-3",
+    "enabled": true,
+    "source": "l2",
+    "destinationNode": "comb",
+    "destinationParameter": "position",
+    "depth": 0.4
+   }
+  ],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "editedPatch": {
+  "patchVersion": 1,
+  "noiseSeed": 7311,
+  "nodes": [
+   {
+    "id": "vowel",
+    "type": "wavetable",
+    "parameters": {
+     "table": 3,
+     "position": 0.1,
+     "outputLevel": 0.6,
+     "unisonVoices": 3,
+     "detuneCents": 10,
+     "unisonSpread": 0.7,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": 0.0,
+     "coarse": 0.0,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "comb",
+    "type": "wavetable",
+    "parameters": {
+     "table": 7,
+     "position": 0.5,
+     "outputLevel": 0.5,
+     "unisonVoices": 1.0,
+     "detuneCents": 12.0,
+     "unisonSpread": 0.5,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": -1,
+     "coarse": 0.0,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "sweep",
+    "type": "wavetable",
+    "parameters": {
+     "table": 8,
+     "position": 0,
+     "outputLevel": 0.35,
+     "unisonVoices": 1.0,
+     "detuneCents": 12.0,
+     "unisonSpread": 0.5,
+     "phaseRandom": 0.0,
+     "drift": 0.0,
+     "octave": 0.0,
+     "coarse": 12,
+     "fine": 0.0,
+     "keytrack": 1.0
+    }
+   },
+   {
+    "id": "bus",
+    "type": "mixer",
+    "parameters": {
+     "level": 1.0,
+     "pan": 0.0,
+     "outputLevel": 1.0
+    }
+   }
+  ],
+  "edges": [
+   {
+    "source": "vowel",
+    "destination": "bus",
+    "gain": 0.5
+   },
+   {
+    "source": "comb",
+    "destination": "bus",
+    "gain": 0.4
+   },
+   {
+    "source": "sweep",
+    "destination": "bus",
+    "gain": 0.3
+   },
+   {
+    "source": "bus",
+    "destination": "output",
+    "gain": 0.7
+   }
+  ],
+  "envelopes": [
+   {
+    "attack": 0.01,
+    "decay": 0.3,
+    "sustain": 0.8,
+    "release": 0.3
+   },
+   {
+    "attack": 0.005,
+    "decay": 0.4,
+    "sustain": 0.2,
+    "release": 0.3
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   },
+   {
+    "attack": 0.01,
+    "decay": 0.1,
+    "sustain": 1.0,
+    "release": 0.2
+   }
+  ],
+  "lfos": [
+   {
+    "rate": 0.8,
+    "waveform": "triangle",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   },
+   {
+    "rate": 0.3,
+    "waveform": "sine",
+    "fadeMs": 0.0,
+    "syncMode": "free",
+    "syncDivision": "1/4"
+   }
+  ],
+  "matrix": [
+   {
+    "id": "row-1",
+    "enabled": true,
+    "source": "l1",
+    "destinationNode": "vowel",
+    "destinationParameter": "position",
+    "depth": 0.8
+   },
+   {
+    "id": "row-2",
+    "enabled": true,
+    "source": "e2",
+    "destinationNode": "sweep",
+    "destinationParameter": "position",
+    "depth": 0.9
+   },
+   {
+    "id": "row-3",
+    "enabled": true,
+    "source": "l2",
+    "destinationNode": "comb",
+    "destinationParameter": "position",
+    "depth": 0.4
+   }
+  ],
+  "macros": [
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   },
+   {
+    "label": "",
+    "default": 0.0
+   }
+  ]
+ },
+ "controls": {
+  "macros": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "outputGain": -6.0,
+  "width": 0.5,
+  "masterTune": 0.0,
+  "bypass": false
+ }
+}

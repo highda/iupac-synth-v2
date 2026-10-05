@@ -63,7 +63,19 @@ const std::array<ModuleDescriptor, moduleTypeCount> catalog {{
     {ModuleType::chorus, "chorus", false, 1, false, true, AudioPort::in, {added(scalar("rate", "Hz", 0.01, 8, 0.5, PS::logarithmic)), added(scalar("depth", "", 0, 1, 0.3)), added(step("voices", "count", 2, 4, 2)), added(scalar("feedback", "", 0, 0.9, 0)), added(scalar("mix", "", 0, 1, 0.3)), added(scalar("outputLevel", "", 0, 1, 1))}},
     {ModuleType::delay, "delay", false, 1, false, true, AudioPort::in, {added(choice("syncMode", {"free", "sync"})), added(scalar("timeMs", "ms", 1, 2000, 375, PS::logarithmic)), added(choice("syncDivision", {"1/1", "1/2", "1/4", "1/4T", "1/8", "1/8T", "1/16"}, 4)), added(scalar("spread", "", -1, 1, 0)), added(scalar("feedback", "", 0, 0.95, 0.35)), added(scalar("damping", "", 0, 1, 0.4)), added(scalar("mix", "", 0, 1, 0.3)), added(scalar("outputLevel", "", 0, 1, 1))}},
     {ModuleType::reverb, "reverb", false, 1, false, true, AudioPort::in, {added(scalar("size", "", 0, 1, 0.5)), added(scalar("decaySeconds", "s", 0.1, 20, 2.0, PS::logarithmic)), added(scalar("damping", "", 0, 1, 0.5)), added(scalar("preDelayMs", "ms", 0, 200, 20)), added(scalar("width", "", 0, 1, 1)), added(scalar("mix", "", 0, 1, 0.25)), added(scalar("outputLevel", "", 0, 1, 1))}},
-    {ModuleType::width, "width", false, 1, false, true, AudioPort::in, {added(scalar("width", "", 0, 2, 1)), added(scalar("bassMonoHz", "Hz", 20, 500, 120, PS::logarithmic)), added(scalar("outputLevel", "", 0, 1, 1))}}
+    {ModuleType::width, "width", false, 1, false, true, AudioPort::in, {added(scalar("width", "", 0, 2, 1)), added(scalar("bassMonoHz", "Hz", 20, 500, 120, PS::logarithmic)), added(scalar("outputLevel", "", 0, 1, 1))}},
+    // D12 (#166): the classic oscillator and the wavetable source. Both share the three general
+    // source slots and carry the same unison and pitch blocks harmonic and FM do. The wavetable's
+    // `table` choices are the engine's built-in tables (engine/Wavetables.hpp): eight synthesized
+    // in-repo, then twenty-four sampled from AKWF-FREE (CC0). Append only; no user import.
+    {ModuleType::osc, "osc", true, 3, true, false, AudioPort::in, {added(choice("waveform", {"sine", "triangle", "saw", "square"}, 2)), added(scalar("pulseWidth", "", 0.05, 0.95, 0.5)), added(scalar("outputLevel", "", 0, 1, 0.7)),
+        added(step("unisonVoices", "count", 1, 7, 1)), added(scalar("detuneCents", "cents", 0, 50, 12)), added(scalar("unisonSpread", "", 0, 1, 0.5)), added(scalar("phaseRandom", "", 0, 1, 0, PS::linear, false)), added(scalar("drift", "", 0, 1, 0)),
+        added(step("octave", "oct", -3, 3, 0)), added(step("coarse", "semitones", -12, 12, 0)), added(scalar("fine", "cents", -100, 100, 0)), added(scalar("keytrack", "", 0, 1, 1, PS::linear, false))}},
+    {ModuleType::wavetable, "wavetable", true, 3, true, false, AudioPort::in, {added(choice("table", {"analog", "harmonics", "pwm", "formant", "organ", "sync", "fm", "digital",
+            "cello", "violin", "flute", "clarinet", "oboe", "altosax", "piano", "epiano", "eorgan", "aguitar", "eguitar", "ebass", "dbass", "voice", "fmsynth", "chip",
+            "vgame", "granular", "overtone", "blended", "distorted", "handdrawn", "theremin", "clavinet"})), added(scalar("position", "", 0, 1, 0)), added(scalar("outputLevel", "", 0, 1, 0.7)),
+        added(step("unisonVoices", "count", 1, 7, 1)), added(scalar("detuneCents", "cents", 0, 50, 12)), added(scalar("unisonSpread", "", 0, 1, 0.5)), added(scalar("phaseRandom", "", 0, 1, 0, PS::linear, false)), added(scalar("drift", "", 0, 1, 0)),
+        added(step("octave", "oct", -3, 3, 0)), added(step("coarse", "semitones", -12, 12, 0)), added(scalar("fine", "cents", -100, 100, 0)), added(scalar("keytrack", "", 0, 1, 1, PS::linear, false))}}
 }};
 
 std::string_view typeId(ModuleType type) { return catalog.at(static_cast<std::size_t>(type)).id; }

@@ -82,6 +82,9 @@ int screenshots(const std::filesystem::path&dir)
   overlay.setLookAndFeel(nullptr);
  }
 #endif
+ // D12 (#166): the classic oscillator and the wavetable source in the general source slots.
+ (void)processor.editPatch([](auto&p){p.nodes.clear();p.edges.clear();p.matrix.clear();});editor.refresh();
+ ok&=editor.activateSlot("osc",src1)&&editor.activateSlot("wavetable",src2);editor.setSize(1200,800);ok&=write(editor.field(),"editor-field-d12-sources.png");
  editor.setVisible(false);return ok?0:1;
 }
 }
@@ -140,7 +143,7 @@ int main(int argc,char**argv)
  // Slot activation in place: each catalog type lands in a typed slot and keeps its canonical id.
  ok&=expect(editor->activateSlot("harmonic",src1)&&editor->activateSlot("fm",src2)&&editor->activateSlot("noise",src3)&&editor->activateSlot("sub",subSlot)&&editor->activateSlot("resonator",res1)&&editor->activateSlot("filter",filt1)&&editor->activateSlot("shaper",shape1)&&editor->activateSlot("mixer",mix1)&&editor->activateSlot("chorus",chorusSlot)&&editor->activateSlot("delay",delaySlot)&&editor->activateSlot("reverb",reverbSlot)&&editor->activateSlot("width",widthSlot),"every catalog module can be activated in its slot");
  ok&=expect(!editor->activateSlot("filter",src1)&&!editor->activateSlot("harmonic",src1)&&!editor->activateSlot("reverb",chorusSlot),"wrong-kind and occupied slots reject activation");
- auto patch=processor.snapshot().editedPatch;ok&=expect(patch.nodes.size()==domain::moduleTypeCount&&node(patch,"src1")&&node(patch,"src3")&&node(patch,"sub1")&&node(patch,"res1")&&node(patch,"filt1")&&node(patch,"shape1")&&node(patch,"mix1")&&node(patch,"chorus1")&&node(patch,"delay1")&&node(patch,"reverb1")&&node(patch,"width1"),"all twelve module types are present with slot ids");
+ auto patch=processor.snapshot().editedPatch;ok&=expect(patch.nodes.size()==12&&node(patch,"src1")&&node(patch,"src3")&&node(patch,"sub1")&&node(patch,"res1")&&node(patch,"filt1")&&node(patch,"shape1")&&node(patch,"mix1")&&node(patch,"chorus1")&&node(patch,"delay1")&&node(patch,"reverb1")&&node(patch,"width1"),"all twelve module types are present with slot ids");
  const auto&map=editor->field().slotMap();ok&=expect(map.node[0]>=0&&map.node[1]>=0&&map.node[2]>=0&&map.node[3]>=0&&map.node[4]>=0&&map.node[5]<0&&map.node[6]>=0&&map.node[7]<0&&map.node[10]>=0&&map.node[11]<0&&map.node[12]>=0&&map.node[15]>=0,"slot map mirrors the patch");
  // Gesture: drag OUT→IN creates an edge through the production editPatch path.
  auto&field=editor->field();drag(*field.outputPort(src1),*field.inputPort(filt1),centreOf(*field.inputPort(filt1)));patch=processor.snapshot().editedPatch;ok&=expect(edge(patch,"src1","filt1")!=nullptr,"synthesized OUT→IN drag creates an audio edge");

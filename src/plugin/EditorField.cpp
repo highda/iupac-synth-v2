@@ -5,7 +5,7 @@ namespace iupac::ui
 {
 namespace
 {
-SlotKind kindOf(domain::ModuleType t){switch(t){case domain::ModuleType::harmonic:case domain::ModuleType::fm:case domain::ModuleType::noise:return SlotKind::source;case domain::ModuleType::resonator:return SlotKind::resonator;case domain::ModuleType::filter:return SlotKind::filter;case domain::ModuleType::shaper:return SlotKind::shaper;case domain::ModuleType::mixer:return SlotKind::mixer;case domain::ModuleType::sub:return SlotKind::sub;case domain::ModuleType::chorus:return SlotKind::chorus;case domain::ModuleType::delay:return SlotKind::delay;case domain::ModuleType::reverb:return SlotKind::reverb;case domain::ModuleType::width:return SlotKind::width;}return SlotKind::source;}
+SlotKind kindOf(domain::ModuleType t){switch(t){case domain::ModuleType::harmonic:case domain::ModuleType::fm:case domain::ModuleType::noise:case domain::ModuleType::osc:case domain::ModuleType::wavetable:return SlotKind::source;case domain::ModuleType::resonator:return SlotKind::resonator;case domain::ModuleType::filter:return SlotKind::filter;case domain::ModuleType::shaper:return SlotKind::shaper;case domain::ModuleType::mixer:return SlotKind::mixer;case domain::ModuleType::sub:return SlotKind::sub;case domain::ModuleType::chorus:return SlotKind::chorus;case domain::ModuleType::delay:return SlotKind::delay;case domain::ModuleType::reverb:return SlotKind::reverb;case domain::ModuleType::width:return SlotKind::width;}return SlotKind::source;}
 std::string_view idPrefix(SlotKind k){switch(k){case SlotKind::source:return"src";case SlotKind::resonator:return"res";case SlotKind::filter:return"filt";case SlotKind::shaper:return"shape";case SlotKind::mixer:return"mix";case SlotKind::sub:return"sub";case SlotKind::chorus:return"chorus";case SlotKind::delay:return"delay";case SlotKind::reverb:return"reverb";case SlotKind::width:return"width";case SlotKind::output:return"out";}return"";}
 int nodeIndex(const domain::Patch&p,std::string_view id){for(std::size_t i=0;i<p.nodes.size();++i)if(p.nodes[i].id==id)return(int)i;return-1;}
 domain::ParameterDescriptor describe(const domain::ModuleDescriptor&m,std::string_view id){const auto*d=domain::findParameter(m,id);return d?*d:domain::ParameterDescriptor{id,"",0,1,0,domain::ParameterScale::linear,domain::ParameterKind::continuous,false,0,20.0,{}};}
@@ -64,8 +64,8 @@ void SlotView::mouseUp(const juce::MouseEvent&e)
 {
  if(!pressed_||!getLocalBounds().contains(e.getPosition())){pressed_=false;return;}pressed_=false;const auto&s=slotTable[slot_];
  if(s.kind!=SlotKind::source){static constexpr std::array types{"","sub","resonator","filter","shaper","mixer","chorus","delay","reverb","width",""};if(field_.onActivate)field_.onActivate(types[(std::size_t)s.kind],slot_);return;}
- juce::PopupMenu m;m.addItem(1,"harmonic");m.addItem(2,"fm");m.addItem(3,"noise");juce::Component::SafePointer<SlotView>self(this);
- m.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(this).withMinimumWidth(80),[self](int r){if(!self||r==0||!self->field_.onActivate)return;self->field_.onActivate(r==1?"harmonic":r==2?"fm":"noise",self->slot_);});
+ juce::PopupMenu m;m.addItem(4,"osc");m.addItem(5,"wavetable");m.addItem(1,"harmonic");m.addItem(2,"fm");m.addItem(3,"noise");juce::Component::SafePointer<SlotView>self(this);
+ m.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(this).withMinimumWidth(80),[self](int r){if(!self||r==0||!self->field_.onActivate)return;self->field_.onActivate(r==1?"harmonic":r==2?"fm":r==3?"noise":r==4?"osc":"wavetable",self->slot_);});
 }
 void SlotView::setNode(const domain::Node*n)
 {
@@ -78,7 +78,7 @@ void SlotView::build(const domain::Node&n)
  auto knob=[&](std::string_view id,juce::String caption){auto k=std::make_unique<Knob>(describe(d,id));k->setCaption(std::move(caption));k->setStep(0.02);k->onChange=[this,p=std::string(id)](double v){commit(p,{v});};addAndMakeVisible(*k);controls_.emplace_back(std::string(id),std::move(k));};
  auto fader=[&](std::string_view id,juce::String caption,bool vertical,bool bipolar){auto f=std::make_unique<Fader>(describe(d,id),vertical,bipolar);f->setCaption(std::move(caption));f->setStep(0.02);f->onChange=[this,p=std::string(id)](double v){commit(p,{v});};addAndMakeVisible(*f);controls_.emplace_back(std::string(id),std::move(f));};
  auto forest=[&](std::string_view id,juce::String caption,Forest::Mode mode,std::vector<double>defaults={}){auto f=std::make_unique<Forest>(describe(d,id),mode,std::move(defaults));f->setCaption(std::move(caption));f->onChange=[this,p=std::string(id)](const std::vector<double>&v){commit(p,v);};addAndMakeVisible(*f);controls_.emplace_back(std::string(id),std::move(f));};
- auto toggle=[&](std::string_view id,std::vector<juce::String>segments){auto t=std::make_unique<SegmentToggle>(std::move(segments));t->onChange=[this,p=std::string(id)](int v){commit(p,{(double)v});};addAndMakeVisible(*t);controls_.emplace_back(std::string(id),std::move(t));};
+ auto toggle=[&](std::string_view id,std::vector<juce::String>segments,bool menu=false){auto t=std::make_unique<SegmentToggle>(std::move(segments),menu);t->onChange=[this,p=std::string(id)](int v){commit(p,{(double)v});};addAndMakeVisible(*t);controls_.emplace_back(std::string(id),std::move(t));};
  std::vector<double>harmonicDefaults(16);for(std::size_t i=0;i<16;++i)harmonicDefaults[i]=(double)(i+1);
  // D8 unison band, shared by the two unison-capable source types. `unisonVoices` is discrete over
  // seven values, so its wheel/drag step is one copy rather than the continuous 2%.
@@ -97,6 +97,10 @@ void SlotView::build(const domain::Node&n)
    // drawn bipolar around their centred defaults and are matrix destinations.
    fader("harmonicityMorph","harm",false,false);fader("oddEvenBalance","odd/ev",false,true);fader("symmetry","sym",false,true);unisonBand();pitchBand();break;
   case domain::ModuleType::fm:knob("carrierRatio","carr");knob("modulatorRatio","mod");knob("index","index");unisonBand();pitchBand();break;
+  // D12 (#166): the classic oscillator is a shape toggle and its pulse width; the wavetable source
+  // is a table toggle and the frame position. Both carry the shared unison and pitch bands.
+  case domain::ModuleType::osc:toggle("waveform",{"sine","tri","saw","sqr"});knob("pulseWidth","width");unisonBand();pitchBand();break;
+  case domain::ModuleType::wavetable:{std::vector<juce::String>names;for(const auto&c:describe(d,"table").choices)names.emplace_back(juce::String(c.data(),c.size()));toggle("table",std::move(names),true);}knob("position","pos");unisonBand();pitchBand();break;
   case domain::ModuleType::noise:toggle("color",{"white","pink"});toggle("mode",{"cont","burst"});knob("burstMs","burst");break;
   case domain::ModuleType::resonator:toggle("mode",{"comb","modal"});knob("tuneRatio","tune");knob("combFeedback","feedback");knob("modalQ","modal q");forest("modeRatios","ratio",Forest::Mode::logDeviation,std::vector<double>(4,1.0));forest("modeLevels","level",Forest::Mode::unipolar);break;
   // D8 filter block (#126). The two new modes append to the toggle, so a stored mode index still
@@ -160,6 +164,9 @@ void SlotView::resized()
  {
   case domain::ModuleType::harmonic:{placePitch(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/5)));placeUnison(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/5)));placeRow(std::array{"harmonicityMorph","oddEvenBalance","symmetry"},body.removeFromBottom(juce::jmin(px(12),body.getHeight()/5)));auto faders=body.removeFromBottom(juce::jmin(px(14),body.getHeight()/4));const int h=body.getHeight()/3;place("partialAmplitudes",body.removeFromTop(h));place("partialRatios",body.removeFromTop(h));place("partialPans",body);place("tilt",faders.removeFromLeft(faders.getWidth()/2).reduced(1,0));place("inharmonicity",faders.reduced(1,0));break;}
   case domain::ModuleType::fm:{placePitch(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/4)));placeUnison(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));const int w=body.getWidth()/3;place("carrierRatio",body.removeFromLeft(w));place("modulatorRatio",body.removeFromLeft(w));place("index",body);break;}
+  case domain::ModuleType::osc:case domain::ModuleType::wavetable:{placePitch(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/4)));placeUnison(body.removeFromBottom(juce::jmin(px(12),body.getHeight()/3)));
+   place(type_==domain::ModuleType::osc?"waveform":"table",body.removeFromTop(juce::jmin(px(13),body.getHeight()/3)).reduced(0,1));
+   place(type_==domain::ModuleType::osc?"pulseWidth":"position",body);break;}
   case domain::ModuleType::noise:{auto left=body.removeFromLeft(body.getWidth()*11/20);const int h=juce::jmin(px(14),left.getHeight()/2);place("color",left.removeFromTop(h).reduced(0,1));place("mode",left.removeFromTop(h).reduced(0,1));place("burstMs",body);break;}
   case domain::ModuleType::resonator:{place("mode",body.removeFromTop(juce::jmin(px(13),body.getHeight()/5)).reduced(0,1));if(mode_==0){hide("modalQ");hide("modeRatios");hide("modeLevels");const int w=body.getWidth()/2;place("tuneRatio",body.removeFromLeft(w));place("combFeedback",body);}else{hide("combFeedback");auto knobs=body.removeFromTop(body.getHeight()*2/5);const int w=knobs.getWidth()/2;place("tuneRatio",knobs.removeFromLeft(w));place("modalQ",knobs);const int h=body.getHeight()/2;place("modeRatios",body.removeFromTop(h));place("modeLevels",body);}break;}
   // The filter's two panel shortcuts take the bottom band the other D8 bands use, so the slot keeps

@@ -100,6 +100,18 @@
    "snapshot": "family-bell.snapshot.json",
    "midi": "held-note.midi.json",
    "samples": 288000
+  },
+  {
+   "id": "osc-shapes-unison-pwm",
+   "snapshot": "osc-shapes.snapshot.json",
+   "midi": "held-note.midi.json",
+   "samples": 144000
+  },
+  {
+   "id": "wavetable-morph",
+   "snapshot": "wavetable-morph.snapshot.json",
+   "midi": "held-note.midi.json",
+   "samples": 144000
   }
  ],
  "rejections": [

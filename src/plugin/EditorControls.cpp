@@ -93,14 +93,27 @@ void Forest::mouseWheelMove(const juce::MouseEvent&e,const juce::MouseWheelDetai
  if(mode_==Mode::logDeviation)v=juce::jlimit(descriptor_.minimum,descriptor_.maximum,v*std::pow(2.0,(w.deltaY>0?1.0:-1.0)/120.0));else v=descriptor_.denormalize(juce::jlimit(0.0,1.0,descriptor_.normalize(v)+(w.deltaY>0?0.01:-0.01)));
  hovered_=c;repaint();if(onChange)onChange(values_);mouseMove(e);
 }
-SegmentToggle::SegmentToggle(std::vector<juce::String>s):segments_(std::move(s)){setRepaintsOnMouseActivity(true);}
+SegmentToggle::SegmentToggle(std::vector<juce::String>s,bool menu):segments_(std::move(s)),menu_(menu){setRepaintsOnMouseActivity(true);}
 void SegmentToggle::setIndex(int i,bool notify){i=juce::jlimit(0,(int)segments_.size()-1,i);const bool changed=i!=index_;index_=i;repaint();if(notify&&changed&&onChange)onChange(index_);}
 void SegmentToggle::paint(juce::Graphics&g)
 {
  auto r=getLocalBounds().toFloat().reduced(0.5f);const float w=r.getWidth()/(float)segments_.size();g.setColour(ink);g.drawRoundedRectangle(r,2.0f,hairline);
+ if(menu_)
+ {
+  const float text=juce::jlimit(minimumTextHeight,scaledText(*this,9.0f),r.getHeight()*0.6f),arrow=r.getHeight()*0.22f;auto label=r.reduced(3.0f,0.0f);auto mark=label.removeFromRight(r.getHeight()*0.6f);
+  drawCaption(g,segments_[(std::size_t)index_],label.toNearestInt(),juce::Justification::centredLeft,text);
+  juce::Path p;p.addTriangle(mark.getCentreX()-arrow,mark.getCentreY()-arrow*0.5f,mark.getCentreX()+arrow,mark.getCentreY()-arrow*0.5f,mark.getCentreX(),mark.getCentreY()+arrow*0.7f);g.fillPath(p);return;
+ }
  for(std::size_t i=0;i<segments_.size();++i){auto seg=juce::Rectangle<float>(r.getX()+w*(float)i,r.getY(),w,r.getHeight());if((int)i==index_){g.setColour(ink);g.fillRoundedRectangle(seg.reduced(1.0f),1.5f);}if(i)g.drawLine(seg.getX(),seg.getY(),seg.getX(),seg.getBottom(),hairline);g.setColour((int)i==index_?ground:ink);drawCaption(g,segments_[i],seg.toNearestInt(),juce::Justification::centred,juce::jlimit(minimumTextHeight,scaledText(*this,9.0f),r.getHeight()*0.6f));}
 }
-void SegmentToggle::mouseDown(const juce::MouseEvent&e){if(e.mods.isPopupMenu())return;setIndex((int)std::floor(e.position.x/juce::jmax(1.0f,(float)getWidth())*(float)segments_.size()),true);}
+void SegmentToggle::mouseWheelMove(const juce::MouseEvent&e,const juce::MouseWheelDetails&w){if(!menu_||w.deltaY==0.0f){juce::Component::mouseWheelMove(e,w);return;}setIndex(index_+(w.deltaY<0.0f?1:-1),true);}
+void SegmentToggle::mouseDown(const juce::MouseEvent&e){if(e.mods.isPopupMenu())return;
+ if(menu_)
+ {
+  juce::PopupMenu m;for(std::size_t i=0;i<segments_.size();++i)m.addItem((int)i+1,segments_[i],true,(int)i==index_);juce::Component::SafePointer<SegmentToggle>self(this);
+  m.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(this).withMinimumWidth(getWidth()),[self](int r){if(self&&r>0)self->setIndex(r-1,true);});return;
+ }
+ setIndex((int)std::floor(e.position.x/juce::jmax(1.0f,(float)getWidth())*(float)segments_.size()),true);}
 void AdsrCurve::setEnvelope(domain::Envelope env,bool notify){envelope_=env;repaint();if(notify&&onChange)onChange(envelope_);}
 // The drawn shape of one bent stage, in stage-progress space. Identical in form to the engine's
 // stage warp (Modules.cpp): a curve of 0 is the straight line, and both endpoints stay exact.

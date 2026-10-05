@@ -74,10 +74,13 @@ private:
 class SegmentToggle final:public juce::Component
 {
 public:
- explicit SegmentToggle(std::vector<juce::String>segments);void setIndex(int,bool notify);[[nodiscard]]int index()const noexcept{return index_;}
- std::function<void(int)>onChange;void paint(juce::Graphics&)override;void mouseDown(const juce::MouseEvent&)override;
+ // `menu` (D12, #166) is the many-choice form: the control shows only the selected name, a click
+ // opens the whole list and the wheel steps through it. The wavetable `table` choice uses it.
+ explicit SegmentToggle(std::vector<juce::String>segments,bool menu=false);void setIndex(int,bool notify);[[nodiscard]]int index()const noexcept{return index_;}
+ [[nodiscard]]bool isMenu()const noexcept{return menu_;}[[nodiscard]]int size()const noexcept{return (int)segments_.size();}
+ std::function<void(int)>onChange;void paint(juce::Graphics&)override;void mouseDown(const juce::MouseEvent&)override;void mouseWheelMove(const juce::MouseEvent&,const juce::MouseWheelDetails&)override;
 private:
- std::vector<juce::String>segments_;int index_{};
+ std::vector<juce::String>segments_;int index_{};bool menu_{};
 };
 class AdsrCurve final:public juce::Component
 {

@@ -23,8 +23,9 @@ inline constexpr std::size_t maximumDocumentBytes = 1024 * 1024;
 inline constexpr std::size_t maximumJsonDepth = 32;
 
 // D8 appends five types; the original seven keep their order so a stored type id never moves.
-enum class ModuleType { harmonic, fm, noise, resonator, filter, shaper, mixer, sub, chorus, delay, reverb, width };
-inline constexpr std::size_t moduleTypeCount = 12;
+// D12 appends `osc` and `wavetable` after them for the same reason.
+enum class ModuleType { harmonic, fm, noise, resonator, filter, shaper, mixer, sub, chorus, delay, reverb, width, osc, wavetable };
+inline constexpr std::size_t moduleTypeCount = 14;
 // The IN ports a node declares. `in` is the ordinary summed stereo input every processor,
 // effect and the OUT bus has; the two audio-rate inputs are the only typed extras (D8).
 enum class AudioPort { in, modIn, exciteIn };

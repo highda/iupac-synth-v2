@@ -41,7 +41,8 @@ std::string targetName(engine::ParameterTarget target)
     // Catalog ids of engine::ParameterTarget, in enum order.
     constexpr std::array names {"carrierRatio", "modulatorRatio", "index", "burstMs", "tuneRatio", "combFeedback", "modalQ", "cutoff", "q", "drive", "wet", "level", "pan", "outputLevel",
                                 "detuneCents", "unisonSpread", "drift", "harmonicityMorph", "oddEvenBalance", "symmetry", "fine", "keytrack", "modInDepth", "exciteDepth", "envAmount",
-                                "rate", "depth", "feedback", "mix", "timeMs", "spread", "damping", "size", "decaySeconds", "preDelayMs", "width", "bassMonoHz"};
+                                "rate", "depth", "feedback", "mix", "timeMs", "spread", "damping", "size", "decaySeconds", "preDelayMs", "width", "bassMonoHz",
+                                "pulseWidth", "position"};
     static_assert(names.size() == engine::parameterTargetCount);
     return names.at(static_cast<std::size_t>(target));
 }

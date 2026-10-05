@@ -44,6 +44,8 @@ target_compile_features(iupac_synth_layout PUBLIC cxx_std_20)
 add_library(iupac_synth_engine STATIC
     src/engine/Engine.cpp
     src/engine/Modules.cpp
+    src/engine/Wavetables.cpp
+    src/engine/WavetableData.cpp
     src/engine/PatchCoordinator.cpp
 )
 target_include_directories(iupac_synth_engine PUBLIC include)
@@ -160,6 +162,8 @@ if(BUILD_TESTING)
     add_test(NAME render-distance-metric COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_render_distance.py)
     # Mapper-coverage invariant (#105, D8): every catalog parameter has a mapping entry.
     # Reads the live catalog through the production CLI, so it guards chemistry-OFF builds too.
+    # D12 (#166): the embedded sampled wavetables must be exactly what the vendored AKWF files generate.
+    add_test(NAME wavetable-data COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/build-wavetables.py --check)
     add_test(NAME mapping-coverage COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_mapping_coverage.py
         $<TARGET_FILE:iupac-cli> ${CMAKE_SOURCE_DIR}/data/mapping-coverage.json)
     add_test(NAME patch-compatibility COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/test_patch_compatibility.py

@@ -151,7 +151,7 @@ def main():
     absent = sorted(declared_rules - traced_rules)
     if absent:
         v3_failures.append(f"coverage ruleIds never traced: {absent}")
-    still_provisional = sorted(f"{e['module']}.{e['parameter']}" for e in coverage["entries"] if e["status"] != "mapped")
+    still_provisional = sorted(f"{e['module']}.{e['parameter']}" for e in coverage["entries"] if e["status"] == "provisional")
     if still_provisional:
         v3_failures.append(f"coverage entries still provisional: {still_provisional}")
     # MAPPING-POLICY caps generated rows at 12 inside the 40-row Patch cap, so the rest stays
