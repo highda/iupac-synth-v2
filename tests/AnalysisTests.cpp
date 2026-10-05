@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     if (!iupac::chemistry::decodeAnalysisResponse(numericResponse, "42")) { std::cerr << "rejected integer request ID\n"; return 1; }
     if (iupac::chemistry::decodeAnalysisResponse(std::string(iupac::chemistry::maximumResponseBytes + 1, 'x'), "42")) return 1;
     const auto generated=iupac::chemistry::generate(*decoded.value);
-    if(!generated||iupac::domain::validate(*generated.patch)!=""||generated.patch->nodes.empty()||generated.patch->matrix.size()!=8){std::cerr<<generated.error<<'\n';return 1;}
+    if(!generated||iupac::domain::validate(*generated.patch)!=""||generated.patch->nodes.empty()||generated.patch->matrix.empty()||generated.patch->matrix.size()>12){std::cerr<<generated.error<<'\n';return 1;}
     const auto sonic=juce::JSON::toString(iupac::chemistry::encodeSonicIntent(*generated.intent),false).toStdString();
     if(sonic.find("filter")!=std::string::npos||sonic.find("resonator")!=std::string::npos||sonic.find("\"fm\"")!=std::string::npos){std::cerr<<"projection leaked module vocabulary\n";return 1;}
     const auto generatedAgain=iupac::chemistry::generate(*decoded.value);

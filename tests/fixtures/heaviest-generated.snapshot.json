@@ -8,37 +8,17 @@
    },
    {
     "destination": "mix",
-    "gain": 0.65,
+    "gain": 0.85,
     "source": "secondary"
    },
    {
-    "destination": "resonator",
-    "gain": 1.0,
-    "source": "mix"
-   },
-   {
-    "destination": "shaper",
-    "gain": 0.8,
-    "source": "sub"
-   },
-   {
-    "destination": "shaper",
-    "gain": 0.85,
-    "source": "resonator"
-   },
-   {
-    "destination": "shaper",
-    "gain": 0.3,
-    "source": "mix"
-   },
-   {
     "destination": "filter",
-    "gain": 0.85,
-    "source": "shaper"
+    "gain": 0.66,
+    "source": "mix"
    },
    {
     "destination": "chorus",
-    "gain": 1.0,
+    "gain": 0.9,
     "source": "filter"
    },
    {
@@ -64,31 +44,31 @@
   ],
   "envelopes": [
    {
-    "attack": 0.052213114754098,
-    "attackCurve": 0.0,
-    "decay": 0.43,
-    "decayCurve": 0.0,
-    "release": 1.13,
-    "releaseCurve": 0.0,
-    "sustain": 0.762295081967213
+    "attack": 0.32730527308557,
+    "attackCurve": 0.504064812973562,
+    "decay": 1.204895289533706,
+    "decayCurve": -0.292484617368438,
+    "release": 1.353163814880058,
+    "releaseCurve": 0.49381141664832,
+    "sustain": 0.786097876488293
    },
    {
-    "attack": 0.01,
+    "attack": 0.163652636542785,
     "attackCurve": 0.0,
-    "decay": 0.266666666666667,
-    "decayCurve": 0.0,
-    "release": 0.5,
+    "decay": 0.54934592370917,
+    "decayCurve": -0.6,
+    "release": 1.353163814880058,
     "releaseCurve": 0.0,
-    "sustain": 0.6
+    "sustain": 0.627704152927182
    },
    {
-    "attack": 0.02,
-    "attackCurve": 0.0,
-    "decay": 0.2,
+    "attack": 0.981022223286241,
+    "attackCurve": 0.3,
+    "decay": 1.0,
     "decayCurve": 0.0,
-    "release": 0.345833333333333,
+    "release": 1.353163814880058,
     "releaseCurve": 0.0,
-    "sustain": 0.5
+    "sustain": 1.0
    },
    {
     "attack": 0.01,
@@ -103,72 +83,88 @@
   "lfos": [
    {
     "fadeMs": 0.0,
-    "rate": 2.183333333333334,
+    "rate": 3.291743087433049,
     "syncDivision": "1/4",
     "syncMode": "free",
     "waveform": "sine"
    },
    {
     "fadeMs": 0.0,
-    "rate": 1.195,
+    "rate": 0.146915415410155,
     "syncDivision": "1/4",
     "syncMode": "free",
-    "waveform": "triangle"
+    "waveform": "randomSmooth"
    }
   ],
   "macros": [
    {
     "default": 0.0,
-    "label": "Macro 1: filter cutoff"
+    "label": "Tone: filter cutoff"
    },
    {
     "default": 0.0,
-    "label": "Macro 2: primary outputLevel"
+    "label": "Motion: primary position"
    },
    {
     "default": 0.0,
-    "label": "Macro 3: resonator combFeedback"
+    "label": "Edge: filter q"
    },
    {
     "default": 0.0,
-    "label": "Macro 4: secondary outputLevel"
+    "label": "Space: reverb mix"
    }
   ],
   "matrix": [
    {
-    "depth": 0.28,
+    "depth": 0.227716420365838,
     "destinationNode": "primary",
     "destinationParameter": "outputLevel",
     "enabled": true,
-    "id": "velocity-primary",
+    "id": "velocity-level",
     "source": "velocity"
    },
    {
-    "depth": 0.171666666666667,
+    "depth": 0.451447564636674,
     "destinationNode": "primary",
-    "destinationParameter": "outputLevel",
+    "destinationParameter": "position",
     "enabled": true,
-    "id": "l1-primary",
+    "id": "l1-motion",
     "source": "l1"
    },
    {
-    "depth": 0.229206167436915,
+    "depth": 0.42,
+    "destinationNode": "primary",
+    "destinationParameter": "position",
+    "enabled": true,
+    "id": "e3-sweep",
+    "source": "e3"
+   },
+   {
+    "depth": 0.063703881775602,
     "destinationNode": "filter",
     "destinationParameter": "cutoff",
     "enabled": true,
-    "id": "e2-tone",
-    "source": "e2"
+    "id": "velocity-tone",
+    "source": "velocity"
    },
    {
-    "depth": 0.2,
-    "destinationNode": "resonator",
-    "destinationParameter": "combFeedback",
+    "depth": 0.097162346736187,
+    "destinationNode": "filter",
+    "destinationParameter": "cutoff",
+    "enabled": true,
+    "id": "l2-drift",
+    "source": "l2"
+   },
+   {
+    "depth": 0.35,
+    "destinationNode": "primary",
+    "destinationParameter": "position",
     "enabled": true,
     "id": "cc1-expression",
     "source": "cc1"
    },
    {
-    "depth": 0.25,
+    "depth": 0.3,
     "destinationNode": "filter",
     "destinationParameter": "cutoff",
     "enabled": true,
@@ -176,25 +172,25 @@
     "source": "macro1"
    },
    {
-    "depth": 0.25,
+    "depth": 0.4,
     "destinationNode": "primary",
-    "destinationParameter": "outputLevel",
+    "destinationParameter": "position",
     "enabled": true,
     "id": "macro2",
     "source": "macro2"
    },
    {
-    "depth": 0.25,
-    "destinationNode": "resonator",
-    "destinationParameter": "combFeedback",
+    "depth": 0.4,
+    "destinationNode": "filter",
+    "destinationParameter": "q",
     "enabled": true,
     "id": "macro3",
     "source": "macro3"
    },
    {
-    "depth": 0.25,
-    "destinationNode": "secondary",
-    "destinationParameter": "outputLevel",
+    "depth": 0.35,
+    "destinationNode": "reverb",
+    "destinationParameter": "mix",
     "enabled": true,
     "id": "macro4",
     "source": "macro4"
@@ -205,164 +201,116 @@
     "id": "primary",
     "parameters": {
      "coarse": 0.0,
-     "detuneCents": 10.157397096415488,
-     "drift": 0.4825,
-     "fine": -5.089846603360117,
-     "harmonicityMorph": 0.9,
-     "inharmonicity": 0.012411104924516,
-     "keytrack": 0.89375,
+     "detuneCents": 31.82655826558266,
+     "drift": 0.199912550170005,
+     "fine": 0.0,
+     "keytrack": 1.0,
      "octave": 0.0,
-     "oddEvenBalance": -0.116666666666667,
-     "outputLevel": 0.389103182256509,
-     "partialAmplitudes": [
-      1.0,
-      0.280183358024744,
-      0.133111881815716,
-      0.078502714114022,
-      0.052119571440319,
-      0.03729573404012,
-      0.028104413226247,
-      0.021995154054523,
-      0.017718773080521,
-      0.014603036544959,
-      0.012259268195471,
-      0.010449644003359,
-      0.009021809940788,
-      0.007874388873045,
-      0.00693773423385,
-      0.006162676123268
-     ],
-     "partialPans": [
-      0.327404545490444,
-      0.462498829617654,
-      0.325931427830499,
-      -0.002080958260959,
-      -0.32887103503337,
-      -0.462489466594428,
-      -0.324451711875955,
-      0.004161874394113,
-      0.330330866771039,
-      0.462470740737524,
-      0.322965427582814,
-      -0.006242706272509,
-      -0.331784011149995,
-      -0.462442652426038,
-      -0.321472605040047,
-      0.008323411770902
-     ],
-     "partialRatios": [
-      1.006186416587163,
-      2.049043112965722,
-      3.163115473530139,
-      4.379182898746761,
-      5.723367940105063,
-      7.216979422318779,
-      8.876883626800726,
-      10.716150697466762,
-      12.74477380771229,
-      14.970338982306298,
-      17.398591529196786,
-      20.033888082815153,
-      22.879544745232593,
-      25.93809952136442,
-      29.211507780387176,
-      32.0
-     ],
-     "phaseRandom": 0.3,
-     "symmetry": 0.590118502310744,
-     "tilt": -0.835556827941598,
-     "unisonSpread": 0.632210250791332,
-     "unisonVoices": 4.0
+     "outputLevel": 0.521759259259259,
+     "phaseRandom": 0.717208672086721,
+     "position": 0.410262897110068,
+     "table": 3.0,
+     "unisonSpread": 0.516666666666667,
+     "unisonVoices": 3.0
     },
-    "type": "harmonic"
+    "type": "wavetable"
    },
    {
     "id": "secondary",
     "parameters": {
-     "carrierRatio": 1.0,
-     "coarse": 3.0,
-     "detuneCents": 10.157397096415488,
-     "drift": 0.4825,
-     "fine": -22.26807888970051,
-     "index": 2.25,
-     "keytrack": 0.89375,
-     "modInDepth": 0.0,
-     "modulatorRatio": 1.545653761869978,
-     "octave": -2.0,
-     "outputLevel": 0.21078431372549,
-     "phaseRandom": 0.3,
-     "unisonSpread": 0.632210250791332,
-     "unisonVoices": 4.0
-    },
-    "type": "fm"
-   },
-   {
-    "id": "sub",
-    "parameters": {
-     "drift": 0.4825,
-     "fine": -5.089846603360117,
-     "keytrack": 0.89375,
-     "octave": -2.0,
-     "outputLevel": 0.317704918032787,
-     "waveform": 1.0
-    },
-    "type": "sub"
-   },
-   {
-    "id": "resonator",
-    "parameters": {
-     "combFeedback": 0.655,
-     "exciteDepth": 0.316666666666667,
-     "modalQ": 4.333333333333333,
-     "mode": 0.0,
-     "modeLevels": [
+     "coarse": 0.0,
+     "detuneCents": 31.82655826558266,
+     "drift": 0.199912550170005,
+     "fine": 9.07638888888889,
+     "harmonicityMorph": 1.0,
+     "inharmonicity": 0.0,
+     "keytrack": 1.0,
+     "octave": 0.0,
+     "oddEvenBalance": -0.36,
+     "outputLevel": 0.296422159946237,
+     "partialAmplitudes": [
       1.0,
-      0.659206167436915,
-      0.394833147735479,
-      0.226666666666667
+      0.315341232829378,
+      0.16054112493331,
+      0.099440093122352,
+      0.068581182272909,
+      0.050625236256285,
+      0.039165141760477,
+      0.031357561557871,
+      0.025773452794853,
+      0.021626474566836,
+      0.018452971768746,
+      0.015964224413336,
+      0.013972316707277,
+      0.012350384086686,
+      0.011010100151349,
+      0.009888332120182
      ],
-     "modeRatios": [
+     "partialPans": [
+      -0.0,
+      0.013333333333333,
+      -0.026666666666667,
+      0.04,
+      -0.053333333333333,
+      0.066666666666667,
+      -0.08,
+      0.093333333333333,
+      -0.106666666666667,
+      0.12,
+      -0.133333333333333,
+      0.146666666666667,
+      -0.16,
+      0.173333333333333,
+      -0.186666666666667,
+      0.2
+     ],
+     "partialRatios": [
       1.0,
-      1.773333333333333,
-      2.113659605551497,
-      3.18125
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      14.0,
+      15.0,
+      16.0
      ],
-     "outputLevel": 0.790983606557377,
-     "tuneRatio": 2.342930327868852
+     "phaseRandom": 0.717208672086721,
+     "symmetry": 0.473055555555556,
+     "tilt": -0.665014271173799,
+     "unisonSpread": 0.516666666666667,
+     "unisonVoices": 1.0
     },
-    "type": "resonator"
-   },
-   {
-    "id": "shaper",
-    "parameters": {
-     "curve": 0.0,
-     "drive": 1.831479419283098,
-     "outputLevel": 0.939344262295082,
-     "wet": 0.2
-    },
-    "type": "shaper"
+    "type": "harmonic"
    },
    {
     "id": "filter",
     "parameters": {
-     "cutoff": 3130.1541859228655,
+     "cutoff": 5146.094030447055,
      "drive": 1.0,
-     "envAmount": 0.01175,
-     "keytrack": 0.016380925115537,
-     "mode": 1.0,
-     "outputLevel": 0.951475409836066,
-     "q": 4.7
+     "envAmount": 0.112963586214608,
+     "keytrack": 0.542689014344508,
+     "mode": 0.0,
+     "outputLevel": 1.0,
+     "q": 2.020376169689061
     },
     "type": "filter"
    },
    {
     "id": "chorus",
     "parameters": {
-     "depth": 0.316666666666667,
-     "feedback": 0.21,
-     "mix": 0.171666666666667,
-     "outputLevel": 0.969672131147541,
-     "rate": 1.241666666666667,
+     "depth": 0.605149051490515,
+     "feedback": 0.0,
+     "mix": 0.334471544715447,
+     "outputLevel": 1.0,
+     "rate": 1.321805021957234,
      "voices": 3.0
     },
     "type": "chorus"
@@ -370,45 +318,45 @@
    {
     "id": "delay",
     "parameters": {
-     "damping": 0.522381497689256,
-     "feedback": 0.465,
-     "mix": 0.182666666666667,
-     "outputLevel": 0.969672131147541,
-     "spread": -0.508984660336012,
-     "syncDivision": 3.0,
+     "damping": 0.428851642759153,
+     "feedback": 0.508578947368421,
+     "mix": 0.282543859649123,
+     "outputLevel": 1.0,
+     "spread": -0.6,
+     "syncDivision": 4.0,
      "syncMode": 1.0,
-     "timeMs": 722.5
+     "timeMs": 375.0
     },
     "type": "delay"
    },
    {
     "id": "reverb",
     "parameters": {
-     "damping": 0.499683039548485,
-     "decaySeconds": 4.800000000000001,
-     "mix": 0.219333333333333,
-     "outputLevel": 0.969672131147541,
-     "preDelayMs": 38.75,
-     "size": 0.732950819672131,
-     "width": 0.631848064280497
+     "damping": 0.428851642759153,
+     "decaySeconds": 3.691238500247019,
+     "mix": 0.313611239558434,
+     "outputLevel": 1.0,
+     "preDelayMs": 41.15277777777777,
+     "size": 0.611111111111111,
+     "width": 1.0
     },
     "type": "reverb"
    },
    {
     "id": "width",
     "parameters": {
-     "bassMonoHz": 179.18032786885246,
-     "outputLevel": 0.969672131147541,
-     "width": 1.084130752373996
+     "bassMonoHz": 150.42437829577744,
+     "outputLevel": 1.0,
+     "width": 1.183333333333333
     },
     "type": "width"
    },
    {
     "id": "mix",
     "parameters": {
-     "level": 0.975737704918033,
-     "outputLevel": 0.984262295081967,
-     "pan": -0.247680788897005
+     "level": 1.0,
+     "outputLevel": 1.0,
+     "pan": -0.28
     },
     "type": "mixer"
    }
@@ -437,37 +385,17 @@
    },
    {
     "destination": "mix",
-    "gain": 0.65,
+    "gain": 0.85,
     "source": "secondary"
    },
    {
-    "destination": "resonator",
-    "gain": 1.0,
-    "source": "mix"
-   },
-   {
-    "destination": "shaper",
-    "gain": 0.8,
-    "source": "sub"
-   },
-   {
-    "destination": "shaper",
-    "gain": 0.85,
-    "source": "resonator"
-   },
-   {
-    "destination": "shaper",
-    "gain": 0.3,
-    "source": "mix"
-   },
-   {
     "destination": "filter",
-    "gain": 0.85,
-    "source": "shaper"
+    "gain": 0.66,
+    "source": "mix"
    },
    {
     "destination": "chorus",
-    "gain": 1.0,
+    "gain": 0.9,
     "source": "filter"
    },
    {
@@ -493,31 +421,31 @@
   ],
   "envelopes": [
    {
-    "attack": 0.052213114754098,
-    "attackCurve": 0.0,
-    "decay": 0.43,
-    "decayCurve": 0.0,
-    "release": 1.13,
-    "releaseCurve": 0.0,
-    "sustain": 0.762295081967213
+    "attack": 0.32730527308557,
+    "attackCurve": 0.504064812973562,
+    "decay": 1.204895289533706,
+    "decayCurve": -0.292484617368438,
+    "release": 1.353163814880058,
+    "releaseCurve": 0.49381141664832,
+    "sustain": 0.786097876488293
    },
    {
-    "attack": 0.01,
+    "attack": 0.163652636542785,
     "attackCurve": 0.0,
-    "decay": 0.266666666666667,
-    "decayCurve": 0.0,
-    "release": 0.5,
+    "decay": 0.54934592370917,
+    "decayCurve": -0.6,
+    "release": 1.353163814880058,
     "releaseCurve": 0.0,
-    "sustain": 0.6
+    "sustain": 0.627704152927182
    },
    {
-    "attack": 0.02,
-    "attackCurve": 0.0,
-    "decay": 0.2,
+    "attack": 0.981022223286241,
+    "attackCurve": 0.3,
+    "decay": 1.0,
     "decayCurve": 0.0,
-    "release": 0.345833333333333,
+    "release": 1.353163814880058,
     "releaseCurve": 0.0,
-    "sustain": 0.5
+    "sustain": 1.0
    },
    {
     "attack": 0.01,
@@ -532,72 +460,88 @@
   "lfos": [
    {
     "fadeMs": 0.0,
-    "rate": 2.183333333333334,
+    "rate": 3.291743087433049,
     "syncDivision": "1/4",
     "syncMode": "free",
     "waveform": "sine"
    },
    {
     "fadeMs": 0.0,
-    "rate": 1.195,
+    "rate": 0.146915415410155,
     "syncDivision": "1/4",
     "syncMode": "free",
-    "waveform": "triangle"
+    "waveform": "randomSmooth"
    }
   ],
   "macros": [
    {
     "default": 0.0,
-    "label": "Macro 1: filter cutoff"
+    "label": "Tone: filter cutoff"
    },
    {
     "default": 0.0,
-    "label": "Macro 2: primary outputLevel"
+    "label": "Motion: primary position"
    },
    {
     "default": 0.0,
-    "label": "Macro 3: resonator combFeedback"
+    "label": "Edge: filter q"
    },
    {
     "default": 0.0,
-    "label": "Macro 4: secondary outputLevel"
+    "label": "Space: reverb mix"
    }
   ],
   "matrix": [
    {
-    "depth": 0.28,
+    "depth": 0.227716420365838,
     "destinationNode": "primary",
     "destinationParameter": "outputLevel",
     "enabled": true,
-    "id": "velocity-primary",
+    "id": "velocity-level",
     "source": "velocity"
    },
    {
-    "depth": 0.171666666666667,
+    "depth": 0.451447564636674,
     "destinationNode": "primary",
-    "destinationParameter": "outputLevel",
+    "destinationParameter": "position",
     "enabled": true,
-    "id": "l1-primary",
+    "id": "l1-motion",
     "source": "l1"
    },
    {
-    "depth": 0.229206167436915,
+    "depth": 0.42,
+    "destinationNode": "primary",
+    "destinationParameter": "position",
+    "enabled": true,
+    "id": "e3-sweep",
+    "source": "e3"
+   },
+   {
+    "depth": 0.063703881775602,
     "destinationNode": "filter",
     "destinationParameter": "cutoff",
     "enabled": true,
-    "id": "e2-tone",
-    "source": "e2"
+    "id": "velocity-tone",
+    "source": "velocity"
    },
    {
-    "depth": 0.2,
-    "destinationNode": "resonator",
-    "destinationParameter": "combFeedback",
+    "depth": 0.097162346736187,
+    "destinationNode": "filter",
+    "destinationParameter": "cutoff",
+    "enabled": true,
+    "id": "l2-drift",
+    "source": "l2"
+   },
+   {
+    "depth": 0.35,
+    "destinationNode": "primary",
+    "destinationParameter": "position",
     "enabled": true,
     "id": "cc1-expression",
     "source": "cc1"
    },
    {
-    "depth": 0.25,
+    "depth": 0.3,
     "destinationNode": "filter",
     "destinationParameter": "cutoff",
     "enabled": true,
@@ -605,25 +549,25 @@
     "source": "macro1"
    },
    {
-    "depth": 0.25,
+    "depth": 0.4,
     "destinationNode": "primary",
-    "destinationParameter": "outputLevel",
+    "destinationParameter": "position",
     "enabled": true,
     "id": "macro2",
     "source": "macro2"
    },
    {
-    "depth": 0.25,
-    "destinationNode": "resonator",
-    "destinationParameter": "combFeedback",
+    "depth": 0.4,
+    "destinationNode": "filter",
+    "destinationParameter": "q",
     "enabled": true,
     "id": "macro3",
     "source": "macro3"
    },
    {
-    "depth": 0.25,
-    "destinationNode": "secondary",
-    "destinationParameter": "outputLevel",
+    "depth": 0.35,
+    "destinationNode": "reverb",
+    "destinationParameter": "mix",
     "enabled": true,
     "id": "macro4",
     "source": "macro4"
@@ -634,164 +578,116 @@
     "id": "primary",
     "parameters": {
      "coarse": 0.0,
-     "detuneCents": 10.157397096415488,
-     "drift": 0.4825,
-     "fine": -5.089846603360117,
-     "harmonicityMorph": 0.9,
-     "inharmonicity": 0.012411104924516,
-     "keytrack": 0.89375,
+     "detuneCents": 31.82655826558266,
+     "drift": 0.199912550170005,
+     "fine": 0.0,
+     "keytrack": 1.0,
      "octave": 0.0,
-     "oddEvenBalance": -0.116666666666667,
-     "outputLevel": 0.389103182256509,
-     "partialAmplitudes": [
-      1.0,
-      0.280183358024744,
-      0.133111881815716,
-      0.078502714114022,
-      0.052119571440319,
-      0.03729573404012,
-      0.028104413226247,
-      0.021995154054523,
-      0.017718773080521,
-      0.014603036544959,
-      0.012259268195471,
-      0.010449644003359,
-      0.009021809940788,
-      0.007874388873045,
-      0.00693773423385,
-      0.006162676123268
-     ],
-     "partialPans": [
-      0.327404545490444,
-      0.462498829617654,
-      0.325931427830499,
-      -0.002080958260959,
-      -0.32887103503337,
-      -0.462489466594428,
-      -0.324451711875955,
-      0.004161874394113,
-      0.330330866771039,
-      0.462470740737524,
-      0.322965427582814,
-      -0.006242706272509,
-      -0.331784011149995,
-      -0.462442652426038,
-      -0.321472605040047,
-      0.008323411770902
-     ],
-     "partialRatios": [
-      1.006186416587163,
-      2.049043112965722,
-      3.163115473530139,
-      4.379182898746761,
-      5.723367940105063,
-      7.216979422318779,
-      8.876883626800726,
-      10.716150697466762,
-      12.74477380771229,
-      14.970338982306298,
-      17.398591529196786,
-      20.033888082815153,
-      22.879544745232593,
-      25.93809952136442,
-      29.211507780387176,
-      32.0
-     ],
-     "phaseRandom": 0.3,
-     "symmetry": 0.590118502310744,
-     "tilt": -0.835556827941598,
-     "unisonSpread": 0.632210250791332,
-     "unisonVoices": 4.0
+     "outputLevel": 0.521759259259259,
+     "phaseRandom": 0.717208672086721,
+     "position": 0.410262897110068,
+     "table": 3.0,
+     "unisonSpread": 0.516666666666667,
+     "unisonVoices": 3.0
     },
-    "type": "harmonic"
+    "type": "wavetable"
    },
    {
     "id": "secondary",
     "parameters": {
-     "carrierRatio": 1.0,
-     "coarse": 3.0,
-     "detuneCents": 10.157397096415488,
-     "drift": 0.4825,
-     "fine": -22.26807888970051,
-     "index": 2.25,
-     "keytrack": 0.89375,
-     "modInDepth": 0.0,
-     "modulatorRatio": 1.545653761869978,
-     "octave": -2.0,
-     "outputLevel": 0.21078431372549,
-     "phaseRandom": 0.3,
-     "unisonSpread": 0.632210250791332,
-     "unisonVoices": 4.0
-    },
-    "type": "fm"
-   },
-   {
-    "id": "sub",
-    "parameters": {
-     "drift": 0.4825,
-     "fine": -5.089846603360117,
-     "keytrack": 0.89375,
-     "octave": -2.0,
-     "outputLevel": 0.317704918032787,
-     "waveform": 1.0
-    },
-    "type": "sub"
-   },
-   {
-    "id": "resonator",
-    "parameters": {
-     "combFeedback": 0.655,
-     "exciteDepth": 0.316666666666667,
-     "modalQ": 4.333333333333333,
-     "mode": 0.0,
-     "modeLevels": [
+     "coarse": 0.0,
+     "detuneCents": 31.82655826558266,
+     "drift": 0.199912550170005,
+     "fine": 9.07638888888889,
+     "harmonicityMorph": 1.0,
+     "inharmonicity": 0.0,
+     "keytrack": 1.0,
+     "octave": 0.0,
+     "oddEvenBalance": -0.36,
+     "outputLevel": 0.296422159946237,
+     "partialAmplitudes": [
       1.0,
-      0.659206167436915,
-      0.394833147735479,
-      0.226666666666667
+      0.315341232829378,
+      0.16054112493331,
+      0.099440093122352,
+      0.068581182272909,
+      0.050625236256285,
+      0.039165141760477,
+      0.031357561557871,
+      0.025773452794853,
+      0.021626474566836,
+      0.018452971768746,
+      0.015964224413336,
+      0.013972316707277,
+      0.012350384086686,
+      0.011010100151349,
+      0.009888332120182
      ],
-     "modeRatios": [
+     "partialPans": [
+      -0.0,
+      0.013333333333333,
+      -0.026666666666667,
+      0.04,
+      -0.053333333333333,
+      0.066666666666667,
+      -0.08,
+      0.093333333333333,
+      -0.106666666666667,
+      0.12,
+      -0.133333333333333,
+      0.146666666666667,
+      -0.16,
+      0.173333333333333,
+      -0.186666666666667,
+      0.2
+     ],
+     "partialRatios": [
       1.0,
-      1.773333333333333,
-      2.113659605551497,
-      3.18125
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      14.0,
+      15.0,
+      16.0
      ],
-     "outputLevel": 0.790983606557377,
-     "tuneRatio": 2.342930327868852
+     "phaseRandom": 0.717208672086721,
+     "symmetry": 0.473055555555556,
+     "tilt": -0.665014271173799,
+     "unisonSpread": 0.516666666666667,
+     "unisonVoices": 1.0
     },
-    "type": "resonator"
-   },
-   {
-    "id": "shaper",
-    "parameters": {
-     "curve": 0.0,
-     "drive": 1.831479419283098,
-     "outputLevel": 0.939344262295082,
-     "wet": 0.2
-    },
-    "type": "shaper"
+    "type": "harmonic"
    },
    {
     "id": "filter",
     "parameters": {
-     "cutoff": 3130.1541859228655,
+     "cutoff": 5146.094030447055,
      "drive": 1.0,
-     "envAmount": 0.01175,
-     "keytrack": 0.016380925115537,
-     "mode": 1.0,
-     "outputLevel": 0.951475409836066,
-     "q": 4.7
+     "envAmount": 0.112963586214608,
+     "keytrack": 0.542689014344508,
+     "mode": 0.0,
+     "outputLevel": 1.0,
+     "q": 2.020376169689061
     },
     "type": "filter"
    },
    {
     "id": "chorus",
     "parameters": {
-     "depth": 0.316666666666667,
-     "feedback": 0.21,
-     "mix": 0.171666666666667,
-     "outputLevel": 0.969672131147541,
-     "rate": 1.241666666666667,
+     "depth": 0.605149051490515,
+     "feedback": 0.0,
+     "mix": 0.334471544715447,
+     "outputLevel": 1.0,
+     "rate": 1.321805021957234,
      "voices": 3.0
     },
     "type": "chorus"
@@ -799,45 +695,45 @@
    {
     "id": "delay",
     "parameters": {
-     "damping": 0.522381497689256,
-     "feedback": 0.465,
-     "mix": 0.182666666666667,
-     "outputLevel": 0.969672131147541,
-     "spread": -0.508984660336012,
-     "syncDivision": 3.0,
+     "damping": 0.428851642759153,
+     "feedback": 0.508578947368421,
+     "mix": 0.282543859649123,
+     "outputLevel": 1.0,
+     "spread": -0.6,
+     "syncDivision": 4.0,
      "syncMode": 1.0,
-     "timeMs": 722.5
+     "timeMs": 375.0
     },
     "type": "delay"
    },
    {
     "id": "reverb",
     "parameters": {
-     "damping": 0.499683039548485,
-     "decaySeconds": 4.800000000000001,
-     "mix": 0.219333333333333,
-     "outputLevel": 0.969672131147541,
-     "preDelayMs": 38.75,
-     "size": 0.732950819672131,
-     "width": 0.631848064280497
+     "damping": 0.428851642759153,
+     "decaySeconds": 3.691238500247019,
+     "mix": 0.313611239558434,
+     "outputLevel": 1.0,
+     "preDelayMs": 41.15277777777777,
+     "size": 0.611111111111111,
+     "width": 1.0
     },
     "type": "reverb"
    },
    {
     "id": "width",
     "parameters": {
-     "bassMonoHz": 179.18032786885246,
-     "outputLevel": 0.969672131147541,
-     "width": 1.084130752373996
+     "bassMonoHz": 150.42437829577744,
+     "outputLevel": 1.0,
+     "width": 1.183333333333333
     },
     "type": "width"
    },
    {
     "id": "mix",
     "parameters": {
-     "level": 0.975737704918033,
-     "outputLevel": 0.984262295081967,
-     "pan": -0.247680788897005
+     "level": 1.0,
+     "outputLevel": 1.0,
+     "pan": -0.28
     },
     "type": "mixer"
    }
@@ -847,8 +743,9 @@
  },
  "provenance": {
   "mappingTrace": {
-   "canonicalIdentity": "C[C@H](NC(=O)CNC(=O)[C@H](C)NC(=O)CNC(=O)[C@H](C)NC(=O)CNC(=O)[C@H](C)NC(=O)CN)C(=O)O",
-   "mappingVersion": 2,
+   "canonicalIdentity": "C[C@H](NC(=O)CNC(=O)[C@H](C)NC(=O)CN)C(=O)O",
+   "layerVoice": "additive",
+   "mappingVersion": 3,
    "patch": {
     "edges": [
      {
@@ -858,37 +755,17 @@
      },
      {
       "destination": "mix",
-      "gain": 0.65,
+      "gain": 0.85,
       "source": "secondary"
      },
      {
-      "destination": "resonator",
-      "gain": 1.0,
-      "source": "mix"
-     },
-     {
-      "destination": "shaper",
-      "gain": 0.8,
-      "source": "sub"
-     },
-     {
-      "destination": "shaper",
-      "gain": 0.85,
-      "source": "resonator"
-     },
-     {
-      "destination": "shaper",
-      "gain": 0.3,
-      "source": "mix"
-     },
-     {
       "destination": "filter",
-      "gain": 0.85,
-      "source": "shaper"
+      "gain": 0.66,
+      "source": "mix"
      },
      {
       "destination": "chorus",
-      "gain": 1.0,
+      "gain": 0.9,
       "source": "filter"
      },
      {
@@ -914,31 +791,31 @@
     ],
     "envelopes": [
      {
-      "attack": 0.052213114754098,
-      "attackCurve": 0.0,
-      "decay": 0.43,
-      "decayCurve": 0.0,
-      "release": 1.13,
-      "releaseCurve": 0.0,
-      "sustain": 0.762295081967213
+      "attack": 0.32730527308557,
+      "attackCurve": 0.504064812973562,
+      "decay": 1.204895289533706,
+      "decayCurve": -0.292484617368438,
+      "release": 1.353163814880058,
+      "releaseCurve": 0.49381141664832,
+      "sustain": 0.786097876488293
      },
      {
-      "attack": 0.01,
+      "attack": 0.163652636542785,
       "attackCurve": 0.0,
-      "decay": 0.266666666666667,
-      "decayCurve": 0.0,
-      "release": 0.5,
+      "decay": 0.54934592370917,
+      "decayCurve": -0.6,
+      "release": 1.353163814880058,
       "releaseCurve": 0.0,
-      "sustain": 0.6
+      "sustain": 0.627704152927182
      },
      {
-      "attack": 0.02,
-      "attackCurve": 0.0,
-      "decay": 0.2,
+      "attack": 0.981022223286241,
+      "attackCurve": 0.3,
+      "decay": 1.0,
       "decayCurve": 0.0,
-      "release": 0.345833333333333,
+      "release": 1.353163814880058,
       "releaseCurve": 0.0,
-      "sustain": 0.5
+      "sustain": 1.0
      },
      {
       "attack": 0.01,
@@ -953,72 +830,88 @@
     "lfos": [
      {
       "fadeMs": 0.0,
-      "rate": 2.183333333333334,
+      "rate": 3.291743087433049,
       "syncDivision": "1/4",
       "syncMode": "free",
       "waveform": "sine"
      },
      {
       "fadeMs": 0.0,
-      "rate": 1.195,
+      "rate": 0.146915415410155,
       "syncDivision": "1/4",
       "syncMode": "free",
-      "waveform": "triangle"
+      "waveform": "randomSmooth"
      }
     ],
     "macros": [
      {
       "default": 0.0,
-      "label": "Macro 1: filter cutoff"
+      "label": "Tone: filter cutoff"
      },
      {
       "default": 0.0,
-      "label": "Macro 2: primary outputLevel"
+      "label": "Motion: primary position"
      },
      {
       "default": 0.0,
-      "label": "Macro 3: resonator combFeedback"
+      "label": "Edge: filter q"
      },
      {
       "default": 0.0,
-      "label": "Macro 4: secondary outputLevel"
+      "label": "Space: reverb mix"
      }
     ],
     "matrix": [
      {
-      "depth": 0.28,
+      "depth": 0.227716420365838,
       "destinationNode": "primary",
       "destinationParameter": "outputLevel",
       "enabled": true,
-      "id": "velocity-primary",
+      "id": "velocity-level",
       "source": "velocity"
      },
      {
-      "depth": 0.171666666666667,
+      "depth": 0.451447564636674,
       "destinationNode": "primary",
-      "destinationParameter": "outputLevel",
+      "destinationParameter": "position",
       "enabled": true,
-      "id": "l1-primary",
+      "id": "l1-motion",
       "source": "l1"
      },
      {
-      "depth": 0.229206167436915,
+      "depth": 0.42,
+      "destinationNode": "primary",
+      "destinationParameter": "position",
+      "enabled": true,
+      "id": "e3-sweep",
+      "source": "e3"
+     },
+     {
+      "depth": 0.063703881775602,
       "destinationNode": "filter",
       "destinationParameter": "cutoff",
       "enabled": true,
-      "id": "e2-tone",
-      "source": "e2"
+      "id": "velocity-tone",
+      "source": "velocity"
      },
      {
-      "depth": 0.2,
-      "destinationNode": "resonator",
-      "destinationParameter": "combFeedback",
+      "depth": 0.097162346736187,
+      "destinationNode": "filter",
+      "destinationParameter": "cutoff",
+      "enabled": true,
+      "id": "l2-drift",
+      "source": "l2"
+     },
+     {
+      "depth": 0.35,
+      "destinationNode": "primary",
+      "destinationParameter": "position",
       "enabled": true,
       "id": "cc1-expression",
       "source": "cc1"
      },
      {
-      "depth": 0.25,
+      "depth": 0.3,
       "destinationNode": "filter",
       "destinationParameter": "cutoff",
       "enabled": true,
@@ -1026,25 +919,25 @@
       "source": "macro1"
      },
      {
-      "depth": 0.25,
+      "depth": 0.4,
       "destinationNode": "primary",
-      "destinationParameter": "outputLevel",
+      "destinationParameter": "position",
       "enabled": true,
       "id": "macro2",
       "source": "macro2"
      },
      {
-      "depth": 0.25,
-      "destinationNode": "resonator",
-      "destinationParameter": "combFeedback",
+      "depth": 0.4,
+      "destinationNode": "filter",
+      "destinationParameter": "q",
       "enabled": true,
       "id": "macro3",
       "source": "macro3"
      },
      {
-      "depth": 0.25,
-      "destinationNode": "secondary",
-      "destinationParameter": "outputLevel",
+      "depth": 0.35,
+      "destinationNode": "reverb",
+      "destinationParameter": "mix",
       "enabled": true,
       "id": "macro4",
       "source": "macro4"
@@ -1055,164 +948,116 @@
       "id": "primary",
       "parameters": {
        "coarse": 0.0,
-       "detuneCents": 10.157397096415488,
-       "drift": 0.4825,
-       "fine": -5.089846603360117,
-       "harmonicityMorph": 0.9,
-       "inharmonicity": 0.012411104924516,
-       "keytrack": 0.89375,
+       "detuneCents": 31.82655826558266,
+       "drift": 0.199912550170005,
+       "fine": 0.0,
+       "keytrack": 1.0,
        "octave": 0.0,
-       "oddEvenBalance": -0.116666666666667,
-       "outputLevel": 0.389103182256509,
-       "partialAmplitudes": [
-        1.0,
-        0.280183358024744,
-        0.133111881815716,
-        0.078502714114022,
-        0.052119571440319,
-        0.03729573404012,
-        0.028104413226247,
-        0.021995154054523,
-        0.017718773080521,
-        0.014603036544959,
-        0.012259268195471,
-        0.010449644003359,
-        0.009021809940788,
-        0.007874388873045,
-        0.00693773423385,
-        0.006162676123268
-       ],
-       "partialPans": [
-        0.327404545490444,
-        0.462498829617654,
-        0.325931427830499,
-        -0.002080958260959,
-        -0.32887103503337,
-        -0.462489466594428,
-        -0.324451711875955,
-        0.004161874394113,
-        0.330330866771039,
-        0.462470740737524,
-        0.322965427582814,
-        -0.006242706272509,
-        -0.331784011149995,
-        -0.462442652426038,
-        -0.321472605040047,
-        0.008323411770902
-       ],
-       "partialRatios": [
-        1.006186416587163,
-        2.049043112965722,
-        3.163115473530139,
-        4.379182898746761,
-        5.723367940105063,
-        7.216979422318779,
-        8.876883626800726,
-        10.716150697466762,
-        12.74477380771229,
-        14.970338982306298,
-        17.398591529196786,
-        20.033888082815153,
-        22.879544745232593,
-        25.93809952136442,
-        29.211507780387176,
-        32.0
-       ],
-       "phaseRandom": 0.3,
-       "symmetry": 0.590118502310744,
-       "tilt": -0.835556827941598,
-       "unisonSpread": 0.632210250791332,
-       "unisonVoices": 4.0
+       "outputLevel": 0.521759259259259,
+       "phaseRandom": 0.717208672086721,
+       "position": 0.410262897110068,
+       "table": 3.0,
+       "unisonSpread": 0.516666666666667,
+       "unisonVoices": 3.0
       },
-      "type": "harmonic"
+      "type": "wavetable"
      },
      {
       "id": "secondary",
       "parameters": {
-       "carrierRatio": 1.0,
-       "coarse": 3.0,
-       "detuneCents": 10.157397096415488,
-       "drift": 0.4825,
-       "fine": -22.26807888970051,
-       "index": 2.25,
-       "keytrack": 0.89375,
-       "modInDepth": 0.0,
-       "modulatorRatio": 1.545653761869978,
-       "octave": -2.0,
-       "outputLevel": 0.21078431372549,
-       "phaseRandom": 0.3,
-       "unisonSpread": 0.632210250791332,
-       "unisonVoices": 4.0
-      },
-      "type": "fm"
-     },
-     {
-      "id": "sub",
-      "parameters": {
-       "drift": 0.4825,
-       "fine": -5.089846603360117,
-       "keytrack": 0.89375,
-       "octave": -2.0,
-       "outputLevel": 0.317704918032787,
-       "waveform": 1.0
-      },
-      "type": "sub"
-     },
-     {
-      "id": "resonator",
-      "parameters": {
-       "combFeedback": 0.655,
-       "exciteDepth": 0.316666666666667,
-       "modalQ": 4.333333333333333,
-       "mode": 0.0,
-       "modeLevels": [
+       "coarse": 0.0,
+       "detuneCents": 31.82655826558266,
+       "drift": 0.199912550170005,
+       "fine": 9.07638888888889,
+       "harmonicityMorph": 1.0,
+       "inharmonicity": 0.0,
+       "keytrack": 1.0,
+       "octave": 0.0,
+       "oddEvenBalance": -0.36,
+       "outputLevel": 0.296422159946237,
+       "partialAmplitudes": [
         1.0,
-        0.659206167436915,
-        0.394833147735479,
-        0.226666666666667
+        0.315341232829378,
+        0.16054112493331,
+        0.099440093122352,
+        0.068581182272909,
+        0.050625236256285,
+        0.039165141760477,
+        0.031357561557871,
+        0.025773452794853,
+        0.021626474566836,
+        0.018452971768746,
+        0.015964224413336,
+        0.013972316707277,
+        0.012350384086686,
+        0.011010100151349,
+        0.009888332120182
        ],
-       "modeRatios": [
+       "partialPans": [
+        -0.0,
+        0.013333333333333,
+        -0.026666666666667,
+        0.04,
+        -0.053333333333333,
+        0.066666666666667,
+        -0.08,
+        0.093333333333333,
+        -0.106666666666667,
+        0.12,
+        -0.133333333333333,
+        0.146666666666667,
+        -0.16,
+        0.173333333333333,
+        -0.186666666666667,
+        0.2
+       ],
+       "partialRatios": [
         1.0,
-        1.773333333333333,
-        2.113659605551497,
-        3.18125
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0
        ],
-       "outputLevel": 0.790983606557377,
-       "tuneRatio": 2.342930327868852
+       "phaseRandom": 0.717208672086721,
+       "symmetry": 0.473055555555556,
+       "tilt": -0.665014271173799,
+       "unisonSpread": 0.516666666666667,
+       "unisonVoices": 1.0
       },
-      "type": "resonator"
-     },
-     {
-      "id": "shaper",
-      "parameters": {
-       "curve": 0.0,
-       "drive": 1.831479419283098,
-       "outputLevel": 0.939344262295082,
-       "wet": 0.2
-      },
-      "type": "shaper"
+      "type": "harmonic"
      },
      {
       "id": "filter",
       "parameters": {
-       "cutoff": 3130.1541859228655,
+       "cutoff": 5146.094030447055,
        "drive": 1.0,
-       "envAmount": 0.01175,
-       "keytrack": 0.016380925115537,
-       "mode": 1.0,
-       "outputLevel": 0.951475409836066,
-       "q": 4.7
+       "envAmount": 0.112963586214608,
+       "keytrack": 0.542689014344508,
+       "mode": 0.0,
+       "outputLevel": 1.0,
+       "q": 2.020376169689061
       },
       "type": "filter"
      },
      {
       "id": "chorus",
       "parameters": {
-       "depth": 0.316666666666667,
-       "feedback": 0.21,
-       "mix": 0.171666666666667,
-       "outputLevel": 0.969672131147541,
-       "rate": 1.241666666666667,
+       "depth": 0.605149051490515,
+       "feedback": 0.0,
+       "mix": 0.334471544715447,
+       "outputLevel": 1.0,
+       "rate": 1.321805021957234,
        "voices": 3.0
       },
       "type": "chorus"
@@ -1220,45 +1065,45 @@
      {
       "id": "delay",
       "parameters": {
-       "damping": 0.522381497689256,
-       "feedback": 0.465,
-       "mix": 0.182666666666667,
-       "outputLevel": 0.969672131147541,
-       "spread": -0.508984660336012,
-       "syncDivision": 3.0,
+       "damping": 0.428851642759153,
+       "feedback": 0.508578947368421,
+       "mix": 0.282543859649123,
+       "outputLevel": 1.0,
+       "spread": -0.6,
+       "syncDivision": 4.0,
        "syncMode": 1.0,
-       "timeMs": 722.5
+       "timeMs": 375.0
       },
       "type": "delay"
      },
      {
       "id": "reverb",
       "parameters": {
-       "damping": 0.499683039548485,
-       "decaySeconds": 4.800000000000001,
-       "mix": 0.219333333333333,
-       "outputLevel": 0.969672131147541,
-       "preDelayMs": 38.75,
-       "size": 0.732950819672131,
-       "width": 0.631848064280497
+       "damping": 0.428851642759153,
+       "decaySeconds": 3.691238500247019,
+       "mix": 0.313611239558434,
+       "outputLevel": 1.0,
+       "preDelayMs": 41.15277777777777,
+       "size": 0.611111111111111,
+       "width": 1.0
       },
       "type": "reverb"
      },
      {
       "id": "width",
       "parameters": {
-       "bassMonoHz": 179.18032786885246,
-       "outputLevel": 0.969672131147541,
-       "width": 1.084130752373996
+       "bassMonoHz": 150.42437829577744,
+       "outputLevel": 1.0,
+       "width": 1.183333333333333
       },
       "type": "width"
      },
      {
       "id": "mix",
       "parameters": {
-       "level": 0.975737704918033,
-       "outputLevel": 0.984262295081967,
-       "pan": -0.247680788897005
+       "level": 1.0,
+       "outputLevel": 1.0,
+       "pan": -0.28
       },
       "type": "mixer"
      }
@@ -1266,284 +1111,1258 @@
     "noiseSeed": 1230327873,
     "patchVersion": 1
    },
-   "projectionVersion": 1,
+   "primaryVoice": "wt-voice",
+   "projectionVersion": 2,
    "rules": [
     {
-     "id": "primary.partialSpectrum",
-     "kind": "parameter",
-     "preClamp": -0.835556827941598,
-     "ruleId": "M1-primary-harmonic",
-     "value": -0.835556827941598
+     "drivers": [
+      "symmetric",
+      "size",
+      "diverse",
+      "salt",
+      "branched"
+     ],
+     "id": "complexity",
+     "kind": "decision",
+     "preClamp": 0.725877192982456,
+     "ruleId": "V2-layer-voice",
+     "value": 1.0
     },
     {
-     "id": "primary.unison",
-     "kind": "parameter",
-     "preClamp": 3.653005464480874,
-     "ruleId": "M5-unison",
-     "value": 4.0
+     "drivers": [],
+     "id": "saw",
+     "kind": "score",
+     "preClamp": 0.564342629780602,
+     "ruleId": "V1-voice-score",
+     "value": 0.564342629780602
     },
     {
-     "id": "primary.drift",
-     "kind": "parameter",
-     "preClamp": 0.4825,
-     "ruleId": "M5-drift",
-     "value": 0.4825
+     "drivers": [],
+     "id": "square",
+     "kind": "score",
+     "preClamp": 0.1,
+     "ruleId": "V1-voice-score",
+     "value": 0.1
     },
     {
-     "id": "primary.pitch",
-     "kind": "parameter",
-     "preClamp": -2.0,
-     "ruleId": "M7-pitch",
+     "drivers": [],
+     "id": "pulse",
+     "kind": "score",
+     "preClamp": 0.05,
+     "ruleId": "V1-voice-score",
+     "value": 0.05
+    },
+    {
+     "drivers": [],
+     "id": "triangle",
+     "kind": "score",
+     "preClamp": 0.254842968075928,
+     "ruleId": "V1-voice-score",
+     "value": 0.254842968075928
+    },
+    {
+     "drivers": [],
+     "id": "sine",
+     "kind": "score",
+     "preClamp": 0.257407407407407,
+     "ruleId": "V1-voice-score",
+     "value": 0.257407407407407
+    },
+    {
+     "drivers": [],
+     "id": "wt-voice",
+     "kind": "score",
+     "preClamp": 1.606903566481994,
+     "ruleId": "V1-voice-score",
+     "value": 1.606903566481994
+    },
+    {
+     "drivers": [],
+     "id": "wt-organ",
+     "kind": "score",
+     "preClamp": 0.0,
+     "ruleId": "V1-voice-score",
      "value": 0.0
     },
     {
-     "id": "primary.spectralShape",
-     "kind": "parameter",
-     "preClamp": 0.9,
-     "ruleId": "M6-spectral-shape",
-     "value": 0.9
+     "drivers": [],
+     "id": "wt-strings",
+     "kind": "score",
+     "preClamp": 0.542836880426828,
+     "ruleId": "V1-voice-score",
+     "value": 0.542836880426828
     },
     {
-     "id": "primary.partialPans",
-     "kind": "parameter",
-     "preClamp": 0.416666666666667,
-     "ruleId": "M1-partial-pan",
-     "value": 0.327404545490444
+     "drivers": [],
+     "id": "wt-wind",
+     "kind": "score",
+     "preClamp": 0.0,
+     "ruleId": "V1-voice-score",
+     "value": 0.0
     },
     {
+     "drivers": [],
+     "id": "wt-keys",
+     "kind": "score",
+     "preClamp": 0.77921052631579,
+     "ruleId": "V1-voice-score",
+     "value": 0.77921052631579
+    },
+    {
+     "drivers": [],
+     "id": "wt-plucked",
+     "kind": "score",
+     "preClamp": 0.596000692520776,
+     "ruleId": "V1-voice-score",
+     "value": 0.596000692520776
+    },
+    {
+     "drivers": [],
+     "id": "wt-chip",
+     "kind": "score",
+     "preClamp": 0.0,
+     "ruleId": "V1-voice-score",
+     "value": 0.0
+    },
+    {
+     "drivers": [],
+     "id": "wt-edge",
+     "kind": "score",
+     "preClamp": 0.0,
+     "ruleId": "V1-voice-score",
+     "value": 0.0
+    },
+    {
+     "drivers": [],
+     "id": "wt-grain",
+     "kind": "score",
+     "preClamp": 0.0,
+     "ruleId": "V1-voice-score",
+     "value": 0.0
+    },
+    {
+     "drivers": [],
+     "id": "wt-complex",
+     "kind": "score",
+     "preClamp": 0.675,
+     "ruleId": "V1-voice-score",
+     "value": 0.675
+    },
+    {
+     "drivers": [],
+     "id": "wt-reed",
+     "kind": "score",
+     "preClamp": 0.0,
+     "ruleId": "V1-voice-score",
+     "value": 0.0
+    },
+    {
+     "drivers": [],
+     "id": "fm-harmonic",
+     "kind": "score",
+     "preClamp": 0.0,
+     "ruleId": "V1-voice-score",
+     "value": 0.0
+    },
+    {
+     "drivers": [],
+     "id": "fm-metal",
+     "kind": "score",
+     "preClamp": 0.0,
+     "ruleId": "V1-voice-score",
+     "value": 0.0
+    },
+    {
+     "drivers": [],
+     "id": "additive",
+     "kind": "score",
+     "preClamp": 0.93956471213215,
+     "ruleId": "V1-voice-score",
+     "value": 0.93956471213215
+    },
+    {
+     "drivers": [
+      "size",
+      "cyclic",
+      "flexible",
+      "fused",
+      "chain",
+      "donor"
+     ],
+     "id": "perc",
+     "kind": "shape",
+     "preClamp": 0.002812460457643,
+     "ruleId": "E1-envelope-shape",
+     "value": 0.002812460457643
+    },
+    {
+     "drivers": [
+      "size",
+      "cyclic",
+      "flexible",
+      "fused",
+      "chain",
+      "donor"
+     ],
+     "id": "pluck",
+     "kind": "shape",
+     "preClamp": 0.013642195932891,
+     "ruleId": "E1-envelope-shape",
+     "value": 0.013642195932891
+    },
+    {
+     "drivers": [
+      "size",
+      "cyclic",
+      "flexible",
+      "fused",
+      "chain",
+      "donor"
+     ],
+     "id": "keys",
+     "kind": "shape",
+     "preClamp": 0.024018375121365,
+     "ruleId": "E1-envelope-shape",
+     "value": 0.024018375121365
+    },
+    {
+     "drivers": [
+      "size",
+      "cyclic",
+      "flexible",
+      "fused",
+      "chain",
+      "donor"
+     ],
+     "id": "lead",
+     "kind": "shape",
+     "preClamp": 0.000108120428101,
+     "ruleId": "E1-envelope-shape",
+     "value": 0.000108120428101
+    },
+    {
+     "drivers": [
+      "size",
+      "cyclic",
+      "flexible",
+      "fused",
+      "chain",
+      "donor"
+     ],
+     "id": "organ",
+     "kind": "shape",
+     "preClamp": 0.0,
+     "ruleId": "E1-envelope-shape",
+     "value": 0.0
+    },
+    {
+     "drivers": [
+      "size",
+      "cyclic",
+      "flexible",
+      "fused",
+      "chain",
+      "donor"
+     ],
+     "id": "swell",
+     "kind": "shape",
+     "preClamp": 0.218544377729037,
+     "ruleId": "E1-envelope-shape",
+     "value": 0.218544377729037
+    },
+    {
+     "drivers": [
+      "size",
+      "cyclic",
+      "flexible",
+      "fused",
+      "chain",
+      "donor"
+     ],
+     "id": "pad",
+     "kind": "shape",
+     "preClamp": 0.740874470330963,
+     "ruleId": "E1-envelope-shape",
+     "value": 0.740874470330963
+    },
+    {
+     "drivers": [
+      "flexible",
+      "size",
+      "donor"
+     ],
+     "id": "e1.attack",
+     "kind": "envelope",
+     "preClamp": 0.32730527308557,
+     "ruleId": "E1-envelope",
+     "value": 0.32730527308557
+    },
+    {
+     "drivers": [
+      "cyclic",
+      "placement"
+     ],
+     "id": "e1.decay",
+     "kind": "envelope",
+     "preClamp": 1.204895289533706,
+     "ruleId": "E1-envelope",
+     "value": 1.204895289533706
+    },
+    {
+     "drivers": [
+      "cyclic",
+      "fused",
+      "flexible"
+     ],
+     "id": "e1.sustain",
+     "kind": "envelope",
+     "preClamp": 0.786097876488293,
+     "ruleId": "E1-envelope",
+     "value": 0.786097876488293
+    },
+    {
+     "drivers": [
+      "size",
+      "lipophilic"
+     ],
+     "id": "e1.release",
+     "kind": "envelope",
+     "preClamp": 1.353163814880058,
+     "ruleId": "E1-envelope",
+     "value": 1.353163814880058
+    },
+    {
+     "drivers": [],
      "id": "primary",
      "kind": "node",
-     "preClamp": 1.0,
-     "ruleId": "M1-primary",
+     "preClamp": 1.606903566481994,
+     "ruleId": "V1-primary-voice",
      "value": 1.0
     },
     {
-     "id": "secondary.unison",
+     "drivers": [
+      "amide",
+      "fused",
+      "hydroxyl",
+      "ester",
+      "carboxyl",
+      "amine",
+      "halogenated",
+      "nitro",
+      "nitrile",
+      "charged",
+      "strained",
+      "salt",
+      "diverse",
+      "thio"
+     ],
+     "id": "primary.table",
      "kind": "parameter",
-     "preClamp": 3.653005464480874,
-     "ruleId": "M5-unison",
-     "value": 4.0
+     "preClamp": 3.0,
+     "ruleId": "S1-table",
+     "value": 3.0
     },
     {
-     "id": "secondary.drift",
+     "drivers": [
+      "bright",
+      "placement"
+     ],
+     "id": "primary.position",
      "kind": "parameter",
-     "preClamp": 0.4825,
-     "ruleId": "M5-drift",
-     "value": 0.4825
+     "preClamp": 0.410262897110068,
+     "ruleId": "S1-table-position",
+     "value": 0.410262897110068
     },
     {
-     "id": "secondary.pitch",
+     "drivers": [
+      "size",
+      "flexible",
+      "conjugated"
+     ],
+     "id": "primary.unisonVoices",
      "kind": "parameter",
-     "preClamp": -2.0,
-     "ruleId": "M7-pitch",
-     "value": -2.0
+     "preClamp": 3.0,
+     "ruleId": "S2-unison",
+     "value": 3.0
     },
     {
-     "id": "secondary.modInDepth",
+     "drivers": [
+      "flexible",
+      "symmetric"
+     ],
+     "id": "primary.detuneCents",
+     "kind": "parameter",
+     "preClamp": 31.82655826558266,
+     "ruleId": "S2-unison",
+     "value": 31.82655826558266
+    },
+    {
+     "drivers": [
+      "chiral",
+      "size",
+      "handed",
+      "cisTrans"
+     ],
+     "id": "primary.unisonSpread",
+     "kind": "parameter",
+     "preClamp": 0.516666666666667,
+     "ruleId": "S2-unison",
+     "value": 0.516666666666667
+    },
+    {
+     "drivers": [
+      "flexible"
+     ],
+     "id": "primary.phaseRandom",
+     "kind": "parameter",
+     "preClamp": 0.717208672086721,
+     "ruleId": "S2-unison",
+     "value": 0.717208672086721
+    },
+    {
+     "drivers": [
+      "flexible",
+      "lipophilic"
+     ],
+     "id": "primary.drift",
+     "kind": "parameter",
+     "preClamp": 0.199912550170005,
+     "ruleId": "S2-drift",
+     "value": 0.199912550170005
+    },
+    {
+     "drivers": [
+      "isotopic",
+      "placement"
+     ],
+     "id": "primary.fine",
      "kind": "parameter",
      "preClamp": 0.0,
-     "ruleId": "M10-audio-rate",
+     "ruleId": "S2-fine",
      "value": 0.0
     },
     {
+     "drivers": [
+      "size",
+      "lipophilic"
+     ],
+     "id": "primary.octave",
+     "kind": "parameter",
+     "preClamp": 0.0,
+     "ruleId": "S2-register",
+     "value": 0.0
+    },
+    {
+     "drivers": [
+      "size"
+     ],
+     "id": "primary.outputLevel",
+     "kind": "parameter",
+     "preClamp": 0.521759259259259,
+     "ruleId": "S2-level",
+     "value": 0.521759259259259
+    },
+    {
+     "drivers": [],
      "id": "secondary",
      "kind": "node",
-     "preClamp": 0.416666666666667,
-     "ruleId": "M2-complement",
+     "preClamp": 0.93956471213215,
+     "ruleId": "V2-layer-voice",
      "value": 1.0
     },
     {
-     "id": "sub",
-     "kind": "node",
-     "preClamp": 0.60655737704918,
-     "ruleId": "M7-sub",
-     "value": 1.0
-    },
-    {
-     "id": "resonator.outputLevel",
+     "drivers": [
+      "bright"
+     ],
+     "id": "secondary.tilt",
      "kind": "parameter",
-     "preClamp": 0.790983606557377,
-     "ruleId": "M3-resonator-level",
-     "value": 0.790983606557377
+     "preClamp": -0.665014271173799,
+     "ruleId": "S1-additive-spectrum",
+     "value": -0.665014271173799
     },
     {
-     "id": "resonator.exciteDepth",
+     "drivers": [
+      "bright"
+     ],
+     "id": "secondary.partialAmplitudes",
      "kind": "parameter",
-     "preClamp": 0.316666666666667,
-     "ruleId": "M10-audio-rate",
-     "value": 0.316666666666667
+     "preClamp": -0.665014271173799,
+     "ruleId": "S1-additive-spectrum",
+     "value": -0.665014271173799
     },
     {
-     "id": "resonator",
-     "kind": "node",
-     "preClamp": 0.291666666666667,
-     "ruleId": "M3-resonator",
-     "value": 1.0
-    },
-    {
-     "id": "shaper.curve",
+     "drivers": [
+      "bright"
+     ],
+     "id": "secondary.partialRatios",
      "kind": "parameter",
-     "preClamp": 0.831479419283098,
-     "ruleId": "M9-shaper-curve",
-     "value": 0.0
+     "preClamp": -0.665014271173799,
+     "ruleId": "S1-additive-spectrum",
+     "value": -0.665014271173799
     },
     {
-     "id": "shaper.outputLevel",
+     "drivers": [],
+     "id": "secondary.harmonicityMorph",
      "kind": "parameter",
-     "preClamp": 0.939344262295082,
-     "ruleId": "M4-shaper-level",
-     "value": 0.939344262295082
-    },
-    {
-     "id": "shaper",
-     "kind": "node",
-     "preClamp": 0.0,
-     "ruleId": "M4-shaper",
-     "value": 1.0
-    },
-    {
-     "id": "filter.depth",
-     "kind": "parameter",
-     "preClamp": 0.047,
-     "ruleId": "M9-filter-depth",
-     "value": 0.01175
-    },
-    {
-     "id": "filter.outputLevel",
-     "kind": "parameter",
-     "preClamp": 0.951475409836066,
-     "ruleId": "M4-filter-level",
-     "value": 0.951475409836066
-    },
-    {
-     "id": "filter",
-     "kind": "node",
-     "preClamp": 0.546030837184573,
-     "ruleId": "M4-filter",
-     "value": 1.0
-    },
-    {
-     "id": "chorus",
-     "kind": "node",
-     "preClamp": 0.416666666666667,
-     "ruleId": "M8-chorus",
-     "value": 1.0
-    },
-    {
-     "id": "delay",
-     "kind": "node",
-     "preClamp": 0.7,
-     "ruleId": "M8-delay",
-     "value": 1.0
-    },
-    {
-     "id": "reverb",
-     "kind": "node",
-     "preClamp": 0.7,
-     "ruleId": "M8-reverb",
-     "value": 1.0
-    },
-    {
-     "id": "width",
-     "kind": "node",
-     "preClamp": 0.181884587289993,
-     "ruleId": "M8-width",
-     "value": 1.0
-    },
-    {
-     "id": "mix",
-     "kind": "node",
-     "preClamp": 0.60655737704918,
-     "ruleId": "M4-mixer",
-     "value": 1.0
-    },
-    {
-     "id": "primary->mix",
-     "kind": "edge",
      "preClamp": 1.0,
-     "ruleId": "M3/M4-routing",
+     "ruleId": "S1-additive-harmonic",
      "value": 1.0
     },
     {
-     "id": "secondary->mix",
-     "kind": "edge",
-     "preClamp": 1.0,
-     "ruleId": "M3/M4-routing",
-     "value": 1.0
+     "drivers": [
+      "aromatic",
+      "saturated"
+     ],
+     "id": "secondary.oddEvenBalance",
+     "kind": "parameter",
+     "preClamp": -0.36,
+     "ruleId": "S1-additive-parity",
+     "value": -0.36
     },
     {
-     "id": "velocity-primary",
-     "kind": "matrix",
-     "preClamp": 0.28,
-     "ruleId": "M5-velocity",
-     "value": 0.28
+     "drivers": [
+      "placement"
+     ],
+     "id": "secondary.symmetry",
+     "kind": "parameter",
+     "preClamp": 0.473055555555556,
+     "ruleId": "S1-additive-parity",
+     "value": 0.473055555555556
     },
     {
-     "id": "l1-primary",
-     "kind": "matrix",
-     "preClamp": 0.171666666666667,
-     "ruleId": "M5-motion",
-     "value": 0.171666666666667
-    },
-    {
-     "id": "e2-tone",
-     "kind": "matrix",
-     "preClamp": 0.229206167436915,
-     "ruleId": "M5-envelope",
-     "value": 0.229206167436915
-    },
-    {
-     "id": "cc1-expression",
-     "kind": "matrix",
-     "preClamp": 0.2,
-     "ruleId": "M5-cc1",
+     "drivers": [
+      "chiral"
+     ],
+     "id": "secondary.partialPans",
+     "kind": "parameter",
+     "preClamp": 0.333333333333333,
+     "ruleId": "S1-additive-pan",
      "value": 0.2
     },
     {
+     "drivers": [
+      "size",
+      "flexible",
+      "conjugated"
+     ],
+     "id": "secondary.unisonVoices",
+     "kind": "parameter",
+     "preClamp": 1.0,
+     "ruleId": "S2-unison",
+     "value": 1.0
+    },
+    {
+     "drivers": [
+      "flexible",
+      "symmetric"
+     ],
+     "id": "secondary.detuneCents",
+     "kind": "parameter",
+     "preClamp": 31.82655826558266,
+     "ruleId": "S2-unison",
+     "value": 31.82655826558266
+    },
+    {
+     "drivers": [
+      "chiral",
+      "size",
+      "handed",
+      "cisTrans"
+     ],
+     "id": "secondary.unisonSpread",
+     "kind": "parameter",
+     "preClamp": 0.516666666666667,
+     "ruleId": "S2-unison",
+     "value": 0.516666666666667
+    },
+    {
+     "drivers": [
+      "flexible"
+     ],
+     "id": "secondary.phaseRandom",
+     "kind": "parameter",
+     "preClamp": 0.717208672086721,
+     "ruleId": "S2-unison",
+     "value": 0.717208672086721
+    },
+    {
+     "drivers": [
+      "flexible",
+      "lipophilic"
+     ],
+     "id": "secondary.drift",
+     "kind": "parameter",
+     "preClamp": 0.199912550170005,
+     "ruleId": "S2-drift",
+     "value": 0.199912550170005
+    },
+    {
+     "drivers": [
+      "isotopic",
+      "placement"
+     ],
+     "id": "secondary.fine",
+     "kind": "parameter",
+     "preClamp": 9.07638888888889,
+     "ruleId": "S2-fine",
+     "value": 9.07638888888889
+    },
+    {
+     "drivers": [
+      "fused",
+      "chain",
+      "branched",
+      "linear"
+     ],
+     "id": "secondary.coarse",
+     "kind": "parameter",
+     "preClamp": 0.0,
+     "ruleId": "V2-layer-interval",
+     "value": 0.0
+    },
+    {
+     "drivers": [
+      "symmetric",
+      "size",
+      "diverse"
+     ],
+     "id": "secondary.outputLevel",
+     "kind": "parameter",
+     "preClamp": 0.296422159946237,
+     "ruleId": "V2-layer-level",
+     "value": 0.296422159946237
+    },
+    {
+     "drivers": [
+      "bright"
+     ],
+     "id": "filter",
+     "kind": "node",
+     "preClamp": 0.642296714481693,
+     "ruleId": "F1-filter",
+     "value": 1.0
+    },
+    {
+     "drivers": [
+      "zwitterionic",
+      "sulfonyl",
+      "lipophilic",
+      "size",
+      "polar"
+     ],
+     "id": "filter.mode",
+     "kind": "parameter",
+     "preClamp": 0.0,
+     "ruleId": "F1-filter-mode",
+     "value": 0.0
+    },
+    {
+     "drivers": [
+      "bright",
+      "placement",
+      "branched"
+     ],
+     "id": "filter.cutoff",
+     "kind": "parameter",
+     "preClamp": 5146.094030447055,
+     "ruleId": "F1-cutoff",
+     "value": 5146.094030447055
+    },
+    {
+     "drivers": [
+      "carbonyl",
+      "strained",
+      "thio"
+     ],
+     "id": "filter.q",
+     "kind": "parameter",
+     "preClamp": 2.020376169689061,
+     "ruleId": "F1-resonance",
+     "value": 2.020376169689061
+    },
+    {
+     "drivers": [
+      "cyclic",
+      "flexible",
+      "size"
+     ],
+     "id": "filter.envAmount",
+     "kind": "parameter",
+     "preClamp": 0.112963586214608,
+     "ruleId": "F1-sweep",
+     "value": 0.112963586214608
+    },
+    {
+     "drivers": [
+      "bright"
+     ],
+     "id": "filter.keytrack",
+     "kind": "parameter",
+     "preClamp": 0.542689014344508,
+     "ruleId": "F1-keytrack",
+     "value": 0.542689014344508
+    },
+    {
+     "drivers": [
+      "charged",
+      "nitro"
+     ],
+     "id": "filter.drive",
+     "kind": "parameter",
+     "preClamp": 1.0,
+     "ruleId": "F1-drive",
+     "value": 1.0
+    },
+    {
+     "drivers": [
+      "flexible",
+      "size"
+     ],
+     "id": "chorus",
+     "kind": "node",
+     "preClamp": 0.81029810298103,
+     "ruleId": "X1-chorus",
+     "value": 1.0
+    },
+    {
+     "drivers": [
+      "flexible"
+     ],
+     "id": "chorus.rate",
+     "kind": "parameter",
+     "preClamp": 1.321805021957234,
+     "ruleId": "X1-chorus",
+     "value": 1.321805021957234
+    },
+    {
+     "drivers": [
+      "flexible"
+     ],
+     "id": "chorus.depth",
+     "kind": "parameter",
+     "preClamp": 0.605149051490515,
+     "ruleId": "X1-chorus",
+     "value": 0.605149051490515
+    },
+    {
+     "drivers": [
+      "size"
+     ],
+     "id": "chorus.voices",
+     "kind": "parameter",
+     "preClamp": 3.0,
+     "ruleId": "X1-chorus",
+     "value": 3.0
+    },
+    {
+     "drivers": [
+      "flexible"
+     ],
+     "id": "chorus.mix",
+     "kind": "parameter",
+     "preClamp": 0.334471544715447,
+     "ruleId": "X1-chorus",
+     "value": 0.334471544715447
+    },
+    {
+     "drivers": [
+      "amide",
+      "symmetric",
+      "chain",
+      "geometric"
+     ],
+     "id": "delay",
+     "kind": "node",
+     "preClamp": 0.912719298245614,
+     "ruleId": "X2-delay",
+     "value": 1.0
+    },
+    {
+     "drivers": [],
+     "id": "delay.syncMode",
+     "kind": "parameter",
+     "preClamp": 1.0,
+     "ruleId": "X2-delay-sync",
+     "value": 1.0
+    },
+    {
+     "drivers": [
+      "amide",
+      "chain"
+     ],
+     "id": "delay.syncDivision",
+     "kind": "parameter",
+     "preClamp": 4.0,
+     "ruleId": "X2-delay",
+     "value": 4.0
+    },
+    {
+     "drivers": [
+      "amide",
+      "symmetric",
+      "chain"
+     ],
+     "id": "delay.feedback",
+     "kind": "parameter",
+     "preClamp": 0.508578947368421,
+     "ruleId": "X2-delay",
+     "value": 0.508578947368421
+    },
+    {
+     "drivers": [
+      "bright"
+     ],
+     "id": "delay.damping",
+     "kind": "parameter",
+     "preClamp": 0.428851642759153,
+     "ruleId": "X2-delay",
+     "value": 0.428851642759153
+    },
+    {
+     "drivers": [
+      "handed",
+      "cisTrans"
+     ],
+     "id": "delay.spread",
+     "kind": "parameter",
+     "preClamp": -0.6,
+     "ruleId": "X2-delay",
+     "value": -0.6
+    },
+    {
+     "drivers": [
+      "amide",
+      "symmetric",
+      "chain"
+     ],
+     "id": "delay.mix",
+     "kind": "parameter",
+     "preClamp": 0.282543859649123,
+     "ruleId": "X2-delay",
+     "value": 0.282543859649123
+    },
+    {
+     "drivers": [
+      "size",
+      "acceptor",
+      "flexible"
+     ],
+     "id": "reverb",
+     "kind": "node",
+     "preClamp": 0.845370798528114,
+     "ruleId": "X3-reverb",
+     "value": 1.0
+    },
+    {
+     "drivers": [
+      "size"
+     ],
+     "id": "reverb.size",
+     "kind": "parameter",
+     "preClamp": 0.611111111111111,
+     "ruleId": "X3-reverb",
+     "value": 0.611111111111111
+    },
+    {
+     "drivers": [
+      "size",
+      "flexible"
+     ],
+     "id": "reverb.decaySeconds",
+     "kind": "parameter",
+     "preClamp": 3.691238500247019,
+     "ruleId": "X3-reverb",
+     "value": 3.691238500247019
+    },
+    {
+     "drivers": [
+      "bright"
+     ],
+     "id": "reverb.damping",
+     "kind": "parameter",
+     "preClamp": 0.428851642759153,
+     "ruleId": "X3-reverb",
+     "value": 0.428851642759153
+    },
+    {
+     "drivers": [
+      "linear"
+     ],
+     "id": "reverb.preDelayMs",
+     "kind": "parameter",
+     "preClamp": 41.15277777777777,
+     "ruleId": "X3-reverb",
+     "value": 41.15277777777777
+    },
+    {
+     "drivers": [
+      "size",
+      "acceptor"
+     ],
+     "id": "reverb.mix",
+     "kind": "parameter",
+     "preClamp": 0.313611239558434,
+     "ruleId": "X3-reverb",
+     "value": 0.313611239558434
+    },
+    {
+     "drivers": [
+      "chiral",
+      "geometric",
+      "salt"
+     ],
+     "id": "width",
+     "kind": "node",
+     "preClamp": 0.333333333333333,
+     "ruleId": "X4-width",
+     "value": 1.0
+    },
+    {
+     "drivers": [
+      "chiral",
+      "geometric",
+      "salt"
+     ],
+     "id": "width.width",
+     "kind": "parameter",
+     "preClamp": 1.183333333333333,
+     "ruleId": "X4-width",
+     "value": 1.183333333333333
+    },
+    {
+     "drivers": [
+      "size",
+      "lipophilic"
+     ],
+     "id": "width.bassMonoHz",
+     "kind": "parameter",
+     "preClamp": 150.42437829577744,
+     "ruleId": "X4-width",
+     "value": 150.42437829577744
+    },
+    {
+     "drivers": [
+      "handed"
+     ],
+     "id": "mix",
+     "kind": "node",
+     "preClamp": 2.0,
+     "ruleId": "G1-mixer",
+     "value": 1.0
+    },
+    {
+     "drivers": [
+      "handed"
+     ],
+     "id": "mix.pan",
+     "kind": "parameter",
+     "preClamp": -0.28,
+     "ruleId": "G1-handedness",
+     "value": -0.28
+    },
+    {
+     "drivers": [],
+     "id": "primary->mix",
+     "kind": "edge",
+     "preClamp": 1.0,
+     "ruleId": "G1-routing",
+     "value": 1.0
+    },
+    {
+     "drivers": [],
+     "id": "secondary->mix",
+     "kind": "edge",
+     "preClamp": 0.85,
+     "ruleId": "G1-routing",
+     "value": 0.85
+    },
+    {
+     "drivers": [],
+     "id": "mix->filter",
+     "kind": "edge",
+     "preClamp": 0.66,
+     "ruleId": "G1-routing",
+     "value": 0.66
+    },
+    {
+     "drivers": [],
+     "id": "filter->chorus",
+     "kind": "edge",
+     "preClamp": 0.9,
+     "ruleId": "G1-routing",
+     "value": 0.9
+    },
+    {
+     "drivers": [],
+     "id": "chorus->delay",
+     "kind": "edge",
+     "preClamp": 1.0,
+     "ruleId": "G1-routing",
+     "value": 1.0
+    },
+    {
+     "drivers": [],
+     "id": "delay->reverb",
+     "kind": "edge",
+     "preClamp": 1.0,
+     "ruleId": "G1-routing",
+     "value": 1.0
+    },
+    {
+     "drivers": [],
+     "id": "reverb->width",
+     "kind": "edge",
+     "preClamp": 1.0,
+     "ruleId": "G1-routing",
+     "value": 1.0
+    },
+    {
+     "drivers": [],
+     "id": "width->output",
+     "kind": "edge",
+     "preClamp": 1.0,
+     "ruleId": "G1-routing",
+     "value": 1.0
+    },
+    {
+     "drivers": [
+      "flexible"
+     ],
+     "id": "l1.rate",
+     "kind": "lfo",
+     "preClamp": 3.291743087433049,
+     "ruleId": "M1-lfo",
+     "value": 3.291743087433049
+    },
+    {
+     "drivers": [
+      "size"
+     ],
+     "id": "l2.rate",
+     "kind": "lfo",
+     "preClamp": 0.146915415410155,
+     "ruleId": "M1-lfo",
+     "value": 0.146915415410155
+    },
+    {
+     "drivers": [
+      "cyclic",
+      "flexible"
+     ],
+     "id": "velocity-level",
+     "kind": "matrix",
+     "preClamp": 0.227716420365838,
+     "ruleId": "M1-velocity",
+     "value": 0.227716420365838
+    },
+    {
+     "drivers": [
+      "flexible"
+     ],
+     "id": "l1-motion",
+     "kind": "matrix",
+     "preClamp": 0.451447564636674,
+     "ruleId": "M1-motion",
+     "value": 0.451447564636674
+    },
+    {
+     "drivers": [
+      "symmetric",
+      "cyclic"
+     ],
+     "id": "e3-sweep",
+     "kind": "matrix",
+     "preClamp": 0.42,
+     "ruleId": "M1-sweep",
+     "value": 0.42
+    },
+    {
+     "drivers": [
+      "cyclic",
+      "flexible"
+     ],
+     "id": "velocity-tone",
+     "kind": "matrix",
+     "preClamp": 0.063703881775602,
+     "ruleId": "M1-velocity",
+     "value": 0.063703881775602
+    },
+    {
+     "drivers": [
+      "flexible",
+      "size"
+     ],
+     "id": "l2-drift",
+     "kind": "matrix",
+     "preClamp": 0.097162346736187,
+     "ruleId": "M1-drift",
+     "value": 0.097162346736187
+    },
+    {
+     "drivers": [
+      "flexible"
+     ],
+     "id": "cc1-expression",
+     "kind": "matrix",
+     "preClamp": 0.35,
+     "ruleId": "M1-expression",
+     "value": 0.35
+    },
+    {
+     "drivers": [],
      "id": "macro1",
      "kind": "matrix",
-     "preClamp": 0.25,
-     "ruleId": "M5-macro",
-     "value": 0.25
+     "preClamp": 0.3,
+     "ruleId": "M1-macro",
+     "value": 0.3
     },
     {
+     "drivers": [],
      "id": "macro2",
      "kind": "matrix",
-     "preClamp": 0.25,
-     "ruleId": "M5-macro",
-     "value": 0.25
+     "preClamp": 0.4,
+     "ruleId": "M1-macro",
+     "value": 0.4
     },
     {
+     "drivers": [],
      "id": "macro3",
      "kind": "matrix",
-     "preClamp": 0.25,
-     "ruleId": "M5-macro",
-     "value": 0.25
+     "preClamp": 0.4,
+     "ruleId": "M1-macro",
+     "value": 0.4
     },
     {
+     "drivers": [],
      "id": "macro4",
      "kind": "matrix",
-     "preClamp": 0.25,
-     "ruleId": "M5-macro",
-     "value": 0.25
+     "preClamp": 0.35,
+     "ruleId": "M1-macro",
+     "value": 0.35
     }
    ],
    "sonicIntent": {
-    "axes": {
-     "brightness": 0.546030837184573,
-     "decay": 0.7,
-     "density": 0.60655737704918,
-     "harmonicity": 1.0,
-     "motion": 0.416666666666667,
-     "rigidity": 0.291666666666667,
-     "roughness": 0.0
+    "profile": {
+     "acceptorsPerAtom": 0.263157894736842,
+     "alcohols": 0.0,
+     "alkeneBonds": 0.0,
+     "amides": 3.0,
+     "amines": 1.0,
+     "aromaticFraction": 0.0,
+     "arylHalides": 0.0,
+     "branchCentrality": 0.5,
+     "branchNitrogenDistance": 0.097222222222222,
+     "branchedFraction": 0.315789473684211,
+     "carbonyls": 4.0,
+     "carboxyls": 1.0,
+     "chargeSeparation": 0.0,
+     "chargedAtoms": 0.0,
+     "chiralBalance": -1.0,
+     "conjugatedFraction": 0.105263157894737,
+     "diameter": 12.0,
+     "donorsPerAtom": 0.263157894736842,
+     "elementKinds": 3.0,
+     "elongation": 0.666666666666667,
+     "esters": 0.0,
+     "ethers": 0.0,
+     "flexibility": 0.388888888888889,
+     "fragments": 1.0,
+     "fusedPerRing": 0.0,
+     "geometricBalance": 0.0,
+     "geometricBonds": 0.0,
+     "halogenAtoms": 0.0,
+     "halogenLoad": 0.0,
+     "heaviestHalogen": 0.0,
+     "heavyAtoms": 19.0,
+     "heteroCentrality": 0.37037037037037,
+     "heteroFraction": 0.473684210526316,
+     "heteroaromaticAtoms": 0.0,
+     "isotopeAtoms": 0.0,
+     "largestFragmentFraction": 1.0,
+     "largestRing": 0.0,
+     "logP": -2.844699999999996,
+     "longestChain": 3.0,
+     "massPerAtom": 14.435631578947367,
+     "metalAtoms": 0.0,
+     "metalloidAtoms": 0.0,
+     "molecularWeight": 274.277,
+     "negativeAtoms": 0.0,
+     "netCharge": 0.0,
+     "nitriles": 0.0,
+     "nitrogenFraction": 0.210526315789474,
+     "nitrogenOxygenDistance": 0.1875,
+     "nitros": 0.0,
+     "oxygenFraction": 0.263157894736842,
+     "phenols": 0.0,
+     "phosphates": 0.0,
+     "phosphorusAtoms": 0.0,
+     "polarSurfacePerAtom": 7.927368421052631,
+     "positiveAtoms": 0.0,
+     "ringAtomFraction": 0.0,
+     "ringCentrality": 0.0,
+     "ringNitrogenDistance": 0.0,
+     "rings": 0.0,
+     "smallRingAtoms": 0.0,
+     "sp3Fraction": 0.6,
+     "stereocenters": 2.0,
+     "sulfonyls": 0.0,
+     "sulfurAtoms": 0.0,
+     "symmetry": 0.0,
+     "terminalFraction": 0.421052631578947,
+     "thios": 0.0,
+     "tripleBonds": 0.0
     },
-    "sonicIntentVersion": 1,
-    "structuralDetail": {
-     "bondOrderMean": 1.222222222222222,
-     "bondOrderSpread": 0.415739709641549,
-     "heteroPlacement": 0.181884587289993,
-     "motifPlacement": 0.5625
+    "sonicIntentVersion": 2,
+    "traits": {
+     "acceptor": 0.752722323049002,
+     "alicyclic": 0.0,
+     "amide": 0.828947368421053,
+     "amine": 0.426315789473684,
+     "aromatic": 0.0,
+     "branched": 0.592105263157895,
+     "bright": 0.642296714481693,
+     "carbonyl": 0.985263157894737,
+     "carboxyl": 0.426315789473684,
+     "chain": 0.333333333333333,
+     "charged": 0.0,
+     "chiral": 0.333333333333333,
+     "cisTrans": 0.0,
+     "conjugated": 0.105263157894737,
+     "cyclic": 0.0,
+     "diverse": 0.5,
+     "donor": 0.953947368421053,
+     "ester": 0.0,
+     "ether": 0.0,
+     "flexible": 0.81029810298103,
+     "fused": 0.0,
+     "geometric": 0.0,
+     "halogenated": 0.0,
+     "handed": -1.0,
+     "heavyHalogen": 0.0,
+     "heteroaromatic": 0.0,
+     "hydroxyl": 0.0,
+     "inorganic": 0.0,
+     "isotopic": 0.0,
+     "linear": 0.743055555555555,
+     "lipophilic": 0.065791571753987,
+     "metallic": 0.0,
+     "nitrile": 0.0,
+     "nitro": 0.0,
+     "phenolic": 0.0,
+     "phosphorus": 0.0,
+     "placement": 0.307638888888889,
+     "polar": 0.834081104400345,
+     "salt": 0.0,
+     "saturated": 0.6,
+     "size": 0.555555555555556,
+     "strained": 0.0,
+     "sulfonyl": 0.0,
+     "sulfur": 0.0,
+     "symmetric": 0.0,
+     "thio": 0.0,
+     "unsaturated": 0.0,
+     "weight": 0.524953007518797,
+     "zwitterionic": 0.0
     }
    }
   }

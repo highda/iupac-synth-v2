@@ -29,7 +29,7 @@ target_compile_definitions(iupac_synth_domain PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE
 target_link_libraries(iupac_synth_domain PUBLIC juce::juce_core)
 
 if(IUPAC_ENABLE_CHEMISTRY)
-    add_library(iupac_chemistry_analysis STATIC src/chemistry/Analysis.cpp src/chemistry/Mapping.cpp src/chemistry/Extension.cpp)
+    add_library(iupac_chemistry_analysis STATIC src/chemistry/Analysis.cpp src/chemistry/Profile.cpp src/chemistry/Mapping.cpp src/chemistry/Extension.cpp)
     target_include_directories(iupac_chemistry_analysis PUBLIC include)
     target_compile_features(iupac_chemistry_analysis PUBLIC cxx_std_20)
     target_compile_definitions(iupac_chemistry_analysis PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)

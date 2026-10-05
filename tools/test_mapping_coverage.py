@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Mapper-coverage invariant (#105, D8).
 
-docs/architecture/CHEMISTRY.md#mapper-coverage-invariant: no catalog parameter may be
-dead for chemistry. The catalog is read through the production CLI
+docs/architecture/CHEMISTRY.md#mapper-coverage: every catalog parameter has exactly one
+entry saying whether mapper 3 assigns it (D13 dropped "no parameter may be dead"). The catalog is read through the production CLI
 (`iupac-cli inspect --stage catalog`), never a transcribed copy, so adding a parameter
 without declaring its mapping fails ctest. Runs in the chemistry-OFF build as well.
 
@@ -13,13 +13,13 @@ import subprocess
 import sys
 import unittest
 
-AXES = {"density", "brightness", "rigidity", "roughness", "decay", "harmonicity", "motion"}
-DETAIL = {"bondOrderMean", "bondOrderSpread", "heteroPlacement", "motifPlacement"}
-DRIVERS = AXES | DETAIL
-STATUSES = {"mapped", "provisional", "unmapped"}
-# D12 (#166): the two source types that landed ahead of the phase-5 mapper rework (#165). Only
-# these may be `unmapped`; every other module still has to be reachable from chemistry.
-UNMAPPED_MODULES = {"osc", "wavetable"}
+import re
+from pathlib import Path
+
+# Drivers are the trait names of SonicIntent 2, read from the production header (mapper 3, D13).
+_HEADER = (Path(__file__).resolve().parents[1] / "include/iupac/chemistry/Mapping.hpp").read_text()
+DRIVERS = set(re.findall(r"X\((\w+)\)", _HEADER.split("#define IUPAC_TRAIT_FIELDS(X)")[1].split("struct Traits")[0]))
+STATUSES = {"mapped", "offPanel", "unmapped"}
 REQUIRED = ("module", "parameter", "status", "ruleId", "drivers", "note")
 # Every parameter kind the descriptor vocabulary defines; all of them need an entry.
 COVERED_KINDS = {"continuous", "discrete", "convenience", "coefficientArray"}
@@ -63,32 +63,26 @@ class CoverageTests(unittest.TestCase):
         unknown = sorted(kinds - COVERED_KINDS)
         self.assertEqual(unknown, [], f"unknown parameter kind: extend COVERED_KINDS and the invariant first: {unknown}")
 
-    def test_entries_are_well_formed_and_no_driver_list_is_empty(self):
+    def test_entries_are_well_formed(self):
+        self.assertGreater(len(DRIVERS), 30, "trait vocabulary was not read from Mapping.hpp")
         for entry in self.entries:
             label = f"{entry.get('module')}.{entry.get('parameter')}"
             for field in REQUIRED:
                 self.assertIn(field, entry, f"{label} is missing '{field}'")
             self.assertIn(entry["status"], STATUSES, f"{label} has status {entry['status']!r}")
-            self.assertTrue(entry["ruleId"], f"{label} has no ruleId")
             if entry["status"] == "unmapped":
-                self.assertIn(entry["module"], UNMAPPED_MODULES, f"{label} may not be unmapped: only the D12 source types are")
-                self.assertTrue(entry["note"], f"{label} is unmapped with no owner in 'note'")
+                # D13: curated beats complete. An unreachable parameter is allowed, but it must say so.
+                self.assertTrue(entry["note"], f"{label} is unmapped with no note")
+                self.assertFalse(entry["ruleId"] or entry["drivers"], f"{label} is unmapped yet names a rule or drivers")
                 continue
-            self.assertTrue(entry["drivers"], f"{label} has an empty drivers list: that is a failure, not a status")
+            self.assertTrue(entry["ruleId"], f"{label} has no ruleId")
             unknown = sorted(set(entry["drivers"]) - DRIVERS)
-            self.assertEqual(unknown, [], f"{label} names drivers that are not SonicIntent axes or structuralDetail fields: {unknown}")
+            self.assertEqual(unknown, [], f"{label} names drivers that are not SonicIntent traits: {unknown}")
 
-    def test_provisional_entries_name_their_owning_leaf(self):
-        for entry in self.entries:
-            if entry["status"] == "provisional":
-                self.assertTrue(entry["note"], f"{entry['module']}.{entry['parameter']} is provisional with no owning leaf in 'note'")
-
-    def test_no_parameter_is_left_provisional(self):
-        # CHEMISTRY.md: a provisional entry must be resolved to `mapped` with calibration evidence
-        # before the release candidate. #128 (W19) resolved the last of them, so the table carries
-        # none and a new parameter cannot land provisional by default.
-        pending = sorted(f"{e['module']}.{e['parameter']}" for e in self.entries if e["status"] == "provisional")
-        self.assertEqual(pending, [], f"parameters still provisional, with no leaf left to own them: {pending}")
+    def test_the_mapper_reaches_most_of_the_catalog(self):
+        # Not an invariant on any single parameter, only a floor so the table cannot quietly empty out.
+        reached = sum(entry["status"] != "unmapped" for entry in self.entries)
+        self.assertGreaterEqual(reached / len(self.entries), 0.6, "the mapper assigns fewer than 60% of catalog parameters")
 
 
 if __name__ == "__main__":

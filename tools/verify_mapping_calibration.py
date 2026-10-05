@@ -77,8 +77,8 @@ def main():
             analysis.write_text(json.dumps(records[identifier]["response"], sort_keys=True))
             trace = run_json([args.cli, "inspect", "--stage", "mapping", "--analysis", str(analysis),
                               "--request-id", identifier])
-            if trace["mappingVersion"] != 2 or trace["projectionVersion"] != 1:
-                raise AssertionError(f"{identifier}: versions not frozen at mapper 2 / projection 1")
+            if trace["mappingVersion"] != 3 or trace["projectionVersion"] != 2:
+                raise AssertionError(f"{identifier}: versions not frozen at mapper 3 / projection 2")
             traces[identifier] = trace
             state = temporary / f"{identifier}.state.json"
             state.write_text(json.dumps(state_for(trace["patch"], trace), sort_keys=True))
@@ -129,29 +129,35 @@ def main():
     if len(graph_counts["holdout"]) < 3: v3_failures.append("holdout graph count")
     broad_patches = [traces[key]["patch"] for key in broad]
     source_types = {node["type"] for patch in broad_patches for node in patch["nodes"]}
-    resonator_modes = {node["parameters"]["mode"] for patch in broad_patches for node in patch["nodes"] if node["type"] == "resonator"}
+    resonator_share = sum(any(node["type"] == "resonator" for node in patch["nodes"]) for patch in broad_patches) / len(broad_patches)
+    primary_types = Counter(next(node["type"] for node in patch["nodes"] if node["id"] == "primary") for patch in broad_patches)
     destinations = {row["destinationParameter"] for patch in broad_patches for row in patch["matrix"] if row["enabled"]}
-    if not {"harmonic", "fm", "noise"}.issubset(source_types): v3_failures.append("broad source types")
-    if resonator_modes != {0, 1}: v3_failures.append("broad resonator modes")
+    # D13 restates the composition clauses for mapper 3: the classic oscillator and the wavetable
+    # source must both lead patches, at least four source types must appear, the additive source
+    # may lead at most a quarter of the set and a resonator may sit on at most a quarter of it.
+    all_sources = {"osc", "wavetable", "harmonic", "fm", "noise", "sub"}
+    if len(source_types & all_sources) < 4 or not {"osc", "wavetable"}.issubset(primary_types): v3_failures.append("broad source types")
+    if primary_types.get("harmonic", 0) / len(broad_patches) > .25: v3_failures.append("broad additive share")
+    if resonator_share > .25: v3_failures.append("broad resonator share")
     if len(destinations) < 4: v3_failures.append("broad modulation destination kinds")
     serial = parallel = False
     for patch in broad_patches:
-        sources = {node["id"] for node in patch["nodes"] if node["type"] in {"harmonic", "fm", "noise"}}
+        sources = {node["id"] for node in patch["nodes"] if node["type"] in all_sources}
         incoming = Counter(edge["destination"] for edge in patch["edges"])
         serial |= any(edge["source"] not in sources for edge in patch["edges"])
         parallel |= any(count > 1 for count in incoming.values())
-    if not serial: v3_failures.append("missing serial resonator graph")
-    if not parallel: v3_failures.append("missing parallel resonator graph")
+    if not serial: v3_failures.append("missing serial graph")
+    if not parallel: v3_failures.append("missing parallel graph")
     # Mapper-coverage invariant, second half (#128): the table claims every entry's `ruleId`
     # appears in the generation trace. Check it against the traces actually produced above rather
     # than trusting the table, so a rule that stops firing is a gate failure and not a stale note.
     coverage = json.loads(Path(args.coverage).read_text())
     traced_rules = {item["ruleId"] for trace in traces.values() for item in trace["rules"]}
-    declared_rules = {e["ruleId"] for e in coverage["entries"] if e["status"] == "mapped"}
+    declared_rules = {rule for e in coverage["entries"] if e["status"] == "mapped" for rule in e["ruleId"].split("+")}
     absent = sorted(declared_rules - traced_rules)
     if absent:
         v3_failures.append(f"coverage ruleIds never traced: {absent}")
-    still_provisional = sorted(f"{e['module']}.{e['parameter']}" for e in coverage["entries"] if e["status"] == "provisional")
+    still_provisional = sorted(f"{e['module']}.{e['parameter']}" for e in coverage["entries"] if e["status"] not in ("mapped", "offPanel", "unmapped"))
     if still_provisional:
         v3_failures.append(f"coverage entries still provisional: {still_provisional}")
     # MAPPING-POLICY caps generated rows at 12 inside the 40-row Patch cap, so the rest stays
@@ -162,7 +168,7 @@ def main():
     if over_budget:
         v3_failures.append(f"generated rows over the MAPPING-POLICY budget of 12: {over_budget}")
     peptides = [key for key in hard if any(token in key for token in ("gly", "ala", "cys", "met", "phe"))]
-    peptide_axes = [tuple(traces[key]["sonicIntent"]["axes"][axis] for axis in ("density", "brightness", "decay")) for key in peptides]
+    peptide_axes = [tuple(traces[key]["sonicIntent"]["traits"][axis] for axis in ("size", "bright", "placement")) for key in peptides]
     if len({signatures[key]["graph"] for key in peptides}) < 2 or len(set(peptide_axes)) < 2:
         v3_failures.append("peptide graph/axis collapse")
     for first, second in hard_pairs:
@@ -176,7 +182,7 @@ def main():
     def generated_cost(identifier):
         patch = traces[identifier]["patch"]
         copies = sum(int(n.get("parameters", {}).get("unisonVoices", 1)) for n in patch["nodes"]
-                     if n["type"] in {"harmonic", "fm", "noise"})
+                     if n["type"] in {"harmonic", "fm", "osc", "wavetable"})
         return (len(patch["nodes"]), copies, len(patch["edges"]), len(patch["matrix"]))
     heaviest = max(sorted(traces), key=generated_cost)
     heaviest_state = state_for(traces[heaviest]["patch"], traces[heaviest])
@@ -187,7 +193,7 @@ def main():
         v3_failures.append(f"V8 heaviest generated fixture is stale: heaviest is now {heaviest} {generated_cost(heaviest)}")
     report = {
         "heaviestGenerated": {"id": heaviest, "nodes_copies_edges_rows": list(generated_cost(heaviest))},
-        "gateVersion": 1, "metricVersion": 1, "mapperVersion": 2, "projectionVersion": 1,
+        "gateVersion": 2, "metricVersion": 1, "mapperVersion": 3, "projectionVersion": 2,
         "fixtureSha256": sha(fixture_path), "pairManifestSha256": sha(pair_path),
         "coverageSha256": sha(Path(args.coverage)), "coverageVersion": coverage["coverageVersion"],
         "coverage": {"declaredRules": sorted(declared_rules), "tracedRules": sorted(traced_rules),
