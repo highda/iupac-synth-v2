@@ -38,6 +38,11 @@ double quantile(double x, const std::array<double, 5>& k)
     return 1.0;
 }
 
+// Every value the generator publishes is rounded to six decimals. The rules use pow/exp/log, whose
+// last bit differs between C libraries; rounding is what keeps the generated Patch and its trace
+// byte-identical on Linux and macOS (V1 cross-platform parity) rather than equal to within an ulp.
+double settle(double x) { return std::isfinite(x) ? std::round(x * 1e6) / 1e6 : x; }
+
 juce::var object() { return juce::var(new juce::DynamicObject); }
 void put(juce::var& v, const char* k, juce::var x) { v.getDynamicObject()->setProperty(k, std::move(x)); }
 
@@ -140,7 +145,7 @@ struct Builder
     {
         auto x = object(); put(x, "kind", kind); put(x, "id", juce::String(id)); put(x, "ruleId", rule);
         juce::Array<juce::var> names; for (const auto* d : drivers) names.add(juce::String(d));
-        put(x, "drivers", names); put(x, "preClamp", pre); put(x, "value", value); items.add(x);
+        put(x, "drivers", names); put(x, "preClamp", settle(pre)); put(x, "value", settle(value)); items.add(x);
     }
     domain::Node node(std::string id, ModuleType type, const char* rule, Drivers drivers, double evidence)
     {
@@ -156,7 +161,7 @@ struct Builder
         const auto& descriptor = domain::moduleCatalog().at(static_cast<std::size_t>(n.type));
         const auto* p = domain::findParameter(descriptor, id);
         if (p == nullptr || !std::isfinite(value)) return 0.0;
-        auto final = std::clamp(value, p->minimum, p->maximum);
+        auto final = settle(std::clamp(value, p->minimum, p->maximum));
         if (p->kind == domain::ParameterKind::discrete) final = std::round(final);
         for (auto& stored : n.parameters) if (stored.id == id) stored.values[0] = final;
         trace("parameter", n.id + "." + std::string(id), rule, drivers, value, final);
@@ -164,12 +169,13 @@ struct Builder
     }
     void edge(const std::string& from, const std::string& to, double gain, const char* rule, Drivers drivers, domain::AudioPort port = domain::AudioPort::in)
     {
-        patch.edges.push_back({from, to, std::clamp(gain, 0.0, 1.0), port});
-        trace("edge", from + "->" + to, rule, drivers, gain, std::clamp(gain, 0.0, 1.0));
+        const auto g = settle(std::clamp(gain, 0.0, 1.0));
+        patch.edges.push_back({from, to, g, port});
+        trace("edge", from + "->" + to, rule, drivers, gain, g);
     }
     void row(std::string id, domain::ModulationSource source, const std::string& node, const char* parameter, double depth, const char* rule, Drivers drivers)
     {
-        const auto d = std::clamp(depth, -1.0, 1.0);
+        const auto d = settle(std::clamp(depth, -1.0, 1.0));
         patch.matrix.push_back({id, true, source, node, parameter, d});
         trace("matrix", id, rule, drivers, depth, d);
     }
@@ -180,6 +186,11 @@ struct Builder
 SonicIntent project(const Analysis& a)
 {
     SonicIntent s; s.profile = profile(a);
+    // Settled before anything reads them, and again after the traits are formed, so both platforms
+    // run the rules below from identical inputs whatever their compilers fused into one operation.
+#define X(name) s.profile.name = settle(s.profile.name);
+    IUPAC_PROFILE_FIELDS(X)
+#undef X
     const auto& p = s.profile; auto& t = s.traits;
     const double heavy = std::max(1.0, p.heavyAtoms);
     // Quartile knots measured on the ranked discovery snapshot (4,957 molecules, mapper v3 calibration).
@@ -225,6 +236,9 @@ SonicIntent project(const Analysis& a)
     // changes position without any count changing. It is what tells constitutional isomers apart.
     t.placement = clamp01(0.30 * p.heteroCentrality + 0.25 * p.branchCentrality + 0.20 * p.nitrogenOxygenDistance
                           + 0.35 * p.branchNitrogenDistance + 0.30 * p.ringNitrogenDistance + 0.15 * p.ringCentrality);
+#define X(name) t.name = settle(t.name);
+    IUPAC_TRAIT_FIELDS(X)
+#undef X
     return s;
 }
 
@@ -335,7 +349,8 @@ GenerationResult generate(const Analysis& a)
                 b.set(n, "symmetry", 0.35 + 0.4 * t.placement, "S1-additive-parity", {"placement"});
                 std::vector<double> pans(16);
                 for (std::size_t i = 0; i < pans.size(); ++i) pans[i] = std::clamp((i % 2 == 0 ? -1.0 : 1.0) * 0.6 * t.chiral * (static_cast<double>(i) / 15.0), -1.0, 1.0);
-                for (auto& stored : n.parameters) if (stored.id == "partialPans") stored.values = pans;
+                for (auto& value : pans) value = settle(value);
+                for (auto& stored : n.parameters) { if (stored.id == "partialPans") stored.values = pans; if (stored.id == "partialAmplitudes" || stored.id == "partialRatios" || stored.id == "tilt") for (auto& value : stored.values) value = settle(value); }
                 b.trace("parameter", id + ".partialPans", "S1-additive-pan", {"chiral"}, t.chiral, pans.back());
                 maxCopies = 2; break;
             }
@@ -431,6 +446,7 @@ GenerationResult generate(const Analysis& a)
         {
             if (stored.id == "modeRatios") stored.values = {1.0, 1.9 + 0.8 * t.weight, 2.7 + 0.9 * t.placement, 3.6 + 0.4 * t.diverse};
             if (stored.id == "modeLevels") stored.values = {1.0, 0.6, 0.35 + 0.2 * t.bright, 0.2};
+            if (stored.id == "modeRatios" || stored.id == "modeLevels") for (auto& value : stored.values) value = settle(value);
         }
         b.trace("parameter", "resonator.modeRatios", "R1-resonator", {"weight", "placement", "diverse"}, 1.9 + 0.8 * t.weight, 1.9 + 0.8 * t.weight);
         b.trace("parameter", "resonator.modeLevels", "R1-resonator", {"bright"}, 0.35 + 0.2 * t.bright, 0.35 + 0.2 * t.bright);
@@ -566,11 +582,14 @@ GenerationResult generate(const Analysis& a)
     // E3 is the slow movement envelope: it carries a wavetable through its frames over the note.
     const domain::Envelope e3{std::clamp(emix(0.25, 2.0, 0.6 * t.size + 0.4 * t.flexible), 0.001, 2.0), 1.0, 1.0, e1.release, 0.3, 0.0, 0.0};
     b.patch.envelopes = {e1, e2, e3, domain::Envelope{}};
+    for (auto& e : b.patch.envelopes) for (auto field : {&domain::Envelope::attack, &domain::Envelope::decay, &domain::Envelope::sustain, &domain::Envelope::release,
+                                                          &domain::Envelope::attackCurve, &domain::Envelope::decayCurve, &domain::Envelope::releaseCurve}) e.*field = settle(e.*field);
     domain::Lfo l1{std::clamp(emix(0.18, 6.5, t.flexible), 0.05, 12.0), domain::LfoWaveform::sine};
     if (primaryVoice == square || primaryVoice == pulse) l1.waveform = domain::LfoWaveform::triangle;
     if (primaryVoice == wtChip) l1.waveform = domain::LfoWaveform::sampleHold;
     l1.fadeMs = shape[lead] > 0.35 ? 250.0 + 500.0 * t.cyclic : 0.0;
     domain::Lfo l2{std::clamp(emix(0.45, 0.06, t.size), 0.05, 12.0), held > 0.5 ? domain::LfoWaveform::randomSmooth : domain::LfoWaveform::sine};
+    l1.rate = settle(l1.rate); l1.fadeMs = settle(l1.fadeMs); l2.rate = settle(l2.rate);
     b.patch.lfos = {l1, l2};
     b.trace("lfo", "l1.rate", "M1-lfo", {"flexible"}, l1.rate, l1.rate); b.trace("lfo", "l2.rate", "M1-lfo", {"size"}, l2.rate, l2.rate);
 
