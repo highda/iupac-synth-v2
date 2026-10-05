@@ -48,6 +48,10 @@ public:
  // The popup asks for a taller frame when the inspector opens; re-centre it rather than resizing a window.
  void setContentSize(int w,int h){content_={w,h};resized();}
  [[nodiscard]]juce::Rectangle<int>contentBounds()const noexcept{return popup_->getBounds();}
+ // The header's title area and close button, shared by paint and the #102 non-overlap test.
+ [[nodiscard]]juce::Rectangle<int>titleBounds()const noexcept{return popup_->getBounds().withTop(popup_->getY()-headerHeight).withHeight(headerHeight).withTrimmedLeft(8).withTrimmedRight(headerHeight+4);}
+ [[nodiscard]]juce::Rectangle<int>closeBounds()const noexcept{return closeButton_.getBounds();}
+ static constexpr float titleHeight=10.0f;
  void dismiss(){exitModalState(0);setVisible(false);if(onDismiss)onDismiss();}
  void resized()override
  {
@@ -66,7 +70,7 @@ public:
   g.setColour(iupac::ui::ground);g.fillRect(frame);
   g.setColour(iupac::ui::ink);g.drawRect(frame,(int)iupac::ui::hairline);
   g.drawLine((float)frame.getX(),(float)popup_->getY()-0.5f,(float)frame.getRight(),(float)popup_->getY()-0.5f,iupac::ui::hairline);
-  iupac::ui::drawCaption(g,"CHEMISTRY",frame.withHeight(headerHeight).withTrimmedLeft(8).withTrimmedRight(headerHeight+4),juce::Justification::centredLeft,10.0f);
+  iupac::ui::drawCaption(g,"CHEMISTRY",titleBounds(),juce::Justification::centredLeft,titleHeight);
  }
  bool keyPressed(const juce::KeyPress&k)override{if(k==juce::KeyPress::escapeKey){dismiss();return true;}return false;}
  void inputAttemptWhenModal()override{}// a click on the dimmed backdrop is inert, not a dismissal

@@ -10,6 +10,7 @@
 #include <cmath>
 #include <filesystem>
 #include <iostream>
+#include <tuple>
 #include <cstdlib>
 namespace
 {
@@ -56,6 +57,13 @@ int screenshots(const std::filesystem::path&dir)
  editor.setSize(2000,1400);ok&=write(editor,"editor-doubled.png");editor.setSize(1200,800);// #89: text scales with the frame
 #if IUPAC_ENABLE_CHEMISTRY
  ChemistryPopup popup(processor);popup.setLookAndFeel(&editor.getLookAndFeel());popup.setVisible(true);ok&=write(popup,"editor-chemistry-popup.png");popup.setLookAndFeel(nullptr);
+ // #102: the in-editor overlay header at the two editor extremes, for the owner's glance.
+ {
+  auto overlayPopup=std::make_unique<ChemistryPopup>(processor);overlayPopup->setSize(620,330);
+  ChemistryOverlay overlay(editor.keyboard(),std::move(overlayPopup));overlay.setLookAndFeel(&editor.getLookAndFeel());
+  for(auto [w,h,name]:{std::tuple{1000,700,"editor-chemistry-overlay-1000x700.png"},std::tuple{1800,1200,"editor-chemistry-overlay-1800x1200.png"}}){overlay.setBounds(0,0,w,h);overlay.setVisible(true);ok&=write(overlay,name);}
+  overlay.setLookAndFeel(nullptr);
+ }
 #endif
  editor.setVisible(false);return ok?0:1;
 }
@@ -334,6 +342,15 @@ field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effec
     editor->setSize(1000,700);
     ok&=expect(editor->getLocalBounds().contains(overlay->getBounds())&&overlay->getBottom()<=editor->keyboard().getY(),"the overlay follows an editor resize");
     ok&=expect(overlay->getBounds().contains(overlay->contentBounds()),"the popup stays inside the overlay after a resize");
+    // #102: at both editor extremes the CHEMISTRY title fits its area and the close button never overlaps it.
+    for(auto size:{std::pair{1000,700},std::pair{1800,1200}})
+    {
+     editor->setSize(size.first,size.second);
+     const auto title=overlay->titleBounds();const auto close=overlay->closeBounds();
+     const auto textWidth=juce::GlyphArrangement::getStringWidth(ui::labelFont(ChemistryOverlay::titleHeight),"CHEMISTRY");
+     ok&=expect(!title.intersects(close)&&close.getX()>title.getRight(),"the overlay close button sits right of the title, not on it");
+     ok&=expect((float)title.getWidth()>=textWidth&&overlay->getBounds().contains(close),"the overlay title is fully visible and the close button inside the overlay");
+    }
     editor->setSize(1200,800);
     juce::Component::SafePointer<ChemistryOverlay>first(overlay);
     overlay->dismiss();
