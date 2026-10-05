@@ -16,6 +16,8 @@ snapshot="$repo_root/data/panels/authored-synth/all-modules.snapshot.json"
 # the whole effects tail at non-zero mix. Kept in the tree and re-derived from the production catalog by
 # `product-path-smoke`, so it cannot drift away from the graph the gate describes (#129).
 worst_case="$repo_root/tests/fixtures/phase4-worst-case.snapshot.json"
+# The heaviest generated patch of the frozen panel (V8, D11/#158), kept current by `mapping-calibration`.
+heaviest="$repo_root/tests/fixtures/heaviest-generated.snapshot.json"
 
 cmake --preset "$preset" -S "$repo_root"
 cmake --build --preset "$preset" --parallel "${IUPAC_BUILD_JOBS:-4}"
@@ -24,11 +26,14 @@ mkdir -p "$output_dir"
 "$build_dir/iupac-cli" > "$output_dir/product.json"
 "$build_dir/iupac-cli" verify-panel --panel "$repo_root/data/panels/authored-synth/panel.json" --output-dir "$output_dir/authored"
 "$build_dir/iupac-cli" benchmark --snapshot "$snapshot" --seconds "${IUPAC_V0_BENCHMARK_SECONDS:-60}" > "$output_dir/benchmark.json"
+"$build_dir/iupac-cli" benchmark --snapshot "$heaviest" --seconds "${IUPAC_V0_BENCHMARK_SECONDS:-60}" > "$output_dir/benchmark-heaviest-generated.json"
 "$build_dir/iupac-cli" benchmark --snapshot "$worst_case" --seconds "${IUPAC_V0_BENCHMARK_SECONDS:-60}" > "$output_dir/benchmark-phase4-worst-case.json"
 
 jq -e '.chemistryEnabled == false and .architecture == 3' "$output_dir/product.json" >/dev/null
 jq -e '.results | length > 0 and all(.[]; .peak <= 0.891252 and (.dc | fabs) <= 0.005 and .guardHits == 0)' "$output_dir/authored/manifest.json" >/dev/null
 jq -e '.voices == 16 and .structuralTransitions > 0 and .activeBanksMaximum == 2 and .renderRatio <= 0.5 and .p99BlockSeconds < (128/48000) and .residentBytesAfter <= 134217728 and .residentBytesAfter <= (.residentBytesSteady + 1048576)' "$output_dir/benchmark.json" >/dev/null
+# Heaviest generated patch (V8, D11 as amended by #158): a measured characteristic with a <=0.8 regression ceiling.
+jq -e '.voices == 16 and .structuralTransitions > 0 and .activeBanksMaximum == 2 and .renderRatio <= 0.8 and .effectsTailMeasured == true and .residentBytesAfter <= 134217728 and .residentBytesAfter <= (.residentBytesSteady + 1048576)' "$output_dir/benchmark-heaviest-generated.json" >/dev/null
 # Phase-4 worst case (V8, D11): a measured load characteristic, not a 0.5 ratio gate. Its figures are
 # recorded from the JSON; the CPU gate is a regression ceiling, memory and structure stay gated.
 jq -e '.voices == 16 and .structuralTransitions > 0 and .activeBanksMaximum == 2 and .renderRatio <= 1.5 and .effectsTailMeasured == true and .residentBytesAfter <= 134217728 and .residentBytesAfter <= (.residentBytesSteady + 1048576)' "$output_dir/benchmark-phase4-worst-case.json" >/dev/null

@@ -53,6 +53,8 @@ def main():
     parser.add_argument("--pairs", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--coverage", default=str(Path(__file__).resolve().parents[1] / "data/mapping-coverage.json"))
+    parser.add_argument("--heaviest-fixture", default=str(Path(__file__).resolve().parents[1] / "tests/fixtures/heaviest-generated.snapshot.json"))
+    parser.add_argument("--write-heaviest-fixture", action="store_true")
     args = parser.parse_args()
     fixture_path, pair_path = Path(args.fixture), Path(args.pairs)
     fixture = json.loads(fixture_path.read_text())
@@ -169,7 +171,22 @@ def main():
         for second in holdout[i+1:]:
             if records[first]["response"]["analysis"]["canonicalIsomericSmiles"] != records[second]["response"]["analysis"]["canonicalIsomericSmiles"] and signatures[first]["value"] == signatures[second]["value"]:
                 v3_failures.append(f"equal holdout values: {first}/{second}")
+    # V8 (D11) gates the heaviest generated patch of the frozen panel at ratio <=0.5. "Heaviest" is the
+    # largest (nodes, source copies, edges, rows) in that order; the committed fixture must stay exactly that patch.
+    def generated_cost(identifier):
+        patch = traces[identifier]["patch"]
+        copies = sum(int(n.get("parameters", {}).get("unisonVoices", 1)) for n in patch["nodes"]
+                     if n["type"] in {"harmonic", "fm", "noise"})
+        return (len(patch["nodes"]), copies, len(patch["edges"]), len(patch["matrix"]))
+    heaviest = max(sorted(traces), key=generated_cost)
+    heaviest_state = state_for(traces[heaviest]["patch"], traces[heaviest])
+    heaviest_path = Path(args.heaviest_fixture)
+    if args.write_heaviest_fixture:
+        heaviest_path.write_text(json.dumps(heaviest_state, sort_keys=True, indent=1) + "\n")
+    elif json.loads(heaviest_path.read_text()) != json.loads(json.dumps(heaviest_state)):
+        v3_failures.append(f"V8 heaviest generated fixture is stale: heaviest is now {heaviest} {generated_cost(heaviest)}")
     report = {
+        "heaviestGenerated": {"id": heaviest, "nodes_copies_edges_rows": list(generated_cost(heaviest))},
         "gateVersion": 1, "metricVersion": 1, "mapperVersion": 2, "projectionVersion": 1,
         "fixtureSha256": sha(fixture_path), "pairManifestSha256": sha(pair_path),
         "coverageSha256": sha(Path(args.coverage)), "coverageVersion": coverage["coverageVersion"],

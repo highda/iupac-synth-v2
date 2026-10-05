@@ -16,6 +16,7 @@
 #endif
 #include <iomanip>
 #include <numeric>
+#include <set>
 #include <sstream>
 
 namespace iupac::tools
@@ -353,7 +354,15 @@ domain::Patch withoutEffectsTail(const domain::Patch& source)
         if (!domain::moduleCatalog()[static_cast<std::size_t>(node.type)].effects) return false;
         removed.push_back(node.id); return true; });
     const auto dropped = [&removed](const std::string& id) { return std::ranges::find(removed, id) != removed.end(); };
+    // Whatever fed the tail now feeds the output bus directly. Without this a patch whose only route
+    // to the output runs through the tail (every generated patch) compiles to almost nothing, and
+    // the difference reported the voices' own cost as tail cost (#158).
+    for (auto& edge : stripped.edges)
+        if (!dropped(edge.source) && dropped(edge.destination) && edge.port == domain::AudioPort::in) edge.destination = "output";
     std::erase_if(stripped.edges, [&dropped](const domain::AudioEdge& edge) { return dropped(edge.source) || dropped(edge.destination); });
+    // Two former tail inputs from one node would now be the same cable twice; keep the first.
+    std::set<std::string> seen;
+    std::erase_if(stripped.edges, [&seen](const domain::AudioEdge& edge) { return edge.destination == "output" && !seen.insert(edge.source).second; });
     std::erase_if(stripped.matrix, [&dropped](const domain::MatrixRow& row) { return dropped(row.destinationNode); });
     return stripped;
 }
