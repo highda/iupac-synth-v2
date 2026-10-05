@@ -48,6 +48,23 @@ void buildDemo(IupacSynthEditor&e)
  e.addLane();e.setLane(0,{"route1",true,domain::ModulationSource::l1,"filt1","cutoff",.6});e.addLane();e.setLane(1,{"route2",true,domain::ModulationSource::e2,"src2","index",-.4});e.addLane();e.setLane(2,{"route3",true,domain::ModulationSource::macro1,"mix1","pan",.8});
  e.setParameter("res1","mode",0,1);e.setParameter("src1","tilt",0,-.6);
 }
+// Under a bare Xvfb there is no window manager, so the EWMH atoms JUCE looks up "only if exists" come
+// back as 0 and the X server answers its XChangeProperty with BadAtom; Xlib's default handler then
+// exits the process. Real hosts always run a window manager. The CI/devbox editor run installs a
+// handler that reports the error and continues (#129, Linux gates). libX11 is resolved at runtime
+// because JUCE loads it with dlopen rather than linking it.
+#if JUCE_LINUX
+#include <dlfcn.h>
+void tolerateMissingWindowManagerAtoms()
+{
+ using Handler=int(*)(void*,void*);
+ auto*library=dlopen("libX11.so.6",RTLD_LAZY|RTLD_NOLOAD);if(!library)return;
+ auto*set=reinterpret_cast<Handler(*)(Handler)>(dlsym(library,"XSetErrorHandler"));
+ if(set)set([](void*,void*){std::cerr<<"editor test: ignored an X error from the window-manager-less Xvfb\n";return 0;});
+}
+#else
+void tolerateMissingWindowManagerAtoms(){}
+#endif
 int screenshots(const std::filesystem::path&dir)
 {
  std::error_code ec;std::filesystem::create_directories(dir,ec);IupacSynthProcessor processor;processor.prepareToPlay(48000,128);(void)processor.editPatch([](auto&p){p.nodes.clear();p.edges.clear();p.matrix.clear();});
@@ -317,6 +334,7 @@ field.setEffective(processor.effectiveValues());ok&=expect(cutoff&&cutoff->effec
  {
   // A host always gives the editor a window. Without a peer nothing in the editor is `isShowing()`, and `isShowing()`
   // is precisely what JUCE's modal dismissal reads (#99), so the guard has to run against a hosted editor.
+  tolerateMissingWindowManagerAtoms();
   editor->addToDesktop(juce::ComponentPeer::windowIsTemporary);
   auto*launcher=labelled(*editor,"chemistry");
   ok&=expect(launcher!=nullptr,"the editor exposes the chemistry launcher");

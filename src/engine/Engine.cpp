@@ -57,8 +57,12 @@ void prepareTargets(CompiledPatch& patch) noexcept
  // pass used to run — the group's unmodulated node value, clamped to the group's range and
  // normalized on the group's scale — so the sum it feeds is unchanged; only the repetition goes.
  for(std::size_t i=0;i<patch.targetCount;++i){auto&target=patch.targets[i];CompiledRow definition{};definition.minimum=target.minimum;definition.maximum=target.maximum;definition.scale=target.scale;target.normalizedBase=normalize(targetValue(patch.nodes[target.node].values,target.target),definition);}
- const auto voiceTargets=std::stable_partition(patch.targets.begin(),patch.targets.begin()+patch.targetCount,[&](const CompiledTarget&t){return t.node<patch.tailStart;});
- patch.voiceTargetCount=static_cast<std::uint8_t>(voiceTargets-patch.targets.begin());
+ // A stable partition by rotation: libstdc++'s std::stable_partition takes a temporary buffer from the
+ // heap, and this runs on the audio thread when a patch is accepted (#129, Linux realtime gate). The
+ // order it produces is exactly std::stable_partition's.
+ std::size_t split=0;
+ for(std::size_t i=0;i<patch.targetCount;++i)if(patch.targets[i].node<patch.tailStart){std::rotate(patch.targets.begin()+split,patch.targets.begin()+i,patch.targets.begin()+i+1);++split;}
+ patch.voiceTargetCount=static_cast<std::uint8_t>(split);
 }
 
 // `begin`/`end` select one half of the target partition: voices run [0, voiceTargetCount) and the

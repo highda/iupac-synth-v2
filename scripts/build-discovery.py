@@ -170,8 +170,16 @@ def verify_sample(archive, output_dir, step):
         raise SystemExit("sample contains no retained record")
     checked = ("sourceId", "revision", "displayName", "names", "sourceStructure", "structureProperty", "rank",
                "canonicalIsomericSmiles", "validationStatus", "backend")
+    # Debian's python3-rdkit has no InChI (#42): there the key cross-check cannot be redone, so the
+    # sample is re-converted without it; every other checked field must still reproduce exactly.
+    try:
+        from rdkit import Chem
+        from rdkit.Chem import inchi
+        derives_keys = bool(inchi.MolToInchiKey(Chem.MolFromSmiles("CCO")))
+    except Exception:
+        derives_keys = False
     for source in sample:
-        record, rejection = convert(source)
+        record, rejection = convert(source if derives_keys else dict(source, inchiKey=None))
         expected = retained[source["sourceId"]]
         if rejection or any(record[key] != expected[key] for key in checked):
             raise SystemExit(f"retained record differs from archived conversion: {source['sourceId']}")
@@ -179,7 +187,7 @@ def verify_sample(archive, output_dir, step):
     target = output_dir / RECORDS.name
     target.write_bytes(RECORDS.read_bytes())
     discovery.build_index(target, output_dir / INDEX.name)
-    print(f"reproduced {len(sample)} sampled records")
+    print(f"reproduced {len(sample)} sampled records" + ("" if derives_keys else " (no InChI in this RDKit build: key cross-check skipped)"))
 
 
 def main():
