@@ -19,3 +19,5 @@ __pycache__/
 *.aiff
 *.flac
 build/
+# The vendored AKWF cycles are source data, not render output (D12).
+!third_party/akwf/waveforms/**/*.wav
