@@ -71,6 +71,7 @@ wanted = {"rdkit", "numpy", "pyinstaller", "pyinstaller_hooks_contrib"}
 found = set()
 for info in sorted(site.glob("*.dist-info")):
     name = info.name.split("-")[0].lower().replace("-", "_")
+    name = {"rdkit_pypi": "rdkit"}.get(name, name)  # RDKit's former distribution name (#154)
     if name not in wanted:
         continue
     roots = list(info.glob("LICENSE*")) + list(info.glob("COPYING*")) \

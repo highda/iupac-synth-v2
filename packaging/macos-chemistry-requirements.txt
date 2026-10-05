@@ -6,7 +6,9 @@
 # pinned interpreter line (CPython 3.11). Cross-platform V1 parity against the
 # committed Linux expectations is the acceptance for this pin; a divergence is an
 # architecture-deviation, never a silent version bump.
-rdkit==2022.9.3 --hash=sha256:68b3af3ebbed4165b2c2b6029e0143cf9cd9e41b279bff774cb0c10cac10eff4
+# The `rdkit` PyPI project no longer serves 2022.9.3 (#154); the same upstream build is still published
+# under the project's former distribution name `rdkit-pypi`. It installs the identical `rdkit` package.
+rdkit-pypi==2022.9.3 --hash=sha256:e4f7724102784e9f6e016bda9228d6e126a1a0655f74a78adb420a24215b45dd
 # RDKit's declared runtime dependencies. numpy is loaded by the production
 # helper's descriptor path, so it is pinned to Debian 12's 1.24 line rather than
 # the provisioning venv's numpy 2: RDKit 2022.09 predates the numpy 2 C API and
