@@ -1,8 +1,8 @@
 name: Pre-release of tested Linux arm64 and macOS arm64 artifacts
 
-# #59: builds both platform deliveries at the dispatched main commit through the existing gate
+# Builds both platform deliveries at the dispatched main commit through the existing gate
 # workflows, verifies every attachment against the tested reports/manifests, tags that exact commit
-# and publishes a GitHub pre-release (or, only for #61 with `final: true`, the v2.0.0 release).
+# and publishes a GitHub pre-release (or, with `final: true`, the v2.0.0 release).
 # Dispatch: gh workflow run prerelease.yml --ref main -f tag=v2.0.0-preview.N
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ on:
         type: string
         default: ""
       final:
-        description: Publish a full (non-pre-) release with tag v2.0.0 — only #61 may set this
+        description: Publish a full (non-pre-) release with tag v2.0.0
         required: false
         type: boolean
         default: false

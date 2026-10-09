@@ -86,7 +86,7 @@ fi
 (cd "$output_dir/artifacts" && find . -type f -print0 | sort -z | xargs -0 shasum -a 256 > ../artifacts.sha256)
 # Downloadable bundle archive for the pre-release (#59): bsdtar keeps bundle structure, symlinks and
 # executable bits, which the Actions artifact zip does not; no AppleDouble/xattr side files.
-bundle_archive=IUPAC-Synth-2-Preview-macos-arm64.tar.gz
+bundle_archive=IUPAC-Synth-2-macos-arm64.tar.gz
 rm -f "$output_dir/$bundle_archive" "$output_dir/$bundle_archive.sha256"
 (cd "$output_dir/artifacts" && COPYFILE_DISABLE=1 tar --no-mac-metadata --no-xattrs -czf "../$bundle_archive" .)
 (cd "$output_dir" && shasum -a 256 "$bundle_archive" > "$bundle_archive.sha256" && shasum -a 256 -c "$bundle_archive.sha256")

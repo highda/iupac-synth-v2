@@ -50,7 +50,7 @@ void buildDemo(IupacSynthEditor&e)
 }
 // Under a bare Xvfb there is no window manager, so the EWMH atoms JUCE looks up "only if exists" come
 // back as 0 and the X server answers its XChangeProperty with BadAtom; Xlib's default handler then
-// exits the process. Real hosts always run a window manager. The CI/devbox editor run installs a
+// exits the process. Real hosts always run a window manager. The CI editor run installs a
 // handler that reports the error and continues (#129, Linux gates). libX11 is resolved at runtime
 // because JUCE loads it with dlopen rather than linking it.
 #if JUCE_LINUX

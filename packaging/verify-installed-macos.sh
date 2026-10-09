@@ -205,7 +205,7 @@ awk '/^real/ {print $2}' "$evidence/cold-start.txt" > "$evidence/cold-start-seco
 
 # ------------------------------------------- relocation: read-only, with spaces
 relocated=$(mktemp -d "${TMPDIR:-/tmp}/iupac relocated read only XXXXXX")
-moved="$relocated/IUPAC Synth 2 Preview installed elsewhere"
+moved="$relocated/IUPAC Synth 2 installed elsewhere"
 cp -R "$prefix" "$moved"
 chmod -R a-w "$moved"
 mkdir -p "$work/relocated-tmp"

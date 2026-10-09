@@ -17,7 +17,7 @@ jdk="${JAVA_HOME:-/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
 
 [ "$(uname -s)" = Darwin ] && [ "$(uname -m)" = arm64 ] || { echo 'build natively on macOS arm64' >&2; exit 1; }
 for tool in "$python" "$jdk/bin/jdeps" "$jdk/bin/jlink"; do
-    test -x "$tool" || { echo "missing pinned prerequisite: $tool (see scripts/setup-macos-prereqs.zsh)" >&2; exit 1; }
+    test -x "$tool" || { echo "missing pinned prerequisite: $tool (see docs/BUILDING.md)" >&2; exit 1; }
 done
 test -d "$jdk/jmods" || { echo "pinned JDK ships no jmods: $jdk" >&2; exit 1; }
 test ! -e "$output" || { echo "output already exists: $output" >&2; exit 2; }

@@ -21,29 +21,29 @@ linux_in=$(cd "$linux_in" && pwd)
 macos_in=$(cd "$macos_in" && pwd)
 
 # --- Linux arm64: exact tested delivery (package-arm64.yml) ---
-linux_archive="$linux_in/product/IUPAC Synth 2 Preview.tar.gz"
+linux_archive="$linux_in/product/IUPAC Synth 2.tar.gz"
 test -f "$linux_archive" || fail "missing $linux_archive"
-(cd "$linux_in/product" && sha256sum -c 'IUPAC Synth 2 Preview.tar.gz.sha256') || fail 'Linux sidecar mismatch'
+(cd "$linux_in/product" && sha256sum -c 'IUPAC Synth 2.tar.gz.sha256') || fail 'Linux sidecar mismatch'
 jq -e --arg sha "$sha" '.commit == $sha' "$linux_in/delivery-report.json" >/dev/null || fail 'delivery-report.json commit differs from release commit'
-jq -e '.testedBy == "v10-report.json" and .archive == "IUPAC Synth 2 Preview.tar.gz"' "$linux_in/delivery-report.json" >/dev/null || fail 'delivery-report.json shape'
+jq -e '.testedBy == "v10-report.json" and .archive == "IUPAC Synth 2.tar.gz"' "$linux_in/delivery-report.json" >/dev/null || fail 'delivery-report.json shape'
 jq -e '.status == "pass"' "$linux_in/v10-report.json" >/dev/null || fail 'v10-report.json is not a pass'
 linux_hash=$(sha256 "$linux_archive")
 test "$linux_hash" = "$(jq -r .sha256 "$linux_in/delivery-report.json")" || fail 'Linux archive hash differs from delivery-report.json'
-cp "$linux_archive" "$out/IUPAC-Synth-2-Preview-linux-arm64.tar.gz"
+cp "$linux_archive" "$out/IUPAC-Synth-2-linux-arm64.tar.gz"
 cp "$linux_in/delivery-report.json" "$out/linux-delivery-report.json"
 cp "$linux_in/v10-report.json" "$out/linux-v10-report.json"
 cp "$linux_in/product/install-report.json" "$out/linux-install-report.json"
-(cd "$out" && sha256sum IUPAC-Synth-2-Preview-linux-arm64.tar.gz > IUPAC-Synth-2-Preview-linux-arm64.tar.gz.sha256)
-test "$(sha256 "$out/IUPAC-Synth-2-Preview-linux-arm64.tar.gz")" = "$linux_hash" || fail 'Linux copy changed'
+(cd "$out" && sha256sum IUPAC-Synth-2-linux-arm64.tar.gz > IUPAC-Synth-2-linux-arm64.tar.gz.sha256)
+test "$(sha256 "$out/IUPAC-Synth-2-linux-arm64.tar.gz")" = "$linux_hash" || fail 'Linux copy changed'
 
 # --- macOS arm64: exact validated bundles (macos-arm64.yml) ---
 (cd "$macos_in" && sha256sum -c --quiet manifest.sha256) || fail 'macOS manifest.sha256 mismatch'
 test "$(tr -d '[:space:]' < "$macos_in/head-commit.txt")" = "$sha" || fail 'macOS head-commit.txt differs from release commit'
 # head-commit.txt is the release commit the run was asked for; commit.txt is the HEAD of the
 # checkout that actually built these bundles. macos-arm64.yml checks out the release commit, so
-# both carry it. The #85 local stand-in builds from a `git archive` export of that commit whose
-# one-commit history is synthetic (scripts/local-lib.sh), so there commit.txt records that export
-# commit and head-commit.txt alone names the release commit. runner-identity.txt tells the two
+# both carry it. A local build from a `git archive` export of that commit has a synthetic
+# one-commit history, so there commit.txt records that export commit and head-commit.txt alone
+# names the release commit. runner-identity.txt tells the two
 # apart and is covered by the manifest verified immediately above.
 macos_commit=$(tr -d '[:space:]' < "$macos_in/commit.txt")
 if grep -q '^local-recipe=' "$macos_in/runner-identity.txt"; then
@@ -52,10 +52,10 @@ else
     test "$macos_commit" = "$sha" || fail 'macOS commit.txt differs from release commit'
 fi
 (cd "$macos_in/artifacts" && sha256sum -c --quiet ../artifacts.sha256) || fail 'macOS artifacts.sha256 mismatch'
-macos_archive="$macos_in/IUPAC-Synth-2-Preview-macos-arm64.tar.gz"
+macos_archive="$macos_in/IUPAC-Synth-2-macos-arm64.tar.gz"
 test -f "$macos_archive" || fail "missing $macos_archive"
-(cd "$macos_in" && sha256sum -c --quiet IUPAC-Synth-2-Preview-macos-arm64.tar.gz.sha256) || fail 'macOS sidecar mismatch'
-grep -q " ./IUPAC-Synth-2-Preview-macos-arm64.tar.gz\$" "$macos_in/manifest.sha256" || fail 'macOS archive absent from manifest'
+(cd "$macos_in" && sha256sum -c --quiet IUPAC-Synth-2-macos-arm64.tar.gz.sha256) || fail 'macOS sidecar mismatch'
+grep -q " ./IUPAC-Synth-2-macos-arm64.tar.gz\$" "$macos_in/manifest.sha256" || fail 'macOS archive absent from manifest'
 grep -q 'AU VALIDATION SUCCEEDED' "$macos_in/auval.txt" || fail 'auval did not succeed'
 jq -e '.product == "IUPAC Synth 2" and .architecture == 3' "$macos_in/product.json" >/dev/null || fail 'macOS product.json identity'
 # The archive contents must be the validated bundles byte for byte.

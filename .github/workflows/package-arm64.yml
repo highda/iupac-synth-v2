@@ -1,4 +1,4 @@
-# Source-gated CI (owner decision 2026-09-18, #73/#75): runs only for pull requests touching source or packaging paths.
+# Source-gated CI: runs only for pull requests touching source or packaging paths.
 # Docs-only and script-only changes never trigger it.
 name: Linux arm64 private runtime package
 on:
@@ -40,14 +40,14 @@ jobs:
           chmod 0777 out
           docker run --rm --network none --read-only --tmpfs /tmp:rw,noexec,nosuid,size=128m \
             --user 65534:65534 -v "$PWD/out:/reports" iupac-product:test \
-            '/opt/IUPAC Synth 2 Preview' /reports/v10-report.json
+            '/opt/IUPAC Synth 2' /reports/v10-report.json
       - name: Export exact tested delivery
         run: |
           mkdir -p out/product
           docker build --platform linux/arm64 --target export --output type=local,dest=out/product -f packaging/ProductDockerfile .
-          (cd out/product && sha256sum -c 'IUPAC Synth 2 Preview.tar.gz.sha256')
-          artifact_sha=$(sha256sum 'out/product/IUPAC Synth 2 Preview.tar.gz' | cut -d ' ' -f 1)
-          printf '{"schemaVersion":1,"commit":"%s","testedBy":"v10-report.json","archive":"IUPAC Synth 2 Preview.tar.gz","sha256":"%s"}\n' \
+          (cd out/product && sha256sum -c 'IUPAC Synth 2.tar.gz.sha256')
+          artifact_sha=$(sha256sum 'out/product/IUPAC Synth 2.tar.gz' | cut -d ' ' -f 1)
+          printf '{"schemaVersion":1,"commit":"%s","testedBy":"v10-report.json","archive":"IUPAC Synth 2.tar.gz","sha256":"%s"}\n' \
             '${{ github.event.pull_request.head.sha || github.sha }}' "$artifact_sha" > out/delivery-report.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

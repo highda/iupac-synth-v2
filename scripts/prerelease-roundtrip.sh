@@ -23,10 +23,10 @@ jq -e '.isDraft == false' "$work/release.json" >/dev/null || fail 'release is a 
 tag_sha=$(gh api "repos/$repo/git/ref/tags/$tag" --jq '.object.sha')
 test "$tag_sha" = "$sha" || fail "tag $tag points at $tag_sha, expected $sha"
 
-expected='IUPAC-Synth-2-Preview-linux-arm64.tar.gz
-IUPAC-Synth-2-Preview-linux-arm64.tar.gz.sha256
-IUPAC-Synth-2-Preview-macos-arm64.tar.gz
-IUPAC-Synth-2-Preview-macos-arm64.tar.gz.sha256
+expected='IUPAC-Synth-2-linux-arm64.tar.gz
+IUPAC-Synth-2-linux-arm64.tar.gz.sha256
+IUPAC-Synth-2-macos-arm64.tar.gz
+IUPAC-Synth-2-macos-arm64.tar.gz.sha256
 SHA256SUMS
 linux-delivery-report.json
 linux-install-report.json
@@ -40,27 +40,27 @@ macos-product.json
 macos-runner-identity.txt'
 test "$(cd "$work/download" && LC_ALL=C ls -1)" = "$expected" || fail 'downloaded asset set differs from the expected attachment list'
 (cd "$work/download" && sha256sum -c SHA256SUMS) || fail 'SHA256SUMS mismatch on downloaded files'
-(cd "$work/download" && sha256sum -c IUPAC-Synth-2-Preview-linux-arm64.tar.gz.sha256 && sha256sum -c IUPAC-Synth-2-Preview-macos-arm64.tar.gz.sha256)
-test "$(sha256sum "$work/download/IUPAC-Synth-2-Preview-linux-arm64.tar.gz" | cut -d ' ' -f 1)" = "$(jq -r .sha256 "$work/download/linux-delivery-report.json")" \
+(cd "$work/download" && sha256sum -c IUPAC-Synth-2-linux-arm64.tar.gz.sha256 && sha256sum -c IUPAC-Synth-2-macos-arm64.tar.gz.sha256)
+test "$(sha256sum "$work/download/IUPAC-Synth-2-linux-arm64.tar.gz" | cut -d ' ' -f 1)" = "$(jq -r .sha256 "$work/download/linux-delivery-report.json")" \
     || fail 'downloaded Linux archive differs from the V10-tested delivery hash'
 jq -e --arg sha "$sha" '.commit == $sha' "$work/download/linux-delivery-report.json" >/dev/null || fail 'delivery report commit'
 
 # Linux: product doctor and offline analysis inside the minimal runtime image, mounted read-only.
-tar -xzf "$work/download/IUPAC-Synth-2-Preview-linux-arm64.tar.gz" -C "$work/linux"
-test -d "$work/linux/IUPAC Synth 2 Preview" || fail 'Linux archive layout'
+tar -xzf "$work/download/IUPAC-Synth-2-linux-arm64.tar.gz" -C "$work/linux"
+test -d "$work/linux/IUPAC Synth 2" || fail 'Linux archive layout'
 chmod -R a+rX "$work/linux"
 docker build --platform linux/arm64 --target runtime-base -t iupac-runtime-base:roundtrip -f "$repo_root/packaging/ProductDockerfile" "$repo_root"
 docker run --rm --network none --read-only --tmpfs /tmp:rw,noexec,nosuid,size=128m --user 65534:65534 \
-    -v "$work/linux/IUPAC Synth 2 Preview:/opt/IUPAC Synth 2 Preview:ro" iupac-runtime-base:roundtrip \
+    -v "$work/linux/IUPAC Synth 2:/opt/IUPAC Synth 2:ro" iupac-runtime-base:roundtrip \
     sh -c 'set -eu; test ! -e /usr/bin/python3; test ! -e /usr/bin/java;
-           "/opt/IUPAC Synth 2 Preview/bin/iupac-product-doctor" "/opt/IUPAC Synth 2 Preview";
-           "/opt/IUPAC Synth 2 Preview/bin/iupac-cli" analyze --mode name --text 2,2,2-trifluoroethan-1-ol' \
+           "/opt/IUPAC Synth 2/bin/iupac-product-doctor" "/opt/IUPAC Synth 2";
+           "/opt/IUPAC Synth 2/bin/iupac-cli" analyze --mode name --text 2,2,2-trifluoroethan-1-ol' \
     | tee "$work/linux-roundtrip.log"
 grep -q '"status":"ok"' "$work/linux-roundtrip.log" || fail 'product doctor did not report ok'
 grep -q 'OCC(F)(F)F' "$work/linux-roundtrip.log" || fail 'offline name analysis did not resolve'
 
 # macOS: archive bytes are the validated bundles; structure and executable bits survive the round trip.
-tar -xzf "$work/download/IUPAC-Synth-2-Preview-macos-arm64.tar.gz" -C "$work/macos"
+tar -xzf "$work/download/IUPAC-Synth-2-macos-arm64.tar.gz" -C "$work/macos"
 (cd "$work/macos" && sha256sum -c --quiet ../download/macos-artifacts.sha256) || fail 'macOS archive contents differ from validated artifacts'
 for exe in 'IUPAC Synth 2.vst3/Contents/MacOS/IUPAC Synth 2' 'IUPAC Synth 2.component/Contents/MacOS/IUPAC Synth 2' \
            'IUPAC Synth 2.app/Contents/MacOS/IUPAC Synth 2' iupac-cli; do

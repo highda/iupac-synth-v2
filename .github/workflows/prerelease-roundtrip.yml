@@ -1,6 +1,6 @@
 name: Pre-release round trip (download from Releases and re-verify)
 
-# #59: called by prerelease.yml after publication, and dispatchable on its own for an existing tag.
+# Called by prerelease.yml after publication, and dispatchable on its own for an existing tag.
 # Downloads every asset with gh, checks SHA256SUMS, runs the product doctor and an offline name
 # analysis on the Linux archive inside the minimal runtime image, re-checks the macOS archive bytes.
 on:

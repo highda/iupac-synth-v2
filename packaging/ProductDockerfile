@@ -14,7 +14,7 @@ RUN cmake --preset linux-release && cmake --build --preset linux-release --paral
  && ctest --preset linux-release --output-on-failure \
  && ./packaging/build-runtime.sh /work/runtime /work/runtime-build \
  && ./scripts/build-pluginval.sh \
- && ./packaging/stage-product.sh build/linux-release /work/runtime '/work/IUPAC Synth 2 Preview' \
+ && ./packaging/stage-product.sh build/linux-release /work/runtime '/work/IUPAC Synth 2' \
  && cp build/pluginval/pluginval_artefacts/Release/pluginval /work/pluginval
 
 # Minimal runtime OS layer without the product: prerelease.yml mounts the downloaded release archive
@@ -26,13 +26,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && test ! -e /usr/bin/python3 && test ! -e /usr/bin/java
 
 FROM runtime-base AS runtime
-COPY --from=build ["/work/IUPAC Synth 2 Preview", "/opt/IUPAC Synth 2 Preview"]
+COPY --from=build ["/work/IUPAC Synth 2", "/opt/IUPAC Synth 2"]
 COPY --from=build /work/pluginval /usr/local/bin/pluginval
 COPY packaging/verify-installed.sh /usr/local/bin/verify-installed
 ENTRYPOINT ["/usr/local/bin/verify-installed"]
 
 FROM scratch AS export
-COPY --from=build ["/work/IUPAC Synth 2 Preview.tar.gz", "/IUPAC Synth 2 Preview.tar.gz"]
-COPY --from=build ["/work/IUPAC Synth 2 Preview.tar.gz.sha256", "/IUPAC Synth 2 Preview.tar.gz.sha256"]
-COPY --from=build ["/work/IUPAC Synth 2 Preview/install-report.json", "/install-report.json"]
+COPY --from=build ["/work/IUPAC Synth 2.tar.gz", "/IUPAC Synth 2.tar.gz"]
+COPY --from=build ["/work/IUPAC Synth 2.tar.gz.sha256", "/IUPAC Synth 2.tar.gz.sha256"]
+COPY --from=build ["/work/IUPAC Synth 2/install-report.json", "/install-report.json"]
 COPY --from=build /work/runtime/package-report.json /private-runtime-report.json

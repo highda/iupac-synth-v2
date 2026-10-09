@@ -1,4 +1,4 @@
-# Source-gated CI (owner decision 2026-09-18, #73/#75): runs only for pull requests touching source paths.
+# Source-gated CI: runs only for pull requests touching source paths.
 # Docs-only and script-only changes never trigger it.
 name: TSan arm64
 

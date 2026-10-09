@@ -1,5 +1,4 @@
-# Dispatch-only (owner decision 2026-09-18, #73/#75): macOS runners bill at 10x minutes, so this never runs on pull requests.
-# Run it once by hand on a release candidate or the #42 platform-lock commit.
+# Dispatch-only: run it by hand on a release candidate; prerelease.yml calls it at the release commit.
 name: macOS arm64 native build
 
 on:
@@ -17,7 +16,7 @@ jobs:
   native:
     name: Native macOS arm64 build, tests, pluginval and auval
     # macos-15 defaults to Xcode 16.4, whose libc++ lacks std::jthread/stop_token used by the chemistry supervisor;
-    # macos-26 ships Xcode 26 (Apple clang 21), matching the owner host toolchain.
+    # macos-26 ships Xcode 26 (Apple clang 21), matching the reference macOS toolchain.
     runs-on: macos-26
     timeout-minutes: 90
     steps:
@@ -121,10 +120,10 @@ jobs:
       - name: Stage the complete product
         run: |
           ./packaging/stage-product-macos.sh build/mac-release out/iupac-chemistry-macos \
-            "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS"
-          cp "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS/install-report.json" out/macos-delivery/
-          cp "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS/install-manifest.sha256" out/macos-delivery/
-          cp "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS.tar.gz.sha256" out/macos-delivery/
+            "$RUNNER_TEMP/IUPAC Synth 2 macOS"
+          cp "$RUNNER_TEMP/IUPAC Synth 2 macOS/install-report.json" out/macos-delivery/
+          cp "$RUNNER_TEMP/IUPAC Synth 2 macOS/install-manifest.sha256" out/macos-delivery/
+          cp "$RUNNER_TEMP/IUPAC Synth 2 macOS.tar.gz.sha256" out/macos-delivery/
 
       - name: Remove every removable external interpreter from the runner
         env:
@@ -134,7 +133,7 @@ jobs:
       - name: Installed V10 analogue, network denied
         run: |
           ./packaging/test-verify-installed-macos.sh
-          ./packaging/verify-installed-macos.sh "$RUNNER_TEMP/IUPAC Synth 2 Preview macOS" \
+          ./packaging/verify-installed-macos.sh "$RUNNER_TEMP/IUPAC Synth 2 macOS" \
             out/macos-delivery/v10-report.json
           cat out/macos-delivery/v10-report.json
 
